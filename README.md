@@ -3,9 +3,9 @@
     <!-- Dark mode -->
     <source media="(prefers-color-scheme: dark)" srcset="resources/insite-logo-wh.png" />
     <!-- Light mode -->
-    <source media="(prefers-color-scheme: light)" srcset="resources/insite-logo-bk.png" />
+    <source media="(prefers-color-scheme: light)" srcset="resources/insite-logo-bl.png" />
     <!-- Fallback -->
-    <img alt="Insite Logo" src="resources/insite-logo-bk.png" width="220" />
+    <img alt="Insite Logo" src="resources/insite-logo-bl.png" width="220" />
   </picture>
 </p>
 
