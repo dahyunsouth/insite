@@ -19,3 +19,49 @@
 **수행배경**: 삼성청년SW·AI아카데미 2학기 특화 프로젝트
 
 ---
+
+## Our Team
+
+<div align="center">
+
+<table>
+  <tr>
+      <td width="25%" align="center">
+      <img src="resources/profile-천광민.png" alt="천광민" width="125" height="125" /><br/>
+      <strong>천광민</strong><br/>
+      <sub><span style="color:gray">팀장 | Front-end<br/></span></sub>
+    </td>
+    <td width="25%" align="center">
+      <img src="resources/profile-남다현.png" alt="남다현" width="125" height="125" /><br/>
+      <strong>남다현</strong><br/>
+      <sub><span style="color:gray">UI/UX | Front-end<br/></span></sub>
+    </td>
+  </tr>
+    <tr>
+    <td width="25%" align="center">
+      <img src="resources/profile-정필교.png" alt="정필교" width="125" height="125" /><br/>
+      <strong>정필교</strong><br/>
+      <sub><span style="color:gray">API | Back-end<br/></span></sub>
+    </td>
+    <td width="25%" align="center">
+      <img src="resources/profile-홍지훈.png" alt="홍지훈" width="125" height="125" /><br/>
+      <strong>홍지훈</strong><br/>
+      <sub><span style="color:gray">Infra | Back-end<br/></span></sub>
+    </td>
+  </tr>
+    </tr>
+    <tr>
+    <td width="25%" align="center">
+      <img src="resources/profile-김범주.png" alt="김범주" width="125" height="125" /><br/>
+      <strong>김범주</strong><br/>
+      <sub><span style="color:gray">상권분석 모델 | Data<br/></span></sub>
+    </td>
+        <td width="25%" align="center">
+      <img src="resources/profile-김재유.png" alt="김재유" width="125" height="125" /><br/>
+      <strong>김재유</strong><br/>
+      <sub><span style="color:gray">상권분석 모델 | Data<br/></span></sub>
+    </td>
+  </tr>
+</table>
+
+</div>
