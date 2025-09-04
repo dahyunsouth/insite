@@ -1,7 +1,7 @@
 package com.ssafy.insite.common.exception;
 
-import com.ssafy.insite.common.entity.BaseResponse;
-import com.ssafy.insite.common.entity.BaseResponseStatus;
+import com.ssafy.insite.common.dto.response.BaseResponse;
+import com.ssafy.insite.common.dto.response.BaseResponseStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;

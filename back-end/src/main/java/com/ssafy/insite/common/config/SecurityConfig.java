@@ -1,6 +1,10 @@
 package com.ssafy.insite.common.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.insite.auth.jwt.JwtTokenProvider;
+import com.ssafy.insite.auth.jwt.JwtVerificationFilter;
+import com.ssafy.insite.common.dto.response.BaseResponse;
+import com.ssafy.insite.common.dto.response.BaseResponseStatus;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +16,8 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -19,6 +25,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 @EnableMethodSecurity(prePostEnabled = true) // @PreAuthorize 사용 위해
 public class SecurityConfig {
+    private final JwtTokenProvider jwtTokenProvider;
+    @Bean
+    public PasswordEncoder passwordEncoder() { // 비밀번호 암호화(BCrypt 해시)
+        return new BCryptPasswordEncoder();
+        /*
+        평문 비밀번호 암호화: String encoded = passwordEncoder.encode("password123!");
+        평문 및 암호화된 비밀번호 비교: boolean isMatch = passwordEncoder.matches("password123!", encoded);
+         */
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -43,7 +59,26 @@ public class SecurityConfig {
                                 "/api/v1/auth/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Preflight 허용 (OPTIONS 요청 허용)
-                        .anyRequest().authenticated()); // 그 외 인증 필요
+                        .anyRequest().authenticated()) // 그 외 인증 필요
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> { // 인증 실패 시 (로그인 필요)
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write(new ObjectMapper().writeValueAsString(
+                                    new BaseResponse<>(BaseResponseStatus.NO_ACCESS_AUTHORITY)
+                            ));
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> { // 인가 실패 시 (권한이 없는 경우)
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write(new ObjectMapper().writeValueAsString(
+                                    new BaseResponse<>(BaseResponseStatus.NO_ACCESS_AUTHORITY)
+                            ));
+                        })
+                )
+                .addFilterBefore(new JwtVerificationFilter(jwtTokenProvider),
+                        UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
+        // JwtVerificationFilter에서 이미 인증객체를 저장했으므로 UsernamePasswordAuthenticationFilter는 그냥 통과됨
 
         return http.build();
     }

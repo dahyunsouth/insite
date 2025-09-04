@@ -1,6 +1,6 @@
 package com.ssafy.insite.common.exception;
 
-import com.ssafy.insite.common.entity.BaseResponseStatus;
+import com.ssafy.insite.common.dto.response.BaseResponseStatus;
 import lombok.Getter;
 
 @Getter

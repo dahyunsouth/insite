@@ -1,4 +1,4 @@
-package com.ssafy.insite.common.entity;
+package com.ssafy.insite.common.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

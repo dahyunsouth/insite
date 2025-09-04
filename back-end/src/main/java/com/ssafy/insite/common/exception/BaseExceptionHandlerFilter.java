@@ -1,8 +1,8 @@
 package com.ssafy.insite.common.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.insite.common.entity.BaseResponse;
-import com.ssafy.insite.common.entity.BaseResponseStatus;
+import com.ssafy.insite.common.dto.response.BaseResponse;
+import com.ssafy.insite.common.dto.response.BaseResponseStatus;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

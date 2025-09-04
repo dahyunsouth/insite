@@ -1,6 +1,6 @@
-package com.ssafy.insite.common.entity;
+package com.ssafy.insite.common.dto.response;
 
-import static com.ssafy.insite.common.entity.BaseResponseStatus.SUCCESS;
+import static com.ssafy.insite.common.dto.response.BaseResponseStatus.SUCCESS;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
