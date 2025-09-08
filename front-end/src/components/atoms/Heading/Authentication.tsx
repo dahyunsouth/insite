@@ -7,7 +7,7 @@ const AuthenticationLabel: React.FC<PageTitleProps> = ({ type }) => {
   
   return (
     <h1 
-      className="text-[50px] font-extrabold whitespace-pre-line"
+      className="text-[50px] font-extrabold whitespace-pre-line text-left"
       style={{ color: '#3288FF' }}
     >
       {titleText}

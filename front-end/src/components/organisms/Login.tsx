@@ -22,7 +22,9 @@ const LoginOrganism: React.FC<LoginOrganismProps> = ({
   return (
     <AuthenticationCard className={className}>
       <div className="flex flex-col items-center">
-        <AuthenticationLabel type="login" />
+        <div className="w-full">
+          <AuthenticationLabel type="login" />
+        </div>
         
         <LoginForm />
         

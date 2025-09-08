@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import KakaoMap from '@/components/map/KakaoMap';
-import RightActionBar from '@/components/molecules/RightActionBar';
+import RightActionBar from '@/components/organisms/RightActionBar';
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
 import MainNavbar from '@/components/templates/Auth/LeftNavbar/MainNavbar';
 

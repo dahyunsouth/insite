@@ -99,7 +99,9 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
     return (
       <AuthenticationCard className={className}>
         <div className="flex flex-col items-center">
-          <AuthenticationLabel type="signup" />
+          <div className="w-full">
+            <AuthenticationLabel type="signup" />
+          </div>
 
           <div className="mt-8 w-[320px]">
             <AuthenticationInputBox
@@ -128,7 +130,9 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
     return (
       <AuthenticationCard className={className}>
         <div className="flex flex-col items-center">
-          <AuthenticationLabel type="signup" />
+          <div className="w-full">
+            <AuthenticationLabel type="signup" />
+          </div>
 
           <div className="mt-8 w-[320px]">
             <SignUpLabel>이메일</SignUpLabel>
@@ -160,7 +164,9 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
     return (
       <AuthenticationCard className={className}>
         <div className="flex flex-col items-center">
-          <AuthenticationLabel type="signup" />
+          <div className="w-full">
+            <AuthenticationLabel type="signup" />
+          </div>
 
           <div className="mt-8 w-[320px]">
             <LabeledStaticField label="이메일" value={state.form.email || '-'} />
@@ -192,7 +198,9 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
     return (
       <AuthenticationCard className={className}>
         <div className="flex flex-col items-center">
-          <AuthenticationLabel type="signup" />
+          <div className="w-full">
+            <AuthenticationLabel type="signup" />
+          </div>
 
           <div className="mt-8 w-[320px] space-y-4">
             <LabeledStaticField label="이메일" value={state.form.email || '-'} />
@@ -226,7 +234,9 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
     return (
       <AuthenticationCard className={className}>
         <div className="flex flex-col items-start">
-          <AuthenticationLabel type="signup" />
+          <div className="w-full">
+            <AuthenticationLabel type="signup" />
+          </div>
 
           <div className="mt-6 w-[320px] space-y-2">
             <LabeledStaticField label="이메일" value={state.form.email || '-'} />
@@ -262,7 +272,9 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
   return (
     <AuthenticationCard className={className}>
       <div className="flex flex-col items-center">
-        <AuthenticationLabel type="signup" />
+        <div className="w-full">
+          <AuthenticationLabel type="signup" />
+        </div>
 
         <div className="mt-10 text-center">
           <p className="text-[20px] font-semibold">

@@ -4,17 +4,17 @@ import React from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import InfoButton from "../../Badge/InfoButton";
 
-type MarketingAreaHeaderProps = {
+type MonthlySalesHeaderProps = {
   className?: string;
   onHelpClick?: () => void;
   onClose?: () => void;
 };
 
-export default function MarketingAreaHeader({ className, onHelpClick, onClose }: MarketingAreaHeaderProps) {
+export default function MonthlySalesHeader({ className, onHelpClick, onClose }: MonthlySalesHeaderProps) {
   return (
     <div className={"w-full flex items-center justify-between " + (className ?? "") }>
       <div className="flex items-center gap-2">
-        <span className="text-black font-bold">상권</span>
+        <span className="text-black font-bold">월 매출</span>
         <InfoButton onHelpClick={onHelpClick} />
       </div>
       <button
@@ -28,5 +28,3 @@ export default function MarketingAreaHeader({ className, onHelpClick, onClose }:
     </div>
   );
 }
-
-
