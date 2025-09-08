@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class RefreshToken {
     @Id
-    private String userUuid; // 사용자 UUID (User와 1:1)
+    private String uuid; // 사용자 UUID (User와 1:1)
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String token;
