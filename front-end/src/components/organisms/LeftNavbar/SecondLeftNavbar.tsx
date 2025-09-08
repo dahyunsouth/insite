@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-const TABS = ["이야기", "상권비교", "뉴스", "마이페이지"] as const;
+const TABS = ["뉴스", "저장한 상권", "상권비교", "내 정보 수정"] as const;
 type Tab = typeof TABS[number];
 
 const SecondLeftNavbar = () => {

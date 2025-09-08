@@ -14,14 +14,6 @@ const SocialLogin: React.FC<SocialLoginProps> = ({
     console.log('Google 로그인 클릭됨');
   };
 
-  const handleKakaoLogin = () => {
-    console.log('카카오 로그인 클릭됨');
-  };
-
-  const handleNaverLogin = () => {
-    console.log('네이버 로그인 클릭됨');
-  };
-
   const handleSSAFYLogin = () => {
     console.log('SSAFY 로그인 클릭됨');
   };
@@ -31,16 +23,6 @@ const SocialLogin: React.FC<SocialLoginProps> = ({
       <SocialLoginButton 
         provider="google" 
         onClick={handleGoogleLogin} 
-      />
-      
-      <SocialLoginButton 
-        provider="kakao" 
-        onClick={handleKakaoLogin} 
-      />
-      
-      <SocialLoginButton 
-        provider="naver" 
-        onClick={handleNaverLogin} 
       />
       
       <SocialLoginButton 
