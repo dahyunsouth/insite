@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import KakaoMap from '@/components/map/KakaoMap';
 import RightActionBar from '@/components/molecules/RightActionBar';
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
+import MainNavbar from '@/components/templates/Auth/LeftNavbar/MainNavbar';
 
 export default function HomePage() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -23,6 +24,11 @@ export default function HomePage() {
     <div className="relative w-screen h-screen overflow-hidden">
       {/* 1) 풀스크린 카카오맵 (배경 고정) */}
       <KakaoMap />
+
+      {/* 상단 네비게이션 바 */}
+      <div className="fixed top-0 left-0 right-0 z-20">
+        <MainNavbar />
+      </div>
 
       {/* 2) 우측 버튼 바 (마이페이지 버튼만 우선 배치) */}
       <RightActionBar onMyPageClick={() => setIsAuthOpen(true)} />
