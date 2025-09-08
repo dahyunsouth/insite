@@ -1,5 +1,8 @@
 package com.ssafy.insite.common.enums;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public enum UserType {
-    USER, PLANNER
+    @JsonProperty("user") USER,
+    @JsonProperty("planner") PLANNER
 }
