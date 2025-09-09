@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import AuthenticationCard from '../atoms/Card/Authentication';
-import AuthenticationLabel from '../atoms/Heading/Authentication';
-import LoginForm from '../molecules/LoginForm';
-import SignUpPrompt from '../molecules/SignUpPrompt';
-import SocialLoginHeader from '../atoms/Label/SocialLoginHeader';
-import SocialLoginForm from '../molecules/SocialLogin';
+import AuthenticationCard from '../../atoms/Auth/Card/Authentication';
+import AuthenticationLabel from '../../atoms/Auth/Heading/Authentication';
+import LoginForm from '../../molecules/Auth/LoginForm';
+import SignUpPrompt from '../../molecules/Auth/SignUpPrompt';
+import SocialLoginHeader from '../../atoms/Auth/Label/SocialLoginHeader';
+import SocialLoginForm from '../../molecules/Auth/SocialLogin';
 
 interface LoginOrganismProps {
   className?: string;

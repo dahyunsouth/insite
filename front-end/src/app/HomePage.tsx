@@ -2,9 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import KakaoMap, { useKakaoMapContext } from '@/components/map/KakaoMap';
-import RightActionBar from '@/components/organisms/RightActionBar';
+import RightActionBar from '@/components/organisms/RightActionBar/RightActionBar';
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
-import MainNavbar from '@/components/templates/Auth/LeftNavbar/MainNavbar';
+import MainNavbar from '@/components/templates/LeftNavbar/MainNavbar';
 
 // 지도 타입 변경 핸들러 컴포넌트
 function MapTypeHandler() {

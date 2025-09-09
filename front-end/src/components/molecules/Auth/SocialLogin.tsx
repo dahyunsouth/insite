@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import SocialLoginButton from '../atoms/Button/SocialLogin';
+import SocialLoginButton from '../../atoms/Auth/Button/SocialLogin';
 
 interface SocialLoginProps {
   className?: string;

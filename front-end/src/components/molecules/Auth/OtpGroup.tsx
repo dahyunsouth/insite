@@ -1,5 +1,5 @@
 import React from "react";
-import OtpCell from "@/components/atoms/InputBox/OtpCell";
+import OtpCell from "@/components/atoms/Auth/InputBox/OtpCell";
 
 // Molecule: OtpGroup
 // Spec: multiple OtpCell arranged in a row, 5px gap between each
