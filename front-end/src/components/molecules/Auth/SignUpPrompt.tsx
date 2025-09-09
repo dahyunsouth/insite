@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import SignUpPromptText from '../atoms/Text/SignUpPromptText';
-import SignUpLink from '../atoms/Button/SignUp';
+import SignUpPromptText from '../../atoms/Auth/Text/SignUpPromptText';
+import SignUpLink from '../../atoms/Auth/Button/SignUp';
 
 interface SignUpPromptProps {
   className?: string;
