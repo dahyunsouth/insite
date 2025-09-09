@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import KakaoMap, { useKakaoMapContext } from '@/components/map/KakaoMap';
 import RightActionBar from '@/components/organisms/RightActionBar/RightActionBar';
 import CtaPillButton from '@/components/molecules/Detail/CtaPillButton/CtaPillButton';
+import AreaDetailModal from '@/components/organisms/Detail/AreaDetailModal/AreaDetailModal';
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
 import MainNavbar from '@/components/templates/LeftNavbar/MainNavbar';
 
@@ -22,6 +23,7 @@ function MapTypeHandler() {
 
 export default function HomePage() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   // (선택) 모달 열렸을 때 페이지 스크롤 잠금
   useEffect(() => {
@@ -52,11 +54,18 @@ export default function HomePage() {
         <CtaPillButton
           label="강남역 상권 분석 자세히 보기"
           ariaLabel="강남역 상권 분석 자세히 보기"
-          onPress={() => console.log('CTA clicked')}
+          onPress={() => setIsDetailOpen(true)}
         />
       </div>
 
       {/* 3) 인증 모달 (AuthModalWrapper) - 조건부 렌더 */}
+      {/* Area detail modal */}
+      <AreaDetailModal
+        open={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        title="강남역 상권 현황"
+      />
+
       {isAuthOpen && (
         <div className="fixed inset-0 z-50"
         onClick={() => setIsAuthOpen(false)}
