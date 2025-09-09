@@ -23,7 +23,7 @@ const AuthenticationInputBox = ({
         border border-[#D9D9D9]
         outline-none
         focus:border-[2px] focus:border-[#404040]
-        text-[#BCBCBC] text-[20px] font-normal
+        text-[#BCBCBC] text-medium font-normal
         ${className}
       `}
       {...props}

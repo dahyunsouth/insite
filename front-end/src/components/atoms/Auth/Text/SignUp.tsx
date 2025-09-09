@@ -11,8 +11,8 @@ const SignUpBody: React.FC<BodyProps> = ({ children }) => {
     <p
       className="
         font-normal
-        text-[20px]
-        leading-[60px]
+        text-medium
+        leading-[20px]
         text-black
       "
       style={{ fontFamily: "Inter, sans-serif" }}

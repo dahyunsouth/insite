@@ -15,13 +15,13 @@ interface LoginOrganismProps {
 }
 
 const LoginOrganism: React.FC<LoginOrganismProps> = ({ 
-  className = "",
+  className = "flex flex-col items-center justify-between",
   onSignUpClick,
   // signUpHref,
 }) => {
   return (
     <AuthenticationCard className={className}>
-      <div className="flex flex-col items-center">
+      
         <div className="w-full">
           <AuthenticationLabel type="login" />
         </div>
@@ -36,7 +36,7 @@ const LoginOrganism: React.FC<LoginOrganismProps> = ({
         <SocialLoginHeader />
 
         <SocialLoginForm />
-      </div>
+      
     </AuthenticationCard>
   );
 };
