@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import KakaoMap, { useKakaoMapContext } from '@/components/map/KakaoMap';
 import RightActionBar from '@/components/organisms/RightActionBar/RightActionBar';
+import CtaPillButton from '@/components/molecules/Detail/CtaPillButton/CtaPillButton';
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
 import MainNavbar from '@/components/templates/LeftNavbar/MainNavbar';
 
@@ -45,6 +46,15 @@ export default function HomePage() {
         {/* 2) 우측 버튼 바 (지도 타입 토글 포함) */}
         <MapTypeHandler />
       </KakaoMap>
+
+      {/* Bottom-center CTA preview for verification */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30">
+        <CtaPillButton
+          label="강남역 상권 분석 자세히 보기"
+          ariaLabel="강남역 상권 분석 자세히 보기"
+          onPress={() => console.log('CTA clicked')}
+        />
+      </div>
 
       {/* 3) 인증 모달 (AuthModalWrapper) - 조건부 렌더 */}
       {isAuthOpen && (
