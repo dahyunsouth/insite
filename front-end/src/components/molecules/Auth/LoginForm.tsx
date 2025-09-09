@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import InputBox from '../atoms/InputBox/InputBox';
-import SubmitButton from '../atoms/Button/Submit';
+import InputBox from '../../atoms/Auth/InputBox/InputBox';
+import SubmitButton from '../../atoms/Auth/Button/Submit';
 
 interface LoginFormProps {
   className?: string;

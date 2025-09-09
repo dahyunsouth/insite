@@ -6,17 +6,17 @@ import React, { useReducer } from 'react';
 // 로그인 모달 (내부에서 SignUpPrompt 렌더)
 // ⛳️ LoginOrganism 에 onSignUpClick?: () => void; prop 을 추가해
 // 내부 <SignUpPrompt onSignUpClick={props.onSignUpClick} />로 전달해줘.
-import LoginOrganism from '@/components/organisms/Login';
+import LoginOrganism from '@/components/organisms/Auth/Login';
 
 // 재사용 아톰/몰큘
-import AuthenticationCard from '@/components/atoms/Card/Authentication';
-import AuthenticationLabel from '@/components/atoms/Heading/Authentication';
-import SignUpLabel from '@/components/atoms/Label/SignUp';
-import SignUpBody from '@/components/atoms/Text/SignUp';
-import AuthenticationInputBox from '@/components/atoms/InputBox/InputBox';
-import SubmitButton from '@/components/atoms/Button/Submit';
-import LabeledStaticField from '@/components/molecules/LabeledStaticField';
-import OtpGroup from '@/components/molecules/OtpGroup';
+import AuthenticationCard from '@/components/atoms/Auth/Card/Authentication';
+import AuthenticationLabel from '@/components/atoms/Auth/Heading/Authentication';
+import SignUpLabel from '@/components/atoms/Auth/Label/SignUp';
+import SignUpBody from '@/components/atoms/Auth/Text/SignUp';
+import AuthenticationInputBox from '@/components/atoms/Auth/InputBox/InputBox';
+import SubmitButton from '@/components/atoms/Auth/Button/Submit';
+import LabeledStaticField from '@/components/molecules/Auth/LabeledStaticField';
+import OtpGroup from '@/components/molecules/Auth/OtpGroup';
 
 // ---------------------------------------------
 // 상태 정의

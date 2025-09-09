@@ -1,8 +1,8 @@
 // front-end/src/components/molecules/LabeledStaticField/LabeledStaticField.tsx
 
 import React from "react";
-import SignUpLabel from "@/components/atoms/Label/SignUp";
-import SignUpBody from "@/components/atoms/Text/SignUp";
+import SignUpLabel from "@/components/atoms/Auth/Label/SignUp";
+import SignUpBody from "@/components/atoms/Auth/Text/SignUp";
 
 interface LabeledStaticFieldProps {
   label: string;
