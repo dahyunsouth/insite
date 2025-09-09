@@ -5,7 +5,7 @@ import AuthenticationCard from '../atoms/Card/Authentication';
 import AuthenticationLabel from '../atoms/Heading/Authentication';
 import LoginForm from '../molecules/LoginForm';
 import SignUpPrompt from '../molecules/SignUpPrompt';
-import TextDivider from '../atoms/Label/SocialLogin';
+import SocialLoginHeader from '../atoms/Label/SocialLoginHeader';
 import SocialLoginForm from '../molecules/SocialLogin';
 
 interface LoginOrganismProps {
@@ -33,7 +33,7 @@ const LoginOrganism: React.FC<LoginOrganismProps> = ({
           // signUpHref={signUpHref}        // (선택)
         />
 
-        <TextDivider />
+        <SocialLoginHeader />
 
         <SocialLoginForm />
       </div>

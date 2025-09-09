@@ -1,10 +1,23 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import KakaoMap from '@/components/map/KakaoMap';
+import KakaoMap, { useKakaoMapContext } from '@/components/map/KakaoMap';
 import RightActionBar from '@/components/organisms/RightActionBar';
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
 import MainNavbar from '@/components/templates/Auth/LeftNavbar/MainNavbar';
+
+// 지도 타입 변경 핸들러 컴포넌트
+function MapTypeHandler() {
+  const mapContext = useKakaoMapContext();
+  
+  const handleMapTypeChange = (mapType: 'roadmap' | 'skyview') => {
+    mapContext?.setMapType(mapType);
+  };
+
+  return (
+    <RightActionBar onMapTypeChange={handleMapTypeChange} />
+  );
+}
 
 export default function HomePage() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -23,15 +36,15 @@ export default function HomePage() {
   return (
     <div className="relative w-screen h-screen overflow-hidden">
       {/* 1) 풀스크린 카카오맵 (배경 고정) */}
-      <KakaoMap />
+      <KakaoMap>
+        {/* 상단 네비게이션 바 */}
+        <div className="fixed top-0 left-0 right-0 z-20">
+          <MainNavbar />
+        </div>
 
-      {/* 상단 네비게이션 바 */}
-      <div className="fixed top-0 left-0 right-0 z-20">
-        <MainNavbar />
-      </div>
-
-      {/* 2) 우측 버튼 바 (마이페이지 버튼만 우선 배치) */}
-      <RightActionBar onMyPageClick={() => setIsAuthOpen(true)} />
+        {/* 2) 우측 버튼 바 (지도 타입 토글 포함) */}
+        <MapTypeHandler />
+      </KakaoMap>
 
       {/* 3) 인증 모달 (AuthModalWrapper) - 조건부 렌더 */}
       {isAuthOpen && (

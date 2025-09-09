@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
 import LoginButton from '@/components/atoms/RightActionBar/LoginButton';
+import MapTypeToggle from '@/components/atoms/RightActionBar/MapTypeToggle';
 import ZoomFuc from '@/components/molecules/ZoomFuc';
 
 interface RightActionBarProps {
@@ -11,6 +12,7 @@ interface RightActionBarProps {
   onLoginClick?: () => void;          // 로그인 버튼 클릭
   onZoomIn?: () => void;              // 줌 인 버튼 클릭
   onZoomOut?: () => void;             // 줌 아웃 버튼 클릭
+  onMapTypeChange?: (mapType: 'roadmap' | 'skyview') => void; // 지도 타입 변경
 }
 
 const RightActionBar: React.FC<RightActionBarProps> = ({
@@ -18,6 +20,7 @@ const RightActionBar: React.FC<RightActionBarProps> = ({
   onLoginClick,
   onZoomIn,
   onZoomOut,
+  onMapTypeChange,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -41,8 +44,11 @@ const RightActionBar: React.FC<RightActionBarProps> = ({
       {/* 로그인 버튼 (정사각형 → 호버 시 확장) */}
       <LoginButton onClick={handleLoginClick} />
 
-      {/* 줌 기능 버튼들 */}
-      <ZoomFuc onZoomIn={onZoomIn} onZoomOut={onZoomOut} />
+      {/* 지도 컨트롤 버튼들 (하단에 세로 정렬) */}
+      <div className="flex flex-col space-y-1">
+        <MapTypeToggle onMapTypeChange={onMapTypeChange} />
+        <ZoomFuc onZoomIn={onZoomIn} onZoomOut={onZoomOut} />
+      </div>
 
       {/* 모달 렌더링 */}
       <AuthModal isOpen={isModalOpen} onClose={handleCloseModal} />

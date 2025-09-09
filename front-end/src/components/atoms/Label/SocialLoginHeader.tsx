@@ -15,17 +15,17 @@ const TextDivider: React.FC<TextDividerProps> = ({
       className={`
         flex
         items-center
-        gap-4
+        w-full
         my-4
         ${className}
       `}
       {...props}
     >
-      <div className="flex-1 border-t border-[#D9D9D9]"></div>
-      <span className="text-[16px] font-normal text-[#8C8C8C] whitespace-nowrap">
+      <div className="flex-1 h-[1px] bg-gray-300"></div>
+      <span className="px-4 text-[16px] font-normal text-[#8C8C8C] whitespace-nowrap">
         {text}
       </span>
-      <div className="flex-1 border-t border-[#D9D9D9]"></div>
+      <div className="flex-1 h-[1px] bg-gray-300"></div>
     </div>
   );
 };
