@@ -1,23 +1,38 @@
-# front-end/Dockerfile
-# Node 20 (Alpine) 기반
-FROM node:20-alpine AS deps
+# Next.js SSR용 — Debian slim 권장 (sharp 등 네이티브 모듈 호환 좋음)
+FROM node:20-bookworm-slim AS deps
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-FROM node:20-alpine AS builder
+FROM node:20-bookworm-slim AS build
 WORKDIR /app
-ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# 환경에 따라 필요시 NEXT_PUBLIC_* 변수 지정 가능
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-FROM node:20-alpine AS runner
+# 프로덕션 의존성만 별도 준비
+FROM node:20-bookworm-slim AS prod-deps
 WORKDIR /app
-ENV NODE_ENV=production
-ENV PORT=3000
-ENV HOSTNAME=0.0.0.0
-COPY --from=builder /app ./
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# 런타임
+FROM node:20-bookworm-slim AS runner
+WORKDIR /app
+ENV NODE_ENV=production \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
+
+# 프로덕션 node_modules만 복사
+COPY --from=prod-deps /app/node_modules ./node_modules
+# 빌드 결과/정적 리소스/패키지 메타 복사
+COPY --from=build /app/.next ./.next
+COPY --from=build /app/public ./public
+COPY --from=build /app/package*.json ./
+
 EXPOSE 3000
+# (선택) /healthz 라우트를 만들어뒀다면 유용
+# HEALTHCHECK --interval=30s --timeout=5s --retries=5 CMD node -e "require('http').get('http://127.0.0.1:3000/healthz', r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+
 CMD ["npm","run","start","--","-p","3000"]
