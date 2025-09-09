@@ -26,6 +26,7 @@ const SignUpPrompt: React.FC<SignUpPromptProps> = ({
         flex
         items-center
         justify-center
+        mt-3
         gap-1
         ${className}
       `}
