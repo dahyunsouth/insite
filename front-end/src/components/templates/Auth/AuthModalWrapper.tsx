@@ -98,11 +98,11 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
   if (state.mode === 'signup_email') {
     return (
       <AuthenticationCard className={className}>
-        <div className="flex flex-col items-center">
-          <div className="w-full">
-            <AuthenticationLabel type="signup" />
-          </div>
-
+        {/* 회원가입 헤더 */}
+        <div className="w-full">
+          <AuthenticationLabel type="signup" />
+        </div>
+        <div>
           <div className="mt-8 w-[320px]">
             <AuthenticationInputBox
               placeholder="이메일을 입력하세요"
@@ -129,7 +129,7 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
   if (state.mode === 'signup_otp') {
     return (
       <AuthenticationCard className={className}>
-        <div className="flex flex-col items-center">
+        <div>
           <div className="w-full">
             <AuthenticationLabel type="signup" />
           </div>
@@ -138,7 +138,8 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
             <SignUpLabel>이메일</SignUpLabel>
             <SignUpBody>{state.form.email || '-'}</SignUpBody>
           </div>
-
+        </div>
+        <div>
           <div className="mt-6 w-[320px]">
             <SignUpLabel>인증번호</SignUpLabel>
             <div className="mt-2">
@@ -163,7 +164,7 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
   if (state.mode === 'signup_nickname') {
     return (
       <AuthenticationCard className={className}>
-        <div className="flex flex-col items-center">
+        <div>
           <div className="w-full">
             <AuthenticationLabel type="signup" />
           </div>
@@ -171,7 +172,8 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
           <div className="mt-8 w-[320px]">
             <LabeledStaticField label="이메일" value={state.form.email || '-'} />
           </div>
-
+        </div>
+        <div>
           <div className="mt-6 w-[320px]">
             <SignUpLabel>닉네임</SignUpLabel>
             <AuthenticationInputBox
@@ -197,7 +199,7 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
   if (state.mode === 'signup_password') {
     return (
       <AuthenticationCard className={className}>
-        <div className="flex flex-col items-center">
+        <div>
           <div className="w-full">
             <AuthenticationLabel type="signup" />
           </div>
@@ -206,8 +208,9 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
             <LabeledStaticField label="이메일" value={state.form.email || '-'} />
             <LabeledStaticField label="닉네임" value={state.form.nickname || '-'} />
           </div>
-
-          <div className="mt-6 w-[320px]">
+        </div>
+        <div>
+          <div className="w-[320px]">
             <SignUpLabel>비밀번호</SignUpLabel>
             <AuthenticationInputBox
               type="password"
@@ -233,7 +236,7 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
   if (state.mode === 'signup_password_confirm') {
     return (
       <AuthenticationCard className={className}>
-        <div className="flex flex-col items-start">
+        <div>
           <div className="w-full">
             <AuthenticationLabel type="signup" />
           </div>
@@ -243,7 +246,8 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
             <LabeledStaticField label="닉네임" value={state.form.nickname || '-'} />
             <LabeledStaticField label="비밀번호" value="확인 중" />
           </div>
-
+        </div>
+        <div>
           <div className="mt-6 w-[320px]">
             <SignUpLabel>비밀번호 확인</SignUpLabel>
             <AuthenticationInputBox
@@ -271,23 +275,21 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
   // -------------------------------
   return (
     <AuthenticationCard className={className}>
-      <div className="flex flex-col items-center">
-        <div className="w-full">
-          <AuthenticationLabel type="signup" />
-        </div>
+      <div className="w-full">
+        <AuthenticationLabel type="signup" />
+      </div>
 
-        <div className="mt-10 text-center">
-          <p className="text-[20px] font-semibold">
-            {state.form.nickname || '회원'}님,
-          </p>
-          <p className="mt-1 text-[16px] text-neutral-700">가입이 완료되었습니다!</p>
-        </div>
+      <div className="mt-10 text-center">
+        <p className="text-[20px] font-semibold">
+          {state.form.nickname || '회원'}님,
+        </p>
+        <p className="mt-1 text-[16px] text-neutral-700">가입이 완료되었습니다!</p>
+      </div>
 
-        <div className="mt-8 w-[320px]">
-          <SubmitButton onClick={() => dispatch({ type: 'GO', to: 'login' })}>
-            바로 시작
-          </SubmitButton>
-        </div>
+      <div className="mt-8 w-[320px]">
+        <SubmitButton onClick={() => dispatch({ type: 'GO', to: 'login' })}>
+          바로 시작
+        </SubmitButton>
       </div>
     </AuthenticationCard>
   );

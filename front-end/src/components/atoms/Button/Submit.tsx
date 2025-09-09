@@ -16,7 +16,7 @@ const SubmitButton = ({
        px-[20px] py-0
        rounded-[15px]
        bg-[#404040]
-       text-white text-[20px] font-normal
+       text-white text-medium font-normal
        ${className}
      `}
      {...props}

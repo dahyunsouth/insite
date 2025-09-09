@@ -15,6 +15,7 @@ const AuthenticationCard = ({
         rounded-[20px]
         bg-[#FFFFFF]
         overflow-y-auto
+        flex flex-col items-center justify-between
         [&::-webkit-scrollbar]:hidden
         ${className}
       `}

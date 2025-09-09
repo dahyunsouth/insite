@@ -11,7 +11,7 @@ const SignUpLabel: React.FC<LabelProps> = ({ children }) => {
     <label
       className="
         font-semibold
-        text-[20px]
+        text-medium
         leading-[60px]
         text-[#371E1E]
       "
