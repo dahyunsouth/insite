@@ -9,8 +9,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# 🔐 (추가) Jenkins --build-arg로 전달된 공개 키를 "빌드 시점"에만 주입
-#     - Jenkins 파이프라인에서: docker build ... --build-arg NEXT_PUBLIC_KAKAO_MAP_API_KEY=...
+# 🔐 Jenkins --build-arg로 전달된 공개 키를 "빌드 시점"에만 주입
+#    - Jenkinsfile에서: docker build ... --build-arg NEXT_PUBLIC_KAKAO_MAP_API_KEY=...
 ARG NEXT_PUBLIC_KAKAO_MAP_API_KEY
 ENV NEXT_PUBLIC_KAKAO_MAP_API_KEY=${NEXT_PUBLIC_KAKAO_MAP_API_KEY}
 
@@ -30,6 +30,9 @@ ENV NODE_ENV=production \
     PORT=3000 \
     HOSTNAME=0.0.0.0
 
+# (선택) 런타임에서 process.env 사용 시 덮어쓸 수 있도록 빈 기본값 지정
+ENV NEXT_PUBLIC_KAKAO_MAP_API_KEY=""
+
 # 프로덕션 node_modules만 복사
 COPY --from=prod-deps /app/node_modules ./node_modules
 # 빌드 결과/정적 리소스/패키지 메타 복사
@@ -39,6 +42,7 @@ COPY --from=build /app/package*.json ./
 
 EXPOSE 3000
 # (선택) /healthz 라우트를 만들어뒀다면 유용
-HEALTHCHECK --interval=30s --timeout=5s --retries=5 CMD node -e "require('http').get('http://127.0.0.1:3000/healthz', r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+HEALTHCHECK --interval=30s --timeout=5s --retries=5 \
+  CMD node -e "require('http').get('http://127.0.0.1:3000/healthz', r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
 
 CMD ["npm","run","start","--","-p","3000"]
