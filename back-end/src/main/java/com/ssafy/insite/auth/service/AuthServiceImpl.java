@@ -9,7 +9,7 @@ import com.ssafy.insite.auth.entity.RefreshToken;
 import com.ssafy.insite.auth.jwt.JwtTokenProvider;
 import com.ssafy.insite.auth.repository.UserRepository;
 import com.ssafy.insite.common.dto.response.BaseResponseStatus;
-import com.ssafy.insite.common.entity.User;
+import com.ssafy.insite.auth.entity.User;
 import com.ssafy.insite.common.enums.ProfileType;
 import com.ssafy.insite.common.enums.Provider;
 import com.ssafy.insite.common.exception.BaseException;
