@@ -42,7 +42,7 @@ export default function AreaDetailModalTemplate({
   return (
     <div
       className={
-        "relative w-[1000px] rounded-3xl border border-black/5 shadow-xl max-h-[85vh] overflow-y-auto " +
+        "relative w-full rounded-3xl border border-black/5 shadow-xl max-h-[85vh] overflow-y-auto" +
         (className ?? "")
       }
       style={{ backgroundColor: "#F8F9FA" }}
