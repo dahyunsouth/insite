@@ -11,12 +11,16 @@ import SocialLoginForm from '../../molecules/Auth/SocialLogin';
 interface LoginOrganismProps {
   className?: string;
   onSignUpClick?: () => void;   // ✅ 추가
+  onClose?: () => void;  // 모달 닫기 콜백
+  onLoginSuccess?: () => void;  // 로그인 성공 콜백
   // signUpHref?: string;          // (선택) 라우팅 링크 사용 시
 }
 
 const LoginOrganism: React.FC<LoginOrganismProps> = ({ 
   className = "flex flex-col items-center justify-between",
   onSignUpClick,
+  onClose,
+  onLoginSuccess,
   // signUpHref,
 }) => {
   return (
@@ -26,7 +30,7 @@ const LoginOrganism: React.FC<LoginOrganismProps> = ({
           <AuthenticationLabel type="login" />
         </div>
         
-        <LoginForm />
+        <LoginForm onClose={onClose} onLoginSuccess={onLoginSuccess} />
         
         <SignUpPrompt
           onSignUpClick={onSignUpClick}  // ✅ 전달

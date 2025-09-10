@@ -2,11 +2,22 @@
 
 import React, { useState } from "react";
 
-const TABS = ["뉴스", "저장한 상권", "상권비교", "내 정보 수정"] as const;
+const TABS = ["뉴스", "상권비교", "저장된 상권", "마이페이지"] as const;
 type Tab = typeof TABS[number];
 
-const SecondLeftNavbar = () => {
+interface SecondLeftNavbarProps {
+  onMyPageClick?: () => void;
+  onLoginModalOpen?: () => void;
+}
+
+const SecondLeftNavbar: React.FC<SecondLeftNavbarProps> = ({ onMyPageClick, onLoginModalOpen }) => {
   const [active, setActive] = useState<Tab | null>(null);
+
+  // 로그인 상태 확인 함수
+  const checkLoginStatus = () => {
+    const authToken = localStorage.getItem('authToken');
+    return !!authToken;
+  };
 
   const baseBtn =
     "px-2 py-2 text-sm sm:text-base leading-none cursor-pointer select-none transition-all duration-150";
@@ -22,7 +33,19 @@ const SecondLeftNavbar = () => {
                 key={label}
                 type="button"
                 aria-pressed={isActive}
-                onClick={() => setActive((prev) => (prev === label ? null : label))}
+                onClick={() => {
+                  if (label === "마이페이지") {
+                    // 로그인 상태 확인
+                    if (checkLoginStatus()) {
+                      // 로그인된 상태: 기존 동작 (마이페이지 열기)
+                      onMyPageClick?.();
+                    } else {
+                      // 로그인되지 않은 상태: 로그인 모달 열기
+                      onLoginModalOpen?.();
+                    }
+                  }
+                  setActive((prev) => (prev === label ? null : label));
+                }}
                 className={
                   baseBtn +
                   (isActive

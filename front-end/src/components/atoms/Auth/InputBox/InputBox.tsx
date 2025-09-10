@@ -2,7 +2,16 @@
 
 import React from 'react';
 
-const AuthenticationInputBox = ({ 
+interface InputBoxProps {
+  placeholder?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
+  className?: string;
+  [key: string]: any;
+}
+
+const AuthenticationInputBox: React.FC<InputBoxProps> = ({ 
   placeholder = "",
   value = "",
   onChange = () => {},
