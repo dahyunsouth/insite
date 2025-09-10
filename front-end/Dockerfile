@@ -8,6 +8,12 @@ FROM node:20-bookworm-slim AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# 🔐 (추가) Jenkins --build-arg로 전달된 공개 키를 "빌드 시점"에만 주입
+#     - Jenkins 파이프라인에서: docker build ... --build-arg NEXT_PUBLIC_KAKAO_MAP_API_KEY=...
+ARG NEXT_PUBLIC_KAKAO_MAP_API_KEY
+ENV NEXT_PUBLIC_KAKAO_MAP_API_KEY=${NEXT_PUBLIC_KAKAO_MAP_API_KEY}
+
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
