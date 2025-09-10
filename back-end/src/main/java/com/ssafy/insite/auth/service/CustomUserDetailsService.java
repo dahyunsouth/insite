@@ -2,7 +2,7 @@ package com.ssafy.insite.auth.service;
 
 import com.ssafy.insite.auth.jwt.CustomUserDetails;
 import com.ssafy.insite.auth.repository.UserRepository;
-import com.ssafy.insite.common.entity.User;
+import com.ssafy.insite.auth.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
