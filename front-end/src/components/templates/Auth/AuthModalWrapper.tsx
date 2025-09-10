@@ -1,7 +1,8 @@
 // front-end/src/components/templates/Auth/AuthModalWrapper.tsx
 'use client';
 
-import React, { useReducer, useState, useEffect } from 'react';
+import React, { useReducer, useState, useEffect, useRef } from 'react';
+import { API_ENDPOINTS } from '@/config/api';
 
 // 로그인 모달 (내부에서 SignUpPrompt 렌더)
 // ⛳️ LoginOrganism 에 onSignUpClick?: () => void; prop 을 추가해
@@ -73,7 +74,13 @@ function reducer(state: State, action: Action): State {
 // ---------------------------------------------
 // Wrapper 본체
 // ---------------------------------------------
-const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) => {
+interface AuthModalWrapperProps {
+  className?: string;
+  onClose?: () => void;  // 모달 닫기 콜백
+  onLoginSuccess?: () => void;  // 로그인 성공 콜백
+}
+
+const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onClose, onLoginSuccess }) => {
   const [state, dispatch] = useReducer(reducer, {
     mode: 'login',
     form: { email: '', otp: '', nickname: '', password: '', passwordConfirm: '' },
@@ -127,6 +134,29 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
     message: string;
   }>({ isValid: null, strength: null, message: '' });
 
+  // 비밀번호 확인 상태
+  const [passwordConfirmValidation, setPasswordConfirmValidation] = useState<{
+    isMatch: boolean | null;
+    message: string;
+  }>({ isMatch: null, message: '' });
+
+  // 회원가입 상태
+  const [signupStatus, setSignupStatus] = useState<{
+    isSigningUp: boolean;
+    isSuccess: boolean | null;
+    message: string;
+  }>({ isSigningUp: false, isSuccess: null, message: '' });
+
+  // 사용자 정보 상태
+  const [userInfo, setUserInfo] = useState<{
+    isLoading: boolean;
+    nickname: string | null;
+    error: string | null;
+  }>({ isLoading: false, nickname: null, error: null });
+
+  // 닉네임 디바운싱을 위한 ref
+  const nicknameTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // OTP 타이머 useEffect
   useEffect(() => {
     if (state.mode === 'signup_otp' && otpTimeLeft > 0) {
@@ -167,10 +197,24 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
     }
   }, [state.form.nickname, state.mode]);
 
-  // 닉네임 변경 핸들러
+  // 컴포넌트 언마운트 시 타이머 정리
+  useEffect(() => {
+    return () => {
+      if (nicknameTimeoutRef.current) {
+        clearTimeout(nicknameTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // 닉네임 변경 핸들러 (디바운싱 적용)
   const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const nickname = e.target.value;
     dispatch({ type: 'SET_NICKNAME', nickname });
+
+    // 이전 타이머가 있으면 클리어
+    if (nicknameTimeoutRef.current) {
+      clearTimeout(nicknameTimeoutRef.current);
+    }
 
     // 닉네임 중복확인 상태 리셋
     setNicknameDuplicateCheck({ isChecking: false, isAvailable: null, message: '' });
@@ -183,8 +227,10 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
         message: '닉네임을 입력해주세요' 
       });
     } else {
-      // 닉네임이 입력되면 자동으로 중복확인 실행
-      checkNicknameDuplicate(nickname);
+      // 디바운싱: 200ms 후에 중복확인 실행
+      nicknameTimeoutRef.current = setTimeout(() => {
+        checkNicknameDuplicate(nickname);
+      }, 200);
     }
   };
 
@@ -200,6 +246,27 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
   useEffect(() => {
     if (state.mode === 'signup_password') {
       setPasswordValidation({ isValid: null, strength: null, message: '' });
+    }
+  }, [state.mode]);
+
+  // 모드가 변경될 때 비밀번호 확인 상태 리셋
+  useEffect(() => {
+    if (state.mode === 'signup_password_confirm') {
+      setPasswordConfirmValidation({ isMatch: null, message: '' });
+    }
+  }, [state.mode]);
+
+  // 모드가 변경될 때 회원가입 상태 리셋
+  useEffect(() => {
+    if (state.mode === 'signup_done') {
+      setSignupStatus({ isSigningUp: false, isSuccess: null, message: '' });
+    }
+  }, [state.mode]);
+
+  // signup_done 모드에서 사용자 정보 가져오기
+  useEffect(() => {
+    if (state.mode === 'signup_done') {
+      fetchUserInfo();
     }
   }, [state.mode]);
 
@@ -223,7 +290,7 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
     setEmailDuplicateCheck({ isChecking: true, isAvailable: null, message: '' });
 
     try {
-      const response = await fetch(`http://43.203.196.29:8080/api/v1/auth/check/email?email=${encodeURIComponent(email)}`, {
+      const response = await fetch(`${API_ENDPOINTS.EMAIL_CHECK}?email=${encodeURIComponent(email)}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -237,19 +304,23 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
           isAvailable: true, 
           message: '사용 가능한 이메일입니다.' 
         });
-      } else if (response.status === 400) {
-        // 이메일 중복 (400 Bad Request)
+      } else if (response.status === 400 || response.status === 409) {
+        // 이메일 중복 (400 Bad Request 또는 409 Conflict)
+        const errorData = await response.json().catch(() => null);
+        console.log(`이메일 중복 확인 - ${response.status} 응답:`, errorData);
         setEmailDuplicateCheck({ 
           isChecking: false, 
           isAvailable: false, 
-          message: '이미 사용 중인 이메일입니다. 다시 입력하세요.' 
+          message: errorData?.message || '이미 사용 중인 이메일입니다. 다시 입력하세요.' 
         });
+        console.log('이메일 중복 상태 설정됨:', { isAvailable: false, message: errorData?.message });
       } else {
         // 기타 에러
+        const errorData = await response.json().catch(() => null);
         setEmailDuplicateCheck({ 
           isChecking: false, 
           isAvailable: null, 
-          message: '이메일 확인 중 오류가 발생했습니다.' 
+          message: errorData?.message || '이메일 확인 중 오류가 발생했습니다.' 
         });
       }
     } catch (error) {
@@ -267,7 +338,7 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
     setEmailSendStatus({ isSending: true, isSuccess: null, message: '' });
 
     try {
-      const response = await fetch('http://43.203.196.29:8080/api/v1/auth/verify/send-code', {
+      const response = await fetch(API_ENDPOINTS.SEND_VERIFICATION_CODE, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -307,7 +378,7 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
     setOtpVerificationStatus({ isVerifying: true, isSuccess: null, message: '' });
 
     try {
-      const response = await fetch('http://43.203.196.29:8080/api/v1/auth/verify/check-code', {
+      const response = await fetch(API_ENDPOINTS.CHECK_VERIFICATION_CODE, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -349,7 +420,7 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
     setNicknameDuplicateCheck({ isChecking: true, isAvailable: null, message: '' });
 
     try {
-      const response = await fetch(`http://43.203.196.29:8080/api/v1/auth/check/nickname?nickname=${encodeURIComponent(nickname)}`, {
+      const response = await fetch(`${API_ENDPOINTS.NICKNAME_CHECK}?nickname=${encodeURIComponent(nickname)}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -454,14 +525,165 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
     });
   };
 
+  // 비밀번호 확인 변경 핸들러
+  const handlePasswordConfirmChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const passwordConfirm = e.target.value;
+    dispatch({ type: 'SET_PASSWORD_CONFIRM', passwordConfirm });
+
+    if (passwordConfirm === '') {
+      setPasswordConfirmValidation({ isMatch: null, message: '' });
+    } else if (passwordConfirm === state.form.password) {
+      setPasswordConfirmValidation({ isMatch: true, message: '' });
+    } else {
+      setPasswordConfirmValidation({ 
+        isMatch: false, 
+        message: '' 
+      });
+    }
+  };
+
+  // 회원가입 API 호출 함수
+  const handleSignup = async () => {
+    setSignupStatus({ isSigningUp: true, isSuccess: null, message: '' });
+
+    try {
+      console.log('회원가입 요청 데이터:', {
+        email: state.form.email,
+        nickname: state.form.nickname,
+        password: state.form.password,
+        type: 'user',
+      });
+
+      const response = await fetch(API_ENDPOINTS.SIGNUP, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: state.form.email,
+          nickname: state.form.nickname,
+          password: state.form.password,
+          type: 'user',
+        }),
+      });
+
+      console.log('회원가입 응답 상태:', response.status);
+      console.log('회원가입 응답 헤더:', response.headers);
+
+      if (response.ok) {
+        // 회원가입 성공 (200 OK)
+        const responseData = await response.json();
+        console.log('회원가입 성공 응답:', responseData);
+        
+        // JWT 토큰이 있다면 저장 (일반적으로 Authorization 헤더나 응답 body에 포함)
+        const authToken = response.headers.get('Authorization') || 
+                         responseData.token || 
+                         responseData.accessToken ||
+                         responseData.result?.token;
+        
+        if (authToken) {
+          localStorage.setItem('authToken', authToken);
+          console.log('JWT 토큰 저장됨:', authToken);
+        }
+        
+        setSignupStatus({ 
+          isSigningUp: false, 
+          isSuccess: true, 
+          message: '회원가입이 완료되었습니다!' 
+        });
+        // 다음 단계로 이동
+        dispatch({ type: 'GO', to: 'signup_done' });
+      } else {
+        // 회원가입 실패
+        const errorData = await response.json().catch(() => null);
+        console.log('회원가입 실패 응답:', errorData);
+        
+        setSignupStatus({ 
+          isSigningUp: false, 
+          isSuccess: false, 
+          message: `회원가입에 실패했습니다. (${response.status}) ${errorData?.message || '다시 시도해주세요.'}` 
+        });
+      }
+    } catch (error) {
+      console.error('회원가입 에러:', error);
+      setSignupStatus({ 
+        isSigningUp: false, 
+        isSuccess: false, 
+        message: '네트워크 오류가 발생했습니다. 다시 시도해주세요.' 
+      });
+    }
+  };
+
+  // 사용자 정보 가져오기 API 호출 함수
+  const fetchUserInfo = async () => {
+    setUserInfo({ isLoading: true, nickname: null, error: null });
+
+    try {
+      console.log('사용자 정보 요청 시작...');
+      
+      // localStorage에서 JWT 토큰 가져오기
+      const authToken = localStorage.getItem('authToken');
+      console.log('저장된 토큰:', authToken);
+      
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      // 토큰이 있으면 Authorization 헤더에 추가
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+      
+      const response = await fetch(API_ENDPOINTS.USER_INFO, {
+        method: 'GET',
+        headers,
+      });
+
+      console.log('사용자 정보 응답 상태:', response.status);
+      console.log('사용자 정보 응답 헤더:', response.headers);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('사용자 정보 응답 데이터:', data);
+        
+        // 응답 구조에 따라 nickname 추출
+        const nickname = data.result?.nickname || data.nickname || null;
+        
+        setUserInfo({ 
+          isLoading: false, 
+          nickname: nickname, 
+          error: null 
+        });
+        // 회원가입 완료 후 자동 로그인 상태로 설정
+        // 실제로는 서버에서 JWT 토큰을 받아서 저장해야 하지만, 
+        // 여기서는 간단히 로그인 성공 상태로 처리
+      } else {
+        const errorData = await response.json().catch(() => null);
+        console.log('사용자 정보 실패 응답:', errorData);
+        
+        setUserInfo({ 
+          isLoading: false, 
+          nickname: null, 
+          error: `사용자 정보를 가져올 수 없습니다. (${response.status}) ${errorData?.message || ''}` 
+        });
+      }
+    } catch (error) {
+      console.error('사용자 정보 가져오기 에러:', error);
+      setUserInfo({ 
+        isLoading: false, 
+        nickname: null, 
+        error: '네트워크 오류가 발생했습니다.' 
+      });
+    }
+  };
+
   // 이메일 변경 핸들러
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const email = e.target.value;
     dispatch({ type: 'SET_EMAIL', email });
 
-    // 이메일 중복확인 및 발송 상태 리셋
+    // 이메일이 변경되면 중복확인 상태만 리셋 (발송 상태는 유지)
     setEmailDuplicateCheck({ isChecking: false, isAvailable: null, message: '' });
-    setEmailSendStatus({ isSending: false, isSuccess: null, message: '' });
 
     if (email === '') {
       setEmailValidation({ isValid: null, message: '' });
@@ -490,6 +712,8 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
         className={className}
         // ⛳️ LoginOrganism 에서 이 핸들러를 SignUpPrompt 로 전달해줘
         onSignUpClick={() => dispatch({ type: 'GO', to: 'signup_email' })}
+        onClose={onClose}
+        onLoginSuccess={onLoginSuccess}
       />
     );
   }
@@ -498,13 +722,29 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
   // 2) 회원가입: 이메일 입력 단계
   // -------------------------------
   if (state.mode === 'signup_email') {
+    // 디버깅용 로그
+    console.log('이메일 입력 단계 렌더링:', {
+      emailDuplicateCheck,
+      emailValidation,
+      emailSendStatus
+    });
+    
     return (
       <AuthenticationCard className={className}>
         {/* 회원가입 헤더 */}
         <div className="w-full">
           <AuthenticationLabel 
             type="signup" 
-            onBackClick={() => dispatch({ type: 'GO', to: 'login' })}
+            onBackClick={() => {
+              // 이메일 입력값 초기화
+              dispatch({ type: 'SET_EMAIL', email: '' });
+              // 이메일 관련 상태들 초기화
+              setEmailValidation({ isValid: null, message: '' });
+              setEmailDuplicateCheck({ isChecking: false, isAvailable: null, message: '' });
+              setEmailSendStatus({ isSending: false, isSuccess: null, message: '' });
+              // 로그인 모드로 이동
+              dispatch({ type: 'GO', to: 'login' });
+            }}
           />
         </div>
         
@@ -531,7 +771,9 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
                 onChange={handleEmailChange}
                 onKeyDown={handleEmailKeyDown}
                 className={
-                  emailSendStatus.isSuccess === false || emailDuplicateCheck.isAvailable === false
+                  emailDuplicateCheck.isAvailable === false
+                    ? '!border-red-500 focus:!border-red-500'
+                    : emailSendStatus.isSuccess === false
                     ? '!border-red-500 focus:!border-red-500'
                     : emailDuplicateCheck.isAvailable === true && emailSendStatus.isSuccess !== false
                     ? '!border-[#3288FF] focus:!border-[#3288FF]'
@@ -549,7 +791,9 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
             <div className="mt-2 w-[320px]">
               <p 
                 className={`text-sm font-normal ${
-                  emailSendStatus.isSuccess === false || emailDuplicateCheck.isAvailable === false
+                  emailDuplicateCheck.isAvailable === false
+                    ? 'text-red-500'
+                    : emailSendStatus.isSuccess === false
                     ? 'text-red-500'
                     : emailDuplicateCheck.isAvailable === true && emailSendStatus.isSuccess !== false
                     ? 'text-[#3288FF]'
@@ -780,24 +1024,28 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
         </div>
         <div>
           <div className="w-[320px]">
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
               <SignUpLabel>비밀번호</SignUpLabel>
-              <div className="ml-2 flex items-center gap-0.5">
-                {passwordValidation.isValid === false && (
-                  <img src="/badges/Unavailable.svg" alt="사용 불가" className="w-[104px] h-[30px]" />
-                )}
-                {passwordValidation.isValid && (
-                  <img src="/badges/Available.svg" alt="사용 가능" className="w-[104px] h-[30px]" />
-                )}
-                {passwordValidation.strength === 'weak' && (
-                  <img src="/badges/Weak.svg" alt="위험" className="w-[104px] h-[30px]" />
-                )}
-                {passwordValidation.strength === 'medium' && (
-                  <img src="/badges/Medium.svg" alt="보통" className="w-[104px] h-[30px]" />
-                )}
-                {passwordValidation.strength === 'strong' && (
-                  <img src="/badges/Strong.svg" alt="안전" className="w-[104px] h-[30px]" />
-                )}
+              <div className="ml-2 flex items-center gap-2">
+                <div>
+                  {passwordValidation.isValid === false && (
+                    <img src="/badges/Unavailable.svg" alt="사용 불가" className="w-[104px] h-[30px]" />
+                  )}
+                  {passwordValidation.isValid && (
+                    <img src="/badges/Available.svg" alt="사용 가능" className="w-[104px] h-[30px]" />
+                  )}
+                </div>
+                <div>
+                  {passwordValidation.strength === 'weak' && (
+                    <img src="/badges/Weak.svg" alt="위험" className="w-auto h-[30px]" />
+                  )}
+                  {passwordValidation.strength === 'medium' && (
+                    <img src="/badges/Medium.svg" alt="보통" className="w-auto h-[30px]" />
+                  )}
+                  {passwordValidation.strength === 'strong' && (
+                    <img src="/badges/Strong.svg" alt="안전" className="w-auto h-[30px]" />
+                  )}
+                </div>
               </div>
             </div>
             <AuthenticationInputBox
@@ -868,25 +1116,71 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
         </div>
         <div>
           <div className="mt-6 w-[320px]">
-            <SignUpLabel>비밀번호 확인</SignUpLabel>
+            <div className="flex items-center gap-2">
+              <SignUpLabel>비밀번호 확인</SignUpLabel>
+              {passwordConfirmValidation.isMatch === true && (
+                <img src="/badges/Match.svg" alt="일치" className="w-[104px] h-[30px]" />
+              )}
+              {passwordConfirmValidation.isMatch === false && (
+                <img src="/badges/Mismatch.svg" alt="불일치" className="w-[104px] h-[30px]" />
+              )}
+            </div>
             <AuthenticationInputBox
               type="password"
               placeholder="비밀번호를 한 번 더 입력하세요"
               value={state.form.passwordConfirm}
-              onChange={(e) =>
-                dispatch({ type: 'SET_PASSWORD_CONFIRM', passwordConfirm: e.target.value })
+              onChange={handlePasswordConfirmChange}
+              className={
+                passwordConfirmValidation.isMatch === true
+                  ? '!border-[#3288FF] focus:!border-[#3288FF]'
+                  : passwordConfirmValidation.isMatch === false
+                  ? '!border-red-500 focus:!border-red-500'
+                  : ''
               }
             />
           </div>
 
+          {/* 비밀번호 확인 메시지 */}
+          {passwordConfirmValidation.message && (
+            <div className="mt-2 w-[320px]">
+              <p className="text-sm font-normal text-red-500">
+                {passwordConfirmValidation.message}
+              </p>
+            </div>
+          )}
+
           <div className="mt-6 w-[320px]">
             <SubmitButton 
-              className="cursor-pointer"
-              onClick={() => dispatch({ type: 'GO', to: 'signup_done' })}
+              className={`cursor-pointer ${
+                passwordConfirmValidation.isMatch !== true || signupStatus.isSigningUp
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                  : ''
+              }`}
+              disabled={passwordConfirmValidation.isMatch !== true || signupStatus.isSigningUp}
+              onClick={() => {
+                if (passwordConfirmValidation.isMatch === true && !signupStatus.isSigningUp) {
+                  handleSignup();
+                }
+              }}
             >
-              확인
+              {signupStatus.isSigningUp ? '가입 중...' : '확인'}
             </SubmitButton>
           </div>
+
+          {/* 회원가입 상태 메시지 */}
+          {signupStatus.message && (
+            <div className="mt-2 w-[320px]">
+              <p 
+                className={`text-sm font-normal ${
+                  signupStatus.isSuccess === true 
+                    ? 'text-[#3288FF]' 
+                    : 'text-red-500'
+                }`}
+              >
+                {signupStatus.message}
+              </p>
+            </div>
+          )}
         </div>
       </AuthenticationCard>
     );
@@ -902,16 +1196,29 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
       </div>
 
       <div className="mt-10 text-center">
-        <p className="text-[20px] font-semibold">
-          {state.form.nickname || '회원'}님,
-        </p>
-        <p className="mt-1 text-[16px] text-neutral-700">가입이 완료되었습니다!</p>
+        {userInfo.isLoading ? (
+          <div className="flex items-center justify-center gap-2">
+            <div className="w-4 h-4 border-2 border-[#3288FF] border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-[16px] text-neutral-700">정보를 불러오는 중...</p>
+          </div>
+        ) : userInfo.error ? (
+          <p className="text-[16px] text-red-500">{userInfo.error}</p>
+        ) : (
+          <div>
+            <p className="text-[20px] font-semibold whitespace-pre-line">
+              {userInfo.nickname || state.form.nickname || '회원'}님,{'\n'}회원가입이 완료되었습니다!
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="mt-8 w-[320px]">
         <SubmitButton 
           className="cursor-pointer"
-          onClick={() => dispatch({ type: 'GO', to: 'login' })}
+          onClick={() => {
+            // 로그인 성공 콜백 호출하여 HomePage로 이동
+            onLoginSuccess?.();
+          }}
         >
           바로 시작
         </SubmitButton>

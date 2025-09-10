@@ -12,7 +12,7 @@ const AuthenticationLabel: React.FC<PageTitleProps> = ({ type, onBackClick }) =>
       {type === 'signup' && (
         <button
           onClick={onBackClick}
-          className="absolute left-0 top-0 p-2 text-gray-400 hover:text-gray-600 active:text-gray-800 transition-colors duration-150"
+          className="absolute left-0 top-0 pt-6 text-gray-400 hover:text-gray-600 active:text-gray-800 transition-colors duration-150 cursor-pointer"
           aria-label="뒤로가기"
         >
           <svg 
@@ -25,7 +25,7 @@ const AuthenticationLabel: React.FC<PageTitleProps> = ({ type, onBackClick }) =>
             strokeLinecap="round" 
             strokeLinejoin="round"
           >
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
+            <path d="M15 18l-6-6 6-6"/>
           </svg>
         </button>
       )}

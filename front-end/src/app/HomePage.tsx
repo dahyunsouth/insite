@@ -7,9 +7,18 @@ import CtaPillButton from '@/components/molecules/Detail/CtaPillButton/CtaPillBu
 import AreaDetailModal from '@/components/organisms/Detail/AreaDetailModal/AreaDetailModal';
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
 import MainNavbar from '@/components/templates/LeftNavbar/MainNavbar';
+import NotificationBar from '@/components/atoms/Common/NotificationBar';
 
 // 지도 타입 변경 핸들러 컴포넌트
-function MapTypeHandler() {
+function MapTypeHandler({ 
+  isLoggedIn, 
+  onLogoutSuccess,
+  onLoginSuccess
+}: { 
+  isLoggedIn: boolean;
+  onLogoutSuccess: () => void;
+  onLoginSuccess: () => void;
+}) {
   const mapContext = useKakaoMapContext();
   
   const handleMapTypeChange = (mapType: 'roadmap' | 'skyview') => {
@@ -17,24 +26,50 @@ function MapTypeHandler() {
   };
 
   return (
-    <RightActionBar onMapTypeChange={handleMapTypeChange} />
+    <RightActionBar 
+      onMapTypeChange={handleMapTypeChange} 
+      isLoggedIn={isLoggedIn}
+      onLogoutSuccess={onLogoutSuccess}
+      onLoginSuccess={onLoginSuccess}
+    />
   );
 }
 
 export default function HomePage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showLogoutNotification, setShowLogoutNotification] = useState(false);
+  const [showLoginNotification, setShowLoginNotification] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-  // (선택) 모달 열렸을 때 페이지 스크롤 잠금
+  // 페이지 로드 시 로그인 상태 확인
   useEffect(() => {
-    if (isAuthOpen) {
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = prev;
-      };
-    }
-  }, [isAuthOpen]);
+    const checkLoginStatus = () => {
+      const authToken = localStorage.getItem('authToken');
+      if (authToken) {
+        setIsLoggedIn(true);
+        console.log('저장된 토큰으로 로그인 상태 확인됨');
+      } else {
+        setIsLoggedIn(false);
+        console.log('토큰이 없어 로그아웃 상태로 설정됨');
+      }
+    };
+    
+    checkLoginStatus();
+  }, []);
+
+  // 로그인 성공 핸들러
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+    setShowLoginNotification(true); // 로그인 성공 안내바 표시
+  };
+
+  // 로그아웃 성공 핸들러
+  const handleLogoutSuccess = () => {
+    setIsLoggedIn(false);
+    setShowLogoutNotification(true); // 안내바 표시
+    console.log('로그아웃 성공 - 상태 업데이트됨');
+  };
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
@@ -45,8 +80,13 @@ export default function HomePage() {
           <MainNavbar />
         </div>
 
+
         {/* 2) 우측 버튼 바 (지도 타입 토글 포함) */}
-        <MapTypeHandler />
+        <MapTypeHandler 
+          isLoggedIn={isLoggedIn} 
+          onLogoutSuccess={handleLogoutSuccess}
+          onLoginSuccess={handleLoginSuccess}
+        />
       </KakaoMap>
 
       {/* Bottom-center CTA preview for verification */}
@@ -58,7 +98,6 @@ export default function HomePage() {
         />
       </div>
 
-      {/* 3) 인증 모달 (AuthModalWrapper) - 조건부 렌더 */}
       {/* Area detail modal */}
       <AreaDetailModal
         open={isDetailOpen}
@@ -66,6 +105,7 @@ export default function HomePage() {
         title="강남역 상권 현황"
       />
 
+      {/* 인증 모달 (AuthModalWrapper) - 조건부 렌더 */}
       {isAuthOpen && (
         <div className="fixed inset-0 z-50"
         onClick={() => setIsAuthOpen(false)}
@@ -85,6 +125,22 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* 로그인 성공 안내바 */}
+      <NotificationBar
+        message="로그인되었습니다"
+        isVisible={showLoginNotification}
+        onClose={() => setShowLoginNotification(false)}
+        duration={3000}
+      />
+
+      {/* 로그아웃 성공 안내바 */}
+      <NotificationBar
+        message="정상적으로 로그아웃 되었습니다"
+        isVisible={showLogoutNotification}
+        onClose={() => setShowLogoutNotification(false)}
+        duration={3000}
+      />
     </div>
   );
 }
