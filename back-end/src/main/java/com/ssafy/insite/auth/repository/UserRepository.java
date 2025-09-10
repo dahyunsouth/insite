@@ -1,6 +1,6 @@
 package com.ssafy.insite.auth.repository;
 
-import com.ssafy.insite.common.entity.User;
+import com.ssafy.insite.auth.entity.User;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

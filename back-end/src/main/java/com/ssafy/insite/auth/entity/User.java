@@ -1,4 +1,4 @@
-package com.ssafy.insite.common.entity;
+package com.ssafy.insite.auth.entity;
 
 import com.ssafy.insite.common.enums.ProfileType;
 import com.ssafy.insite.common.enums.Provider;
