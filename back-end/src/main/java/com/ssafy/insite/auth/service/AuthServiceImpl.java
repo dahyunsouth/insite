@@ -10,6 +10,7 @@ import com.ssafy.insite.auth.jwt.JwtTokenProvider;
 import com.ssafy.insite.auth.repository.UserRepository;
 import com.ssafy.insite.common.dto.response.BaseResponseStatus;
 import com.ssafy.insite.common.entity.User;
+import com.ssafy.insite.common.enums.ProfileType;
 import com.ssafy.insite.common.enums.Provider;
 import com.ssafy.insite.common.exception.BaseException;
 import com.ssafy.insite.common.utils.RedisKeyGenerator;
@@ -98,6 +99,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .nickname(request.getNickname())
+                .profile(ProfileType.DEFAULT)
                 .provider(Provider.NONE)
                 .type(request.getType())
                 .build();
@@ -130,6 +132,7 @@ public class AuthServiceImpl implements AuthService {
                 .uuid(user.getUuid())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
+                .profile(user.getProfile())
                 .provider(user.getProvider())
                 .type(user.getType())
                 .build();
@@ -144,6 +147,7 @@ public class AuthServiceImpl implements AuthService {
 
         String newNickname = request.getNickname();
         String newPassword = request.getPassword();
+        ProfileType profile = request.getProfile();
 
         if (newNickname != null && !newNickname.isEmpty() && !newNickname.equals("null")) {
             user.updateNickname(newNickname);
@@ -151,6 +155,10 @@ public class AuthServiceImpl implements AuthService {
 
         if (newPassword != null && !newPassword.isEmpty() && !newPassword.equals("null")) {
             user.updatePassword(passwordEncoder.encode(newPassword));
+        }
+
+        if (profile != null) {
+            user.updateProfile(profile);
         }
     }
 
