@@ -3,6 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import KakaoMap, { useKakaoMapContext } from '@/components/map/KakaoMap';
 import RightActionBar from '@/components/organisms/RightActionBar/RightActionBar';
+import CtaPillButton from '@/components/molecules/Detail/CtaPillButton/CtaPillButton';
+import AreaDetailModal from '@/components/organisms/Detail/AreaDetailModal/AreaDetailModal';
+import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
 import MainNavbar from '@/components/templates/LeftNavbar/MainNavbar';
 import NotificationBar from '@/components/atoms/Common/NotificationBar';
 
@@ -36,6 +39,8 @@ export default function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLogoutNotification, setShowLogoutNotification] = useState(false);
   const [showLoginNotification, setShowLoginNotification] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   // 페이지 로드 시 로그인 상태 확인
   useEffect(() => {
@@ -84,6 +89,42 @@ export default function HomePage() {
         />
       </KakaoMap>
 
+      {/* Bottom-center CTA preview for verification */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30">
+        <CtaPillButton
+          label="강남역 상권 분석 자세히 보기"
+          ariaLabel="강남역 상권 분석 자세히 보기"
+          onPress={() => setIsDetailOpen(true)}
+        />
+      </div>
+
+      {/* Area detail modal */}
+      <AreaDetailModal
+        open={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        title="강남역 상권 현황"
+      />
+
+      {/* 인증 모달 (AuthModalWrapper) - 조건부 렌더 */}
+      {isAuthOpen && (
+        <div className="fixed inset-0 z-50"
+        onClick={() => setIsAuthOpen(false)}
+        >
+          {/* 딤 영역 */}
+          <div
+            className="absolute inset-0 bg-black/40"
+          />
+          {/* 모달 본체 */}
+          <div className="relative z-10 flex min-h-screen items-center justify-center p-4">
+            <div
+              className="w-[360px]"
+              onClick={(e) => e.stopPropagation()} // 딤 클릭 닫기와 구분
+            >
+              <AuthModalWrapper className="w-[360px]" />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 로그인 성공 안내바 */}
       <NotificationBar

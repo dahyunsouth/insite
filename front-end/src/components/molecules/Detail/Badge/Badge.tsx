@@ -1,0 +1,1 @@
+/* Placeholder: Detail Badge component. No implementation yet. */
