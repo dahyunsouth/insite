@@ -3,6 +3,7 @@ package com.ssafy.insite.auth.controller;
 import com.ssafy.insite.auth.dto.request.EmailRequestDto;
 import com.ssafy.insite.auth.dto.request.EmailVerificationRequestDto;
 import com.ssafy.insite.auth.dto.request.LoginRequestDto;
+import com.ssafy.insite.auth.dto.request.ModifyAccountRequestDto;
 import com.ssafy.insite.auth.dto.request.SignupRequestDto;
 import com.ssafy.insite.auth.dto.response.LoginResponseDto;
 import com.ssafy.insite.auth.dto.response.UserDetailResponseDto;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -107,6 +109,16 @@ public class AuthController {
         UserDetailResponseDto userInfo = authService.inquiryAccount(userDetails.getUuid());
 
         return new BaseResponse<>(userInfo);
+    }
+
+    @PutMapping("/user")
+    @Operation(summary = "회원정보 수정")
+    @PreAuthorize("hasRole('USER')")
+    public BaseResponse<Void> modifyAccount(@RequestBody ModifyAccountRequestDto request,
+                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        authService.modifyAccount(userDetails.getUuid(), request);
+
+        return new BaseResponse<>();
     }
 
     @GetMapping("/check/email")

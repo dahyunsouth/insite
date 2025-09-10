@@ -19,7 +19,12 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
-            "/api/v1/auth/**"
+            "/api/v1/auth/login",
+            "/api/v1/auth/signup",
+            "/api/v1/auth/check/email",
+            "/api/v1/auth/check/nickname",
+            "/api/v1/auth/verify/send-code",
+            "/api/v1/auth/verify/check-code",
     };
 
     private final JwtTokenProvider jwtTokenProvider;

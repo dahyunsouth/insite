@@ -1,6 +1,7 @@
 package com.ssafy.insite.auth.service;
 
 import com.ssafy.insite.auth.dto.request.LoginRequestDto;
+import com.ssafy.insite.auth.dto.request.ModifyAccountRequestDto;
 import com.ssafy.insite.auth.dto.request.SignupRequestDto;
 import com.ssafy.insite.auth.dto.response.LoginResponseDto;
 import com.ssafy.insite.auth.dto.response.UserDetailResponseDto;
@@ -132,6 +133,25 @@ public class AuthServiceImpl implements AuthService {
                 .provider(user.getProvider())
                 .type(user.getType())
                 .build();
+    }
+
+    // 회원정보 수정
+    @Override
+    @Transactional
+    public void modifyAccount(String uuid, ModifyAccountRequestDto request) {
+        User user = userRepository.findByUuid(uuid)
+                .orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_USER));
+
+        String newNickname = request.getNickname();
+        String newPassword = request.getPassword();
+
+        if (newNickname != null && !newNickname.isEmpty() && !newNickname.equals("null")) {
+            user.updateNickname(newNickname);
+        }
+
+        if (newPassword != null && !newPassword.isEmpty() && !newPassword.equals("null")) {
+            user.updatePassword(passwordEncoder.encode(newPassword));
+        }
     }
 
     // 이메일 중복확인
