@@ -1,6 +1,7 @@
 package com.ssafy.insite.auth.service;
 
 import com.ssafy.insite.auth.dto.request.LoginRequestDto;
+import com.ssafy.insite.auth.dto.request.ModifyAccountRequestDto;
 import com.ssafy.insite.auth.dto.request.SignupRequestDto;
 import com.ssafy.insite.auth.dto.response.LoginResponseDto;
 import com.ssafy.insite.auth.dto.response.UserDetailResponseDto;
@@ -9,6 +10,7 @@ import com.ssafy.insite.auth.jwt.JwtTokenProvider;
 import com.ssafy.insite.auth.repository.UserRepository;
 import com.ssafy.insite.common.dto.response.BaseResponseStatus;
 import com.ssafy.insite.common.entity.User;
+import com.ssafy.insite.common.enums.ProfileType;
 import com.ssafy.insite.common.enums.Provider;
 import com.ssafy.insite.common.exception.BaseException;
 import com.ssafy.insite.common.utils.RedisKeyGenerator;
@@ -97,6 +99,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .nickname(request.getNickname())
+                .profile(ProfileType.DEFAULT)
                 .provider(Provider.NONE)
                 .type(request.getType())
                 .build();
@@ -129,9 +132,34 @@ public class AuthServiceImpl implements AuthService {
                 .uuid(user.getUuid())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
+                .profile(user.getProfile())
                 .provider(user.getProvider())
                 .type(user.getType())
                 .build();
+    }
+
+    // 회원정보 수정
+    @Override
+    @Transactional
+    public void modifyAccount(String uuid, ModifyAccountRequestDto request) {
+        User user = userRepository.findByUuid(uuid)
+                .orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_USER));
+
+        String newNickname = request.getNickname();
+        String newPassword = request.getPassword();
+        ProfileType profile = request.getProfile();
+
+        if (newNickname != null && !newNickname.isEmpty() && !newNickname.equals("null")) {
+            user.updateNickname(newNickname);
+        }
+
+        if (newPassword != null && !newPassword.isEmpty() && !newPassword.equals("null")) {
+            user.updatePassword(passwordEncoder.encode(newPassword));
+        }
+
+        if (profile != null) {
+            user.updateProfile(profile);
+        }
     }
 
     // 이메일 중복확인

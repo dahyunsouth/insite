@@ -1,5 +1,6 @@
 package com.ssafy.insite.common.entity;
 
+import com.ssafy.insite.common.enums.ProfileType;
 import com.ssafy.insite.common.enums.Provider;
 import com.ssafy.insite.common.enums.UserType;
 import jakarta.persistence.Column;
@@ -41,6 +42,10 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    private ProfileType profile;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Provider provider;
 
     @Enumerated(EnumType.STRING)
@@ -53,5 +58,9 @@ public class User {
 
     public void updatePassword(String password) {
         this.password = password;
+    }
+
+    public void updateProfile(ProfileType profile) {
+        this.profile = profile;
     }
 }

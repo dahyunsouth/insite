@@ -120,6 +120,13 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
     message: string;
   }>({ isChecking: false, isAvailable: null, message: '' });
 
+  // 비밀번호 유효성 및 강도 상태
+  const [passwordValidation, setPasswordValidation] = useState<{
+    isValid: boolean | null;
+    strength: 'weak' | 'medium' | 'strong' | null;
+    message: string;
+  }>({ isValid: null, strength: null, message: '' });
+
   // OTP 타이머 useEffect
   useEffect(() => {
     if (state.mode === 'signup_otp' && otpTimeLeft > 0) {
@@ -186,6 +193,13 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
     if (state.mode === 'signup_email') {
       setEmailDuplicateCheck({ isChecking: false, isAvailable: null, message: '' });
       setEmailSendStatus({ isSending: false, isSuccess: null, message: '' });
+    }
+  }, [state.mode]);
+
+  // 모드가 변경될 때 비밀번호 상태 리셋
+  useEffect(() => {
+    if (state.mode === 'signup_password') {
+      setPasswordValidation({ isValid: null, strength: null, message: '' });
     }
   }, [state.mode]);
 
@@ -372,6 +386,72 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
         message: '네트워크 오류가 발생했습니다.' 
       });
     }
+  };
+
+  // 비밀번호 강도 측정 함수
+  const checkPasswordStrength = (password: string, email: string) => {
+    if (!password) {
+      return { strength: null, message: '' };
+    }
+
+    // 길이 검사
+    if (password.length < 8 || password.length > 15) {
+      return { 
+        strength: null, 
+        message: '최소 8자리 이상 15자리 이하 비밀번호를 입력하세요' 
+      };
+    }
+
+    // 문자 종류 분석
+    const hasLower = /[a-z]/.test(password);
+    const hasUpper = /[A-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    const charTypes = [hasLower, hasUpper, hasNumber, hasSpecial].filter(Boolean).length;
+
+    // 연속성 검사
+    const hasSequential = /(012|123|234|345|456|567|678|789|890|abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)/i.test(password);
+    
+    // 반복성 검사
+    const hasRepeating = /(.)\1{2,}/.test(password);
+    
+    // 이메일 포함 검사
+    const emailParts = email.split('@')[0].toLowerCase();
+    const hasEmailInPassword = password.toLowerCase().includes(emailParts);
+    
+    // 사전 단어 검사 (간단한 예시)
+    const commonWords = ['password', '123456', 'qwerty', 'admin', 'user', 'login'];
+    const hasCommonWord = commonWords.some(word => password.toLowerCase().includes(word));
+
+    // 강도 판정
+    if (charTypes === 1 || hasCommonWord || hasEmailInPassword) {
+      return { strength: 'weak', message: '위험' };
+    }
+    
+    if (password.length >= 11 && charTypes >= 3 && !hasSequential && !hasRepeating) {
+      return { strength: 'strong', message: '안전' };
+    }
+    
+    if (charTypes >= 2 && !hasSequential && !hasRepeating) {
+      return { strength: 'medium', message: '보통' };
+    }
+    
+    return { strength: 'weak', message: '위험' };
+  };
+
+  // 비밀번호 변경 핸들러
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const password = e.target.value;
+    dispatch({ type: 'SET_PASSWORD', password });
+
+    const strengthResult = checkPasswordStrength(password, state.form.email);
+    
+    setPasswordValidation({
+      isValid: password.length >= 8 && password.length <= 15,
+      strength: strengthResult.strength,
+      message: strengthResult.message
+    });
   };
 
   // 이메일 변경 핸들러
@@ -700,19 +780,63 @@ const AuthModalWrapper: React.FC<{ className?: string }> = ({ className = '' }) 
         </div>
         <div>
           <div className="w-[320px]">
-            <SignUpLabel>비밀번호</SignUpLabel>
+            <div className="flex items-center">
+              <SignUpLabel>비밀번호</SignUpLabel>
+              <div className="ml-2 flex items-center gap-0.5">
+                {passwordValidation.isValid === false && (
+                  <img src="/badges/Unavailable.svg" alt="사용 불가" className="w-[104px] h-[30px]" />
+                )}
+                {passwordValidation.isValid && (
+                  <img src="/badges/Available.svg" alt="사용 가능" className="w-[104px] h-[30px]" />
+                )}
+                {passwordValidation.strength === 'weak' && (
+                  <img src="/badges/Weak.svg" alt="위험" className="w-[104px] h-[30px]" />
+                )}
+                {passwordValidation.strength === 'medium' && (
+                  <img src="/badges/Medium.svg" alt="보통" className="w-[104px] h-[30px]" />
+                )}
+                {passwordValidation.strength === 'strong' && (
+                  <img src="/badges/Strong.svg" alt="안전" className="w-[104px] h-[30px]" />
+                )}
+              </div>
+            </div>
             <AuthenticationInputBox
               type="password"
               placeholder="비밀번호를 입력하세요"
               value={state.form.password}
-              onChange={(e) => dispatch({ type: 'SET_PASSWORD', password: e.target.value })}
+              onChange={handlePasswordChange}
+              className={
+                passwordValidation.isValid === false
+                  ? '!border-red-500 focus:!border-red-500'
+                  : passwordValidation.isValid === true
+                  ? '!border-[#3288FF] focus:!border-[#3288FF]'
+                  : '!border-black focus:!border-black'
+              }
             />
           </div>
 
+          {/* 비밀번호 길이 오류 메시지만 표시 */}
+          {passwordValidation.isValid === false && passwordValidation.message && (
+            <div className="mt-2 w-[320px]">
+              <p className="text-sm font-normal text-red-500">
+                {passwordValidation.message}
+              </p>
+            </div>
+          )}
+
           <div className="mt-6 w-[320px]">
             <SubmitButton 
-              className="cursor-pointer"
-              onClick={() => dispatch({ type: 'GO', to: 'signup_password_confirm' })}
+              className={`cursor-pointer ${
+                passwordValidation.isValid !== true
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                  : ''
+              }`}
+              disabled={passwordValidation.isValid !== true}
+              onClick={() => {
+                if (passwordValidation.isValid) {
+                  dispatch({ type: 'GO', to: 'signup_password_confirm' });
+                }
+              }}
             >
               확인
             </SubmitButton>
