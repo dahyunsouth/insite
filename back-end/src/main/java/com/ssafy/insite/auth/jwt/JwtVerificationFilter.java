@@ -6,15 +6,29 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.util.AntPathMatcher;
 
 @RequiredArgsConstructor
 public class JwtVerificationFilter extends OncePerRequestFilter {
+    private static final String[] PUBLIC = {
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/api/v1/auth/login",
+            "/api/v1/auth/signup",
+            "/api/v1/auth/check/email",
+            "/api/v1/auth/check/nickname",
+            "/api/v1/auth/verify/send-code",
+            "/api/v1/auth/verify/check-code",
+    };
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final AntPathMatcher pm = new AntPathMatcher();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -43,5 +57,18 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
 
         // 다음 필터로 요청 전달
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        // CORS preflight는 항상 스킵
+        if (HttpMethod.OPTIONS.matches(request.getMethod())) return true;
+
+        // 공개 URL은 스킵
+        String uri = request.getRequestURI();
+        for (String p : PUBLIC) {
+            if (pm.match(p, uri)) return true;
+        }
+        return false;
     }
 }
