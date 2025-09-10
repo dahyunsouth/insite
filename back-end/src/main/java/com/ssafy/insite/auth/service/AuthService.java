@@ -1,6 +1,7 @@
 package com.ssafy.insite.auth.service;
 
 import com.ssafy.insite.auth.dto.request.LoginRequestDto;
+import com.ssafy.insite.auth.dto.request.ModifyAccountRequestDto;
 import com.ssafy.insite.auth.dto.request.SignupRequestDto;
 import com.ssafy.insite.auth.dto.response.LoginResponseDto;
 import com.ssafy.insite.auth.dto.response.UserDetailResponseDto;
@@ -20,6 +21,9 @@ public interface AuthService {
 
     // 회원정보 조회
     UserDetailResponseDto inquiryAccount(String uuid);
+
+    // 회원정보 수정
+    void modifyAccount(String uuid, ModifyAccountRequestDto request);
 
     // 이메일 중복확인
     boolean checkEmailDuplicate(String email);
