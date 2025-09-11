@@ -40,3 +40,72 @@
     - `Filter 화이트리스트`: 이 요청은 인증 과정 자체를 생략
 
 ---
+## Sept. 11
+
+### QueryDSL 개념
+- `JPA/Hibernate`: 엔티티 상태 관리와 기본 CRUD, 연관관계, 변경감지 등 “ORM”이 핵심
+
+- `QueryDSL(라이브러리)`: JPQL을 타입세이프한 빌더 문법으로 작성하게 해 주는 도구로 동적 조건, 복잡 조인/집계/서브쿼리를 컴파일 타임 타입체크로 안전하게 다룸
+
+### Q타입
+- QueryDSL이 엔티티 클래스를 분석해서 자동 생성하는 메타클래스
+
+- 이름 앞에 Q가 붙어서 나오고, 엔티티 필드를 타입 안전하게 접근할 수 있게함
+
+이렇게 Entity를 작성하면
+```Java
+@Entity
+public class Store {
+    @Id
+    private Long id;
+    private String storeName;
+    private String mainCategory;
+}
+```
+
+빌드 시 `target/generated-sources` 폴더 밑에 생성
+
+```Java
+// 자동 생성: QStore.java
+public class QStore extends EntityPathBase<Store> {
+    public static final QStore store = new QStore("store");
+
+    public final StringPath storeName = createString("storeName");
+    public final StringPath mainCategory = createString("mainCategory");
+    public final NumberPath<Long> id = createNumber("id", Long.class);
+}
+```
+
+### Q타입 용도
+- `JPAQueryFactory`와 함께 사용해 JPQL을 대체
+
+```Java
+JPAQueryFactory query = new JPAQueryFactory(em);
+QStore s = QStore.store;
+
+List<Store> results = query
+    .selectFrom(s)
+    .where(s.mainCategory.eq("FOOD"))
+    .orderBy(s.storeName.asc())
+    .fetch();
+```
+
+- **JPA (JPQL만 사용했을 때)**
+    - 문자열 기반이라 IDE에서 필드 오타를 못 잡음
+    - 동적 조건이 많아지면 문자열 붙이는 코드가 지저분해짐
+```Java
+@Query("select s from Store s where s.mainCategory = :cat")
+List<Store> findByCategory(@Param("cat") String category);
+```
+
+- **QueryDSL**
+    - 컴파일 타임에 오류를 잡아줌
+    - 동적 쿼리(옵션별 조건 추가)가 깔끔해짐
+```Java
+QStore s = QStore.store;
+query.selectFrom(s)
+     .where(s.mainCategory.eq(category))
+     .fetch();
+```
+
+---
