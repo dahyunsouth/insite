@@ -31,15 +31,15 @@ export default function AreaDetailModal({ open, onClose, title, subtitle }: Area
   return createPortal(
     <div
       className={
-        // start from the same Y as the navbar (top: 0); keep right safe padding for the right rail
-        "fixed inset-0 z-50 flex items-start justify-center pb-10 pl-4 pr-[112px]"
+        // align modal to the right side of the viewport
+        "fixed inset-0 z-50 flex items-start justify-end"
       }
     >
-      {/* backdrop */}
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
+      {/* backdrop
+      <div className="absolute inset-0 bg-black/30" onClick={onClose} /> */}
 
       {/* modal */}
-      <div className="relative z-10 mx-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="relative z-10 w-[calc(75vw-1rem)] mt-2 mr-2" onClick={(e) => e.stopPropagation()}>
         <AreaDetailModalTemplate title={title} subtitle={subtitle} onClose={onClose} />
       </div>
     </div>,

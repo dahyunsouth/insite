@@ -14,7 +14,7 @@ export default function LabelText({ className, children }: LabelTextProps) {
   return (
     <span
       className={
-        "text-white text-[25px] leading-[40px] font-normal " +
+        "text-white text-[17.5px] leading-[40px] font-normal " +
         "whitespace-nowrap overflow-hidden text-ellipsis " +
         (className ?? "")
       }
