@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import MarketRecommendationMap from '@/components/atoms/MarketRecommendation/MarketRecommendationMap';
 import LeftMarketRecommendationBar from '@/components/organisms/MarketRecommendation/LeftMarketRecommendationBar';
-import MarketRecommendationProgressBar from '@/components/atoms/MarketRecommendation/MarketRecommendationProgressBar';
+import MarketTypeStore from '@/components/organisms/MarketRecommendation/MarketTypeStore';
 
 interface MarketRecommendationProps {
   onClose: () => void;
@@ -14,6 +14,13 @@ export default function MarketRecommendation({ onClose }: MarketRecommendationPr
   const router = useRouter();
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [showMap, setShowMap] = useState<boolean>(true);
+  const [selections, setSelections] = useState<{
+    marketType: string | null;
+    storeSize: string | null;
+    minFee: number;
+    maxFee: number;
+  } | null>(null);
 
   const handleBackToHome = () => {
     onClose();
@@ -22,6 +29,44 @@ export default function MarketRecommendation({ onClose }: MarketRecommendationPr
 
   const handleDistrictSelect = (districtId: string | null, districtName: string) => {
     setSelectedDistrict(districtName || null);
+  };
+
+  const handleNextStep = () => {
+    setCurrentStep(2);
+    setShowMap(false);
+  };
+
+  const handleSelectionsChange = (newSelections: {
+    marketType: string | null;
+    storeSize: string | null;
+    minFee: number;
+    maxFee: number;
+  }) => {
+    setSelections(newSelections);
+  };
+
+  const handleReset = () => {
+    setSelectedDistrict(null);
+    setSelections(null);
+    setCurrentStep(1);
+    setShowMap(true);
+  };
+
+  const handleBack = () => {
+    setCurrentStep(1);
+    setShowMap(true);
+  };
+
+  const handleStepClick = (step: number) => {
+    if (step === 1) {
+      // 원 1 클릭 시 지도로 이동
+      setCurrentStep(1);
+      setShowMap(true);
+    } else {
+      // 원 2, 3, 4 클릭 시 MarketTypeStore로 이동
+      setCurrentStep(2);
+      setShowMap(false);
+    }
   };
 
   return (
@@ -48,12 +93,27 @@ export default function MarketRecommendation({ onClose }: MarketRecommendationPr
         <div className="flex flex-row flex-1 gap-4 min-h-0">
           {/* 우측 영역 */}
           <div className='w-1/4 flex-shrink-0'>
-            <LeftMarketRecommendationBar selectedDistrict={selectedDistrict} />
+            <LeftMarketRecommendationBar 
+              selectedDistrict={selectedDistrict}
+              selections={selections}
+              onReset={handleReset}
+              onStepClick={handleStepClick}
+            />
           </div>
           {/* 좌측 영역 */}
           <div
           className='w-3/4 bg-white rounded-2xl border border-gray-300 p-6 min-h-0 flex flex-col'>
-            <MarketRecommendationMap onDistrictSelect={handleDistrictSelect} />
+            {showMap ? (
+              <MarketRecommendationMap 
+                onDistrictSelect={handleDistrictSelect} 
+                onNextStep={handleNextStep}
+              />
+            ) : (
+              <MarketTypeStore 
+                onSelectionsChange={handleSelectionsChange} 
+                onBack={handleBack}
+              />
+            )}
           </div>
         </div>
       </div>

@@ -24,9 +24,10 @@ interface SeoulDistrictsData {
 
 interface MarketRecommendationMapProps {
   onDistrictSelect?: (districtId: string | null, districtName: string) => void;
+  onNextStep?: () => void;
 }
 
-export default function MarketRecommendationMap({ onDistrictSelect }: MarketRecommendationMapProps) {
+export default function MarketRecommendationMap({ onDistrictSelect, onNextStep }: MarketRecommendationMapProps) {
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [hoveredDistrict, setHoveredDistrict] = useState<string | null>(null);
   const [districts, setDistricts] = useState<SeoulDistrictsData | null>(null);
@@ -178,6 +179,7 @@ export default function MarketRecommendationMap({ onDistrictSelect }: MarketReco
         </svg>
       </div>
       <button
+        onClick={onNextStep}
         className={`w-full py-3 px-4 rounded-lg transition-colors ${
           selectedDistrict 
             ? 'bg-gray-700 text-white cursor-pointer hover:bg-gray-800' 
