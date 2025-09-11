@@ -23,6 +23,26 @@ function mapSlots(row: any): Slot[] {
   return items.map(([key, label]) => ({ key, label, value: Number(row?.[key] ?? 0) }));
 }
 
+function mapDays(row: any): Slot[] {
+  const candidates: Array<{ keys: string[]; label: string }> = [
+    { keys: ["MON_FLPOP_CO", "MONDAY_FLPOP_CO", "DY_MON_FLPOP_CO"], label: "월요일" },
+    { keys: ["TUE_FLPOP_CO", "TUES_FLPOP_CO", "DY_TUE_FLPOP_CO"], label: "화요일" },
+    { keys: ["WED_FLPOP_CO", "WEDS_FLPOP_CO", "DY_WED_FLPOP_CO"], label: "수요일" },
+    { keys: ["THU_FLPOP_CO", "THUR_FLPOP_CO", "DY_THU_FLPOP_CO"], label: "목요일" },
+    { keys: ["FRI_FLPOP_CO", "FRIDAY_FLPOP_CO", "DY_FRI_FLPOP_CO"], label: "금요일" },
+    { keys: ["SAT_FLPOP_CO", "SATURDAY_FLPOP_CO", "DY_SAT_FLPOP_CO"], label: "토요일" },
+    { keys: ["SUN_FLPOP_CO", "SUNDAY_FLPOP_CO", "DY_SUN_FLPOP_CO"], label: "일요일" },
+  ];
+  function readNum(row: any, keys: string[]) {
+    for (const k of keys) {
+      const v = row?.[k];
+      if (v !== undefined && v !== null && v !== "") return Number(v);
+    }
+    return 0;
+  }
+  return candidates.map(({ keys, label }) => ({ key: keys[0], label, value: readNum(row, keys) }));
+}
+
 async function fetchPage(key: string, quarter: string, start: number, end: number) {
   const url = `${SEOUL_BASE}/${key}/json/${SERVICE}/${start}/${end}/${quarter}`;
   const res = await fetch(url, { cache: "no-store" });
@@ -67,12 +87,25 @@ export async function GET(req: NextRequest) {
         const slots = mapSlots(found);
         let maxIndex = 0;
         for (let i = 1; i < slots.length; i++) if (slots[i].value > slots[maxIndex].value) maxIndex = i;
+
+        // Weekday stats (best-effort; keys differ between specs). Missing keys produce 0 values.
+        const days = mapDays(found);
+        let dayMaxIndex = 0;
+        let dayMinIndex = 0;
+        for (let i = 1; i < days.length; i++) {
+          if (days[i].value > days[dayMaxIndex].value) dayMaxIndex = i;
+          if (days[i].value < days[dayMinIndex].value) dayMinIndex = i;
+        }
+
         const result = {
           quarter,
           trdarCd: String(found.TRDAR_CD),
           trdarNm: String(found.TRDAR_CD_NM ?? ""),
           slots,
           max: { index: maxIndex, label: slots[maxIndex].label, value: slots[maxIndex].value },
+          days,
+          dayMax: { index: dayMaxIndex, label: days[dayMaxIndex].label, value: days[dayMaxIndex].value },
+          dayMin: { index: dayMinIndex, label: days[dayMinIndex].label, value: days[dayMinIndex].value },
           list_total_count: total,
         };
         return new Response(JSON.stringify(result), {

@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import AreaDetailModalTemplate from "@/components/templates/Detail/AreaDetailModalTemplate";
 import TradeAreaSelect from "@/components/molecules/Detail/TradeAreaSelect";
 import TimeSlotCard from "@/components/molecules/Detail/TimeSlotCard";
+import StoreCard from "@/components/molecules/Detail/StoreCard";
 
 type AreaDetailModalProps = {
   open: boolean;
@@ -70,7 +71,14 @@ export default function AreaDetailModal({ open, onClose, title, subtitle, onSele
             />
           }
         >
-          <TimeSlotCard trdarCode={selected?.code ?? null} />
+          <>
+            <section id="pop-section" className="scroll-mt-24">
+              <TimeSlotCard trdarCode={selected?.code ?? null} />
+            </section>
+            <section id="store-section" className="scroll-mt-24">
+              <StoreCard trdarCode={selected?.code ?? null} />
+            </section>
+          </>
         </AreaDetailModalTemplate>
       </div>
     </div>,

@@ -82,7 +82,9 @@ export default function TradeAreaSelect({ className, onChange }: Props) {
     try {
       const q = await loadQuarter();
       setQuarter(q);
-      await loadRange(q, 1, 1000);
+      // Load only first 10 items once (no infinite scroll)
+      await loadRange(q, 1, 10);
+      setHasMore(false);
     } catch (e: any) {
       setError(e?.message ?? "load failed");
     } finally {
@@ -95,20 +97,8 @@ export default function TradeAreaSelect({ className, onChange }: Props) {
   }, [init]);
 
   const listRef = useRef<HTMLDivElement>(null);
-  const onScroll = useCallback(async () => {
-    if (!listRef.current || !hasMore || loading || !quarter) return;
-    const el = listRef.current;
-    const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 24;
-    if (!nearBottom) return;
-    setLoading(true);
-    try {
-      await loadRange(quarter, nextStart, nextStart + 999);
-    } catch (e: any) {
-      setError(e?.message ?? "load more failed");
-    } finally {
-      setLoading(false);
-    }
-  }, [hasMore, loading, quarter, nextStart, loadRange]);
+  // Disable infinite scroll: keep a no-op handler
+  const onScroll = useCallback(() => {}, []);
 
   useEffect(() => {
     // Debug log: selection propagated to parent
@@ -129,7 +119,6 @@ export default function TradeAreaSelect({ className, onChange }: Props) {
           />
           <Combobox.Options
             ref={listRef as any}
-            onScroll={onScroll}
             className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-xl border border-gray-200 bg-white p-1 shadow-lg"
           >
               {error && (
@@ -154,11 +143,7 @@ export default function TradeAreaSelect({ className, onChange }: Props) {
                   )}
                 </Combobox.Option>
               ))}
-              {hasMore && (
-                <div className="px-3 py-2 text-center text-xs text-gray-400">
-                  {loading ? "더 불러오는 중..." : "아래로 스크롤하여 더 보기"}
-                </div>
-              )}
+              {/* Infinite scroll disabled */}
           </Combobox.Options>
         </div>
       </Combobox>

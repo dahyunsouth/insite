@@ -34,7 +34,7 @@ export default function AreaDetailModalTemplate({
   return (
     <div
       className={
-        "relative w-full rounded-3xl border border-black/5 shadow-xl max-h-[85vh] overflow-y-auto " +
+        "relative w-full rounded-3xl border border-black/5 shadow-xl max-h-[85vh] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden " +
         (className ?? "")
       }
       style={{ backgroundColor: "#F8F9FA" }}
@@ -70,11 +70,44 @@ export default function AreaDetailModalTemplate({
         <div className="md:grid md:grid-cols-[1fr_240px] md:gap-6">
           {/* Left column: stack of section cards */}
           <div>
-            <div className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
-              <div className="p-[30px]">
-                {children ?? <DefaultPopulationCardSkeleton sectionTitle={sectionTitle} />}
-              </div>
-            </div>
+            {(() => {
+              let kids = React.Children.toArray(children ?? []);
+              // If a single top-level Fragment wraps multiple nodes, unwrap it
+              if (
+                kids.length === 1 &&
+                React.isValidElement(kids[0]) &&
+                // @ts-ignore: comparing to Fragment type
+                kids[0].type === React.Fragment
+              ) {
+                // @ts-ignore: access fragment children
+                kids = React.Children.toArray(kids[0].props?.children ?? []);
+              }
+              if (kids.length === 0) {
+                return (
+                  <div className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
+                    <div className="p-[30px]">
+                      <DefaultPopulationCardSkeleton sectionTitle={sectionTitle} />
+                    </div>
+                  </div>
+                );
+              }
+              if (kids.length === 1) {
+                return (
+                  <div className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
+                    <div className="p-[30px]">{kids[0]}</div>
+                  </div>
+                );
+              }
+              return (
+                <div className="flex flex-col gap-4">
+                  {kids.map((node, idx) => (
+                    <div key={idx} className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
+                      <div className="p-[30px]">{node}</div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Right column: aside menu (sticky, non-scrolling) */}
@@ -88,24 +121,37 @@ export default function AreaDetailModalTemplate({
 }
 
 function DefaultVerticalPills() {
-  const items = ["최신 상권 종합 지표", "연령대별", "지출금액", "대중교통/주차"];
-  const activeIndex = 0;
+  const items = [
+    { id: "pop-section", label: "유동인구" },
+    { id: "store-section", label: "점포" },
+  ];
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  function go(id: string, idx: number) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      setActiveIndex(idx);
+    }
+  }
+
   return (
     <nav aria-label="섹션 내비게이션" className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
       <ul className="flex flex-col">
-        {items.map((t, idx) => {
+        {items.map((it, idx) => {
           const isActive = idx === activeIndex;
           return (
-            <li key={t} className={idx !== 0 ? "mt-3" : undefined}>
+            <li key={it.id} className={idx !== 0 ? "mt-3" : undefined}>
               <button
                 type="button"
+                onClick={() => go(it.id, idx)}
                 aria-current={isActive ? "page" : undefined}
                 className={
                   "w-full text-left text-base leading-6 " +
                   (isActive ? "text-[#3288FF] font-semibold" : "text-gray-400 hover:text-gray-600")
                 }
               >
-                {t}
+                {it.label}
               </button>
             </li>
           );

@@ -147,7 +147,7 @@ export default function HomePage() {
       <AreaDetailModal
         open={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
-        title="강남역 상권 현황"
+        title="상권 현황"
       />
 
       {/* 인증 모달 (AuthModalWrapper) - 조건부 렌더 */}
