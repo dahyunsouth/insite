@@ -12,7 +12,7 @@ type Props = {
 export default function TimeSlotBarChart({ labels, values, maxIndex = null, className }: Props) {
   const W = 560;
   const H = 260;
-  const m = { top: 16, right: 12, bottom: 28, left: 40 };
+  const m = { top: 16, right: 12, bottom: 20, left: 60 };
   const cw = W - m.left - m.right;
   const ch = H - m.top - m.bottom;
 
@@ -44,7 +44,7 @@ export default function TimeSlotBarChart({ labels, values, maxIndex = null, clas
   const tickVals = Array.from({ length: ticks + 1 }, (_, i) => Math.round((maxVal * i) / ticks));
 
   return (
-    <div className={className}>
+    <div className={(className ? `flex justify-center ${className}` : "flex justify-center")}>
       <svg width={W} height={H} role="img" aria-label="시간대별 유동인구 막대 차트">
         {/* grid & axes */}
         {tickVals.map((tv, i) => {
