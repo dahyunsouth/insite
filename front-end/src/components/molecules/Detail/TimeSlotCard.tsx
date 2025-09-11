@@ -140,56 +140,56 @@ export default function TimeSlotCard({ trdarCode }: Props) {
       {/* 선택 모드별 최다/최소 표 (Highlight와 Chart 사이) */}
       <div className="mt-3 overflow-hidden rounded-2xl border border-gray-200">
         <div className="grid grid-cols-2">
-          <div className="bg-[#3B82F6] px-4 py-3 text-center text-sm font-semibold text-black">
+          <div className="bg-[#3288FF1A] px-4 py-3 text-center text-sm font-semibold text-black">
             {mode === "time" ? "유동인구가 가장 많은 시간대" : "유동인구가 가장 많은 요일"}
           </div>
-          <div className="border-l border-gray-200 bg-[#3B82F6] px-4 py-3 text-center text-sm font-semibold text-black">
+          <div className="border-l border-gray-200 bg-[#3288FF1A] px-4 py-3 text-center text-sm font-semibold text-black">
             {mode === "time" ? "유동인구가 가장 적은 시간대" : "유동인구가 가장 적은 요일"}
           </div>
-          <div className="bg-black px-4 py-5 text-center text-white">
+          <div className="px-4 py-5 text-center text-black">
             {mode === "time" ? (
               timeMax ? (
                 <>
                   <span className="font-semibold">{timeMax.label}</span>
                   {typeof timeMax.value === "number" && (
-                    <span className="ml-2 text-white/80">{timeMax.value.toLocaleString()}명</span>
+                    <span className="ml-2 text-gray-500">{timeMax.value.toLocaleString()}명</span>
                   )}
                 </>
               ) : (
-                <span className="text-white/70">데이터 없음</span>
+                <span className="text-gray-500">데이터 없음</span>
               )
             ) : data?.dayMax ? (
               <>
                 <span className="font-semibold">{data.dayMax.label}</span>
                 {typeof data.dayMax.value === "number" && (
-                  <span className="ml-2 text-white/80">{data.dayMax.value.toLocaleString()}명</span>
+                  <span className="ml-2 text-gray-500">{data.dayMax.value.toLocaleString()}명</span>
                 )}
               </>
             ) : (
-              <span className="text-white/70">데이터 없음</span>
+              <span className="text-gray-500">데이터 없음</span>
             )}
           </div>
-          <div className="border-l border-gray-200 bg-black px-4 py-5 text-center text-white">
+          <div className="border-l border-gray-200 px-4 py-5 text-center text-black">
             {mode === "time" ? (
               timeMin ? (
                 <>
                   <span className="font-semibold">{timeMin.label}</span>
                   {typeof timeMin.value === "number" && (
-                    <span className="ml-2 text-white/80">{timeMin.value.toLocaleString()}명</span>
+                    <span className="ml-2 text-gray-500">{timeMin.value.toLocaleString()}명</span>
                   )}
                 </>
               ) : (
-                <span className="text-white/70">데이터 없음</span>
+                <span className="text-gray-500">데이터 없음</span>
               )
             ) : data?.dayMin ? (
               <>
                 <span className="font-semibold">{data.dayMin.label}</span>
                 {typeof data.dayMin.value === "number" && (
-                  <span className="ml-2 text-white/80">{data.dayMin.value.toLocaleString()}명</span>
+                  <span className="ml-2 text-gray-500">{data.dayMin.value.toLocaleString()}명</span>
                 )}
               </>
             ) : (
-              <span className="text-white/70">데이터 없음</span>
+              <span className="text-gray-500">데이터 없음</span>
             )}
           </div>
         </div>
@@ -216,4 +216,3 @@ export default function TimeSlotCard({ trdarCode }: Props) {
     </div>
   );
 }
-
