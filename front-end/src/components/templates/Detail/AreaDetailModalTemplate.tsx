@@ -37,18 +37,20 @@ export default function AreaDetailModalTemplate({
       }
       style={{ backgroundColor: "#F8F9FA" }}
     >
-      {/* Close button */}
-      <button
-        type="button"
-        aria-label="닫기"
-        onClick={onClose}
-        className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 hover:bg-white shadow-sm"
-      >
-        <XMarkIcon className="h-5 w-5 text-gray-700" />
-      </button>
-
       {/* Header */}
-      <div className="rounded-t-3xl border-b border-black/5" style={{ backgroundColor: "#FFFFFF" }}>
+      <div
+        className="sticky top-0 z-10 relative rounded-t-3xl border-b border-black/5 bg-white"
+        style={{ backgroundColor: "#FFFFFF" }}
+      >
+        {/* Close button (kept within sticky header) */}
+        <button
+          type="button"
+          aria-label="닫기"
+          onClick={onClose}
+          className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 hover:bg-white shadow-sm"
+        >
+          <XMarkIcon className="h-5 w-5 text-gray-700" />
+        </button>
         <div className={"px-6 py-4 " + (headerAlign === "center" ? "text-center" : "text-left")}>
           {title && <h2 className="text-[20px] font-semibold text-[#3288FF]">{title}</h2>}
           {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
@@ -67,8 +69,8 @@ export default function AreaDetailModalTemplate({
             </div>
           </div>
 
-          {/* Right column: aside menu (sticky) */}
-          <aside className="hidden md:block md:sticky md:top-6 self-start">
+          {/* Right column: aside menu (sticky, non-scrolling) */}
+          <aside className="hidden md:block md:sticky md:top-[68px] self-start">
             {asideNode ?? <DefaultVerticalPills />}
           </aside>
         </div>
