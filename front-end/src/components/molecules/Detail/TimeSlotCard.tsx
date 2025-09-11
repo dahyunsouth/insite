@@ -78,7 +78,7 @@ export default function TimeSlotCard({ trdarCode }: Props) {
 
   return (
     <div>
-      <h3 className="text-[18px] font-semibold text-gray-900">유동인구 시간대별 추이</h3>
+      <h3 className="text-[18px] font-semibold text-gray-900">유동인구</h3>
 
       {/* Segmented control: 시간대별 / 요일별 */}
       <div className="mt-4 w-full rounded-xl bg-gray-100 p-1">

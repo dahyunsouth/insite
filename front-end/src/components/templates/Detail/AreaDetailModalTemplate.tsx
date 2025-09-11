@@ -70,11 +70,44 @@ export default function AreaDetailModalTemplate({
         <div className="md:grid md:grid-cols-[1fr_240px] md:gap-6">
           {/* Left column: stack of section cards */}
           <div>
-            <div className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
-              <div className="p-[30px]">
-                {children ?? <DefaultPopulationCardSkeleton sectionTitle={sectionTitle} />}
-              </div>
-            </div>
+            {(() => {
+              let kids = React.Children.toArray(children ?? []);
+              // If a single top-level Fragment wraps multiple nodes, unwrap it
+              if (
+                kids.length === 1 &&
+                React.isValidElement(kids[0]) &&
+                // @ts-ignore: comparing to Fragment type
+                kids[0].type === React.Fragment
+              ) {
+                // @ts-ignore: access fragment children
+                kids = React.Children.toArray(kids[0].props?.children ?? []);
+              }
+              if (kids.length === 0) {
+                return (
+                  <div className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
+                    <div className="p-[30px]">
+                      <DefaultPopulationCardSkeleton sectionTitle={sectionTitle} />
+                    </div>
+                  </div>
+                );
+              }
+              if (kids.length === 1) {
+                return (
+                  <div className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
+                    <div className="p-[30px]">{kids[0]}</div>
+                  </div>
+                );
+              }
+              return (
+                <div className="flex flex-col gap-4">
+                  {kids.map((node, idx) => (
+                    <div key={idx} className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
+                      <div className="p-[30px]">{node}</div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Right column: aside menu (sticky, non-scrolling) */}
