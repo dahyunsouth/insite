@@ -34,7 +34,7 @@ export default function AreaDetailModalTemplate({
   return (
     <div
       className={
-        "relative w-full rounded-3xl border border-black/5 shadow-xl max-h-[85vh] overflow-y-auto " +
+        "relative w-full rounded-3xl border border-black/5 shadow-xl max-h-[85vh] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden " +
         (className ?? "")
       }
       style={{ backgroundColor: "#F8F9FA" }}
