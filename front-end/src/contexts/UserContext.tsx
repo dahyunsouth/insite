@@ -20,6 +20,7 @@ interface UserContextType {
   error: string | null;
   refreshUserInfo: () => Promise<void>;
   clearUserInfo: () => void;
+  deleteUser: () => Promise<boolean>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -164,6 +165,35 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     localStorage.removeItem('userInfo');
   };
 
+  // 회원탈퇴
+  const deleteUser = async (): Promise<boolean> => {
+    try {
+      const response = await authManager.authenticatedRequest(API_ENDPOINTS.USER_DELETE, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error(`회원탈퇴에 실패했습니다. (${response.status})`);
+      }
+
+      const data = await response.json();
+      
+      if (data.isSuccess) {
+        // 성공 시 모든 인증 정보 삭제
+        authManager.clearTokens();
+        clearUserInfo();
+        return true;
+      } else {
+        throw new Error(data.message || '회원탈퇴에 실패했습니다.');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.';
+      setError(errorMessage);
+      console.error('회원탈퇴 오류:', err);
+      return false;
+    }
+  };
+
   // 컴포넌트 마운트 시 사용자 정보 로드
   useEffect(() => {
     refreshUserInfo();
@@ -175,6 +205,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     error,
     refreshUserInfo,
     clearUserInfo,
+    deleteUser,
   };
 
   return (

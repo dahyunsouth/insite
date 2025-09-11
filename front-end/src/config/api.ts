@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
   REFRESH: `${API_BASE_URL}/api/v1/auth/refresh`,
   USER_INFO: `${API_BASE_URL}/api/v1/auth/user`,
   USER_UPDATE: `${API_BASE_URL}/api/v1/auth/user`,
+  USER_DELETE: `${API_BASE_URL}/api/v1/auth/user`,
   EMAIL_CHECK: `${API_BASE_URL}/api/v1/auth/check/email`,
   NICKNAME_CHECK: `${API_BASE_URL}/api/v1/auth/check/nickname`,
   SEND_VERIFICATION_CODE: `${API_BASE_URL}/api/v1/auth/verify/send-code`,
