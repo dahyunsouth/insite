@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import RadarChart from "@/components/molecules/Detail/Chart/RadarChart";
 
@@ -10,6 +10,7 @@ type AreaDetailModalTemplateProps = {
   onClose?: () => void;
   className?: string;
   headerAlign?: "left" | "center";
+  headerRight?: React.ReactNode;
   sectionTitle?: React.ReactNode;
   sectionAside?: React.ReactNode;
   sectionNav?: React.ReactNode;
@@ -21,7 +22,8 @@ export default function AreaDetailModalTemplate({
   subtitle,
   onClose,
   className,
-  headerAlign = "left",
+  headerAlign = "center",
+  headerRight,
   sectionTitle,
   sectionAside,
   sectionNav,
@@ -51,7 +53,13 @@ export default function AreaDetailModalTemplate({
         >
           <XMarkIcon className="h-5 w-5 text-gray-700" />
         </button>
-        <div className={"px-6 py-4 " + (headerAlign === "center" ? "text-center" : "text-left")}>
+        <div className={"px-6 py-4 pr-16 " + (headerAlign === "center" ? "text-center" : "text-left") }>
+          {/* Right actions (e.g., trade area dropdown) */}
+          {headerRight && (
+            <div className="absolute right-6 top-1/2 -translate-y-1/2">
+              {headerRight}
+            </div>
+          )}
           {title && <h2 className="text-[20px] font-semibold text-[#3288FF]">{title}</h2>}
           {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
         </div>
@@ -80,7 +88,7 @@ export default function AreaDetailModalTemplate({
 }
 
 function DefaultVerticalPills() {
-  const items = ["최신 상권 종합 지표", "유동인구", "지출금액", "대중교통 하차"];
+  const items = ["최신 상권 종합 지표", "연령대별", "지출금액", "대중교통/주차"];
   const activeIndex = 0;
   return (
     <nav aria-label="섹션 내비게이션" className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -112,30 +120,53 @@ function DefaultPopulationCardSkeleton({
 }: {
   sectionTitle?: React.ReactNode;
 }) {
+  const [mode, setMode] = useState<"time" | "dow">("time");
   return (
     <div>
       {/* Section title */}
-      <h3 className="text-[18px] font-semibold text-gray-900">{sectionTitle ?? "유동인구"}</h3>
+      <h3 className="text-[18px] font-semibold text-gray-900">{sectionTitle ?? "연령대별"}</h3>
 
       {/* Segmented control (static, full width) */}
       <div className="mt-4 w-full rounded-xl bg-gray-100 p-1">
         <div className="grid grid-cols-2 gap-1">
-          <button className="w-full justify-center rounded-xl bg-white px-4 py-4 text-sm font-medium text-[#3288FF] shadow-sm">일별 추이</button>
-          <button className="w-full justify-center rounded-xl px-4 py-4 text-sm font-medium text-gray-500">주별 추이</button>
+          <button
+            type="button"
+            onClick={() => setMode("time")}
+            aria-pressed={mode === "time"}
+            className={
+              `w-full justify-center rounded-xl px-4 py-4 text-sm font-medium shadow-sm ` +
+              (mode === "time" ? "bg-white text-[#3288FF]" : "text-gray-500")
+            }
+          >
+            시간대별 추이
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("dow")}
+            aria-pressed={mode === "dow"}
+            className={
+              `w-full justify-center rounded-xl px-4 py-4 text-sm font-medium ` +
+              (mode === "dow" ? "bg-white text-[#3288FF] shadow-sm" : "text-gray-500")
+            }
+          >
+            요일별 추이
+          </button>
         </div>
       </div>
 
       {/* Highlight statement */}
       <div className="mt-4 rounded-xl bg-gray-50 px-4 py-4 text-gray-900">
         <span className="font-medium">강조 문장</span>
-        <span className="ml-1 font-bold text-rose-500">핵심 키워드</span>
+        <span className="ml-1 font-bold text-rose-500">
+          {mode === "time" ? "유동인구가 가장 많은 시간대는 ~예요" : "핵심 지표"}
+        </span>
       </div>
 
       {/* Caption (right-aligned) */}
-      <div className="mt-1 text-right text-xs text-gray-400">최근 28일 기준</div>
+      <div className="mt-1 text-right text-xs text-gray-400">최근 28일</div>
 
       {/* Blue metric line */}
-      <div className="mt-4 text-[15px] font-semibold text-[#3288FF]">지표 하이라이트: 샘플 텍스트</div>
+      <div className="mt-4 text-[15px] font-semibold text-[#3288FF]">지표 하이라이트 문구</div>
 
       {/* Two-column summary */}
       <div className="mt-3 overflow-hidden rounded-2xl border border-gray-200">
@@ -150,10 +181,10 @@ function DefaultPopulationCardSkeleton({
       {/* Chart: area comparison radar */}
       <div className="mt-4 h-[280px] rounded-2xl border border-gray-200 p-3">
         <RadarChart
-          labels={["유동인구", "점포수", "임대료", "접근성", "상주인구", "직장인구", "집객시설", "상권변화지표"]}
+          labels={["연령대별", "유동", "지출", "근접성", "주거인구", "직장인구", "집객시설", "상권변화"]}
           series={[
-            { name: "강남역", color: "#2563EB", values: [85, 82, 40, 95, 58, 96, 88, 84] },
-            { name: "홍대입구역", color: "#60A5FA", dashed: true, values: [78, 76, 60, 78, 56, 68, 76, 72] },
+            { name: "강남", color: "#2563EB", values: [85, 82, 40, 95, 58, 96, 88, 84] },
+            { name: "기준", color: "#60A5FA", dashed: true, values: [78, 76, 60, 78, 56, 68, 76, 72] },
           ]}
           maxValue={100}
           levels={5}
