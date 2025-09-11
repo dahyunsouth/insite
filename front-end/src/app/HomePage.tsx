@@ -106,21 +106,7 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* 상권추천 버튼 */}
-        <div className="fixed top-4 right-5 transform -translate-x-1/2 z-50">
-          <button 
-            onClick={() => {
-              router.push('/marketrecommendation');
-            }}
-            className="cursor-pointer focus:outline-none"
-          >
-            <img 
-              src="/MarketRecommendationButton.svg" 
-              alt="상권 추천" 
-              className='w-150px h-60px'
-            />
-          </button>
-        </div>
+        
 
         {/* 2) 우측 버튼 바 (지도 타입 토글 포함) */}
         <MapTypeHandler 

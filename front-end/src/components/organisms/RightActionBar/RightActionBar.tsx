@@ -2,10 +2,12 @@
 
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useRouter } from 'next/navigation';
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
 import LoginButton from '@/components/atoms/RightActionBar/LoginButton';
 import MapTypeToggle from '@/components/atoms/RightActionBar/MapTypeToggle';
 import ZoomFuc from '@/components/molecules/ZoomFuc';
+import Image from 'next/image';
 
 interface RightActionBarProps {
   className?: string;                 // 포지션/여백 커스터마이즈
@@ -27,6 +29,7 @@ const RightActionBar: React.FC<RightActionBarProps> = ({
   isLoggedIn = false,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
 
   const handleLoginClick = () => {
     setIsModalOpen(true);
@@ -54,12 +57,28 @@ const RightActionBar: React.FC<RightActionBarProps> = ({
         ${className}
       `}
     >
-      {/* 로그인 버튼 (정사각형 → 호버 시 확장) */}
-      <LoginButton 
-        onLoginClick={handleLoginClick}
-        onLogoutSuccess={handleLogoutSuccess}
-        isLoggedIn={isLoggedIn} 
-      />
+      <div className='flex flex-row gap-2'>
+        {/* 상권추천 버튼 */}
+        <button 
+          onClick={() => {
+            router.push('/marketrecommendation');
+          }}
+          className="cursor-pointer focus:outline-none"
+        >
+          <img 
+            src="/MarketRecommendationButton.svg" 
+            alt="상권 추천" 
+            className='w-auto h-full'
+          />
+        </button>
+        
+        {/* 로그인 버튼 (정사각형 → 호버 시 확장) */}
+        <LoginButton 
+          onLoginClick={handleLoginClick}
+          onLogoutSuccess={handleLogoutSuccess}
+          isLoggedIn={isLoggedIn} 
+        />
+      </div>
 
       {/* 지도 컨트롤 버튼들 (하단에 세로 정렬) */}
       <div className="flex flex-col space-y-1">

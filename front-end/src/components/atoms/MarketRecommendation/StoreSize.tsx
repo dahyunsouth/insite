@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import StoreSizeInfoModal from './Modal/StoreSizeInfoModal';
 
 interface StoreSizeProps {
   onSizeChange?: (size: string | null) => void;
@@ -12,11 +13,21 @@ const StoreSize: React.FC<StoreSizeProps> = ({
   initialValue = null 
 }) => {
   const [selectedSize, setSelectedSize] = useState<string | null>(initialValue);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const infoButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleSizeSelect = (size: string) => {
     const newValue = selectedSize === size ? null : size;
     setSelectedSize(newValue);
     onSizeChange?.(newValue);
+  };
+
+  const handleInfoButtonClick = () => {
+    setIsModalVisible(!isModalVisible);
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
   };
 
   return (
@@ -26,9 +37,14 @@ const StoreSize: React.FC<StoreSizeProps> = ({
         <h3 className="text-lg font-bold text-gray-900 mr-2">
           점포 규모
         </h3>
-        <div className="w-5 h-5 bg-gray-300 rounded-full flex items-center justify-center">
+        {/* 안내 버튼 */}
+        <button 
+          ref={infoButtonRef}
+          className="cursor-pointer w-5 h-5 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400 transition-colors"
+          onClick={handleInfoButtonClick}
+        >
           <span className="text-gray-600 text-white text-xs font-medium">i</span>
-        </div>
+        </button>
       </div>
 
       {/* 선택 버튼들 */}
@@ -61,6 +77,13 @@ const StoreSize: React.FC<StoreSizeProps> = ({
           중대형
         </button>
       </div>
+
+      {/* 정보 모달 */}
+      <StoreSizeInfoModal 
+        isVisible={isModalVisible}
+        onClose={handleModalClose}
+        buttonRef={infoButtonRef}
+      />
     </div>
   );
 };
