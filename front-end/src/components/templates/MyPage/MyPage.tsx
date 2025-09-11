@@ -1,9 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import MyPageHeader from '../../molecules/MyPage/MyPageHeader';
 import MyProfileInfo from '../../molecules/MyPage/MyProfileInfo';
 import MyPageMenu from '../../molecules/MyPage/MyPageMenu';
+import MyMarket from './MyMarket';
+import { UserProvider } from '../../../contexts/UserContext';
 
 interface MyPageProps {
   onClose?: () => void;
@@ -18,15 +20,40 @@ const MyPage: React.FC<MyPageProps> = ({
   onSavedAreas,
   className = ''
 }) => {
+  const [currentView, setCurrentView] = useState<'main' | 'saved-areas'>('main');
+
+  const handleSavedAreasClick = () => {
+    setCurrentView('saved-areas');
+  };
+
+  const handleBackToMain = () => {
+    setCurrentView('main');
+  };
+
+  if (currentView === 'saved-areas') {
+    return (
+      <UserProvider>
+        <MyMarket 
+          onBack={handleBackToMain}
+          className={className}
+        />
+      </UserProvider>
+    );
+  }
+
   return (
-    <div className={`w-1/4 p-4 space-y-4 bg-white h-screen ${className}`}>
-      <MyPageHeader onBackClick={onClose} />
-      <MyProfileInfo />
-      <MyPageMenu 
-        onEditInfo={onEditInfo}
-        onSavedAreas={onSavedAreas}
-      />
-    </div>
+    <UserProvider>
+      <div className={`p-4 bg-white h-screen ${className}`}>
+        <MyPageHeader onBackClick={onClose} />
+        <MyProfileInfo />
+        <div className="mt-4">
+          <MyPageMenu 
+            onEditInfo={onEditInfo}
+            onSavedAreas={handleSavedAreasClick}
+          />
+        </div>
+      </div>
+    </UserProvider>
   );
 };
 

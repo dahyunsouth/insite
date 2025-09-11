@@ -74,13 +74,18 @@
 
 <ul>
   <li>
+    <a href="project-deliverable/mid-term-report.pdf" target="_blank">
+      📄 중간발표자료.pdf
+    </a>
+  </li>
+  <li>
     <a href="https://www.figma.com/design/gq5rM8qe4bREXNcoOEkZiu/S13P21E203?node-id=27-115&t=9PjAI0bDAXV0q7lU-1" target="_blank">
-      📄 Figma 와이어 프레임
+      📄 Figma 와이어프레임
     </a>
   </li>
   <li>
     <a href="https://www.notion.so/PJT_Insite-24d5c80a61df80729a14efd760641cfa?source=copy_link" target="_blank">
-      📄 Notion 프로젝트 문서
+      📄 Notion 프로젝트문서
     </a>
   </li>
 </ul>
