@@ -9,6 +9,7 @@ import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
 import MainNavbar from '@/components/templates/LeftNavbar/MainNavbar';
 import MyPageMenu from '@/components/templates/MyPage/MyPage';
 import NotificationBar from '@/components/atoms/Common/NotificationBar';
+import { useRouter } from 'next/navigation';
 
 // 지도 타입 변경 핸들러 컴포넌트
 function MapTypeHandler({ 
@@ -37,13 +38,13 @@ function MapTypeHandler({
 }
 
 export default function HomePage() {
+  const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLogoutNotification, setShowLogoutNotification] = useState(false);
   const [showLoginNotification, setShowLoginNotification] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [showMyPage, setShowMyPage] = useState(false);
-  const [isMyPageClosing, setIsMyPageClosing] = useState(false);
 
   // 페이지 로드 시 로그인 상태 확인
   useEffect(() => {
@@ -60,6 +61,7 @@ export default function HomePage() {
     
     checkLoginStatus();
   }, []);
+
 
   // 로그인 성공 핸들러
   const handleLoginSuccess = () => {
@@ -81,24 +83,19 @@ export default function HomePage() {
 
   // 마이페이지 닫기 핸들러
   const handleMyPageClose = () => {
-    setIsMyPageClosing(true);
-    // 애니메이션 완료 후 실제로 닫기
-    setTimeout(() => {
-      setShowMyPage(false);
-      setIsMyPageClosing(false);
-    }, 300);
+    setShowMyPage(false);
   };
+
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
       {/* 1) 풀스크린 카카오맵 (배경 고정) */}
       <KakaoMap>
-        {/* 상단 네비게이션 바 */}
+        {/* 좌측 네비게이션 바 */}
         <div className="fixed w-1/4 top-0 left-0 right-0 z-20">
           {showMyPage && (
             <MyPageMenu 
-              onClose={handleMyPageClose} 
-              isClosing={isMyPageClosing}
+              onClose={handleMyPageClose}
             />
           )}
           {!showMyPage && (
@@ -109,6 +106,21 @@ export default function HomePage() {
           )}
         </div>
 
+        {/* 상권추천 버튼 */}
+        <div className="fixed top-4 right-5 transform -translate-x-1/2 z-50">
+          <button 
+            onClick={() => {
+              router.push('/marketrecommendation');
+            }}
+            className="cursor-pointer focus:outline-none"
+          >
+            <img 
+              src="/MarketRecommendationButton.svg" 
+              alt="상권 추천" 
+              className='w-150px h-60px'
+            />
+          </button>
+        </div>
 
         {/* 2) 우측 버튼 바 (지도 타입 토글 포함) */}
         <MapTypeHandler 
@@ -170,6 +182,7 @@ export default function HomePage() {
         onClose={() => setShowLogoutNotification(false)}
         duration={3000}
       />
+
     </div>
   );
 }

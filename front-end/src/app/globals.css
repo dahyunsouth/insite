@@ -10,7 +10,39 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  /* 커스텀 spacing 값 추가 */
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-7: 28px;
 }
+
+/* 커스텀 margin 클래스 정의 */
+.m-5 { margin: 20px; }
+.m-6 { margin: 24px; }
+.m-7 { margin: 28px; }
+
+/* 방향별 margin 클래스 */
+.mt-5 { margin-top: 20px; }
+.mt-6 { margin-top: 24px; }
+.mt-7 { margin-top: 28px; }
+
+.mb-5 { margin-bottom: 20px; }
+.mb-6 { margin-bottom: 24px; }
+.mb-7 { margin-bottom: 28px; }
+
+.ml-5 { margin-left: 20px; }
+.ml-6 { margin-left: 24px; }
+.ml-7 { margin-left: 28px; }
+
+.mr-5 { margin-right: 20px; }
+.mr-6 { margin-right: 24px; }
+.mr-7 { margin-right: 28px; }
+
+/* padding 클래스도 추가 */
+.p-5 { padding: 20px; }
+.p-6 { padding: 24px; }
+.p-7 { padding: 28px; }
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -23,4 +55,19 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* SVG 지도 스타일링 */
+svg {
+  font-family: inherit;
+}
+
+/* 지도 인터랙션 효과 */
+.district-path {
+  transition: all 0.2s ease-in-out;
+}
+
+.district-path:hover {
+  transform: scale(1.02);
+  transform-origin: center;
 }
