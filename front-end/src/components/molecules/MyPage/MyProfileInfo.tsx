@@ -1,78 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import ProfilePics from '../../atoms/Common/ProfilePics';
-import { API_ENDPOINTS } from '../../../config/api';
-
-interface UserInfo {
-  uuid: string;
-  email: string;
-  nickname: string;
-  profile: string;
-  provider: string;
-  type: string;
-}
-
-interface ApiResponse {
-  httpStatus: {
-    error: boolean;
-    is4xxClientError: boolean;
-    is5xxServerError: boolean;
-    is1xxInformational: boolean;
-    is2xxSuccessful: boolean;
-    is3xxRedirection: boolean;
-  };
-  isSuccess: boolean;
-  message: string;
-  code: number;
-  result: UserInfo;
-}
+import { useUser } from '../../../contexts/UserContext';
 
 const MyProfileInfo: React.FC = () => {
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-          setError('로그인이 필요합니다.');
-          return;
-        }
-
-        const response = await fetch(API_ENDPOINTS.USER_INFO, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('사용자 정보를 가져오는데 실패했습니다.');
-        }
-
-        const data: ApiResponse = await response.json();
-        
-        if (data.isSuccess && data.result) {
-          setUserInfo(data.result);
-        } else {
-          setError(data.message || '사용자 정보를 가져오는데 실패했습니다.');
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserInfo();
-  }, []);
+  const { userInfo, loading, error } = useUser();
 
   if (loading) {
     return (
