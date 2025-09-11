@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     eslint: { ignoreDuringBuilds: true }, // 린트 에러가 있어도 빌드 계속
   // 필요시 타입오류도 임시무시 (권장X)
     typescript: { ignoreBuildErrors: true },
+  
   /* config options here */
 };
   
