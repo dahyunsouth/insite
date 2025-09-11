@@ -16,6 +16,7 @@ interface LeftMarketRecommendationBarProps {
     storeSize: string | null;
     minFee: number;
     maxFee: number;
+    hasInteracted: boolean;
   } | null;
   onReset?: () => void;
   onStepClick?: (step: number) => void;
@@ -43,8 +44,8 @@ const LeftMarketRecommendationBar: React.FC<LeftMarketRecommendationBarProps> = 
     },
     {
       id: 4,
-      title: '임대료',
-      value: '창업 임대료 영역을 선택하세요.',
+      title: '월 임대료',
+      value: '창업 월 임대료 영역을 선택하세요.',
       isSelected: false
     }
   ]);
@@ -83,14 +84,18 @@ const LeftMarketRecommendationBar: React.FC<LeftMarketRecommendationBarProps> = 
                 value: selections.storeSize || '창업 규모를 선택하세요.',
                 isSelected: !!selections.storeSize
               };
-            case 4: // 임대료
-              // 사용자가 조작한 경우 (0원~1억원이어도 선택된 것으로 간주)
-              const feeText = `${selections.minFee.toLocaleString()}원 ~ ${selections.maxFee.toLocaleString()}원`;
-              return {
-                ...filter,
-                value: feeText,
-                isSelected: true // selections가 전달되면 항상 선택된 것으로 간주
-              };
+            case 4: // 월 임대료
+              // hasInteracted가 true인 경우에만 업데이트
+              if (selections.hasInteracted) {
+                const feeText = `${selections.minFee.toLocaleString()}원 ~ ${selections.maxFee.toLocaleString()}원`;
+                return {
+                  ...filter,
+                  value: feeText,
+                  isSelected: true
+                };
+              }
+              // hasInteracted가 false면 기존 상태 유지
+              return filter;
             default:
               return filter;
           }
@@ -118,7 +123,7 @@ const LeftMarketRecommendationBar: React.FC<LeftMarketRecommendationBarProps> = 
           ? '선호 상권 유형을 선택하세요.'
           : filter.id === 3
           ? '창업 규모를 선택하세요.'
-          : '창업 임대료 영역을 선택하세요.'
+          : '창업 월 임대료 영역을 선택하세요.'
       }))
     );
   };

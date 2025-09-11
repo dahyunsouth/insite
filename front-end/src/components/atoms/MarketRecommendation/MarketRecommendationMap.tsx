@@ -25,16 +25,22 @@ interface SeoulDistrictsData {
 interface MarketRecommendationMapProps {
   onDistrictSelect?: (districtId: string | null, districtName: string) => void;
   onNextStep?: () => void;
+  initialSelectedDistrict?: string | null;
 }
 
-export default function MarketRecommendationMap({ onDistrictSelect, onNextStep }: MarketRecommendationMapProps) {
-  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
+export default function MarketRecommendationMap({ onDistrictSelect, onNextStep, initialSelectedDistrict }: MarketRecommendationMapProps) {
+  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(initialSelectedDistrict || null);
   const [hoveredDistrict, setHoveredDistrict] = useState<string | null>(null);
   const [districts, setDistricts] = useState<SeoulDistrictsData | null>(null);
 
   useEffect(() => {
     setDistricts(seoulDistrictsData as SeoulDistrictsData);
   }, []);
+
+  // initialSelectedDistrict가 변경될 때 selectedDistrict 상태 동기화
+  useEffect(() => {
+    setSelectedDistrict(initialSelectedDistrict || null);
+  }, [initialSelectedDistrict]);
 
   const handleDistrictClick = useCallback((districtId: string, districtName: string) => {
     const isDeselecting = selectedDistrict === districtId;

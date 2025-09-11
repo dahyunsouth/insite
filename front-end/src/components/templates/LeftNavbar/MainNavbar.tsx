@@ -6,13 +6,14 @@ import ThirdLeftNavbar from '@/components/organisms/LeftNavbar/ThirdLeftNavbar';
 interface MainNavbarProps {
   onMyPageClick?: () => void;
   onLoginModalOpen?: () => void;
+  onSavedAreasClick?: () => void;
 }
 
-const MainNavbar: React.FC<MainNavbarProps> = ({ onMyPageClick, onLoginModalOpen }) => {
+const MainNavbar: React.FC<MainNavbarProps> = ({ onMyPageClick, onLoginModalOpen, onSavedAreasClick }) => {
   return (
     <nav className="pt-2 pl-2 space-y-1">
       <FirstLeftNavbar />
-      <SecondLeftNavbar onMyPageClick={onMyPageClick} onLoginModalOpen={onLoginModalOpen} />
+      <SecondLeftNavbar onMyPageClick={onMyPageClick} onLoginModalOpen={onLoginModalOpen} onSavedAreasClick={onSavedAreasClick} />
       <ThirdLeftNavbar />
     </nav>
   );

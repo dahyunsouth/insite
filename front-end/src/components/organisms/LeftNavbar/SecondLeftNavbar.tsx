@@ -8,9 +8,10 @@ type Tab = typeof TABS[number];
 interface SecondLeftNavbarProps {
   onMyPageClick?: () => void;
   onLoginModalOpen?: () => void;
+  onSavedAreasClick?: () => void;
 }
 
-const SecondLeftNavbar: React.FC<SecondLeftNavbarProps> = ({ onMyPageClick, onLoginModalOpen }) => {
+const SecondLeftNavbar: React.FC<SecondLeftNavbarProps> = ({ onMyPageClick, onLoginModalOpen, onSavedAreasClick }) => {
   const [active, setActive] = useState<Tab | null>(null);
 
   // 로그인 상태 확인 함수
@@ -39,6 +40,15 @@ const SecondLeftNavbar: React.FC<SecondLeftNavbarProps> = ({ onMyPageClick, onLo
                     if (checkLoginStatus()) {
                       // 로그인된 상태: 기존 동작 (마이페이지 열기)
                       onMyPageClick?.();
+                    } else {
+                      // 로그인되지 않은 상태: 로그인 모달 열기
+                      onLoginModalOpen?.();
+                    }
+                  } else if (label === "저장된 상권") {
+                    // 로그인 상태 확인
+                    if (checkLoginStatus()) {
+                      // 로그인된 상태: 저장된 상권 페이지 열기
+                      onSavedAreasClick?.();
                     } else {
                       // 로그인되지 않은 상태: 로그인 모달 열기
                       onLoginModalOpen?.();

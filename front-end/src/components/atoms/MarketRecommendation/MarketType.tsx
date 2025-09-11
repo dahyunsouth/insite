@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import MarketTypeInfoModal from './Modal/MarketTypeInfoModal';
 
 interface MarketTypeProps {
   onMarketTypeChange?: (marketType: string | null) => void;
@@ -12,11 +13,21 @@ const MarketType: React.FC<MarketTypeProps> = ({
   initialValue = null 
 }) => {
   const [selectedType, setSelectedType] = useState<string | null>(initialValue);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const infoButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleTypeSelect = (type: string) => {
     const newValue = selectedType === type ? null : type;
     setSelectedType(newValue);
     onMarketTypeChange?.(newValue);
+  };
+
+  const handleInfoButtonClick = () => {
+    setIsModalVisible(!isModalVisible);
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
   };
 
   return (
@@ -26,9 +37,14 @@ const MarketType: React.FC<MarketTypeProps> = ({
         <h3 className="text-lg font-bold text-gray-900 mr-2">
           발달/골목상권
         </h3>
-        <div className="w-5 h-5 bg-gray-300 rounded-full flex items-center justify-center">
+        {/* 안내 모달 */}
+        <button 
+          ref={infoButtonRef}
+          className="cursor-pointer w-5 h-5 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400 transition-colors"
+          onClick={handleInfoButtonClick}
+        >
           <span className="text-gray-600 text-white text-xs font-medium">i</span>
-        </div>
+        </button>
       </div>
 
       {/* 선택 버튼들 */}
@@ -61,6 +77,13 @@ const MarketType: React.FC<MarketTypeProps> = ({
           골목상권
         </button>
       </div>
+
+      {/* 정보 모달 */}
+      <MarketTypeInfoModal 
+        isVisible={isModalVisible}
+        onClose={handleModalClose}
+        buttonRef={infoButtonRef}
+      />
     </div>
   );
 };

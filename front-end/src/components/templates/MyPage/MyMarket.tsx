@@ -59,7 +59,7 @@ const MyMarket: React.FC<MyMarketProps> = ({
                   </div>
                </div>
                {/* 저장된 상권 카드 내용 */}
-               <div className='flex flex-col gap-2 border-b border-blue-500 pb-2'>
+               <div className='flex flex-col gap-2 border-b pb-2'>
                  <div className='flex justify-between'>
                    <span className='font-bold'>월 매출</span>
                    <span>10000000원</span>
