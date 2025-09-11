@@ -8,6 +8,7 @@ import AreaDetailModal from '@/components/organisms/Detail/AreaDetailModal/AreaD
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
 import MainNavbar from '@/components/templates/LeftNavbar/MainNavbar';
 import MyPageMenu from '@/components/templates/MyPage/MyPage';
+import MyMarket from '@/components/templates/MyPage/MyMarket';
 import NotificationBar from '@/components/atoms/Common/NotificationBar';
 import { useRouter } from 'next/navigation';
 
@@ -45,6 +46,7 @@ export default function HomePage() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [showMyPage, setShowMyPage] = useState(false);
+  const [showMyMarket, setShowMyMarket] = useState(false);
 
   // 페이지 로드 시 로그인 상태 확인
   useEffect(() => {
@@ -86,6 +88,16 @@ export default function HomePage() {
     setShowMyPage(false);
   };
 
+  // 저장된 상권 열기 핸들러
+  const handleSavedAreasClick = () => {
+    setShowMyMarket(true);
+  };
+
+  // 저장된 상권 닫기 핸들러
+  const handleMyMarketClose = () => {
+    setShowMyMarket(false);
+  };
+
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
@@ -98,10 +110,16 @@ export default function HomePage() {
               onClose={handleMyPageClose}
             />
           )}
-          {!showMyPage && (
+          {showMyMarket && (
+            <MyMarket 
+              onBack={handleMyMarketClose}
+            />
+          )}
+          {!showMyPage && !showMyMarket && (
             <MainNavbar 
               onMyPageClick={handleMyPageClick} 
               onLoginModalOpen={() => setIsAuthOpen(true)}
+              onSavedAreasClick={handleSavedAreasClick}
             />
           )}
         </div>
