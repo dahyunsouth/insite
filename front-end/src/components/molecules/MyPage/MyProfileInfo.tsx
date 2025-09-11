@@ -7,6 +7,20 @@ import { useUser } from '../../../contexts/UserContext';
 const MyProfileInfo: React.FC = () => {
   const { userInfo, loading, error } = useUser();
 
+  // 프로필 이미지 경로 생성 함수
+  const getProfileImageSrc = (profile: string | null | undefined) => {
+    if (!profile || profile === 'default') {
+      return '/profilepics/profile_default.png';
+    }
+    
+    const validProfiles = ['cat', 'dog', 'fox', 'chick', 'panda', 'rabbit'];
+    if (validProfiles.includes(profile)) {
+      return `/profilepics/profile_${profile}.png`;
+    }
+    
+    return '/profilepics/profile_default.png';
+  };
+
   if (loading) {
     return (
       <div className="flex flex-row items-center p-4 bg-gray-100 rounded-lg">
@@ -30,6 +44,7 @@ const MyProfileInfo: React.FC = () => {
   return (
     <div className="flex flex-row items-center p-4 rounded-lg">
       <ProfilePics 
+        src={getProfileImageSrc(userInfo?.profile)}
         alt={`${userInfo?.nickname || '사용자'} 프로필`}
         size="lg"
       />
