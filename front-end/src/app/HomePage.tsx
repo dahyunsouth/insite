@@ -7,6 +7,7 @@ import CtaPillButton from '@/components/molecules/Detail/CtaPillButton/CtaPillBu
 import AreaDetailModal from '@/components/organisms/Detail/AreaDetailModal/AreaDetailModal';
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
 import MainNavbar from '@/components/templates/LeftNavbar/MainNavbar';
+import MyPageMenu from '@/components/templates/MyPage/MyPage';
 import NotificationBar from '@/components/atoms/Common/NotificationBar';
 
 // 지도 타입 변경 핸들러 컴포넌트
@@ -41,6 +42,8 @@ export default function HomePage() {
   const [showLoginNotification, setShowLoginNotification] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [showMyPage, setShowMyPage] = useState(false);
+  const [isMyPageClosing, setIsMyPageClosing] = useState(false);
 
   // 페이지 로드 시 로그인 상태 확인
   useEffect(() => {
@@ -71,13 +74,39 @@ export default function HomePage() {
     console.log('로그아웃 성공 - 상태 업데이트됨');
   };
 
+  // 마이페이지 열기 핸들러
+  const handleMyPageClick = () => {
+    setShowMyPage(true);
+  };
+
+  // 마이페이지 닫기 핸들러
+  const handleMyPageClose = () => {
+    setIsMyPageClosing(true);
+    // 애니메이션 완료 후 실제로 닫기
+    setTimeout(() => {
+      setShowMyPage(false);
+      setIsMyPageClosing(false);
+    }, 300);
+  };
+
   return (
     <div className="relative w-screen h-screen overflow-hidden">
       {/* 1) 풀스크린 카카오맵 (배경 고정) */}
       <KakaoMap>
         {/* 상단 네비게이션 바 */}
-        <div className="fixed top-0 left-0 right-0 z-20">
-          <MainNavbar />
+        <div className="fixed w-1/4 top-0 left-0 right-0 z-20">
+          {showMyPage && (
+            <MyPageMenu 
+              onClose={handleMyPageClose} 
+              isClosing={isMyPageClosing}
+            />
+          )}
+          {!showMyPage && (
+            <MainNavbar 
+              onMyPageClick={handleMyPageClick} 
+              onLoginModalOpen={() => setIsAuthOpen(true)}
+            />
+          )}
         </div>
 
 
