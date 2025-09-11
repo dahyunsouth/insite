@@ -21,7 +21,7 @@ export default function AreaDetailModalTemplate({
   subtitle,
   onClose,
   className,
-  headerAlign = "left",
+  headerAlign = "center",
   sectionTitle,
   sectionAside,
   sectionNav,
