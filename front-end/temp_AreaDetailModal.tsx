@@ -1,10 +1,9 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import AreaDetailModalTemplate from "@/components/templates/Detail/AreaDetailModalTemplate";
 import TradeAreaSelect from "@/components/molecules/Detail/TradeAreaSelect";
-import TimeSlotCard from "@/components/molecules/Detail/TimeSlotCard";
 
 type AreaDetailModalProps = {
   open: boolean;
@@ -21,7 +20,6 @@ type AreaDetailModalProps = {
  */
 export default function AreaDetailModal({ open, onClose, title, subtitle, onSelectTradeArea }: AreaDetailModalProps) {
   const [selected, setSelected] = useState<{ code: string; name: string } | null>(null);
-
   useEffect(() => {
     if (!open) return;
     const handle = (e: KeyboardEvent) => {
@@ -33,22 +31,23 @@ export default function AreaDetailModal({ open, onClose, title, subtitle, onSele
 
   const computedTitle = useMemo(() => {
     if (selected?.name) {
-      const suffix = " 상권 현황";
+      // If incoming title follows "{name} ?곴텒 ?꾪솴", swap the name part
+      const suffix = " ?곴텒 ?꾪솴";
+      if (title && title.includes(suffix)) return `${selected.name}${suffix}`;
       return `${selected.name}${suffix}`;
     }
     return title;
   }, [selected, title]);
 
-  useEffect(() => {
-    // Debug log: verify selected and computed title changes
-    // eslint-disable-next-line no-console
-    console.log("[AreaDetailModal] selection changed:", selected, "computedTitle:", computedTitle);
-  }, [selected, computedTitle]);
-
   if (!open) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-start justify-end">
+    <div
+      className={
+        // align modal to the right side of the viewport
+        "fixed inset-0 z-50 flex items-start justify-end"
+      }
+    >
       {/* backdrop
       <div className="absolute inset-0 bg-black/30" onClick={onClose} /> */}
 
@@ -61,17 +60,12 @@ export default function AreaDetailModal({ open, onClose, title, subtitle, onSele
           headerRight={
             <TradeAreaSelect
               onChange={(opt) => {
-                // Debug log: dropdown change event
-                // eslint-disable-next-line no-console
-                console.log("[AreaDetailModal] dropdown onChange:", opt);
                 setSelected(opt);
                 onSelectTradeArea?.(opt);
               }}
             />
           }
-        >
-          <TimeSlotCard trdarCode={selected?.code ?? null} />
-        </AreaDetailModalTemplate>
+        />
       </div>
     </div>,
     document.body
