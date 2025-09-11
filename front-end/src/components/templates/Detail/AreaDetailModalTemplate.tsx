@@ -121,24 +121,37 @@ export default function AreaDetailModalTemplate({
 }
 
 function DefaultVerticalPills() {
-  const items = ["최신 상권 종합 지표", "연령대별", "지출금액", "대중교통/주차"];
-  const activeIndex = 0;
+  const items = [
+    { id: "pop-section", label: "유동인구" },
+    { id: "store-section", label: "점포" },
+  ];
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  function go(id: string, idx: number) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      setActiveIndex(idx);
+    }
+  }
+
   return (
     <nav aria-label="섹션 내비게이션" className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
       <ul className="flex flex-col">
-        {items.map((t, idx) => {
+        {items.map((it, idx) => {
           const isActive = idx === activeIndex;
           return (
-            <li key={t} className={idx !== 0 ? "mt-3" : undefined}>
+            <li key={it.id} className={idx !== 0 ? "mt-3" : undefined}>
               <button
                 type="button"
+                onClick={() => go(it.id, idx)}
                 aria-current={isActive ? "page" : undefined}
                 className={
                   "w-full text-left text-base leading-6 " +
                   (isActive ? "text-[#3288FF] font-semibold" : "text-gray-400 hover:text-gray-600")
                 }
               >
-                {t}
+                {it.label}
               </button>
             </li>
           );

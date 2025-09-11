@@ -72,8 +72,12 @@ export default function AreaDetailModal({ open, onClose, title, subtitle, onSele
           }
         >
           <>
-            <TimeSlotCard trdarCode={selected?.code ?? null} />
-            <StoreCard trdarCode={selected?.code ?? null} />
+            <section id="pop-section" className="scroll-mt-24">
+              <TimeSlotCard trdarCode={selected?.code ?? null} />
+            </section>
+            <section id="store-section" className="scroll-mt-24">
+              <StoreCard trdarCode={selected?.code ?? null} />
+            </section>
           </>
         </AreaDetailModalTemplate>
       </div>
