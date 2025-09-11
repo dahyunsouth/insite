@@ -5,12 +5,14 @@ import React from 'react';
 interface MyPageMenuProps {
   onEditInfo?: () => void;
   onSavedAreas?: () => void;
+  onPasswordUpdate?: () => void;
   className?: string;
 }
 
 const MyPageMenu: React.FC<MyPageMenuProps> = ({
   onEditInfo,
   onSavedAreas,
+  onPasswordUpdate,
   className = ''
 }) => {
   return (
@@ -57,7 +59,7 @@ const MyPageMenu: React.FC<MyPageMenuProps> = ({
 
       {/* 비밀번호 변경 메뉴 */}
       <button
-        onClick={onEditInfo}
+        onClick={onPasswordUpdate}
         className="cursor-pointer w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors duration-200"
       >
         <span className="text-gray-900 font-medium">비밀번호 변경</span>
