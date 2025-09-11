@@ -41,15 +41,23 @@ export function KakaoMapProvider({ children, showNotification }: { children: Rea
   const zoomIn = () => {
     if (!map) return;
     const currentLevel = map.getLevel();
-    // 부드러운 애니메이션과 함께 줌 인
-    map.setLevel(currentLevel - 1, { animate: true });
+    // 부드러운 애니메이션과 함께 줌 인 (지속시간 500ms, 이징 적용)
+    map.setLevel(currentLevel - 1, { 
+      animate: true,
+      duration: 500,
+      easing: 'easeOutCubic'
+    });
   };
 
   const zoomOut = () => {
     if (!map) return;
     const currentLevel = map.getLevel();
-    // 부드러운 애니메이션과 함께 줌 아웃
-    map.setLevel(currentLevel + 1, { animate: true });
+    // 부드러운 애니메이션과 함께 줌 아웃 (지속시간 500ms, 이징 적용)
+    map.setLevel(currentLevel + 1, { 
+      animate: true,
+      duration: 500,
+      easing: 'easeOutCubic'
+    });
   };
 
   const getZoomLevel = () => {

@@ -12,7 +12,10 @@ interface MarketRecommendationProps {
 
 export default function MarketRecommendation({ onClose }: MarketRecommendationProps) {
   const router = useRouter();
-  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<{
+    id: string | null;
+    name: string | null;
+  }>({ id: null, name: null });
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [showMap, setShowMap] = useState<boolean>(true);
   const [selections, setSelections] = useState<{
@@ -20,6 +23,7 @@ export default function MarketRecommendation({ onClose }: MarketRecommendationPr
     storeSize: string | null;
     minFee: number;
     maxFee: number;
+    hasInteracted: boolean;
   } | null>(null);
 
   const handleBackToHome = () => {
@@ -28,7 +32,10 @@ export default function MarketRecommendation({ onClose }: MarketRecommendationPr
   };
 
   const handleDistrictSelect = (districtId: string | null, districtName: string) => {
-    setSelectedDistrict(districtName || null);
+    setSelectedDistrict({
+      id: districtId,
+      name: districtName || null
+    });
   };
 
   const handleNextStep = () => {
@@ -41,12 +48,13 @@ export default function MarketRecommendation({ onClose }: MarketRecommendationPr
     storeSize: string | null;
     minFee: number;
     maxFee: number;
+    hasInteracted: boolean;
   }) => {
     setSelections(newSelections);
   };
 
   const handleReset = () => {
-    setSelectedDistrict(null);
+    setSelectedDistrict({ id: null, name: null });
     setSelections(null);
     setCurrentStep(1);
     setShowMap(true);
@@ -94,7 +102,7 @@ export default function MarketRecommendation({ onClose }: MarketRecommendationPr
           {/* 우측 영역 */}
           <div className='w-1/4 flex-shrink-0'>
             <LeftMarketRecommendationBar 
-              selectedDistrict={selectedDistrict}
+              selectedDistrict={selectedDistrict.name}
               selections={selections}
               onReset={handleReset}
               onStepClick={handleStepClick}
@@ -107,11 +115,13 @@ export default function MarketRecommendation({ onClose }: MarketRecommendationPr
               <MarketRecommendationMap 
                 onDistrictSelect={handleDistrictSelect} 
                 onNextStep={handleNextStep}
+                initialSelectedDistrict={selectedDistrict.id}
               />
             ) : (
               <MarketTypeStore 
                 onSelectionsChange={handleSelectionsChange} 
                 onBack={handleBack}
+                initialSelections={selections}
               />
             )}
           </div>
