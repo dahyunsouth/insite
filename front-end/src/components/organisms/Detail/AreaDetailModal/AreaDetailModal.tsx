@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -7,6 +7,7 @@ import TradeAreaSelect from "@/components/molecules/Detail/TradeAreaSelect";
 import TimeSlotCard from "@/components/molecules/Detail/TimeSlotCard";
 import StoreCard from "@/components/molecules/Detail/StoreCard";
 import ResidentPopulationCard from "@/components/molecules/Detail/ResidentPopulationCard";
+import WorkPopulationCard from "@/components/molecules/Detail/WorkPopulationCard";
 
 type AreaDetailModalProps = {
   open: boolean;
@@ -35,7 +36,7 @@ export default function AreaDetailModal({ open, onClose, title, subtitle, onSele
 
   const computedTitle = useMemo(() => {
     if (selected?.name) {
-      const suffix = " 상권 현황";
+      const suffix = " 상권 상황";
       return `${selected.name}${suffix}`;
     }
     return title;
@@ -80,6 +81,9 @@ export default function AreaDetailModal({ open, onClose, title, subtitle, onSele
             <section id="pop-section" className="scroll-mt-24">
               <TimeSlotCard trdarCode={selected?.code ?? null} />
             </section>
+            <section id="work-section" className="scroll-mt-24">
+              <WorkPopulationCard trdarCode={selected?.code ?? null} />
+            </section>
             <section id="store-section" className="scroll-mt-24">
               <StoreCard trdarCode={selected?.code ?? null} />
             </section>
@@ -94,6 +98,7 @@ export default function AreaDetailModal({ open, onClose, title, subtitle, onSele
 function DetailAsideNav() {
   const items = [
     { id: "resident-section", label: "상주인구" },
+    { id: "work-section", label: "직장인구" },
     { id: "pop-section", label: "유동인구" },
     { id: "store-section", label: "점포" },
   ];
