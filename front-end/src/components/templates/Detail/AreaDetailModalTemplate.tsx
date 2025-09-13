@@ -1,8 +1,7 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import RadarChart from "@/components/molecules/Detail/Chart/RadarChart";
 
 type AreaDetailModalTemplateProps = {
   title?: React.ReactNode;
@@ -77,10 +76,10 @@ export default function AreaDetailModalTemplate({
                 kids.length === 1 &&
                 React.isValidElement(kids[0]) &&
                 // @ts-ignore: comparing to Fragment type
-                kids[0].type === React.Fragment
+                (kids[0] as any).type === React.Fragment
               ) {
                 // @ts-ignore: access fragment children
-                kids = React.Children.toArray(kids[0].props?.children ?? []);
+                kids = React.Children.toArray((kids[0] as any).props?.children ?? []);
               }
               if (kids.length === 0) {
                 return (
@@ -170,7 +169,7 @@ function DefaultPopulationCardSkeleton({
   return (
     <div>
       {/* Section title */}
-      <h3 className="text-[18px] font-semibold text-gray-900">{sectionTitle ?? "연령대별"}</h3>
+      <h3 className="text-[18px] font-semibold text-gray-900">{sectionTitle ?? "요약"}</h3>
 
       {/* Segmented control (static, full width) */}
       <div className="mt-4 w-full rounded-xl bg-gray-100 p-1">
@@ -184,7 +183,7 @@ function DefaultPopulationCardSkeleton({
               (mode === "time" ? "bg-white text-[#3288FF]" : "text-gray-500")
             }
           >
-            시간대별 추이
+            시간대 추이
           </button>
           <button
             type="button"
@@ -195,7 +194,7 @@ function DefaultPopulationCardSkeleton({
               (mode === "dow" ? "bg-white text-[#3288FF] shadow-sm" : "text-gray-500")
             }
           >
-            요일별 추이
+            요일 추이
           </button>
         </div>
       </div>
@@ -204,7 +203,7 @@ function DefaultPopulationCardSkeleton({
       <div className="mt-4 rounded-xl bg-gray-50 px-4 py-4 text-gray-900">
         <span className="font-medium">강조 문장</span>
         <span className="ml-1 font-bold text-rose-500">
-          {mode === "time" ? "유동인구가 가장 많은 시간대는 ~예요" : "핵심 지표"}
+          {mode === "time" ? "시간대 하이라이트" : "요일 하이라이트"}
         </span>
       </div>
 
@@ -212,7 +211,7 @@ function DefaultPopulationCardSkeleton({
       <div className="mt-1 text-right text-xs text-gray-400">최근 28일</div>
 
       {/* Blue metric line */}
-      <div className="mt-4 text-[15px] font-semibold text-[#3288FF]">지표 하이라이트 문구</div>
+      <div className="mt-4 text-[15px] font-semibold text-[#3288FF]">지표 요약 문구</div>
 
       {/* Two-column summary */}
       <div className="mt-3 overflow-hidden rounded-2xl border border-gray-200">
@@ -222,22 +221,6 @@ function DefaultPopulationCardSkeleton({
           <div className="px-4 py-4 text-center text-gray-800">내용 A</div>
           <div className="border-l border-gray-200 px-4 py-4 text-center text-gray-800">내용 B</div>
         </div>
-      </div>
-
-      {/* Chart: area comparison radar */}
-      <div className="mt-4 h-[280px] rounded-2xl border border-gray-200 p-3">
-        <RadarChart
-          labels={["연령대별", "유동", "지출", "근접성", "주거인구", "직장인구", "집객시설", "상권변화"]}
-          series={[
-            { name: "강남", color: "#2563EB", values: [85, 82, 40, 95, 58, 96, 88, 84] },
-            { name: "기준", color: "#60A5FA", dashed: true, values: [78, 76, 60, 78, 56, 68, 76, 72] },
-          ]}
-          maxValue={100}
-          levels={5}
-          animate
-          duration={800}
-          easing="easeOutCubic"
-        />
       </div>
     </div>
   );
