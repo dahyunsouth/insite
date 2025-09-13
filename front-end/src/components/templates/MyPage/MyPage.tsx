@@ -14,6 +14,7 @@ interface MyPageProps {
   onClose?: () => void;
   onEditInfo?: () => void;
   onSavedAreas?: () => void;
+  onSavedAreasClose?: () => void;
   className?: string;
 }
 
@@ -21,6 +22,7 @@ const MyPage: React.FC<MyPageProps> = ({
   onClose,
   onEditInfo,
   onSavedAreas,
+  onSavedAreasClose,
   className = ''
 }) => {
   const [currentView, setCurrentView] = useState<'main' | 'saved-areas' | 'edit-info' | 'password-update'>('main');
@@ -33,6 +35,8 @@ const MyPage: React.FC<MyPageProps> = ({
 
   const handleSavedAreasClick = () => {
     setCurrentView('saved-areas');
+    // 부모(HomePage)에게 알림: 저장된 상권 진입
+    onSavedAreas?.();
   };
 
   const handleEditInfoClick = () => {
@@ -45,6 +49,7 @@ const MyPage: React.FC<MyPageProps> = ({
 
   const handleBackToMain = () => {
     setCurrentView('main');
+    onSavedAreasClose?.();
   };
 
   if (currentView === 'saved-areas') {
