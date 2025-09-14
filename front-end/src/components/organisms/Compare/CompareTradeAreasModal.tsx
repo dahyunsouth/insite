@@ -87,61 +87,67 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
 
           {/* Body */}
           <div className="flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-8 py-8">
-            {/* Radar Chart */}
-            {(() => {
-              const labels = [
-                "PC1","PC2","PC3","PC4","PC5","PC6","PC7","PC8","PC9","PC10",
-              ];
-              const aValues = [8.7,7.5,9.2,6.1,7.9,5.6,8.1,6.8,7.2,6.5];
-              const bValues = [6.2,8.4,7.1,7.3,6.8,7.0,6.1,7.9,5.8,7.4];
-              return (
-                <div className="mx-auto w-full max-w-[720px] aspect-square rounded-2xl border border-gray-200 bg-white">
-                  <RadarChart
-                    labels={labels}
-                    series={[
-                      { name: "A", values: aValues, color: "#2563EB", dashed: false, fillOpacity: 0.08 },
-                      { name: "B", values: bValues, color: "#F472B6", dashed: true, fillOpacity: 0.08 },
-                    ]}
-                    maxValue={10}
-                    levels={5}
-                    selectedAxis={selectedPc}
-                    onSelectAxis={(idx) => setSelectedPc(idx)}
-                  />
-                </div>
-              );
-            })()}
+            {/* Upper Section: Chart + Detail */}
+            <div className="grid grid-cols-2 items-start gap-x-8">
+              {/* Upper Left: Radar Chart */}
+              <div>
+                {(() => {
+                  const labels = [
+                    "PC1","PC2","PC3","PC4","PC5","PC6","PC7","PC8","PC9","PC10",
+                  ];
+                  const aValues = [8.7,7.5,9.2,6.1,7.9,5.6,8.1,6.8,7.2,6.5];
+                  const bValues = [6.2,8.4,7.1,7.3,6.8,7.0,6.1,7.9,5.8,7.4];
+                  return (
+                    <div className="mx-auto w-full aspect-square rounded-2xl border border-gray-200 bg-white">
+                      <RadarChart
+                        labels={labels}
+                        series={[
+                          { name: "A", values: aValues, color: "#2563EB", dashed: false, fillOpacity: 0.08 },
+                          { name: "B", values: bValues, color: "#F472B6", dashed: true, fillOpacity: 0.08 },
+                        ]}
+                        maxValue={10}
+                        levels={5}
+                        selectedAxis={selectedPc}
+                        onSelectAxis={(idx) => setSelectedPc(idx)}
+                      />
+                    </div>
+                  );
+                })()}
+              </div>
 
-            {/* Detail panel */}
-            {(() => {
-              const pcs: PcMeta[] = [
-                { id:1, code:"PC1", name:"도심·고소득·대형", features:["총_직장_인구_수_log","인구당_소득","영역_면적"], meaning:"도심형 대형·고소득 상권 축", highText:"CBD·광역 상업지처럼 규모와 구매력이 큰 곳", lowText:"소규모·저소득·면적이 작은 주거 위주 상권" },
-                { id:2, code:"PC2", name:"집적·안정", features:["점포_밀도","운영_영업_개월_평균","총_유동인구_수_sqrt"], meaning:"안정·집적 상권 축", highText:"상업 집적 + 운영 안정성이 높은 곳", lowText:"저집적·저안정 상권" },
-                { id:3, code:"PC3", name:"거주·근무 복합", features:["총_상주인구_수_log","총_상주인구_수_sqrt","총_직장_인구_수_log"], meaning:"주거·업무 복합 상권 축", highText:"주거·업무 복합 상권", lowText:"소규모·저활성 주거 상권" },
-                { id:4, code:"PC4", name:"프리미엄 소비", features:["총_상주인구_수_cbrt","월_평균_소득_금액","총_직장_인구_수_cbrt"], meaning:"프리미엄·고급 소비 상권 축", highText:"고소득층 프리미엄 주거·상업지", lowText:"보급형 상권" },
-                { id:5, code:"PC5", name:"주민 생활", features:["총_직장_인구_수_sqrt","상주인구_비율","월_평균_소득_금액"], meaning:"주민 중심 생활 상권 축", highText:"안정적 주민 생활형 상권", lowText:"유동형·불안정 상권" },
-                { id:6, code:"PC6", name:"주거 밀집", features:["아파트_단지_수","총_상주인구_수","총_유동인구_수_cbrt"], meaning:"주거 밀집 상권 축", highText:"신도시·주거 특화 상권", lowText:"분산형 상권" },
-                { id:7, code:"PC7", name:"관광·집객", features:["집객시설_밀도","운영_영업_개월_평균","총_직장_인구_수_sqrt"], meaning:"관광·상업 집객 상권 축", highText:"관광지형 상권", lowText:"내수형 상권" },
-                { id:8, code:"PC8", name:"복합·균형", features:["인구_혼합도","점포_집객시설_비율","총_유동인구_수_sqrt"], meaning:"복합·균형 상권 축", highText:"복합형 상권", lowText:"편향된 상권" },
-                { id:9, code:"PC9", name:"효율적 소비", features:["인구당_소득","점포_수_log","총_상주인구_수"], meaning:"효율적 소비 상권 축", highText:"효율적·성장 잠재력 큼", lowText:"효율성 낮은 상권" },
-                { id:10, code:"PC10", name:"역동성", features:["개업_율","집객시설_수","폐업_률"], meaning:"역동적 상권 축", highText:"변화 많고 기회/리스크 공존", lowText:"정체된 상권" },
-              ];
-              const labels = pcs.map((p) => p.code);
-              const aValues = [8.7,7.5,9.2,6.1,7.9,5.6,8.1,6.8,7.2,6.5];
-              const bValues = [6.2,8.4,7.1,7.3,6.8,7.0,6.1,7.9,5.8,7.4];
-              const idx = Math.max(0, Math.min(9, selectedPc ?? 0));
-              return (
-                <div className="mt-6">
-                  <PcDetailPanel
-                    pc={pcs[idx]}
-                    aName="A"
-                    bName="B"
-                    aScore={aValues[idx]}
-                    bScore={bValues[idx]}
-                  />
-                </div>
-              );
-            })()}
+              {/* Upper Right: Detail panel */}
+              <div>
+                {(() => {
+                  const pcs: PcMeta[] = [
+                    { id:1, code:"PC1", name:"도심·고소득·대형", features:["총_직장_인구_수_log","인구당_소득","영역_면적"], meaning:"도심형 대형·고소득 상권 축", highText:"CBD·광역 상업지처럼 규모와 구매력이 큰 곳", lowText:"소규모·저소득·면적이 작은 주거 위주 상권" },
+                    { id:2, code:"PC2", name:"집적·안정", features:["점포_밀도","운영_영업_개월_평균","총_유동인구_수_sqrt"], meaning:"안정·집적 상권 축", highText:"상업 집적 + 운영 안정성이 높은 곳", lowText:"저집적·저안정 상권" },
+                    { id:3, code:"PC3", name:"거주·근무 복합", features:["총_상주인구_수_log","총_상주인구_수_sqrt","총_직장_인구_수_log"], meaning:"주거·업무 복합 상권 축", highText:"주거·업무 복합 상권", lowText:"소규모·저활성 주거 상권" },
+                    { id:4, code:"PC4", name:"프리미엄 소비", features:["총_상주인구_수_cbrt","월_평균_소득_금액","총_직장_인구_수_cbrt"], meaning:"프리미엄·고급 소비 상권 축", highText:"고소득층 프리미엄 주거·상업지", lowText:"보급형 상권" },
+                    { id:5, code:"PC5", name:"주민 생활", features:["총_직장_인구_수_sqrt","상주인구_비율","월_평균_소득_금액"], meaning:"주민 중심 생활 상권 축", highText:"안정적 주민 생활형 상권", lowText:"유동형·불안정 상권" },
+                    { id:6, code:"PC6", name:"주거 밀집", features:["아파트_단지_수","총_상주인구_수","총_유동인구_수_cbrt"], meaning:"주거 밀집 상권 축", highText:"신도시·주거 특화 상권", lowText:"분산형 상권" },
+                    { id:7, code:"PC7", name:"관광·집객", features:["집객시설_밀도","운영_영업_개월_평균","총_직장_인구_수_sqrt"], meaning:"관광·상업 집객 상권 축", highText:"관광지형 상권", lowText:"내수형 상권" },
+                    { id:8, code:"PC8", name:"복합·균형", features:["인구_혼합도","점포_집객시설_비율","총_유동인구_수_sqrt"], meaning:"복합·균형 상권 축", highText:"복합형 상권", lowText:"편향된 상권" },
+                    { id:9, code:"PC9", name:"효율적 소비", features:["인구당_소득","점포_수_log","총_상주인구_수"], meaning:"효율적 소비 상권 축", highText:"효율적·성장 잠재력 큼", lowText:"효율성 낮은 상권" },
+                    { id:10, code:"PC10", name:"역동성", features:["개업_율","집객시설_수","폐업_률"], meaning:"역동적 상권 축", highText:"변화 많고 기회/리스크 공존", lowText:"정체된 상권" },
+                  ];
+                  const labels = pcs.map((p) => p.code);
+                  const aValues = [8.7,7.5,9.2,6.1,7.9,5.6,8.1,6.8,7.2,6.5];
+                  const bValues = [6.2,8.4,7.1,7.3,6.8,7.0,6.1,7.9,5.8,7.4];
+                  const idx = Math.max(0, Math.min(9, selectedPc ?? 0));
+                  return (
+                    <PcDetailPanel
+                      pc={pcs[idx]}
+                      aName="A"
+                      bName="B"
+                      aScore={aValues[idx]}
+                      bScore={bValues[idx]}
+                    />
+                  );
+                })()}
+              </div>
+            </div>
 
+            {/* Lower Section: At a Glance */}
             {/* Selectors aligned to columns */}
             <div className="mt-10">
               <div className="text-2xl font-extrabold text-gray-900">한 눈에 보기</div>
