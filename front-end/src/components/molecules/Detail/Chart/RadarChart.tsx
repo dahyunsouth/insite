@@ -24,6 +24,10 @@ type RadarChartProps = {
   delay?: number;
   /** Easing: linear | easeOutCubic */
   easing?: "linear" | "easeOutCubic";
+  /** Optional: currently selected axis index */
+  selectedAxis?: number | null;
+  /** Optional: click on axis/label */
+  onSelectAxis?: (index: number) => void;
 };
 
 /**
@@ -41,6 +45,8 @@ export default function RadarChart({
   duration = 700,
   delay = 0,
   easing = "easeOutCubic",
+  selectedAxis = null,
+  onSelectAxis,
 }: RadarChartProps) {
   const N = labels.length;
   if (N === 0) return null;
@@ -121,16 +127,20 @@ export default function RadarChart({
     const cos = Math.cos(a);
     const textAnchor = cos > 0.2 ? "start" : cos < -0.2 ? "end" : "middle";
     const dy = Math.sin(a) > 0.2 ? 12 : Math.sin(a) < -0.2 ? -6 : 4;
+    const active = selectedAxis === j;
     return (
-      <text
-        key={lab}
-        x={x}
-        y={y + dy}
-        textAnchor={textAnchor}
-        style={{ fontSize: 12, fill: "#6B7280" }}
-      >
-        {lab}
-      </text>
+      <g key={lab} className="cursor-pointer" onClick={() => onSelectAxis?.(j)}>
+        {/* invisible hit area for easier clicks */}
+        <circle cx={x} cy={y + dy - 4} r={16} fill="transparent" />
+        <text
+          x={x}
+          y={y + dy}
+          textAnchor={textAnchor}
+          style={{ fontSize: 12, fill: active ? "#2563EB" : "#6B7280", fontWeight: active ? 600 : 400 }}
+        >
+          {lab}
+        </text>
+      </g>
     );
   });
 

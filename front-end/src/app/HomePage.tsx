@@ -157,7 +157,7 @@ export default function HomePage() {
       />
 
       {/* Compare modal: right-side overlay (covers right 75%) */}
-      <CompareTradeAreasModal open={isCompareOpen} onClose={() => setIsCompareOpen(false)} leftOpen={false} />
+      <CompareTradeAreasModal open={isCompareOpen} onClose={() => setIsCompareOpen(false)} leftOpen={true} />
 
       {/* 인증 모달 (AuthModalWrapper) - 조건부 렌더 */}
       {isAuthOpen && (
