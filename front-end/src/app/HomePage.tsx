@@ -11,6 +11,7 @@ import MyPageMenu from '@/components/templates/MyPage/MyPage';
 import MyMarket from '@/components/templates/MyPage/MyMarket';
 import NotificationBar from '@/components/atoms/Common/NotificationBar';
 import { useRouter } from 'next/navigation';
+import CompareTradeAreasModal from '@/components/organisms/Compare/CompareTradeAreasModal';
 
 // 지도 타입 변경 핸들러 컴포넌트
 function MapTypeHandler({ 
@@ -47,6 +48,7 @@ export default function HomePage() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [showMyPage, setShowMyPage] = useState(false);
   const [showMyMarket, setShowMyMarket] = useState(false);
+  const [isCompareOpen, setIsCompareOpen] = useState(false);
 
   // 페이지 로드 시 로그인 상태 확인
   useEffect(() => {
@@ -91,11 +93,13 @@ export default function HomePage() {
   // 저장된 상권 열기 핸들러
   const handleSavedAreasClick = () => {
     setShowMyMarket(true);
+    setIsCompareOpen(true);
   };
 
   // 저장된 상권 닫기 핸들러
   const handleMyMarketClose = () => {
     setShowMyMarket(false);
+    setIsCompareOpen(false);
   };
 
 
@@ -108,6 +112,8 @@ export default function HomePage() {
           {showMyPage && (
             <MyPageMenu 
               onClose={handleMyPageClose}
+              onSavedAreas={() => setIsCompareOpen(true)}
+              onSavedAreasClose={() => setIsCompareOpen(false)}
             />
           )}
           {showMyMarket && (
@@ -149,6 +155,9 @@ export default function HomePage() {
         onClose={() => setIsDetailOpen(false)}
         title="상권 현황"
       />
+
+      {/* Compare modal: right-side overlay (covers right 75%) */}
+      <CompareTradeAreasModal open={isCompareOpen} onClose={() => setIsCompareOpen(false)} leftOpen={false} />
 
       {/* 인증 모달 (AuthModalWrapper) - 조건부 렌더 */}
       {isAuthOpen && (
