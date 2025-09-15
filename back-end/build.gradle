@@ -2,6 +2,11 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.5'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'nu.studer.jooq' version '9.0'
+}
+
+ext {
+	jooqVersion = '3.19.8'
 }
 
 group = 'com.ssafy'
@@ -49,8 +54,80 @@ dependencies {
 
 	// SMTP
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+	// jOOQ
+	implementation 'org.springframework.boot:spring-boot-starter-jooq'
+	jooqGenerator "org.jooq:jooq-meta:${jooqVersion}"
+	jooqGenerator "org.jooq:jooq-codegen:${jooqVersion}"
+	jooqGenerator 'com.mysql:mysql-connector-j'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+jooq {
+	version = jooqVersion
+	configurations {
+		main {
+			generationTool {
+				logging = org.jooq.meta.jaxb.Logging.INFO
+
+				jdbc {
+					driver   = 'com.mysql.cj.jdbc.Driver'
+					// 환경변수 없으면 로컬 기본값 사용 (원하는 값으로 교체)
+					url      = 'jdbc:mysql://ssafy-mysql-db.mysql.database.azure.com:3306/s13p21e203?sslMode=REQUIRED'
+					user     = 'S13P21E203'
+					password = 'eOKIKdoBQr'
+				}
+
+				generator {
+					name = 'org.jooq.codegen.JavaGenerator'
+
+					database {
+						// MySQL 8
+						name = 'org.jooq.meta.mysql.MySQLDatabase'
+
+						// 스키마명
+						inputSchema = 's13p21e203'
+
+						// 생성할 테이블 범위 지정 (정확한 테이블명 알려주면 여기 최적화 가능)
+						includes = '.*'
+						excludes = '' // 필요 시 제외 패턴 추가
+
+						// 타입 보정이 필요하면 여기서 강제 매핑 (예시)
+						// forcedTypes = [
+						//   new org.jooq.meta.jaxb.ForcedType()
+						//      .withName('BIGINT')
+						//      .withIncludeExpression('.*\\.id')
+						// ]
+					}
+
+					generate {
+						// POJO/DAO는 이번엔 사용 안 함 (DTO 직접 매핑)
+						pojos = false
+						daos  = false
+						// Java Record 생성 등 옵션 필요시 추가 가능
+						fluentSetters = true
+					}
+
+					target {
+						packageName = 'com.ssafy.insite.data.jooq.codegen'
+						directory = project.layout.buildDirectory
+								.dir('generated-src/jooq')
+								.get().asFile.absolutePath
+					}
+
+					strategy {
+						// 기본 전략 사용. 네이밍 커스터마이징이 필요하면 여기서 지정 가능
+						name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+					}
+				}
+			}
+		}
+	}
+}
+
+// 생성된 소스 디렉터리를 main 소스셋에 등록
+sourceSets.main.java.srcDir(
+		project.layout.buildDirectory.dir('generated-src/jooq').get())
