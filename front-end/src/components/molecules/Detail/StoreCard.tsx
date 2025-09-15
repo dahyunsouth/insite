@@ -76,11 +76,11 @@ export default function StoreCard({ trdarCode }: Props) {
   }, [data]);
 
   return (
-    <div className="mt-6">
-      <h3 className="text-[18px] font-semibold text-gray-900">점포 지표</h3>
+    <div className="mt-2">
+      <h3 className="text-[18px] font-semibold text-gray-900">점포</h3>
 
       {/* Caption */}
-      <div className="mt-1 text-right text-xs text-gray-400">{quarter ?? "—"}</div>
+      {/* <div className="mt-1 text-right text-xs text-gray-400">{quarter ?? "—"}</div> */}
 
       {/* Net change badge */}
       <div className="mt-3">{data ? netBadge : null}</div>
