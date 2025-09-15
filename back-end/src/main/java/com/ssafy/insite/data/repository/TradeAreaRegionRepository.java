@@ -4,6 +4,7 @@ import static com.ssafy.insite.data.jooq.codegen.Tables.TRADE_AREA_REGION;
 
 import com.ssafy.insite.common.utils.SeoulDistrictConverter;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
+import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
@@ -16,17 +17,39 @@ import org.springframework.stereotype.Repository;
 public class TradeAreaRegionRepository {
     private final DSLContext dsl;
 
+    // 자치구별 상권 개수 조회
     public SeoulDistrictCountResponseDto countByDistrict(SeoulDistrict district) {
-        String label = SeoulDistrictConverter.toKorean(district); // 국문 행정구명
+        String gu = SeoulDistrictConverter.toKorean(district); // 국문 행정구명
 
         Record1<Integer> record = dsl
                 .select(DSL.count())
                 .from(TRADE_AREA_REGION)
-                .where(TRADE_AREA_REGION.SIGNGU_CD_NM.eq(label))
+                .where(TRADE_AREA_REGION.SIGNGU_CD_NM.eq(gu))
                 .fetchOne();
 
         int count = (record != null) ? record.value1() : 0;
 
-        return new SeoulDistrictCountResponseDto(district, label, count);
+        return new SeoulDistrictCountResponseDto(gu, count);
+    }
+
+    // 행정동별 상권 개수 조회
+    public SeoulDongCountResponseDto countByDong(SeoulDistrict district, String dong) {
+        String gu = SeoulDistrictConverter.toKorean(district); // 국문 행정구명
+
+        String normalizedDong = dong
+                .replace('·', '?')
+                .replace('.', '?')
+                .trim(); // 국문 행정동명
+
+        Record1<Integer> record = dsl
+                .select(DSL.count())
+                .from(TRADE_AREA_REGION)
+                .where(TRADE_AREA_REGION.SIGNGU_CD_NM.eq(gu))
+                .and(TRADE_AREA_REGION.ADSTRD_CD_NM.eq(normalizedDong))
+                .fetchOne();
+
+        int count = (record != null) ? record.value1() : 0;
+
+        return new SeoulDongCountResponseDto(gu, dong, count);
     }
 }
