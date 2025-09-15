@@ -137,8 +137,8 @@ export default function HomePage() {
       {/* Bottom-center CTA preview for verification */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30">
         <CtaPillButton
-          label="강남역 상권 분석 자세히 보기"
-          ariaLabel="강남역 상권 분석 자세히 보기"
+          label="상권 분석 자세히 보기"
+          ariaLabel="상권 분석 자세히 보기"
           onPress={() => setIsDetailOpen(true)}
         />
       </div>
