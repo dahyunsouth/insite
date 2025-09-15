@@ -1,0 +1,89 @@
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[26200],{426200:function(e,o,a){a.d(o,{C:function(){return p}});var r=a(674293),i=a(303098),n=a(321764);var t=a(443343),l=a(311714);const _=(0,l.createContext)(null);var s=a(742368),c=(a(885709),a(161750));const u=(0,s.zo)(c.J)`
+  flex-shrink: 0;
+`;var d=a(154314);const k={onContainer:"",default:"",accessible:"",surface:"",background:""},b={variant:"filled",color:"primary",shape:"circle",size:"S",equalRatio:!1,divider:!1,empty:!1},v=(0,d.p)("span",({theme:e,$size:o=b.size})=>s.iv`
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    height: ${e.token[`c_badge_size_container_text_${o}`]};
+    padding: ${e.token[`c_badge_spacing_padding_container_${o}`]};
+    gap: ${e.token[`c_badge_spacing_itemGap_sideItem_${o}`]};
+    border-width: ${e.token[`c_badge_borderWidth_${o}`]};
+    border-style: solid;
+    border-radius: ${e.token[`c_badge_radius_square_text_${o}`]};
+    font: ${e.token[`c_badge_typography_${o}`]};
+    outline-width: ${e.token[`c_badge_borderWidth_outline_${o}`]};
+    outline-style: solid;
+  `,{props:{color:{primary:s.iv`
+          ${({theme:e})=>(k.onContainer=e.token.s_color_brand_primary_onContainer,k.default=e.token.s_color_brand_primary_default,k.accessible=e.token.s_color_brand_primary_accessible,k.surface=e.token.s_color_brand_primary_surface,k.background=e.token.s_color_brand_primary_background,"")}
+        `,blue:s.iv`
+          ${({theme:e})=>(k.onContainer=e.token.s_color_visualization_onContainer_blue,k.default=e.token.s_color_visualization_default_blue,k.accessible=e.token.s_color_visualization_accessible_blue,k.surface=e.token.s_color_visualization_surface_blue,k.background=e.token.s_color_visualization_background_blue,"")}
+        `,green:s.iv`
+          ${({theme:e})=>(k.onContainer=e.token.s_color_visualization_onContainer_green,k.default=e.token.s_color_visualization_default_green,k.accessible=e.token.s_color_visualization_accessible_green,k.surface=e.token.s_color_visualization_surface_green,k.background=e.token.s_color_visualization_background_green,"")}
+        `,yellow:s.iv`
+          ${({theme:e})=>(k.onContainer=e.token.s_color_visualization_onContainer_yellow,k.default=e.token.s_color_visualization_default_yellow,k.accessible=e.token.s_color_visualization_accessible_yellow,k.surface=e.token.s_color_visualization_surface_yellow,k.background=e.token.s_color_visualization_background_yellow,"")}
+        `,red:s.iv`
+          ${({theme:e})=>(k.onContainer=e.token.s_color_visualization_onContainer_red,k.default=e.token.s_color_visualization_default_red,k.accessible=e.token.s_color_visualization_accessible_red,k.surface=e.token.s_color_visualization_surface_red,k.background=e.token.s_color_visualization_background_red,"")}
+        `,purple:s.iv`
+          ${({theme:e})=>(k.onContainer=e.token.s_color_visualization_onContainer_purple,k.default=e.token.s_color_visualization_default_purple,k.accessible=e.token.s_color_visualization_accessible_purple,k.surface=e.token.s_color_visualization_surface_purple,k.background=e.token.s_color_visualization_background_purple,"")}
+        `,neutral:s.iv`
+          ${({theme:e})=>(k.onContainer=e.token.s_color_visualization_onContainer_neutral,k.default=e.token.s_color_visualization_default_neutral,k.accessible=e.token.s_color_visualization_accessible_neutral,k.surface=e.token.s_color_visualization_surface_neutral,k.background=e.token.s_color_visualization_background_neutral,"")}
+        `,neutralDeep:s.iv`
+          ${({theme:e})=>(k.onContainer=e.token.s_color_visualization_onContainer_neutralDeep,k.default=e.token.s_color_visualization_default_neutralDeep,k.accessible=e.token.s_color_visualization_accessible_neutralDeep,k.surface=e.token.s_color_visualization_surface_neutralDeep,k.background=e.token.s_color_visualization_background_neutralDeep,"")}
+        `},variant:{filled:s.iv`
+          ${({theme:e})=>s.iv`
+            border-color: ${e.token.s_color_neutral_border_transparent};
+            color: ${k.onContainer};
+            background-color: ${k.default};
+          `}
+        `,fillLight:s.iv`
+          ${({theme:e})=>s.iv`
+            border-color: ${e.token.s_color_neutral_border_transparent};
+            color: ${k.accessible};
+            background-color: ${k.surface};
+          `}
+        `,fillLightBackground:s.iv`
+          ${({theme:e})=>s.iv`
+            border-color: ${e.token.s_color_neutral_border_transparent};
+            color: ${k.accessible};
+            background-color: ${k.background};
+          `}
+        `,outlined:s.iv`
+          ${({theme:e})=>s.iv`
+            background-color: ${e.token.s_color_neutral_background_transparent};
+            color: ${k.accessible};
+            border-color: ${k.default};
+          `}
+        `,outlinedBackground:s.iv`
+          ${({theme:e})=>s.iv`
+            background-color: ${e.token.s_color_neutral_background_default};
+            color: ${k.accessible};
+            border-color: ${k.default};
+          `}
+        `,ghost:s.iv`
+          ${({theme:e})=>s.iv`
+            background-color: ${e.token.s_color_neutral_background_transparent};
+            border-color: ${e.token.s_color_neutral_border_transparent};
+            color: ${k.accessible};
+          `}
+        `},equalRatio:{true:s.iv`
+          aspect-ratio: 1;
+          overflow: hidden;
+        `},size:{"2XS":s.iv``,XS:s.iv``,S:s.iv``,M:s.iv``},shape:{circle:s.iv`
+          ${({theme:e})=>s.iv`
+            border-radius: ${e.token.c_badge_radius_round};
+          `}
+        `,square:s.iv``},divider:{true:s.iv`
+          ${({theme:e})=>s.iv`
+            outline-color: ${e.token.s_color_neutral_background_default};
+          `}
+        `,false:s.iv`
+          outline-width: 0;
+        `},empty:{true:s.iv`
+          padding: 0;
+        `}},compoundProps:[{empty:!0,shape:"square",style:({theme:e,$size:o=b.size})=>s.iv`
+          border-radius: ${e.token[`c_badge_radius_square_dot_${o}`]};
+        `},{empty:!0,style:({theme:e,$size:o=b.size})=>s.iv`
+          width: ${e.token[`c_badge_size_container_dot_${o}`]};
+          height: ${e.token[`c_badge_size_container_dot_${o}`]};
+        `}],defaultProps:b}),g=(0,i.G)("Badge",(e,o)=>{const a=(e=>(0,n.w)(e,{asChild:"asChild",variant:"variant",color:"color",size:"size",shape:"shape",equalRatio:"equalRatio",divider:"divider"}))(e),i=e.asChild?t.g:"span";return(0,r.jsx)(_.Provider,{value:{size:e.size??"S"},"data-f":"Provider-5754",children:(0,r.jsx)(v,{as:i,ref:o,$variant:e.variant,$color:e.color,$equalRatio:e.equalRatio,$size:e.size,$shape:e.shape,$divider:e.divider,$empty:null==e.children,...a,"data-f":"StyleSpan-a84e"})})}),p=Object.assign(g,{Icon:e=>{const{size:o}=(()=>{const e=(0,l.useContext)(_);if(null===e)throw new Error("BadgeContext is not provided");return e})(),{token:a}=(0,s.Fg)(),i=a[`c_badge_size_icon_text_${o}`];return(0,r.jsx)(u,{width:i,height:i,color:"inherit",...e,"data-f":"StyledIcon-f929"})}})}}]);
