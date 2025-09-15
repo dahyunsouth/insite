@@ -25,6 +25,7 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             "/api/v1/auth/check/nickname",
             "/api/v1/auth/verify/send-code",
             "/api/v1/auth/verify/check-code",
+            "/api/v1/data/**"
     };
 
     private final JwtTokenProvider jwtTokenProvider;
