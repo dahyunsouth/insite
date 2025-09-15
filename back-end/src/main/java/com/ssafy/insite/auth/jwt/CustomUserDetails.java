@@ -1,6 +1,6 @@
 package com.ssafy.insite.auth.jwt;
 
-import com.ssafy.insite.common.entity.User;
+import com.ssafy.insite.auth.entity.User;
 import com.ssafy.insite.common.enums.Provider;
 import com.ssafy.insite.common.enums.UserType;
 import java.util.Collection;

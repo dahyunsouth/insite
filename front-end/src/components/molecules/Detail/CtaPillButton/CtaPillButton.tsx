@@ -36,7 +36,7 @@ export default function CtaPillButton({
 }: CtaPillButtonProps) {
   const widthClasses = fullWidth
     ? "w-full"
-    : "w-[445px] max-w-full";
+    : "w-[375px] max-w-full";
 
   const maxWidthStyle = maxWidth ? { maxWidth: `${Math.max(0, maxWidth)}px` } : undefined;
 
@@ -48,7 +48,7 @@ export default function CtaPillButton({
       disabled={disabled}
       className={
         "group relative isolate inline-flex items-center justify-center " +
-        "h-[80px] px-[50px] py-[20px] " +
+        "h-[50px] px-[50px] py-[20px] " +
         `${widthClasses} ` +
         "rounded-[100px] text-white select-none " +
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 " +
@@ -68,7 +68,7 @@ export default function CtaPillButton({
 
       {/* Foreground content */}
       <span className="relative z-10 inline-flex items-center gap-[10px]">
-        {icon ?? <SearchIcon size={30} />}
+        {icon ?? <SearchIcon size={20} />}
         <LabelText>{label}</LabelText>
       </span>
     </button>
