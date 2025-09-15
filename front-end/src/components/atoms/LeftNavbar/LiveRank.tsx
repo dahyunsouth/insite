@@ -115,7 +115,7 @@ export default function LiveRank({ className, intervalMs = 2000 }: LiveRankProps
 
 function Row({ item }: { item: RankItem }) {
   return (
-    <div className="h-[clamp(32px,3.2vw,44px)] flex items-center justify-between px-2 sm:px-3">
+    <div className="h-[clamp(32px,3.2vw,44px)] flex items-center justify-between px-1">
       <div className="flex items-center gap-2">
         <span className="font-bold text-[#3288FF] text-[clamp(13px,1.2vw,15px)] leading-none">
           {item.rank}

@@ -1,0 +1,210 @@
+﻿"use client";
+
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import RadarChart from "@/components/molecules/Detail/Chart/RadarChart";
+import PcDetailPanel, { PcMeta } from "@/components/organisms/Compare/PcDetailPanel";
+
+type CompareTradeAreasModalProps = {
+  open: boolean;
+  onClose: () => void;
+  /** Whether the left sidebar (25%) is open. Controls overlay area and layout. */
+  leftOpen?: boolean;
+};
+
+export default function CompareTradeAreasModal({ open, onClose, leftOpen = true }: CompareTradeAreasModalProps) {
+  const [selectedPc, setSelectedPc] = useState<number>(0);
+  // Close on ESC
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open, onClose]);
+
+  // Body scroll lock while modal open
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  const containerLeftClass = leftOpen ? "left-[25%]" : "left-0";
+  const cardMaxWidthClass = leftOpen ? "w-[min(920px,90%)]" : "w-[min(1200px,95%)]";
+  const showThird = !leftOpen;
+
+  const metrics = [
+  { key: "Foot Traffic", a: "410K", b: "410K", aNum: 2702, bNum: 2508 },
+  { key: "Stores", a: "97", b: "97", aNum: 2702, bNum: 2508 },
+  { key: "Residents", a: "2,702", b: "2,702", aNum: 2702, bNum: 2508 },
+  { key: "Workers", a: "5,275", b: "5,275", aNum: 2702, bNum: 2508 },
+  { key: "Attraction", a: "5,275", b: "5,275", aNum: 2702, bNum: 2508 },
+  { key: "Change Index", a: "HL", b: "HL", aNum: 2702, bNum: 2508 },
+] as const;
+
+  return createPortal(
+    <div
+      className={`fixed inset-y-0 right-0 ${containerLeftClass} z-40`}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="compare-modal-title"
+    >
+      {/* Dim only the right side */}
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+
+      {/* Centered modal card */}
+      <div className="relative z-10 flex min-h-screen items-center justify-center p-6">
+        <div
+          className={`${cardMaxWidthClass} rounded-3xl bg-white shadow-xl border border-black/5 max-h-[85vh] overflow-hidden flex flex-col`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="relative px-8 pt-8 pb-4 border-b border-black/5 text-center">
+            <h2 id="compare-modal-title" className="text-2xl font-extrabold text-gray-900">
+              상권 비교하기
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">상권 A와 상권 B를 비교합니다.</p>
+
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={onClose}
+              className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 hover:bg-gray-50 shadow-sm border border-gray-200"
+            >
+              <span className="sr-only">Close</span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" strokeWidth="1.5" stroke="currentColor" className="h-5 w-5 text-gray-700">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-8 py-8">
+            {/* Upper Section: Chart + Detail */}
+            <div className="grid grid-cols-[400px_1fr] gap-x-8">
+              {/* Upper Left: Radar Chart */}
+              <div>
+                {(() => {
+                  const labels = [
+                    "PC1","PC2","PC3","PC4","PC5","PC6","PC7","PC8","PC9","PC10",
+                  ];
+                  const aValues = [8.7,7.5,9.2,6.1,7.9,5.6,8.1,6.8,7.2,6.5];
+                  const bValues = [6.2,8.4,7.1,7.3,6.8,7.0,6.1,7.9,5.8,7.4];
+                  return (
+                    <div className="mx-auto w-full aspect-square rounded-2xl border border-gray-200 bg-white">
+                      <RadarChart
+                        labels={labels}
+                        series={[
+                          { name: "A", values: aValues, color: "#2563EB", dashed: false, fillOpacity: 0.08 },
+                          { name: "B", values: bValues, color: "#F472B6", dashed: true, fillOpacity: 0.08 },
+                        ]}
+                        maxValue={10}
+                        levels={5}
+                        selectedAxis={selectedPc}
+                        onSelectAxis={(idx) => setSelectedPc(idx)}
+                      />
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Upper Right: Detail panel */}
+              <div>
+                {(() => {
+                  const pcs: PcMeta[] = [
+                    { id:1, code:"PC1", name:"도심·고소득·대형", features:["총_직장_인구_수_log","인구당_소득","영역_면적"], meaning:"도심형 대형·고소득 상권 축", highText:"CBD·광역 상업지처럼 규모와 구매력이 큰 곳", lowText:"소규모·저소득·면적이 작은 주거 위주 상권" },
+                    { id:2, code:"PC2", name:"집적·안정", features:["점포_밀도","운영_영업_개월_평균","총_유동인구_수_sqrt"], meaning:"안정·집적 상권 축", highText:"상업 집적 + 운영 안정성이 높은 곳", lowText:"저집적·저안정 상권" },
+                    { id:3, code:"PC3", name:"거주·근무 복합", features:["총_상주인구_수_log","총_상주인구_수_sqrt","총_직장_인구_수_log"], meaning:"주거·업무 복합 상권 축", highText:"주거·업무 복합 상권", lowText:"소규모·저활성 주거 상권" },
+                    { id:4, code:"PC4", name:"프리미엄 소비", features:["총_상주인구_수_cbrt","월_평균_소득_금액","총_직장_인구_수_cbrt"], meaning:"프리미엄·고급 소비 상권 축", highText:"고소득층 프리미엄 주거·상업지", lowText:"보급형 상권" },
+                    { id:5, code:"PC5", name:"주민 생활", features:["총_직장_인구_수_sqrt","상주인구_비율","월_평균_소득_금액"], meaning:"주민 중심 생활 상권 축", highText:"안정적 주민 생활형 상권", lowText:"유동형·불안정 상권" },
+                    { id:6, code:"PC6", name:"주거 밀집", features:["아파트_단지_수","총_상주인구_수","총_유동인구_수_cbrt"], meaning:"주거 밀집 상권 축", highText:"신도시·주거 특화 상권", lowText:"분산형 상권" },
+                    { id:7, code:"PC7", name:"관광·집객", features:["집객시설_밀도","운영_영업_개월_평균","총_직장_인구_수_sqrt"], meaning:"관광·상업 집객 상권 축", highText:"관광지형 상권", lowText:"내수형 상권" },
+                    { id:8, code:"PC8", name:"복합·균형", features:["인구_혼합도","점포_집객시설_비율","총_유동인구_수_sqrt"], meaning:"복합·균형 상권 축", highText:"복합형 상권", lowText:"편향된 상권" },
+                    { id:9, code:"PC9", name:"효율적 소비", features:["인구당_소득","점포_수_log","총_상주인구_수"], meaning:"효율적 소비 상권 축", highText:"효율적·성장 잠재력 큼", lowText:"효율성 낮은 상권" },
+                    { id:10, code:"PC10", name:"역동성", features:["개업_율","집객시설_수","폐업_률"], meaning:"역동적 상권 축", highText:"변화 많고 기회/리스크 공존", lowText:"정체된 상권" },
+                  ];
+                  const labels = pcs.map((p) => p.code);
+                  const aValues = [8.7,7.5,9.2,6.1,7.9,5.6,8.1,6.8,7.2,6.5];
+                  const bValues = [6.2,8.4,7.1,7.3,6.8,7.0,6.1,7.9,5.8,7.4];
+                  const idx = Math.max(0, Math.min(9, selectedPc ?? 0));
+                  return (
+                    <PcDetailPanel
+                      pc={pcs[idx]}
+                      aName="A"
+                      bName="B"
+                      aScore={aValues[idx]}
+                      bScore={bValues[idx]}
+                    />
+                  );
+                })()}
+              </div>
+            </div>
+
+            {/* Lower Section: At a Glance */}
+            {/* Selectors aligned to columns */}
+            <div className="mt-10">
+              <div className="text-2xl font-extrabold text-gray-900">한 눈에 보기</div>
+              <div className={`mt-4 grid gap-x-10 ${showThird ? "grid-cols-[1fr_1fr_240px]" : "grid-cols-2"}`}>
+                <div>
+                  <button type="button" className="w-full flex items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-left text-gray-700 hover:bg-gray-50">
+                    <span>상권 A 선택하기</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="h-5 w-5 text-gray-500">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15l3.25-3.25L14.75 15" />
+                    </svg>
+                  </button>
+                </div>
+                <div>
+                  <button type="button" className="w-full flex items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-left text-gray-700 hover:bg-gray-50">
+                    <span>상권 B 선택하기</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="h-5 w-5 text-gray-500">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15l3.25-3.25L14.75 15" />
+                    </svg>
+                  </button>
+                </div>
+                {showThird && <div />}
+              </div>
+            </div>
+
+            {/* Metrics rows */}
+            <div className={`mt-8 grid gap-x-10 ${showThird ? "grid-cols-[1fr_1fr_240px]" : "grid-cols-2"}`}>
+              {metrics.map((m, idx) => (
+                <React.Fragment key={`${m.key}-${idx}`}>
+                  <div className="py-6 border-t border-gray-200">
+                    <div className="text-gray-500">{m.key}</div>
+                    <div className="mt-2 text-3xl sm:text-4xl font-extrabold text-gray-900">{m.a}</div>
+                  </div>
+                  <div className="py-6 border-t border-gray-200">
+                    <div className="text-gray-500">{m.key}</div>
+                    <div className="mt-2 text-3xl sm:text-4xl font-extrabold text-gray-900">{m.b}</div>
+                  </div>
+                  {showThird && (
+                    <div className="py-6 border-t border-gray-200 flex items-center">
+                      <div className="w-full">
+                        <div className="flex items-center gap-3">
+                          <div className="h-4 flex-1 rounded bg-[#2563eb]" style={{ width: "75%" }} />
+                          <span className="text-sm text-gray-700">{m.aNum.toLocaleString()}</span>
+                        </div>
+                        <div className="mt-2 flex items-center gap-3">
+                          <div className="h-4 flex-1 rounded bg-[#f472b6]" style={{ width: "55%" }} />
+                          <span className="text-sm text-gray-700">{m.bNum.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
