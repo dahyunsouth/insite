@@ -27,7 +27,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
   const deltaColor = delta == null ? "text-gray-500" : delta > 0 ? "text-[#2563EB]" : delta < 0 ? "text-[#F472B6]" : "text-gray-600";
 
   return (
-    <section className={("rounded-2xl border border-gray-200 bg-white p-5 " + (className ?? "")).trim()} aria-labelledby="pc-detail-title" id="pc-detail">
+    <section className={("rounded-2xl border border-gray-200 bg-white p-5 h-full flex flex-col justify-between " + (className ?? "")).trim()} aria-labelledby="pc-detail-title" id="pc-detail">
       <header className="flex items-start justify-between gap-3">
         <div>
           <h3 id="pc-detail-title" className="text-lg font-semibold text-gray-900">{pc.code} · {pc.name}</h3>
@@ -43,7 +43,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
       </div>
 
       {/* Interpretation */}
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="mt-4 grid grid-cols-1 gap-3">
         <div className="rounded-xl bg-[#F8FAFF] p-3">
           <div className="text-xs font-medium text-[#2563EB]">점수가 클 때</div>
           <div className="mt-1 text-sm text-gray-800">{pc.highText}</div>

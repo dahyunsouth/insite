@@ -66,7 +66,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="relative px-8 pt-8 pb-4 border-b border-black/5">
+          <div className="relative px-8 pt-8 pb-4 border-b border-black/5 text-center">
             <h2 id="compare-modal-title" className="text-2xl font-extrabold text-gray-900">
               상권 비교하기
             </h2>
@@ -88,7 +88,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
           {/* Body */}
           <div className="flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-8 py-8">
             {/* Upper Section: Chart + Detail */}
-            <div className="grid grid-cols-2 items-start gap-x-8">
+            <div className="grid grid-cols-[400px_1fr] gap-x-8">
               {/* Upper Left: Radar Chart */}
               <div>
                 {(() => {
