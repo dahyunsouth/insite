@@ -54,4 +54,11 @@ public class DataController {
         QuarterSummaryResponseDto response = dataService.findQuarterSummary(stdrYyquCd, trdarCd);
         return new BaseResponse<>(response);
     }
+
+    @GetMapping("/latest-quarter")
+    @Operation(summary = "최신 분기(년분기_코드) 조회")
+    public BaseResponse<String> getLatestQuarterCode() {
+        String latestCode = dataService.findLatestQuarterCode();
+        return new BaseResponse<>(latestCode);
+    }
 }

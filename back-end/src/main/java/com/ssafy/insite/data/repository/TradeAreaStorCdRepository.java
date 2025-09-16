@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 public class TradeAreaStorCdRepository {
     private final DSLContext dsl;
 
+    // 상권별 분기 요약 조회
     public QuarterSummaryResponseDto findQuarterSummary(String stdrYyquCd, Integer trdarCd) {
         Record6<UInteger, UInteger, BigDecimal, UInteger, BigDecimal, UInteger> record =
                 dsl.select(
@@ -53,5 +54,14 @@ public class TradeAreaStorCdRepository {
                 .clsbizStorCo(clsbizStorCo)
                 .netIncrease(opbizStorCo - clsbizStorCo)
                 .build();
+    }
+
+    // 최신 분기 조회
+    public String findLatestQuarterCode() {
+        return dsl.select(TRADE_AREA_STOR_CD.STDR_YYQU_CD)
+                .from(TRADE_AREA_STOR_CD)
+                .orderBy(TRADE_AREA_STOR_CD.STDR_YYQU_CD.desc())
+                .limit(1)
+                .fetchOneInto(String.class);
     }
 }

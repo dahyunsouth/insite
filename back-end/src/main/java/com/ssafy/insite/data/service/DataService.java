@@ -14,4 +14,7 @@ public interface DataService {
     
     // 상권별 분기 요약 조회
     QuarterSummaryResponseDto findQuarterSummary(String stdrYyquCd, Integer trdarCd);
+
+    // 최신 분기 조회
+    String findLatestQuarterCode();
 }

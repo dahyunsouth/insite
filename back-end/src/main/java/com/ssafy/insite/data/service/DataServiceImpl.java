@@ -36,4 +36,11 @@ public class DataServiceImpl implements DataService {
     public QuarterSummaryResponseDto findQuarterSummary(String stdrYyquCd, Integer trdarCd) {
         return tradeAreaStorCdRepository.findQuarterSummary(stdrYyquCd, trdarCd);
     }
+
+    // 최신 분기 조회
+    @Override
+    @Transactional(readOnly = true)
+    public String findLatestQuarterCode() {
+        return tradeAreaStorCdRepository.findLatestQuarterCode();
+    }
 }
