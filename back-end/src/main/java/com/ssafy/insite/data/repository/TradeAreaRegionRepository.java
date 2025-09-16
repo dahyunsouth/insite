@@ -30,7 +30,11 @@ public class TradeAreaRegionRepository {
                 .where(TRADE_AREA_REGION.SIGNGU_CD_NM.eq(gu))
                 .fetchOne();
 
-        int count = (record != null) ? record.value1() : 0;
+        if (record == null) {
+            throw new BaseException(BaseResponseStatus.INVALID_QUERY);
+        }
+
+        int count = record.value1();
 
         return new SeoulDistrictCountResponseDto(gu, count);
     }
@@ -50,7 +54,11 @@ public class TradeAreaRegionRepository {
                 .and(TRADE_AREA_REGION.ADSTRD_CD_NM.eq(SeoulDongCatalog.normalize(dong)))
                 .fetchOne();
 
-        int count = (record != null) ? record.value1() : 0;
+        if (record == null) {
+            throw new BaseException(BaseResponseStatus.INVALID_QUERY);
+        }
+
+        int count = record.value1();
 
         return new SeoulDongCountResponseDto(gu, dong, count);
     }
