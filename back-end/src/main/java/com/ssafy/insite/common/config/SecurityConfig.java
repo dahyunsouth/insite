@@ -59,7 +59,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/api/v1/auth/**",
-                                "/api/v1/data/**"
+                                "/api/v1/data/**",
+                                "/api/seoul/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Preflight 허용 (OPTIONS 요청 허용)
                         .anyRequest().authenticated()) // 그 외 인증 필요
