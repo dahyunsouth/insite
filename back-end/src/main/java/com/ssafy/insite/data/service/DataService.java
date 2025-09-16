@@ -1,5 +1,6 @@
 package com.ssafy.insite.data.service;
 
+import com.ssafy.insite.data.dto.response.QuarterSummaryResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
@@ -10,4 +11,7 @@ public interface DataService {
     
     // 행정동별 상권 개수 조회
     SeoulDongCountResponseDto countByDong(SeoulDistrict district, String dong);
+    
+    // 상권별 분기 요약 조회
+    QuarterSummaryResponseDto findQuarterSummary(String stdrYyquCd, Integer trdarCd);
 }
