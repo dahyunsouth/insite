@@ -9,7 +9,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Builder
 public class SeoulDistrictCountResponseDto {
-    private SeoulDistrict districtNameEng; // 영문 행정구명
     private String districtNameKor; // 국문 행정구명
     private int count; // 상권 개수
 }

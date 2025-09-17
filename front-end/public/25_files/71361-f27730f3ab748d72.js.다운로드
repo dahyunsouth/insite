@@ -1,0 +1,38 @@
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[71361],{71361:function(t,e,i){i.d(e,{u:function(){return l}});var a=i(674293),o=i(742368),n=i(311714),r=i(334651);const c=t=>{const e=(t=>({direction:t.direction??"horizontal",widthType:t.widthType??"fill",aligment:t.aligment??"center",justify:t.justify??"center",gap:t.gap??"M"}))(t),i=(0,n.useMemo)(()=>({widthType:s(t.widthType),styledProps:"fill"===t.widthType&&{flexGrow:1,flexBasis:0}||void 0}),[t]);return(0,a.jsx)(r.Z.Provider,{value:i,"data-f":"Provider-d582",children:(0,a.jsx)(p,{figmaProps:e,"data-f":"Container-3468",children:t.children})})};c.displayName="ButtonGroup";const s=t=>"hug"===t?"auto":"fill",p=o.zo.div`
+  //
+  display: inline-flex;
+  flex-direction: ${({figmaProps:t})=>"horizontal"===t.direction?"row":"vertical"?"column":"row"};
+  align-items: ${({figmaProps:t})=>{return"start"===(e=t.aligment)?"flex-start":"end"===e?"flex-end":"center";var e}};
+  justify-content: ${({figmaProps:t})=>{return"start"===(e=t.justify)?"flex-start":"end"===e?"flex-end":"center";var e}};
+
+  ${({figmaProps:t,theme:e})=>{const i="none"===(a=t.gap)?"0px":"L"===a?"16px":"8px";var a;return"horizontal"===t.direction?e.mixin.flexColGap(i):e.mixin.flexRowGap(i)}};
+
+  width: 100%;
+`;var m=i(161750);const l=t=>{const e=(t=>({graphicType:t.graphicType??"icon",iconName:t.iconName??"folder_add",title:t.title??"",subtitle:t.subtitle??"",maxWidth:t.maxWidth??"none",size:t.size??"M"}))(t),i=(0,o.Fg)();return(0,a.jsxs)(d,{figmaProps:e,"data-f":"EmptyStateContainer-d74c",children:[(0,a.jsx)(_,{figmaProps:e,"data-f":"EmptyStateIconWrapper-a757",children:"icon"===e.graphicType?(0,a.jsx)(m.J,{iconName:e.iconName,width:i.token[`c_emptyState_size_graphicArea_${e.size}`],height:i.token[`c_emptyState_size_graphicArea_${e.size}`],color:i.token.c_emptyState_color_contents_icon,"data-f":"Icon-bec1"}):t.customImage??(0,a.jsx)(m.J,{iconName:e.iconName,width:i.token[`c_emptyState_size_graphicArea_${e.size}`],height:i.token[`c_emptyState_size_graphicArea_${e.size}`],color:i.token.c_emptyState_color_contents_icon,"data-f":"Icon-5101"})}),(0,a.jsxs)(f,{figmaProps:e,"data-f":"EmptyStateTitleContainer-c5b7",children:[(0,a.jsx)(h,{figmaProps:e,"data-f":"EmptyStateTitle-f6ec",children:e.title}),e.subtitle&&(0,a.jsx)(g,{figmaProps:e,"data-f":"EmptyStateSubtitle-207d",children:e.subtitle})]}),t.bottomButton&&(0,a.jsx)(u,{figmaProps:e,"data-f":"ButtonWrapper-cf2f",children:(0,a.jsx)(c,{direction:"horizontal",widthType:"hug",gap:"M","data-f":"ButtonGroup-8639",children:t.bottomButton})})]})},d=o.zo.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: ${({theme:t,figmaProps:e})=>"none"===e.maxWidth?"unset":t.token[`c_emptyState_size_maxWidth_${e.maxWidth}`]};
+`,_=o.zo.div`
+  margin-bottom: ${({theme:t,figmaProps:e})=>t.token[`c_emptyState_spacing_itemGap_graphic_${e.size}`]};
+`,f=o.zo.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: ${({theme:t,figmaProps:e})=>t.token[`c_emptyState_spacing_itemGap_sentence_${e.size}`]};
+`,h=o.zo.p`
+  word-break: break-word;
+  color: ${({theme:t})=>t.token.c_emptyState_color_contents_text_title};
+  font: ${({theme:t,figmaProps:e})=>t.token[`c_emptyState_typography_title_${e.size}`]};
+`,g=o.zo.p`
+  white-space: pre-wrap;
+  color: ${({theme:t})=>t.token.c_emptyState_color_contents_text_sub};
+  font: ${({theme:t,figmaProps:e})=>t.token[`c_emptyState_typography_sub_${e.size}`]};
+`,u=o.zo.div`
+  margin-top: ${({theme:t,figmaProps:e})=>t.token[`c_emptyState_spacing_itemGap_actionButton_${e.size}`]};
+  width: 100%;
+`}}]);

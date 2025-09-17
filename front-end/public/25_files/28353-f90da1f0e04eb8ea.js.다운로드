@@ -1,0 +1,80 @@
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[28353],{28353:function(e,t,i){i.d(t,{O:function(){return p}});var r=i(674293),o=i(311714),a=i(742368),n=i(303098);const l=o.createContext({}),s=(0,n.G)("Tab",(e,t)=>{const{value:i,defaultId:a,children:n,onChange:s,size:c="L",textOverFlow:b="ellipsis",widthType:h="fill",unmountOnSwitch:f=!0,isTabTitleVisible:u=!0,"data-f":_,...p}=e,m=(0,o.useId)(),T=(0,o.useId)(),g=Boolean(i),x=_?`${_}-`:"",[v,w]=(0,o.useState)(a??""),I=i??v,y=(0,o.useRef)(new Map);return(0,o.useEffect)(()=>{"fill"!==h&&y.current.get(I)?.scrollIntoView({behavior:"smooth"})},[I,h]),(0,r.jsx)(l.Provider,{value:{selectedId:I,onChange:e=>{!g&&w(e),s(e)},size:c,widthType:h,textOverFlow:b,tabTriggerIdPrefix:m,tabContentIdPrefix:T,unmountOnSwitch:f,setTabTriggerRef:(e,t)=>{y.current.set(e,t)},removeTabTriggerRef:e=>{y.current.delete(e)},isTabTitleVisible:u},"data-f":"Provider-ad0c",children:(0,r.jsx)(d,{...p,ref:t,"data-f":`${x}TabWrapper-84ca`,children:e.children})})}),d=a.zo.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`,c=a.zo.div`
+  display: flex;
+  position: ${({isTabTitleVisible:e})=>e?"sticky":"relative"};
+  flex-direction: row;
+  top: -1px;
+  /* 다른 컴포넌트에 너무 많은 영향을 끼쳐 사용처에서 필요 시 styled component로 래핑해 사용 권장  
+  z-index: 1; */
+  width: 100%;
+  transition: transform 0.3s ease-in-out;
+  transform: ${({isTabTitleVisible:e})=>e?"translateY(0)":"translateY(-100%)"};
+`,b=(0,n.G)("Tab.List",(e,t)=>{const{children:i,...a}=e,{isTabTitleVisible:n}=o.useContext(l);return(0,r.jsx)(c,{role:"tablist",...a,ref:t,isTabTitleVisible:n,"data-f":"TabListWrapper-a2f3",children:i})}),h=(0,n.G)("Tab.Trigger",(e,t)=>{const{children:i,id:a,disabled:n,...s}=e,{selectedId:d,onChange:c,size:b,widthType:h,textOverFlow:u,tabTriggerIdPrefix:_,tabContentIdPrefix:p,setTabTriggerRef:m,removeTabTriggerRef:T}=o.useContext(l),g=d===a,x=n?"disabled":g?"active":"inactive",v=(0,o.useRef)(null),w=t||v;return(0,o.useEffect)(()=>("current"in w&&w.current&&m(a,w.current),()=>{T(a)}),[]),(0,r.jsx)(f,{...s,ref:w,id:_+a,role:"tab","aria-selected":g,"aria-controls":p+a,"aria-disabled":n,disabled:n,tabIndex:g?0:-1,onClick:()=>{c(a)},size:b,state:x,widthType:h,textOverFlow:u,"data-f":"TabTriggerWrapper-46a2",children:i})}),f=a.zo.button`
+  font: ${({state:e,theme:t})=>t.token[`c_tabItem_typography_${e}`]};
+  color: ${({state:e,theme:t})=>t.token[`c_tabItem_color_contents_${e}`]};
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  cursor: pointer;
+  height: ${({size:e,theme:t})=>t.token[`c_tabItem_size_height_${e}`]};
+  padding: ${({size:e,theme:t})=>t.token[`c_tabItem_spacing_padding_${e}`]};
+  background-color: ${({state:e,theme:t})=>t.token[`c_tabItem_color_background_${e}`]};
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    border-bottom-style: solid;
+    border-bottom-color: ${({state:e,theme:t})=>t.token[`c_tabItem_color_border_${e}`]};
+    /** @TODO c_tabItem_borderWidth_active, c_tabItem_borderWidth_inactive, c_tabItem_borderWidth_disabled 외에 나머지 다 제거 */
+    border-bottom-width: ${({state:e})=>"active"===e?"2px":"1px"};
+  }
+
+  &[disabled] {
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: ${({theme:e})=>e.token.c_tabItem_opacity_disabled};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({theme:e})=>e.token.b_color_brand_secondary_60};
+  }
+
+  ${({state:e,theme:t})=>t.mixin.hoverDesktopOnly(a.iv`
+      &:hover {
+        &:after {
+          border-bottom-color: ${"inactive"===e&&t.token.c_tabItem_color_border_hover};
+        }
+        color: ${"inactive"===e&&t.token.c_tabItem_color_contents_hover};
+      }
+    `)}
+
+  ${({widthType:e})=>"fill"===e?a.iv`
+          flex: 1;
+        `:a.iv`
+          flex: 0 1 auto;
+          white-space: nowrap;
+        `};
+
+  ${({widthType:e,textOverFlow:t})=>"hug"!==e&&"ellipsis"===t?a.iv`
+          ${({theme:e})=>e.mixin.textOverflow()}
+        `:a.iv`
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        `}
+`,u=(0,n.G)("Tab.Panel",(e,t)=>{const{selectedId:i,tabTriggerIdPrefix:a,tabContentIdPrefix:n,unmountOnSwitch:s}=o.useContext(l),{id:d,children:c,...b}=e,h=i===d;return(0,r.jsx)(r.Fragment,{children:s&&!h?null:(0,r.jsx)(_,{...b,id:n+d,role:"tabpanel","aria-labelledby":a+d,hidden:!h,ref:t,"data-f":"TabContentWrapper-4507",children:c})})}),_=a.zo.div`
+  width: 100%;
+
+  &[hidden='true'] {
+    display: none;
+  }
+`,p=Object.assign(s,{List:b,Trigger:h,Panel:u});p.displayName="Tab"}}]);
