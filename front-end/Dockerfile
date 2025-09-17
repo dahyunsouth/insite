@@ -43,6 +43,8 @@ COPY --from=build /app/package*.json ./
 EXPOSE 3000
 # (선택) /healthz 라우트를 만들어뒀다면 유용
 HEALTHCHECK --interval=30s --timeout=5s --retries=5 \
-  CMD node -e "require('http').get('http://127.0.0.1:3000/healthz', r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+  # CMD node -e "require('http').get('http://127.0.0.1:3000/healthz', r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+  CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3000),(r)=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
 
-CMD ["npm","run","start","--","-p","3000"]
+# CMD ["npm","run","start","--","-p","3000"]
+CMD ["npm","run","start","--","-p","3000","-H","0.0.0.0"]

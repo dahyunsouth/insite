@@ -47,6 +47,8 @@ public enum BaseResponseStatus {
     EMAIL_VERIFICATION_CODE_MISMATCH(HttpStatus.UNAUTHORIZED, false, 2016, "인증 코드가 일치하지 않습니다."),
     EMAIL_NOT_VERIFIED(HttpStatus.UNAUTHORIZED, false, 2017, "이메일 인증코드를 검증해 주세요."),
     INVALID_BIRTHDATE(HttpStatus.CONFLICT, false, 2018, "생년월일이 올바르지 않습니다."),
+    INVALID_DONG(HttpStatus.BAD_REQUEST, false, 2019, "행정동이 존재하지 않습니다."),
+    INVALID_QUERY(HttpStatus.BAD_REQUEST, false, 2020, "검색 조건이 유효하지 않습니다."),
     ;
 
     private final HttpStatusCode httpStatusCode;
