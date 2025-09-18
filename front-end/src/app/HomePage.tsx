@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import KakaoMap, { useKakaoMapContext } from '@/components/map/KakaoMap';
 import LoadView from '@/components/map/LoadView';
 import RightActionBar from '@/components/organisms/RightActionBar/RightActionBar';
@@ -66,6 +66,78 @@ export default function HomePage() {
   const [isLoadViewActive, setIsLoadViewActive] = useState(false);
   const [isLoadViewMinimized, setIsLoadViewMinimized] = useState(false);
   const [isCafeActive, setIsCafeActive] = useState(false);
+  const [showMarketingArea, setShowMarketingArea] = useState(false);
+  const [showMarketList, setShowMarketList] = useState(false);
+  const [currentDistrict, setCurrentDistrict] = useState<string>('');
+  const [currentDong, setCurrentDong] = useState<string>('');
+
+  // 최신 상태를 참조하기 위한 ref
+  const showMarketListRef = useRef(showMarketList);
+  const currentDistrictRef = useRef(currentDistrict);
+  const currentDongRef = useRef(currentDong);
+
+  // ref 업데이트
+  useEffect(() => {
+    showMarketListRef.current = showMarketList;
+  }, [showMarketList]);
+
+  useEffect(() => {
+    currentDistrictRef.current = currentDistrict;
+  }, [currentDistrict]);
+
+  useEffect(() => {
+    currentDongRef.current = currentDong;
+  }, [currentDong]);
+
+  // 상권 모드 상태 변화 디버깅
+  useEffect(() => {
+    console.log('🏠 HomePage - showMarketingArea 상태 변화:', showMarketingArea);
+  }, [showMarketingArea]);
+
+  // 상권 리스트 상태 변화 디버깅
+  useEffect(() => {
+    console.log('🏠 HomePage - showMarketList 상태 변화:', showMarketList);
+  }, [showMarketList]);
+
+  // 현재 주소 상태 변화 디버깅
+  useEffect(() => {
+    console.log('🏠 HomePage - currentDistrict/currentDong 상태 변화:', currentDistrict, currentDong);
+  }, [currentDistrict, currentDong]);
+
+  // 상권 리스트 표시 핸들러
+  const handleShowMarketList = (district: string, dong: string) => {
+    console.log('📋 상권 리스트 표시:', district, dong);
+    setCurrentDistrict(district);
+    setCurrentDong(dong);
+    setShowMarketList(true);
+  };
+
+  // 상권 리스트 닫기 핸들러
+  const handleMarketListClose = () => {
+    console.log('🔄 상권 리스트 닫기');
+    setShowMarketList(false);
+    setCurrentDistrict('');
+    setCurrentDong('');
+  };
+
+  // 주소 변경 핸들러 (지도 이동 시 자동 호출) - ref로 최신 상태 참조
+  const handleAddressChange = useCallback((district: string, dong: string) => {
+    console.log('🔄 주소 변경 감지:', district, dong);
+    console.log('📊 현재 상권 리스트 상태 (state):', showMarketList);
+    console.log('📊 현재 상권 리스트 상태 (ref):', showMarketListRef.current);
+    console.log('📍 현재 저장된 주소 (state):', currentDistrict, currentDong);
+    console.log('📍 현재 저장된 주소 (ref):', currentDistrictRef.current, currentDongRef.current);
+    
+    // ref를 사용해서 최신 상태 확인
+    if (showMarketListRef.current) {
+      console.log('📋 상권 리스트 자동 업데이트 실행 (ref 기반)');
+      setCurrentDistrict(district);
+      setCurrentDong(dong);
+      console.log('✅ 새 주소로 상태 업데이트 완료:', district, dong);
+    } else {
+      console.log('❌ 상권 리스트가 닫혀있어서 업데이트 안함 (ref 기반)');
+    }
+  }, []); // 의존성 배열을 빈 배열로 하여 함수 재생성 방지
 
   // 페이지 로드 시 로그인 상태 확인
   useEffect(() => {
@@ -171,9 +243,9 @@ export default function HomePage() {
   return (
     <div className="relative w-screen h-screen overflow-hidden">
       {/* 1) 풀스크린 카카오맵 (배경 고정) */}
-      <KakaoMap cafeActive={isCafeActive}>
+      <KakaoMap cafeActive={isCafeActive} showMarketingArea={showMarketingArea}>
         {/* 좌측 네비게이션 바 */}
-        <div className="fixed w-1/4 top-0 left-0 right-0 z-20">
+        <div className="fixed w-1/4 top-0 left-0 right-0 z-20 h-screen flex flex-col">
           {showMyPage && (
             <MyPageMenu 
               onClose={handleMyPageClose}
@@ -192,6 +264,14 @@ export default function HomePage() {
               onLoginModalOpen={() => setIsAuthOpen(true)}
               onSavedAreasClick={handleSavedAreasClick}
               onCompareClick={handleCompareTabClick}
+              onMarketingAreaChange={setShowMarketingArea}
+              showMarketingArea={showMarketingArea}
+              showMarketList={showMarketList}
+              currentDistrict={currentDistrict}
+              currentDong={currentDong}
+              onMarketListClose={handleMarketListClose}
+              onAddressClick={handleShowMarketList}
+              onAddressChange={handleAddressChange}
             />
           )}
         </div>

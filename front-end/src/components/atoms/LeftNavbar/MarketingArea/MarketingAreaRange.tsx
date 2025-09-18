@@ -6,6 +6,7 @@ type LegendItem = {
 };
 
 const ITEMS: LegendItem[] = [
+  { color: "#000000", label: "5개 미만" },
   { color: "#9DDE4D", label: "5 ~ 10개" },
   { color: "#FFD62B", label: "11 ~ 50개" },
   { color: "#FF8A36", label: "51 ~ 300개" },

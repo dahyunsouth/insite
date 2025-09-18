@@ -1,18 +1,14 @@
 'use client';
 
 import { useEffect, useRef, createContext, useContext, ReactNode, useState } from 'react';
-import { DefaultCircleWithText } from './CircleWithText';
 import Notification from './Notification';
 import { useNotification } from './useNotification';
 import LoadView from './LoadView';
 import CafeSearch from './CafeSearch';
 import ZoomBlock from './ZoomBlock';
-
-declare global {
-  interface Window {
-    kakao: any;
-  }
-}
+import SignGuPoligon from './SignGuPoligon';
+import AdstrdPoligon from './AdstrdPoligon';
+import TradeAreaPoligon from './TradeAreaPoligon';
 
 // KakaoMap Context 생성
 interface KakaoMapContextType {
@@ -35,8 +31,8 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
     if (!map) return;
     
     const mapTypeId = mapType === 'skyview' 
-      ? window.kakao.maps.MapTypeId.HYBRID 
-      : window.kakao.maps.MapTypeId.ROADMAP;
+      ? (window as any).kakao.maps.MapTypeId.HYBRID 
+      : (window as any).kakao.maps.MapTypeId.ROADMAP;
     
     map.setMapTypeId(mapTypeId);
   };
@@ -71,23 +67,23 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
   useEffect(() => {
     const script = document.createElement('script');
     script.async = true;
-    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY}&autoload=false`;
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY}&autoload=false&libraries=services`;
     
     document.head.appendChild(script);
 
     script.onload = () => {
-      window.kakao.maps.load(() => {
+      (window as any).kakao.maps.load(() => {
         if (!mapContainer.current) return;
 
         const options = {
-          center: new window.kakao.maps.LatLng(37.501309, 127.039599),
+          center: new (window as any).kakao.maps.LatLng(37.501309, 127.039599),
           level: 3
         };
 
-        const mapInstance = new window.kakao.maps.Map(mapContainer.current, options);
+        const mapInstance = new (window as any).kakao.maps.Map(mapContainer.current, options);
         
         // 지도가 확대 또는 축소되면 이벤트를 등록합니다
-        window.kakao.maps.event.addListener(mapInstance, 'zoom_changed', function() {
+        (window as any).kakao.maps.event.addListener(mapInstance, 'zoom_changed', function() {
           // 지도의 현재 레벨을 얻어옵니다
           const level = mapInstance.getLevel();
           // 필요시 줌 레벨 변경에 따른 추가 로직을 여기에 구현
@@ -133,15 +129,23 @@ export function useKakaoMapContext() {
 }
 
 // 기존 컴포넌트는 Provider로 감싸서 사용
-export default function FullScreenKakaoMap({ children, cafeActive = false }: { children?: ReactNode; cafeActive?: boolean }) {
+export default function FullScreenKakaoMap({ 
+  children, 
+  cafeActive = false, 
+  showMarketingArea = false
+}: { 
+  children?: ReactNode; 
+  cafeActive?: boolean; 
+  showMarketingArea?: boolean;
+}) {
   const { notification, showNotification, hideNotification } = useNotification();
 
   console.log('FullScreenKakaoMap 렌더링:', { cafeActive });
 
   return (
     <KakaoMapProvider showNotification={showNotification} cafeActive={cafeActive}>
-      {/* 기본 원과 텍스트 예제 */}
-      <DefaultCircleWithText />
+      {/* 상권별 폴리곤 표시 컴포넌트 (레벨 1~5) */}
+      <TradeAreaPoligon />
       
       {/* 로드뷰 컴포넌트 */}
       <LoadView 
@@ -154,6 +158,12 @@ export default function FullScreenKakaoMap({ children, cafeActive = false }: { c
       
       {/* 줌 제한 컴포넌트 */}
       <ZoomBlock />
+      
+      {/* 구별 폴리곤 표시 컴포넌트 (레벨 7~8) */}
+      <SignGuPoligon showMarketingArea={showMarketingArea} />
+      
+      {/* 행정동별 폴리곤 표시 컴포넌트 (레벨 6) */}
+      <AdstrdPoligon showMarketingArea={showMarketingArea} />
       
       {/* 자식 컴포넌트들 */}
       {children}
