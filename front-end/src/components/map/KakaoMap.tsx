@@ -67,7 +67,7 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
   useEffect(() => {
     const script = document.createElement('script');
     script.async = true;
-    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY}&autoload=false`;
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY}&autoload=false&libraries=services`;
     
     document.head.appendChild(script);
 
@@ -129,7 +129,15 @@ export function useKakaoMapContext() {
 }
 
 // 기존 컴포넌트는 Provider로 감싸서 사용
-export default function FullScreenKakaoMap({ children, cafeActive = false, showMarketingArea = false }: { children?: ReactNode; cafeActive?: boolean; showMarketingArea?: boolean }) {
+export default function FullScreenKakaoMap({ 
+  children, 
+  cafeActive = false, 
+  showMarketingArea = false
+}: { 
+  children?: ReactNode; 
+  cafeActive?: boolean; 
+  showMarketingArea?: boolean;
+}) {
   const { notification, showNotification, hideNotification } = useNotification();
 
   console.log('FullScreenKakaoMap 렌더링:', { cafeActive });
@@ -155,7 +163,7 @@ export default function FullScreenKakaoMap({ children, cafeActive = false, showM
       <SignGuPoligon showMarketingArea={showMarketingArea} />
       
       {/* 행정동별 폴리곤 표시 컴포넌트 (레벨 6) */}
-      <AdstrdPoligon />
+      <AdstrdPoligon showMarketingArea={showMarketingArea} />
       
       {/* 자식 컴포넌트들 */}
       {children}
