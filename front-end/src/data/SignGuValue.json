@@ -1,0 +1,30 @@
+{
+"DESCRIPTION" : {"SIGNGU_CD":"자치구_코드","YDNTS_VALUE":"와이좌표_값","XCNTS_VALUE":"엑스좌표_값","SIGNGU_NM":"자치구_명","RELM_AR":"영역_면적"},
+"DATA" : [
+{"signgu_cd":"11110","relm_ar":23990643,"ydnts_value":455039,"xcnts_value":197997,"signgu_nm":"종로구"},
+{"signgu_cd":"11140","relm_ar":9990317,"ydnts_value":451178,"xcnts_value":199639,"signgu_nm":"중구"},
+{"signgu_cd":"11170","relm_ar":21892688,"ydnts_value":447985,"xcnts_value":198224,"signgu_nm":"용산구"},
+{"signgu_cd":"11200","relm_ar":16817016,"ydnts_value":450168,"xcnts_value":203628,"signgu_nm":"성동구"},
+{"signgu_cd":"11215","relm_ar":17049029,"ydnts_value":449693,"xcnts_value":207577,"signgu_nm":"광진구"},
+{"signgu_cd":"11230","relm_ar":14277373,"ydnts_value":453608,"xcnts_value":204847,"signgu_nm":"동대문구"},
+{"signgu_cd":"11260","relm_ar":18537446,"ydnts_value":455365,"xcnts_value":208203,"signgu_nm":"중랑구"},
+{"signgu_cd":"11290","relm_ar":24578799,"ydnts_value":456236,"xcnts_value":201547,"signgu_nm":"성북구"},
+{"signgu_cd":"11305","relm_ar":23638414,"ydnts_value":460427,"xcnts_value":200988,"signgu_nm":"강북구"},
+{"signgu_cd":"11320","relm_ar":20705585,"ydnts_value":463273,"xcnts_value":202857,"signgu_nm":"도봉구"},
+{"signgu_cd":"11350","relm_ar":35589181,"ydnts_value":461433,"xcnts_value":206623,"signgu_nm":"노원구"},
+{"signgu_cd":"11380","relm_ar":29795672,"ydnts_value":457737,"xcnts_value":193557,"signgu_nm":"은평구"},
+{"signgu_cd":"11410","relm_ar":17687798,"ydnts_value":453140,"xcnts_value":194617,"signgu_nm":"서대문구"},
+{"signgu_cd":"11440","relm_ar":23862255,"ydnts_value":451092,"xcnts_value":191895,"signgu_nm":"마포구"},
+{"signgu_cd":"11470","relm_ar":17462673,"ydnts_value":447260,"xcnts_value":187215,"signgu_nm":"양천구"},
+{"signgu_cd":"11500","relm_ar":41456740,"ydnts_value":451315,"xcnts_value":184345,"signgu_nm":"강서구"},
+{"signgu_cd":"11530","relm_ar":20097922,"ydnts_value":443893,"xcnts_value":187294,"signgu_nm":"구로구"},
+{"signgu_cd":"11545","relm_ar":13021079,"ydnts_value":440133,"xcnts_value":191226,"signgu_nm":"금천구"},
+{"signgu_cd":"11560","relm_ar":24523722,"ydnts_value":446984,"xcnts_value":192060,"signgu_nm":"영등포구"},
+{"signgu_cd":"11590","relm_ar":16382215,"ydnts_value":444381,"xcnts_value":195725,"signgu_nm":"동작구"},
+{"signgu_cd":"11620","relm_ar":29578708,"ydnts_value":440885,"xcnts_value":195164,"signgu_nm":"관악구"},
+{"signgu_cd":"11650","relm_ar":46920555,"ydnts_value":441541,"xcnts_value":202764,"signgu_nm":"서초구"},
+{"signgu_cd":"11680","relm_ar":39488793,"ydnts_value":444135,"xcnts_value":205569,"signgu_nm":"강남구"},
+{"signgu_cd":"11710","relm_ar":33853024,"ydnts_value":445134,"xcnts_value":210194,"signgu_nm":"송파구"},
+{"signgu_cd":"11740","relm_ar":24557023,"ydnts_value":450114,"xcnts_value":212991,"signgu_nm":"강동구"}
+]
+}
