@@ -15,7 +15,7 @@ export default function LabelText({ className, children }: LabelTextProps) {
     <span
       className={
         "text-white text-[17.5px] leading-[40px] font-normal " +
-        "whitespace-nowrap overflow-hidden text-ellipsis " +
+        "whitespace-nowrap cursor-pointer " +
         (className ?? "")
       }
       style={{ fontFamily: "Inter, sans-serif" }}
