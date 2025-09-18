@@ -2,6 +2,7 @@ package com.ssafy.insite.data.repository;
 
 import static com.ssafy.insite.data.jooq.codegen.Tables.TRADE_AREA_REGION;
 import static com.ssafy.insite.data.jooq.codegen.Tables.TRADE_AREA_STOR_CD;
+import static org.jooq.impl.DSL.max;
 
 import com.ssafy.insite.common.dto.response.BaseResponseStatus;
 import com.ssafy.insite.common.exception.BaseException;
@@ -95,7 +96,13 @@ public class TradeAreaRegionRepository {
                 .from(TRADE_AREA_REGION)
                 .leftJoin(TRADE_AREA_STOR_CD)
                     .on(TRADE_AREA_REGION.TRDAR_CD.eq(TRADE_AREA_STOR_CD.TRDAR_CD)
-                        .and(TRADE_AREA_STOR_CD.SVC_INDUTY_CD_NM.eq("커피-음료")))
+                        .and(TRADE_AREA_STOR_CD.SVC_INDUTY_CD_NM.eq("커피-음료"))
+                            .and(TRADE_AREA_STOR_CD.STDR_YYQU_CD.eq(
+                                    dsl.select(max(TRADE_AREA_STOR_CD.STDR_YYQU_CD))
+                                            .from(TRADE_AREA_STOR_CD)
+                                            .where(TRADE_AREA_STOR_CD.TRDAR_CD.eq(TRADE_AREA_REGION.TRDAR_CD))
+                                            .and(TRADE_AREA_STOR_CD.SVC_INDUTY_CD_NM.eq("커피-음료"))
+                            )))
                 .where(
                         TRADE_AREA_REGION.SIGNGU_CD_NM.eq(gu)
                                 .and(TRADE_AREA_REGION.ADSTRD_CD_NM.eq(dong))

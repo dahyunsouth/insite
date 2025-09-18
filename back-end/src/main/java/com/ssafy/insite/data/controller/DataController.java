@@ -2,11 +2,13 @@ package com.ssafy.insite.data.controller;
 
 import com.ssafy.insite.common.dto.response.BaseResponse;
 import com.ssafy.insite.data.dto.response.QuarterSummaryResponseDto;
+import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
+import com.ssafy.insite.data.enums.TradeAreaType;
 import com.ssafy.insite.data.service.DataService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,6 +42,19 @@ public class DataController {
         return new BaseResponse<>(response);
     }
 
+    @GetMapping("/rec-sys")
+    @Operation(summary = "상권 추천 결과 조회")
+    public BaseResponse<RecommendationResponseDto> findTop3ByDistrictAndType(
+            @Parameter(description = "자치구명")
+            @RequestParam("district") SeoulDistrict district,
+            @Parameter(description = "상권유형")
+            @RequestParam("type") TradeAreaType type
+    ) {
+        RecommendationResponseDto response = dataService.findTop3ByDistrictAndType(district, type);
+
+        return new BaseResponse<>(response);
+    }
+
     @GetMapping("/count-by-gu")
     @Operation(summary = "자치구별 상권 개수 조회")
     public BaseResponse<SeoulDistrictCountResponseDto> countByDistrict(
@@ -54,8 +69,9 @@ public class DataController {
     @GetMapping("/count-by-dong")
     @Operation(summary = "행정동별 상권 개수 조회")
     public BaseResponse<SeoulDongCountResponseDto> countByDong(
-            @Parameter(description = "자치구명 및 행정동명")
+            @Parameter(description = "자치구")
             @RequestParam("district") SeoulDistrict district,
+            @Parameter(description = "행정동")
             @RequestParam("dong") String dong
     ) {
         SeoulDongCountResponseDto response = dataService.countByDong(district, dong);
@@ -95,8 +111,9 @@ public class DataController {
     @GetMapping("/trade-areas")
     @Operation(summary = "행정동 내 상권 리스트 조회")
     public BaseResponse<TradeAreasResponseDto> listByDistrictAndDong(
-            @Parameter(description = "자치구명 및 행정동명")
+            @Parameter(description = "자치구")
             @RequestParam("district") SeoulDistrict district,
+            @Parameter(description = "행정동")
             @RequestParam("dong") String dong
     ) {
         TradeAreasResponseDto response = dataService.listByDistrictAndDong(district, dong);
