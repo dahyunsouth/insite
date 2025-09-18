@@ -36,7 +36,7 @@ export default function CtaPillButton({
 }: CtaPillButtonProps) {
   const widthClasses = fullWidth
     ? "w-full"
-    : "w-[375px] max-w-full";
+    : "w-auto min-w-[200px] max-w-[90vw]";
 
   const maxWidthStyle = maxWidth ? { maxWidth: `${Math.max(0, maxWidth)}px` } : undefined;
 
@@ -48,7 +48,7 @@ export default function CtaPillButton({
       disabled={disabled}
       className={
         "group relative isolate inline-flex items-center justify-center " +
-        "h-[50px] px-[50px] py-[20px] " +
+        "h-[50px] px-[30px] py-[20px] " +
         `${widthClasses} ` +
         "rounded-[100px] text-white select-none " +
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 " +

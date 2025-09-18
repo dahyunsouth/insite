@@ -18,14 +18,20 @@ interface KakaoOverlay {
   setMap: (map: any) => void;
 }
 
-export default function TradeAreaPoligon() {
+interface TradeAreaPoligonProps {
+  onTradeAreaSelect?: (tradeAreaName: string | null) => void;
+  onShowMarketList?: (district: string, dong: string) => void;
+}
+
+export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }: TradeAreaPoligonProps) {
   const { map } = useKakaoMapContext();
   const tradeAreaPolygonsRef = useRef<KakaoPolygon[]>([]);
   const tradeAreaLabelsRef = useRef<KakaoOverlay[]>([]);
   const eventListenersRef = useRef<(() => void)[]>([]);
   const isShowingRef = useRef<boolean>(false);
-  const polygonMapRef = useRef<Map<string, {polygon: KakaoPolygon, centerLat: number, centerLng: number, polygonPaths: PolygonPath[][]}>>(new Map());
+  const polygonMapRef = useRef<Map<string, {polygon: KakaoPolygon, centerLat: number, centerLng: number, polygonPaths: PolygonPath[][], tradeAreaName: string, district: string, dong: string}>>(new Map());
   const globalEventListenerRef = useRef<((e: Event) => void) | null>(null);
+  const selectedTradeAreaRef = useRef<string | null>(null);
 
   // 전역 이벤트 위임 설정
   const setupGlobalEventDelegation = useCallback(() => {
@@ -49,10 +55,121 @@ export default function TradeAreaPoligon() {
       
       if (!polygonData) return;
 
-      const { polygon, centerLat, centerLng } = polygonData;
+      const { polygon, centerLat, centerLng, tradeAreaName, district, dong } = polygonData;
 
       if (e.type === 'mouseenter') {
-        // 폴리곤 호버 효과
+        // 선택된 상권이 아닌 경우에만 호버 효과 적용
+        if (selectedTradeAreaRef.current !== labelId) {
+          // 폴리곤 호버 효과
+          polygon.setOptions({
+            fillColor: '#3288FF',
+            fillOpacity: 0.3,
+            strokeWeight: 3,
+            strokeColor: '#3288FF',
+            strokeOpacity: 1,
+            zIndex: 1000
+          });
+          
+          // 라벨도 최상위로 올리기 (기본 레이아웃 유지하면서 hover 스타일 적용)
+          if (target.style) {
+            target.style.zIndex = '9999';
+            target.style.transform = 'scale(1.05)';
+            target.style.boxShadow = '0 4px 12px rgba(50, 136, 255, 0.4)';
+            target.style.backgroundColor = 'rgba(50, 136, 255, 0.9)';
+            target.style.color = '#ffffff';
+            target.style.textShadow = '1px 1px 2px rgba(0,0,0,0.7)';
+            // 기본 레이아웃 속성들 유지
+            target.style.padding = '4px 8px';
+            target.style.fontSize = `${12}px`;
+            target.style.fontWeight = 'bold';
+            target.style.textAlign = 'center';
+            target.style.whiteSpace = 'nowrap';
+            target.style.pointerEvents = 'auto';
+            target.style.cursor = 'pointer';
+            target.style.borderRadius = '6px';
+            target.style.border = '1px solid rgba(50, 136, 255, 0.8)';
+            target.style.transition = 'all 0.2s ease';
+            target.style.position = 'relative';
+          }
+        }
+      } else if (e.type === 'mouseleave') {
+        // 선택된 상권이 아닌 경우에만 호버 효과 제거
+        if (selectedTradeAreaRef.current !== labelId) {
+          // 폴리곤 호버 효과 제거
+          polygon.setOptions({
+            fillColor: '#3288FF',
+            fillOpacity: 0,
+            strokeWeight: 1,
+            strokeColor: '#3288FF',
+            strokeOpacity: 0.8,
+            zIndex: 2
+          });
+          
+          // 라벨 원래 상태로 복원 (기본 스타일 유지)
+          if (target.style) {
+            target.style.zIndex = '100';
+            target.style.transform = 'scale(1)';
+            target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+            target.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+            target.style.color = '#000000';
+            target.style.textShadow = 'none';
+            // 기본 레이아웃 속성들 유지
+            target.style.padding = '4px 8px';
+            target.style.fontSize = `${12}px`;
+            target.style.fontWeight = 'bold';
+            target.style.textAlign = 'center';
+            target.style.whiteSpace = 'nowrap';
+            target.style.pointerEvents = 'auto';
+            target.style.cursor = 'pointer';
+            target.style.borderRadius = '6px';
+            target.style.border = '1px solid rgba(50, 136, 255, 0.8)';
+            target.style.transition = 'all 0.2s ease';
+            target.style.position = 'relative';
+          }
+        }
+      } else if (e.type === 'click') {
+        // 이전에 선택된 상권이 있다면 해제
+        if (selectedTradeAreaRef.current) {
+          const prevPolygonData = polygonMapRef.current.get(selectedTradeAreaRef.current);
+          if (prevPolygonData) {
+            prevPolygonData.polygon.setOptions({
+              fillColor: '#3288FF',
+              fillOpacity: 0,
+              strokeWeight: 1,
+              strokeColor: '#3288FF',
+              strokeOpacity: 0.8,
+              zIndex: 2
+            });
+            
+            // 이전 라벨 스타일 복원 (기본 스타일 유지)
+            const prevLabelElement = document.getElementById(selectedTradeAreaRef.current);
+            if (prevLabelElement && prevLabelElement.style) {
+              prevLabelElement.style.zIndex = '100';
+              prevLabelElement.style.transform = 'scale(1)';
+              prevLabelElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+              prevLabelElement.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+              prevLabelElement.style.color = '#000000';
+              prevLabelElement.style.textShadow = 'none';
+              // 기본 레이아웃 속성들 유지
+              prevLabelElement.style.padding = '4px 8px';
+              prevLabelElement.style.fontSize = `${12}px`;
+              prevLabelElement.style.fontWeight = 'bold';
+              prevLabelElement.style.textAlign = 'center';
+              prevLabelElement.style.whiteSpace = 'nowrap';
+              prevLabelElement.style.pointerEvents = 'auto';
+              prevLabelElement.style.cursor = 'pointer';
+              prevLabelElement.style.borderRadius = '6px';
+              prevLabelElement.style.border = '1px solid rgba(50, 136, 255, 0.8)';
+              prevLabelElement.style.transition = 'all 0.2s ease';
+              prevLabelElement.style.position = 'relative';
+            }
+          }
+        }
+
+        // 새로운 상권 선택
+        selectedTradeAreaRef.current = labelId;
+        
+        // 선택된 상권의 스타일 유지 (클릭 후에도 hover 상태 유지)
         polygon.setOptions({
           fillColor: '#3288FF',
           fillOpacity: 0.3,
@@ -62,32 +179,37 @@ export default function TradeAreaPoligon() {
           zIndex: 1000
         });
         
-        // 라벨도 최상위로 올리기 (이미 onmouseover 이벤트에서 처리되지만 추가 보장)
+        // 라벨 스타일 유지 (기본 레이아웃 유지하면서 선택 스타일 적용)
         if (target.style) {
           target.style.zIndex = '9999';
           target.style.transform = 'scale(1.05)';
           target.style.boxShadow = '0 4px 12px rgba(50, 136, 255, 0.4)';
+          target.style.backgroundColor = 'rgba(50, 136, 255, 0.9)';
+          target.style.color = '#ffffff';
+          target.style.textShadow = '1px 1px 2px rgba(0,0,0,0.7)';
+          // 기본 레이아웃 속성들 유지
+          target.style.padding = '4px 8px';
+          target.style.fontSize = `${12}px`;
+          target.style.fontWeight = 'bold';
+          target.style.textAlign = 'center';
+          target.style.whiteSpace = 'nowrap';
+          target.style.pointerEvents = 'auto';
+          target.style.cursor = 'pointer';
+          target.style.borderRadius = '6px';
+          target.style.border = '1px solid rgba(50, 136, 255, 0.8)';
+          target.style.transition = 'all 0.2s ease';
+          target.style.position = 'relative';
         }
-      } else if (e.type === 'mouseleave') {
-        // 폴리곤 호버 효과 제거
-        polygon.setOptions({
-          fillColor: '#3288FF',
-          fillOpacity: 0,
-          strokeWeight: 1,
-          strokeColor: '#3288FF',
-          strokeOpacity: 0.8,
-          zIndex: 2
-        });
-        
-        // 라벨 원래 상태로 복원
-        if (target.style) {
-          target.style.zIndex = '100';
-          target.style.transform = 'scale(1)';
-          target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-        }
-      } else if (e.type === 'click') {
+
+        // 지도 중심 이동 및 확대
         map.setCenter(new (window.kakao.maps as any).LatLng(centerLat, centerLng));
         map.setLevel(4);
+        
+        // 상권명을 부모 컴포넌트로 전달
+        onTradeAreaSelect?.(tradeAreaName);
+        
+        // 상권리스트 활성화
+        onShowMarketList?.(district, dong);
       }
     };
 
@@ -96,7 +218,7 @@ export default function TradeAreaPoligon() {
     document.addEventListener('click', globalEventHandler, true);
     
     globalEventListenerRef.current = globalEventHandler;
-  }, [map]);
+  }, [map, onTradeAreaSelect, onShowMarketList]);
 
   // 상권별 폴리곤과 라벨 숨김 함수 (고성능 최적화)
   const hideTradeAreaPolygons = useCallback(() => {
@@ -104,6 +226,10 @@ export default function TradeAreaPoligon() {
 
     // 즉시 상태 변경으로 중복 실행 방지
     isShowingRef.current = false;
+    
+    // 선택 상태 초기화
+    selectedTradeAreaRef.current = null;
+    onTradeAreaSelect?.(null);
     
     // 폴리곤 맵 정리
     polygonMapRef.current.clear();
@@ -122,7 +248,7 @@ export default function TradeAreaPoligon() {
     tradeAreaPolygonsRef.current = [];
     tradeAreaLabelsRef.current = [];
     eventListenersRef.current = [];
-  }, []);
+  }, [onTradeAreaSelect, onShowMarketList]);
 
   // 상권별 폴리곤과 라벨 표시 함수 (레벨 1~5)
   const showTradeAreaPolygons = useCallback(() => {
@@ -253,9 +379,7 @@ export default function TradeAreaPoligon() {
           position: relative;
           z-index: 100;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        " onmouseover="this.style.backgroundColor='rgba(50, 136, 255, 0.9)'; this.style.color='#ffffff'; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1.05)'; this.style.zIndex='9999'; this.style.boxShadow='0 4px 12px rgba(50, 136, 255, 0.4)';" 
-           onmouseout="this.style.backgroundColor='rgba(255, 255, 255, 0.9)'; this.style.color='#000000'; this.style.textShadow='none'; this.style.transform='scale(1)'; this.style.zIndex='100'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';"
-        >${tradeArea.trdar_cd_nm}</div>`;
+        ">${tradeArea.trdar_cd_nm}</div>`;
 
         const customOverlay = new (window.kakao.maps as any).CustomOverlay({
           map: map,
@@ -270,7 +394,10 @@ export default function TradeAreaPoligon() {
           polygon: matchingPolygonData.polygon,
           centerLat,
           centerLng,
-          polygonPaths: matchingPolygonData.polygonPaths
+          polygonPaths: matchingPolygonData.polygonPaths,
+          tradeAreaName: tradeArea.trdar_cd_nm,
+          district: tradeArea.signgu_cd_nm,
+          dong: tradeArea.adstrd_cd_nm
         });
 
         labels.push(customOverlay);

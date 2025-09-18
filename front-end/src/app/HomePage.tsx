@@ -67,9 +67,10 @@ export default function HomePage() {
   const [isLoadViewMinimized, setIsLoadViewMinimized] = useState(false);
   const [isCafeActive, setIsCafeActive] = useState(false);
   const [showMarketingArea, setShowMarketingArea] = useState(false);
-  const [showMarketList, setShowMarketList] = useState(false);
-  const [currentDistrict, setCurrentDistrict] = useState<string>('');
-  const [currentDong, setCurrentDong] = useState<string>('');
+  const [showMarketList, setShowMarketList] = useState(true);
+  const [currentDistrict, setCurrentDistrict] = useState<string>('강남구');
+  const [currentDong, setCurrentDong] = useState<string>('역삼동');
+  const [selectedTradeAreaName, setSelectedTradeAreaName] = useState<string | null>(null);
 
   // 최신 상태를 참조하기 위한 ref
   const showMarketListRef = useRef(showMarketList);
@@ -243,7 +244,12 @@ export default function HomePage() {
   return (
     <div className="relative w-screen h-screen overflow-hidden">
       {/* 1) 풀스크린 카카오맵 (배경 고정) */}
-      <KakaoMap cafeActive={isCafeActive} showMarketingArea={showMarketingArea}>
+      <KakaoMap 
+        cafeActive={isCafeActive} 
+        showMarketingArea={showMarketingArea}
+        onTradeAreaSelect={setSelectedTradeAreaName}
+        onShowMarketList={handleShowMarketList}
+      >
         {/* 좌측 네비게이션 바 */}
         <div className="fixed w-1/4 top-0 left-0 right-0 z-20 h-screen flex flex-col">
           {showMyPage && (
@@ -299,14 +305,16 @@ export default function HomePage() {
         />
       </KakaoMap>
 
-      {/* Bottom-center CTA preview for verification */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30">
-        <CtaPillButton
-          label="상권 분석 자세히 보기"
-          ariaLabel="상권 분석 자세히 보기"
-          onPress={() => setIsDetailOpen(true)}
-        />
-      </div>
+      {/* Bottom-center CTA preview for verification - 상권 선택 시에만 표시 */}
+      {selectedTradeAreaName && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 px-4 max-w-[calc(100vw-2rem)]">
+          <CtaPillButton
+            label={`${selectedTradeAreaName} 상권 상세보기`}
+            ariaLabel={`${selectedTradeAreaName} 상권 상세보기`}
+            onPress={() => setIsDetailOpen(true)}
+          />
+        </div>
+      )}
 
       {/* Area detail modal */}
       <AreaDetailModal
