@@ -4,6 +4,7 @@ import com.ssafy.insite.common.dto.response.BaseResponse;
 import com.ssafy.insite.data.dto.response.QuarterSummaryResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
 import com.ssafy.insite.data.service.DataService;
@@ -45,7 +46,7 @@ public class DataController {
     }
 
     @GetMapping("/quarter-summary")
-    @Operation(summary = "상권별 분기 요약 조회")
+    @Operation(summary = "상권 분기 요약 조회")
     public BaseResponse<QuarterSummaryResponseDto> getQuarterSummary(
             @Parameter(description = "기준_년분기_코드")
             @RequestParam("stdrYyquCd") String stdrYyquCd,
@@ -53,6 +54,16 @@ public class DataController {
             @RequestParam("trdarCd") Integer trdarCd
     ) {
         QuarterSummaryResponseDto response = dataService.findQuarterSummary(stdrYyquCd, trdarCd);
+        return new BaseResponse<>(response);
+    }
+
+    @GetMapping("/trade-area-detail")
+    @Operation(summary = "상권 상세 정보 조회")
+    public BaseResponse<TradeAreaDetailResponseDto> findTradeAreaDetail(
+            @Parameter(description = "상권_코드")
+            @RequestParam("trdarCd") Integer trdarCd
+    ) {
+        TradeAreaDetailResponseDto response = dataService.findTradeAreaDetail(trdarCd);
         return new BaseResponse<>(response);
     }
 
