@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import RadarChart from "@/components/molecules/Detail/Chart/RadarChart";
 import PcDetailPanel, { PcMeta } from "@/components/organisms/Compare/PcDetailPanel";
+import TradeAreaPicker, { TradeAreaSelection } from "@/components/molecules/Compare/TradeAreaPicker";
 
 type CompareTradeAreasModalProps = {
   open: boolean;
@@ -14,6 +15,8 @@ type CompareTradeAreasModalProps = {
 
 export default function CompareTradeAreasModal({ open, onClose, leftOpen = true }: CompareTradeAreasModalProps) {
   const [selectedPc, setSelectedPc] = useState<number>(0);
+  const [selectionA, setSelectionA] = useState<TradeAreaSelection>({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
+  const [selectionB, setSelectionB] = useState<TradeAreaSelection>({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
   // Close on ESC
   useEffect(() => {
     if (!open) return;
@@ -88,10 +91,11 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
           {/* Body */}
           <div className="flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-8 py-8">
             {/* Upper Section: Chart + Detail */}
-            <div className="grid grid-cols-[400px_1fr] gap-x-8">
-              {/* Upper Left: Radar Chart */}
-              <div>
-                {(() => {
+            {false && (
+              <div className="grid grid-cols-[400px_1fr] gap-x-8">
+                {/* Upper Left: Radar Chart */}
+                <div>
+                  {(() => {
                   const labels = [
                     "PC1","PC2","PC3","PC4","PC5","PC6","PC7","PC8","PC9","PC10",
                   ];
@@ -113,11 +117,11 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
                     </div>
                   );
                 })()}
-              </div>
+                </div>
 
-              {/* Upper Right: Detail panel */}
-              <div>
-                {(() => {
+                {/* Upper Right: Detail panel */}
+                <div>
+                  {(() => {
                   const pcs: PcMeta[] = [
                     { id:1, code:"PC1", name:"도심·고소득·대형", features:["총_직장_인구_수_log","인구당_소득","영역_면적"], meaning:"도심형 대형·고소득 상권 축", highText:"CBD·광역 상업지처럼 규모와 구매력이 큰 곳", lowText:"소규모·저소득·면적이 작은 주거 위주 상권" },
                     { id:2, code:"PC2", name:"집적·안정", features:["점포_밀도","운영_영업_개월_평균","총_유동인구_수_sqrt"], meaning:"안정·집적 상권 축", highText:"상업 집적 + 운영 안정성이 높은 곳", lowText:"저집적·저안정 상권" },
@@ -144,30 +148,28 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
                     />
                   );
                 })()}
-              </div>
+                </div>
             </div>
+            )}
 
             {/* Lower Section: At a Glance */}
             {/* Selectors aligned to columns */}
             <div className="mt-10">
               <div className="text-2xl font-extrabold text-gray-900">한 눈에 보기</div>
               <div className={`mt-4 grid gap-x-10 ${showThird ? "grid-cols-[1fr_1fr_240px]" : "grid-cols-2"}`}>
-                <div>
-                  <button type="button" className="w-full flex items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-left text-gray-700 hover:bg-gray-50">
-                    <span>상권 A 선택하기</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="h-5 w-5 text-gray-500">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15l3.25-3.25L14.75 15" />
-                    </svg>
-                  </button>
-                </div>
-                <div>
-                  <button type="button" className="w-full flex items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-left text-gray-700 hover:bg-gray-50">
-                    <span>상권 B 선택하기</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="h-5 w-5 text-gray-500">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15l3.25-3.25L14.75 15" />
-                    </svg>
-                  </button>
-                </div>
+                <TradeAreaPicker
+                  title="상권 A"
+                  value={selectionA}
+                  onChange={setSelectionA}
+                  accentColor="#2563eb"
+                  backgroundColor="rgba(190, 210, 253, 0.1)"
+                />
+                <TradeAreaPicker title="상권 B"
+                value={selectionB}
+                onChange={setSelectionB}
+                accentColor="#f472b6"
+                backgroundColor="rgba(252, 220, 237, 0.1)"
+                />
                 {showThird && <div />}
               </div>
             </div>
