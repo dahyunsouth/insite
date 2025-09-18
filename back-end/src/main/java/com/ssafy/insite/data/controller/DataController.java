@@ -4,6 +4,7 @@ import com.ssafy.insite.common.dto.response.BaseResponse;
 import com.ssafy.insite.data.dto.response.QuarterSummaryResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
 import com.ssafy.insite.data.service.DataService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,5 +61,16 @@ public class DataController {
     public BaseResponse<String> getLatestQuarterCode() {
         String latestCode = dataService.findLatestQuarterCode();
         return new BaseResponse<>(latestCode);
+    }
+
+    @GetMapping("/trade-areas")
+    @Operation(summary = "행정동 내 상권 리스트 조회")
+    public BaseResponse<TradeAreasResponseDto> listByDistrictAndDong(
+            @Parameter(description = "자치구명 및 행정동명")
+            @RequestParam("district") SeoulDistrict district,
+            @RequestParam("dong") String dong
+    ) {
+        TradeAreasResponseDto response = dataService.listByDistrictAndDong(district, dong);
+        return new BaseResponse<>(response);
     }
 }

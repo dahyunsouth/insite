@@ -3,6 +3,7 @@ package com.ssafy.insite.data.service;
 import com.ssafy.insite.data.dto.response.QuarterSummaryResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
 import com.ssafy.insite.data.repository.TradeAreaRegionRepository;
 import com.ssafy.insite.data.repository.TradeAreaStorCdRepository;
@@ -42,5 +43,12 @@ public class DataServiceImpl implements DataService {
     @Transactional(readOnly = true)
     public String findLatestQuarterCode() {
         return tradeAreaStorCdRepository.findLatestQuarterCode();
+    }
+
+    // 행정동 내 상권 리스트 조회
+    @Override
+    @Transactional(readOnly = true)
+    public TradeAreasResponseDto listByDistrictAndDong(SeoulDistrict district, String dong) {
+        return tradeAreaRegionRepository.listByDistrictAndDong(district, dong);
     }
 }
