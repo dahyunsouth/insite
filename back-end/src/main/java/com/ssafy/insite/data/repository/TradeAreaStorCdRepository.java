@@ -25,7 +25,7 @@ public class TradeAreaStorCdRepository {
         return v != null ? v.doubleValue() : 0.0;
     }
 
-    // 상권별 분기 요약 조회
+    // 상권 분기 요약 조회
     public QuarterSummaryResponseDto findQuarterSummary(String stdrYyquCd, Integer trdarCd) {
         Record6<UInteger, UInteger, BigDecimal, UInteger, BigDecimal, UInteger> record =
                 dsl.select(
