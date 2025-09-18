@@ -4,6 +4,8 @@ import { useEffect, useRef, createContext, useContext, ReactNode, useState } fro
 import { DefaultCircleWithText } from './CircleWithText';
 import Notification from './Notification';
 import { useNotification } from './useNotification';
+import LoadView from './LoadView';
+import CafeSearch from './CafeSearch';
 
 declare global {
   interface Window {
@@ -24,7 +26,7 @@ interface KakaoMapContextType {
 const KakaoMapContext = createContext<KakaoMapContextType | null>(null);
 
 // KakaoMap Provider 컴포넌트
-export function KakaoMapProvider({ children, showNotification }: { children: ReactNode; showNotification: (message: string) => void }) {
+export function KakaoMapProvider({ children, showNotification, cafeActive = false }: { children: ReactNode; showNotification: (message: string) => void; cafeActive?: boolean }) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<any>(null);
 
@@ -130,13 +132,21 @@ export function useKakaoMapContext() {
 }
 
 // 기존 컴포넌트는 Provider로 감싸서 사용
-export default function FullScreenKakaoMap({ children }: { children?: ReactNode }) {
+export default function FullScreenKakaoMap({ children, cafeActive = false }: { children?: ReactNode; cafeActive?: boolean }) {
   const { notification, showNotification, hideNotification } = useNotification();
 
+  console.log('FullScreenKakaoMap 렌더링:', { cafeActive });
+
   return (
-    <KakaoMapProvider showNotification={showNotification}>
+    <KakaoMapProvider showNotification={showNotification} cafeActive={cafeActive}>
       {/* 기본 원과 텍스트 예제 */}
       <DefaultCircleWithText />
+      
+      {/* 로드뷰 컴포넌트 */}
+      <LoadView />
+      
+      {/* 카페 검색 컴포넌트 */}
+      <CafeSearch isActive={cafeActive} />
       
       {/* 자식 컴포넌트들 */}
       {children}

@@ -1,6 +1,5 @@
 package com.ssafy.insite.data.dto.response;
 
-import com.ssafy.insite.data.enums.SeoulDistrict;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -17,6 +17,17 @@ type StoreResponse = {
   netChange: number;
 };
 
+type LatestQuarterResponse = {
+  httpStatus: string;
+  isSuccess: boolean;
+  message: string;
+  code: number;
+  result: string;
+};
+
+const BACKEND_BASE_URL = (process.env.NEXT_PUBLIC_BACKEND_BASE_URL ?? "http://43.203.196.29:8080").replace(/\/+$/, "");
+const LATEST_QUARTER_ENDPOINT = `${BACKEND_BASE_URL}/api/v1/data/latest-quarter`;
+
 export default function StoreCard({ trdarCode }: Props) {
   const [data, setData] = useState<StoreResponse | null>(null);
   const [quarter, setQuarter] = useState<string | null>(null);
@@ -33,9 +44,13 @@ export default function StoreCard({ trdarCode }: Props) {
       setLoading(true);
       setError(null);
       try {
-        const qRes = await fetch("/api/seoul/latest-quarter", { cache: "no-store" });
+        const qRes = await fetch(LATEST_QUARTER_ENDPOINT, { cache: "no-store" });
         if (!qRes.ok) throw new Error("latest-quarter failed");
-        const q = (await qRes.json()).quarter as string;
+        const qJson = (await qRes.json()) as LatestQuarterResponse;
+        if (!qJson?.isSuccess || qJson?.httpStatus !== "OK" || typeof qJson?.result !== "string") {
+          throw new Error("latest-quarter payload invalid");
+        }
+        const q = qJson.result;
         if (aborted) return;
         setQuarter(q);
 

@@ -1,0 +1,113 @@
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[65518],{839962:function(e,t,n){n.d(t,{E:function(){return r}});const r=n(742368).iv`
+  /*! minireset.css v0.0.6 | MIT License | github.com/jgthms/minireset.css */
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  &:not([data-no-reset='true'], [data-no-reset='true'] *) {
+    &:where(
+        a,
+        blockquote,
+        button,
+        dd,
+        dl,
+        dt,
+        fieldset,
+        figure,
+        form,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        header,
+        iframe,
+        input,
+        legend,
+        li,
+        menu,
+        nav,
+        ol,
+        p,
+        pre,
+        select,
+        section,
+        table,
+        td,
+        textarea,
+        th,
+        ul
+      ) {
+      margin: 0;
+      padding: 0;
+    }
+
+    &:where(h1, h2, h3, h4, h5, h6) {
+      font-size: 100%;
+      font-weight: normal;
+    }
+
+    &:where(ul) {
+      list-style: none;
+    }
+
+    &:where(button) {
+      background: none;
+      color: inherit;
+      border: none;
+      padding: 0;
+      font: inherit;
+      cursor: pointer;
+      outline: inherit;
+    }
+
+    &:where(input, textarea, select, a) {
+      margin: 0;
+      font-family: inherit;
+      color: inherit;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      &:visited {
+        color: inherit;
+      }
+    }
+  }
+
+  &:not(html):not([data-no-reset='true'], [data-no-reset='true'] *) {
+    &,
+    &::before,
+    &::after {
+      box-sizing: inherit;
+    }
+  }
+
+  html {
+    box-sizing: border-box;
+  }
+
+  &:not([data-no-reset='true'], [data-no-reset='true'] *) {
+    &:where(img, video) {
+      height: auto;
+    }
+
+    &:where(iframe) {
+      border: 0;
+    }
+
+    &:where(table) {
+      border-collapse: collapse;
+      border-spacing: 0;
+    }
+
+    &:where(td, th) {
+      padding: 0;
+    }
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-smooth: never;
+  }
+`},639530:function(e,t,n){n.d(t,{H:function(){return N},Q:function(){return M}});var r=n(897491),o=n(231821),i=n(417342),a=n(322612),h=n(179448),s=n(451870),d=n(182474),l=n(846153),u=n(149144),c=n(908159),g=n(797831),b=n(856925);const f=r.b,m=o.F,p=i.M,w=a.g,k=h.C,v=s.J,x=d.U,y=l.K,z=u.O,_=c.k,C=g.X,E=b.B,M={...f,...p,...k,...x,...z,...C},N={...m,...w,...v,...y,..._,...E}}}]);
