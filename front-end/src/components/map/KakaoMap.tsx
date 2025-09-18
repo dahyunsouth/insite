@@ -129,7 +129,7 @@ export function useKakaoMapContext() {
 }
 
 // 기존 컴포넌트는 Provider로 감싸서 사용
-export default function FullScreenKakaoMap({ children, cafeActive = false }: { children?: ReactNode; cafeActive?: boolean }) {
+export default function FullScreenKakaoMap({ children, cafeActive = false, showMarketingArea = false }: { children?: ReactNode; cafeActive?: boolean; showMarketingArea?: boolean }) {
   const { notification, showNotification, hideNotification } = useNotification();
 
   console.log('FullScreenKakaoMap 렌더링:', { cafeActive });
@@ -152,7 +152,7 @@ export default function FullScreenKakaoMap({ children, cafeActive = false }: { c
       <ZoomBlock />
       
       {/* 구별 폴리곤 표시 컴포넌트 (레벨 7~8) */}
-      <SignGuPoligon />
+      <SignGuPoligon showMarketingArea={showMarketingArea} />
       
       {/* 행정동별 폴리곤 표시 컴포넌트 (레벨 6) */}
       <AdstrdPoligon />

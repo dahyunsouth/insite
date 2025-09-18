@@ -5,21 +5,38 @@ import TotalMenuBar from '@/components/molecules/LeftNavbar/TotalMenuBar';
 import TotalMarketingArea from '@/components/molecules/LeftNavbar/TotalMarketingArea';
 import TotalMonthlySales from '@/components/molecules/LeftNavbar/TotalMonthlySales';
 
-const ThirdLeftNavbar = () => {
+interface ThirdLeftNavbarProps {
+  onMarketingAreaChange?: (show: boolean) => void;
+}
+
+const ThirdLeftNavbar: React.FC<ThirdLeftNavbarProps> = ({ onMarketingAreaChange }) => {
   const [showMarketingArea, setShowMarketingArea] = useState(false);
   const [showMonthlySales, setShowMonthlySales] = useState(false);
+
+  const handleMarketingAreaToggle = (show: boolean) => {
+    setShowMarketingArea(show);
+    onMarketingAreaChange?.(show);
+  };
+
+  const handleMonthlySalesToggle = (show: boolean) => {
+    setShowMonthlySales(show);
+    // 월매출 모드일 때는 상권 모드 비활성화
+    if (show) {
+      onMarketingAreaChange?.(false);
+    }
+  };
 
   return (
     <div className="w-full bg-white flex flex-col items-center">
       <div className='w-full'>
         {showMarketingArea ? (
-          <TotalMarketingArea onClose={() => setShowMarketingArea(false)} />
+          <TotalMarketingArea onClose={() => handleMarketingAreaToggle(false)} />
         ) : showMonthlySales ? (
-          <TotalMonthlySales onClose={() => setShowMonthlySales(false)} />
+          <TotalMonthlySales onClose={() => handleMonthlySalesToggle(false)} />
         ) : (
           <TotalMenuBar 
-            onSelectMarket={() => setShowMarketingArea(true)}
-            onSelectMonthlySales={() => setShowMonthlySales(true)}
+            onSelectMarket={() => handleMarketingAreaToggle(true)}
+            onSelectMonthlySales={() => handleMonthlySalesToggle(true)}
           />
         )}
       </div>

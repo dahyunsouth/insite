@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useKakaoMapContext } from './KakaoMap';
 import signGuData from '../../data/SignGuValue.json';
 import signGuPolygonData from '../../data/SignGuPoligon.json';
 import { tmToWgs84 } from '../../utils/coordinateTransform';
+import { getColorByCount, addOpacityToColor, darkenColor } from '../../utils/marketingAreaColors';
+import { API_ENDPOINTS } from '../../config/api';
 
 // 타입 정의
 interface KakaoPolygon {
@@ -17,14 +19,73 @@ interface KakaoOverlay {
   setMap: (map: any) => void;
 }
 
-export default function SignGuPoligon() {
+interface GuCountData {
+  [guName: string]: number;
+}
+
+interface SignGuPolygonProps {
+  showMarketingArea?: boolean;
+}
+
+export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolygonProps) {
   const { map } = useKakaoMapContext();
   const signGuPolygonsRef = useRef<KakaoPolygon[]>([]);
   const signGuLabelsRef = useRef<KakaoOverlay[]>([]);
   const eventListenersRef = useRef<(() => void)[]>([]);
   const isShowingRef = useRef<boolean>(false);
-  const polygonMapRef = useRef<Map<string, {polygon: KakaoPolygon, centerLat: number, centerLng: number}>>(new Map());
+  const polygonMapRef = useRef<Map<string, {polygon: KakaoPolygon, centerLat: number, centerLng: number, guName: string}>>(new Map());
   const globalEventListenerRef = useRef<((e: Event) => void) | null>(null);
+  const [guCountData, setGuCountData] = useState<GuCountData>({});
+  const [isLoadingData, setIsLoadingData] = useState<boolean>(false);
+
+  // 자치구별 상권 개수 데이터 로드
+  const loadGuCountData = useCallback(async () => {
+    if (isLoadingData) return;
+    
+    setIsLoadingData(true);
+    const countData: GuCountData = {};
+    
+    try {
+      // 모든 자치구에 대해 병렬로 API 호출
+      const promises = signGuData.DATA.map(async (district: any) => {
+        try {
+          const response = await fetch(`${API_ENDPOINTS.COUNT_BY_GU}?district=${encodeURIComponent(district.signgu_nm)}`);
+          if (response.ok) {
+            const data = await response.json();
+            return { guName: district.signgu_nm, count: data.result?.count || 0 };
+          } else {
+            console.warn(`Failed to load data for ${district.signgu_nm}:`, response.status, response.statusText);
+            return { guName: district.signgu_nm, count: 0 };
+          }
+        } catch (error) {
+          console.warn(`Error loading data for ${district.signgu_nm}:`, error);
+          return { guName: district.signgu_nm, count: 0 };
+        }
+      });
+
+      const results = await Promise.all(promises);
+      
+      // 결과를 GuCountData 객체로 변환
+      results.forEach(result => {
+        countData[result.guName] = result.count;
+      });
+      
+      setGuCountData(countData);
+      console.log('구별 상권 개수 데이터 로드 완료:', countData);
+      
+    } catch (error) {
+      console.error('Error loading gu count data:', error);
+    } finally {
+      setIsLoadingData(false);
+    }
+  }, [isLoadingData]);
+
+  // showMarketingArea가 true일 때 데이터 로드
+  useEffect(() => {
+    if (showMarketingArea && Object.keys(guCountData).length === 0) {
+      loadGuCountData();
+    }
+  }, [showMarketingArea, guCountData, loadGuCountData]);
 
   // 전역 이벤트 위임 설정
   const setupGlobalEventDelegation = useCallback(() => {
@@ -38,20 +99,59 @@ export default function SignGuPoligon() {
       const polygonData = polygonMapRef.current.get(labelId);
       if (!polygonData) return;
 
-      const { polygon, centerLat, centerLng } = polygonData;
+      const { polygon, centerLat, centerLng, guName } = polygonData;
 
       if (e.type === 'mouseenter') {
-        polygon.setOptions({
-          fillOpacity: 0.5,
-          strokeWeight: 3,
-          strokeOpacity: 1
-        });
+        // 현재 상권 모드 상태를 실시간으로 확인
+        const isMarketingMode = showMarketingArea;
+        console.log(`🎯 ${guName} hover 시작: 상권모드=${isMarketingMode}`);
+        
+        if (isMarketingMode) {
+          // 상권 모드: 배경 불투명도만 20%로 증가, 색상은 유지
+          polygon.setOptions({
+            fillOpacity: 0.2,
+            strokeWeight: 2,
+            strokeOpacity: 1
+          });
+        } else {
+          // 일반 모드: 파란색 hover 효과
+          polygon.setOptions({
+            fillOpacity: 0.5,
+            strokeWeight: 2,
+            strokeOpacity: 1
+          });
+        }
       } else if (e.type === 'mouseleave') {
-        polygon.setOptions({
-          fillOpacity: 0, // 기본값으로 돌아갈 때 투명
-          strokeWeight: 1,
-          strokeOpacity: 1
-        });
+        // 현재 상권 모드 상태를 실시간으로 확인
+        const isMarketingMode = showMarketingArea;
+        console.log(`🔄 ${guName} hover 해제: 상권모드=${isMarketingMode}`);
+        
+        if (isMarketingMode) {
+          // 상권 모드일 때: 각 구의 원래 상권 색상으로 복원
+          const count = guCountData[guName] || 0;
+          const baseColor = getColorByCount(count);
+          const fillOpacity = count >= 5 ? 0.1 : 0;
+          
+          console.log(`  → ${guName} 복원: count=${count}, color=${baseColor}, opacity=${fillOpacity}`);
+          
+          polygon.setOptions({
+            strokeColor: baseColor,
+            fillColor: baseColor,
+            fillOpacity: fillOpacity,
+            strokeWeight: 1,
+            strokeOpacity: 1
+          });
+        } else {
+          // 일반 모드일 때: 기본 파란색으로 복원
+          console.log(`  → ${guName} 일반모드 복원`);
+          polygon.setOptions({
+            strokeColor: '#3288FF',
+            fillColor: '#3288FF',
+            fillOpacity: 0,
+            strokeWeight: 1,
+            strokeOpacity: 1
+          });
+        }
       } else if (e.type === 'click') {
         map.setCenter(new (window.kakao.maps as any).LatLng(centerLat, centerLng));
         map.setLevel(6);
@@ -63,7 +163,99 @@ export default function SignGuPoligon() {
     document.addEventListener('click', globalEventHandler, true);
     
     globalEventListenerRef.current = globalEventHandler;
-  }, [map]);
+  }, [map, showMarketingArea, guCountData]);
+
+  // 상권 모드 상태 변화에 따른 폴리곤 업데이트
+  useEffect(() => {
+    if (!isShowingRef.current) return;
+
+    // 상권 모드 변경 시 이벤트 핸들러 재설정
+    if (globalEventListenerRef.current) {
+      document.removeEventListener('mouseenter', globalEventListenerRef.current, true);
+      document.removeEventListener('mouseleave', globalEventListenerRef.current, true);
+      document.removeEventListener('click', globalEventListenerRef.current, true);
+      globalEventListenerRef.current = null;
+    }
+    setupGlobalEventDelegation();
+
+    if (showMarketingArea) {
+      // 상권 모드 ON: 상권 개수에 따른 색상 적용
+      if (Object.keys(guCountData).length > 0) {
+        console.log('🎯 상권 모드 활성화 - 폴리곤 색상 업데이트');
+        
+        signGuPolygonsRef.current.forEach((polygon, index) => {
+          const district = signGuData.DATA[index];
+          if (district) {
+            const guName = district.signgu_nm;
+            const count = guCountData[guName] || 0;
+            const baseColor = getColorByCount(count);
+            const fillOpacity = count >= 5 ? 0.1 : 0;
+            
+            polygon.setOptions({
+              strokeColor: baseColor,
+              fillColor: baseColor,
+              fillOpacity: fillOpacity,
+            });
+            
+            console.log(`  ${guName}: ${count}개 -> ${baseColor} (opacity: ${fillOpacity})`);
+          }
+        });
+        
+        // 라벨도 상권 모드 스타일로 업데이트
+        signGuLabelsRef.current.forEach((label, index) => {
+          const district = signGuData.DATA[index];
+          if (district) {
+            const guName = district.signgu_nm;
+            const count = guCountData[guName] || 0;
+            const baseColor = getColorByCount(count);
+            const labelBackgroundColor = addOpacityToColor(baseColor, 0.9);
+            const labelBorderColor = addOpacityToColor(baseColor, 0.8);
+            const hoverBackgroundColor = darkenColor(baseColor, 0.2);
+            
+            const currentLabelId = `signgu-label-${index}`;
+            const labelElement = document.getElementById(currentLabelId);
+            if (labelElement) {
+              labelElement.style.backgroundColor = labelBackgroundColor;
+              labelElement.style.borderColor = labelBorderColor;
+              labelElement.style.color = '#ffffff';
+              labelElement.style.textShadow = '1px 1px 2px rgba(0,0,0,0.7)';
+              
+              // hover 이벤트 업데이트
+              labelElement.setAttribute('onmouseover', 
+                `this.style.backgroundColor='${hoverBackgroundColor}'; this.style.borderColor='${hoverBackgroundColor}'; this.style.color='#ffffff'; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1.1)'`
+              );
+              labelElement.setAttribute('onmouseout', 
+                `this.style.backgroundColor='${labelBackgroundColor}'; this.style.borderColor='${labelBorderColor}'; this.style.color='#ffffff'; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1)'`
+              );
+            }
+          }
+        });
+      }
+    } else {
+      // 상권 모드 OFF: 기본 상태로 복원
+      console.log('🔄 상권 모드 비활성화 - 기본 상태로 복원');
+      
+      signGuPolygonsRef.current.forEach((polygon) => {
+        polygon.setOptions({
+          strokeColor: '#3288FF',
+          fillColor: '#3288FF',
+          fillOpacity: 0,
+        });
+      });
+      
+      // 라벨도 기본 스타일로 복원
+      signGuLabelsRef.current.forEach((label, index) => {
+        const currentLabelId = `signgu-label-${index}`;
+        const labelElement = document.getElementById(currentLabelId);
+        if (labelElement) {
+          labelElement.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+          labelElement.style.borderColor = 'rgba(50, 136, 255, 0.8)';
+          labelElement.style.color = '#000000';
+          labelElement.style.textShadow = 'none';
+        }
+      });
+    }
+  }, [showMarketingArea, guCountData, setupGlobalEventDelegation]);
 
   // 구별 폴리곤과 라벨 숨김 함수 (고성능 최적화)
   const hideSignGuPolygons = useCallback(() => {
@@ -145,28 +337,52 @@ export default function SignGuPoligon() {
         // 해당하는 구 정보 찾기 (인덱스 기반으로 매칭)
         const district = signGuData.DATA[index];
         if (district) {
+          // 상권 개수에 따른 색상 결정
+          const guName = district.signgu_nm;
+          const count = guCountData[guName] || 0;
+          const baseColor = showMarketingArea ? getColorByCount(count) : '#3288FF';
+          const strokeColor = baseColor;
+          const fillColor = baseColor;
+          const fillOpacity = showMarketingArea ? 0.1 : 0;
+
+          // 폴리곤 색상 업데이트
+          kakaoPolygon.setOptions({
+            strokeColor: strokeColor,
+            fillColor: fillColor,
+            fillOpacity: fillOpacity,
+          });
+
           // 구 중심 좌표로 라벨 위치 설정 (정확한 TM->WGS84 변환)
           const { lat: centerLat, lng: centerLng } = tmToWgs84(district.xcnts_value, district.ydnts_value);
           const position = new (window.kakao.maps as any).LatLng(centerLat, centerLng);
 
-          // 구 이름 라벨 생성 (AdstrdPoligon.tsx와 동일한 스타일)
+          // 구 이름 라벨 생성
           const currentLabelId = `signgu-label-${index}`;
+          const labelBackgroundColor = showMarketingArea ? addOpacityToColor(baseColor, 0.9) : 'rgba(255, 255, 255, 0.9)';
+          const labelBorderColor = showMarketingArea ? addOpacityToColor(baseColor, 0.8) : 'rgba(50, 136, 255, 0.8)';
+          
+          // hover 시 배경색: 상권 모드일 때는 더 진한 색상, 일반 모드일 때는 파란색
+          const hoverBackgroundColor = showMarketingArea ? darkenColor(baseColor, 0.2) : 'rgba(50, 136, 255, 0.9)';
+          
+          const textColor = showMarketingArea ? '#ffffff' : '#000000';
+          const textShadow = showMarketingArea ? '1px 1px 2px rgba(0,0,0,0.7)' : 'none';
+          
           const content = `<div id="${currentLabelId}" class="signgu-label" style="
             padding: 6px 12px;
             font-size: ${fontSize}px;
             font-weight: bold;
-            color: #000000;
+            color: ${textColor};
             text-align: center;
             white-space: nowrap;
             pointer-events: auto;
             cursor: pointer;
-            text-shadow: none;
-            background-color: rgba(255, 255, 255, 0.9);
+            text-shadow: ${textShadow};
+            background-color: ${labelBackgroundColor};
             border-radius: 8px;
-            border: 2px solid rgba(50, 136, 255, 0.8);
+            border: 2px solid ${labelBorderColor};
             transition: all 0.2s ease;
-          " onmouseover="this.style.backgroundColor='rgba(50, 136, 255, 0.9)'; this.style.color='#ffffff'; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1.1)'" 
-             onmouseout="this.style.backgroundColor='rgba(255, 255, 255, 0.9)'; this.style.color='#000000'; this.style.textShadow='none'; this.style.transform='scale(1)'"
+          " onmouseover="this.style.backgroundColor='${hoverBackgroundColor}'; this.style.borderColor='${hoverBackgroundColor}'; this.style.color='#ffffff'; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1.1)'" 
+             onmouseout="this.style.backgroundColor='${labelBackgroundColor}'; this.style.borderColor='${labelBorderColor}'; this.style.color='${textColor}'; this.style.textShadow='${textShadow}'; this.style.transform='scale(1)'"
           >${district.signgu_nm}</div>`;
 
           const customOverlay = new (window.kakao.maps as any).CustomOverlay({
@@ -180,7 +396,8 @@ export default function SignGuPoligon() {
           polygonMapRef.current.set(currentLabelId, {
             polygon: kakaoPolygon,
             centerLat,
-            centerLng
+            centerLng,
+            guName: district.signgu_nm
           });
 
           labels.push(customOverlay);
@@ -191,7 +408,7 @@ export default function SignGuPoligon() {
     signGuPolygonsRef.current = polygons;
     signGuLabelsRef.current = labels;
     eventListenersRef.current = eventCleanups;
-  }, [map, setupGlobalEventDelegation]);
+  }, [map, setupGlobalEventDelegation, showMarketingArea, guCountData]);
 
   useEffect(() => {
     if (!map || !window.kakao) return;
