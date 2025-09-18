@@ -3,6 +3,7 @@ package com.ssafy.insite.data.service;
 import com.ssafy.insite.data.dto.response.QuarterSummaryResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
 
 public interface DataService {
@@ -17,4 +18,7 @@ public interface DataService {
 
     // 최신 분기 조회
     String findLatestQuarterCode();
+
+    // 행정동 내 상권 리스트 조회
+    TradeAreasResponseDto listByDistrictAndDong(SeoulDistrict district, String dong);
 }
