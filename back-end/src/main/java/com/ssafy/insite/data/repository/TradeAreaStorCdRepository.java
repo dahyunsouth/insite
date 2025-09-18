@@ -17,7 +17,15 @@ import org.springframework.stereotype.Repository;
 public class TradeAreaStorCdRepository {
     private final DSLContext dsl;
 
-    // 상권별 분기 요약 조회
+    private static Integer toInteger(UInteger v) {
+        return v == null ? null : v.intValue();
+    }
+
+    private static Double toDouble(BigDecimal v) {
+        return v != null ? v.doubleValue() : 0.0;
+    }
+
+    // 상권 분기 요약 조회
     public QuarterSummaryResponseDto findQuarterSummary(String stdrYyquCd, Integer trdarCd) {
         Record6<UInteger, UInteger, BigDecimal, UInteger, BigDecimal, UInteger> record =
                 dsl.select(
@@ -38,21 +46,14 @@ public class TradeAreaStorCdRepository {
             throw new BaseException(BaseResponseStatus.INVALID_QUERY);
         }
 
-        int storCo            = record.value1() != null ? record.value1().intValue() : 0;
-        int similrIndutyStorCo= record.value2() != null ? record.value2().intValue() : 0;
-        double opbizRt        = record.value3() != null ? record.value3().doubleValue() : 0.0;
-        int opbizStorCo       = record.value4() != null ? record.value4().intValue() : 0;
-        double clsbizRt       = record.value5() != null ? record.value5().doubleValue() : 0.0;
-        int clsbizStorCo      = record.value6() != null ? record.value6().intValue() : 0;
-
         return QuarterSummaryResponseDto.builder()
-                .storCo(storCo)
-                .similrIndutyStorCo(similrIndutyStorCo)
-                .opbizRt(opbizRt)
-                .opbizStorCo(opbizStorCo)
-                .clsbizRt(clsbizRt)
-                .clsbizStorCo(clsbizStorCo)
-                .netIncrease(opbizStorCo - clsbizStorCo)
+                .storCo(toInteger(record.value1()))
+                .similrIndutyStorCo(toInteger(record.value2()))
+                .opbizRt(toDouble(record.value3()))
+                .opbizStorCo(toInteger(record.value4()))
+                .clsbizRt(toDouble(record.value5()))
+                .clsbizStorCo(toInteger(record.value6()))
+                .netIncrease((toInteger(record.value4()) - toInteger(record.value6())))
                 .build();
     }
 

@@ -6,6 +6,7 @@ import Notification from './Notification';
 import { useNotification } from './useNotification';
 import LoadView from './LoadView';
 import CafeSearch from './CafeSearch';
+import ZoomBlock from './ZoomBlock';
 
 declare global {
   interface Window {
@@ -143,10 +144,16 @@ export default function FullScreenKakaoMap({ children, cafeActive = false }: { c
       <DefaultCircleWithText />
       
       {/* 로드뷰 컴포넌트 */}
-      <LoadView />
+      <LoadView 
+        isActive={false} 
+        onToggle={() => {}} 
+      />
       
       {/* 카페 검색 컴포넌트 */}
       <CafeSearch isActive={cafeActive} />
+      
+      {/* 줌 제한 컴포넌트 */}
+      <ZoomBlock />
       
       {/* 자식 컴포넌트들 */}
       {children}
