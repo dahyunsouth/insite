@@ -7,6 +7,8 @@ import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
 import LoginButton from '@/components/atoms/RightActionBar/LoginButton';
 import MapTypeToggle from '@/components/atoms/RightActionBar/MapTypeToggle';
 import ZoomFuc from '@/components/molecules/ZoomFuc';
+import LoadViewButton from '@/components/map/LoadViewButton';
+import CafeButton from '@/components/atoms/RightActionBar/CafeButton';
 import Image from 'next/image';
 
 interface RightActionBarProps {
@@ -16,7 +18,12 @@ interface RightActionBarProps {
   onZoomIn?: () => void;              // 줌 인 버튼 클릭
   onZoomOut?: () => void;             // 줌 아웃 버튼 클릭
   onMapTypeChange?: (mapType: 'roadmap' | 'skyview') => void; // 지도 타입 변경
+  onLoadViewToggle?: (action: boolean | 'minimize' | 'restore') => void;      // 로드뷰 토글
+  onCafeToggle?: (categoryId: string) => void;  // 카페 토글
   isLoggedIn?: boolean;               // 로그인 상태
+  isLoadViewActive?: boolean;         // 로드뷰 활성 상태
+  isLoadViewMinimized?: boolean;      // 로드뷰 최소화 상태
+  isCafeActive?: boolean;             // 카페 활성 상태
 }
 
 const RightActionBar: React.FC<RightActionBarProps> = ({
@@ -26,7 +33,12 @@ const RightActionBar: React.FC<RightActionBarProps> = ({
   onZoomIn,
   onZoomOut,
   onMapTypeChange,
+  onLoadViewToggle,
+  onCafeToggle,
   isLoggedIn = false,
+  isLoadViewActive = false,
+  isLoadViewMinimized = false,
+  isCafeActive = false,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
@@ -82,6 +94,15 @@ const RightActionBar: React.FC<RightActionBarProps> = ({
 
       {/* 지도 컨트롤 버튼들 (하단에 세로 정렬) */}
       <div className="flex flex-col space-y-1">
+        <CafeButton 
+          onToggle={onCafeToggle} 
+          isActive={isCafeActive}
+        />
+        <LoadViewButton 
+          onToggle={onLoadViewToggle} 
+          isActive={isLoadViewActive}
+          isMinimized={isLoadViewMinimized}
+        />
         <MapTypeToggle onMapTypeChange={onMapTypeChange} />
         <ZoomFuc onZoomIn={onZoomIn} onZoomOut={onZoomOut} />
       </div>

@@ -1,0 +1,16 @@
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[82999],{582999:function(r,o,e){e.d(o,{k:function(){return t}});var s=e(674293),a=e(742368);const t=r=>{const o=(r=>({...r,color:r.color??null,progress:r.progress??0,max:r.max??100,duration:r.duration??1e3}))(r);return(0,s.jsx)(n,{figmaProps:o,value:o.progress,max:o.max,"data-f":"Progress-9bf0"})},n=a.zo.progress`
+  width: 100%;
+  height: 8px;
+  -webkit-appearance: none;
+
+  &::-webkit-progress-bar {
+    border-radius: 999px;
+    background-color: ${({theme:r})=>r.token.s_color_divider_default};
+  }
+
+  &::-webkit-progress-value {
+    transition: width ${({figmaProps:r})=>`${r.duration}ms`};
+    border-radius: 999px;
+    background-color: ${({theme:r})=>r.token.s_color_brand_primary_light};
+  }
+`}}]);

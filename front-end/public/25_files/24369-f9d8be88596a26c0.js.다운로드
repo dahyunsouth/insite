@@ -1,0 +1,27 @@
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[24369],{424369:function(t,e,o){o.d(e,{l:function(){return c}});var n=o(674293);var r=o(742368),a=o(303098),i=o(769246),l=o(311714),s=o(847305);const c=(0,a.G)("Carousel",(t,e)=>{(0,l.useImperativeHandle)(e,()=>({updateSlideButtonsVisibility:()=>{c.current&&V(c.current)}}));const o=(0,l.useRef)(null),r=(t=>({...t,gap:t.gap??8,contentsPaddingStart:t.contentsPaddingStart??0,buttonPositionVerticalPercentage:t.buttonPositionVerticalPercentage??50}))(t),a=(t=>{const{height:e,children:o,buttonPositionValue:n,showSlideButton:r,contentsPaddingStart:a,endDiff:i,gap:l,scrollPercentage:s,onClickFinalIndicatorButton:c,onClickIndicatorButton:d,onClickMore:u,scrollRef:f,showScrollbar:p,indicatorButtonSize:g,wrapperStyle:h,...b}=t;return b})(t),c=t.scrollRef??o,g=(0,l.useRef)(null),[h,b]=(0,l.useState)(!1),[P,S]=(0,l.useState)(!1),[B,x]=(0,l.useState)(!1),v=Boolean(t.showSlideButton),w=t["data-f"],m=w?`${w}-`:"",C=e=>{t.onClickIndicatorButton?.(e),(e=>{g.current?.scrollTo({direction:e,percent:t.scrollPercentage??90,behavior:"smooth"})})(e)},V=e=>{const{scrollLeft:o,scrollWidth:n,offsetWidth:r}=e;b(o>0),S(o+r<n-(t.endDiff||10)),x(n>r)};return(0,l.useEffect)(()=>{if(!c.current)return;const t=new ResizeObserver(()=>{c.current&&V(c.current)});return t.observe(c.current),()=>t.disconnect()},[]),(0,n.jsxs)(d,{...a,"data-f":`${m}Container-f6bc`,children:[(0,n.jsx)(i.p,{ref:g,scrollRef:c,endDiff:t.endDiff,scrollDirection:"horizontal",showScrollbar:t.showScrollbar,onScroll:t=>{V(t.currentTarget)},onMount:({hasScroll:t})=>S(t),overscrollBehavior:"auto","data-f":"ScrollView-de96",children:(0,n.jsxs)(u,{figmaProps:r,"data-f":"WrapperX-bd5f",style:t.wrapperStyle,children:[t.children,B&&t.onClickMore&&(0,n.jsx)(p,{"data-f":"MoreButtonWrapper-b087",children:(0,n.jsx)(s.E,{iconName:"arrow_right",color:"neutral",size:"M",shadow:"none",shape:"round",onClick:()=>{t.onClickFinalIndicatorButton?.(),t.onClickMore?.()},"data-no-drag":t.carouselMoreButtonsAttributes?.["data-no-drag"],"data-f":"ElevatedButton-aa2f"})})]})}),v&&h&&(0,n.jsx)(f,{figmaProps:r,direction:"left",buttonPositionValue:t.buttonPositionValue,buttonPositionVerticalPercentage:r.buttonPositionVerticalPercentage,onClick:()=>C("left"),"data-f":"SlideButtonWrapper-a9d9",children:(0,n.jsx)(s.E,{"aria-label":"slide to left button",iconName:"chevron_left",size:t.indicatorButtonSize??"2XS",shape:"round",shadow:"always","data-no-drag":t.carouselMoreButtonsAttributes?.["data-no-drag"],"data-f":"ElevatedButton-67f0"})}),v&&P&&(0,n.jsx)(f,{figmaProps:r,direction:"right",buttonPositionValue:t.buttonPositionValue,buttonPositionVerticalPercentage:r.buttonPositionVerticalPercentage,onClick:()=>C("right"),"data-f":"SlideButtonWrapper-dcab",children:(0,n.jsx)(s.E,{"aria-label":"slide to right button",iconName:"chevron_right",size:t.indicatorButtonSize??"2XS",shape:"round",shadow:"always","data-no-drag":t.carouselMoreButtonsAttributes?.["data-no-drag"],"data-f":"ElevatedButton-f44b"})})]})}),d=r.zo.div`
+  position: relative;
+`,u=r.zo.div`
+  height: ${({figmaProps:t})=>t.height};
+  display: flex;
+  padding-left: ${({figmaProps:t})=>t.contentsPaddingStart}px;
+  ${({figmaProps:t,theme:e})=>e.mixin.flexColGap(`${t.gap}px`)}
+`,f=r.zo.div`
+  position: absolute;
+  padding: 8px;
+
+  ${({direction:t})=>`padding-${t}: 0px`};
+  ${({direction:t,buttonPositionValue:e})=>`${t}: ${e??-6}px`};
+
+  cursor: pointer;
+
+  display: flex;
+  top: ${({buttonPositionVerticalPercentage:t})=>`${t}%`};
+  transform: translateY(-50%);
+  justify-content: center;
+  align-items: center;
+`,p=r.zo.div`
+  height: 100%;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+`}}]);
