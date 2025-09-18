@@ -7,18 +7,22 @@ interface MainNavbarProps {
   onMyPageClick?: () => void;
   onLoginModalOpen?: () => void;
   onSavedAreasClick?: () => void;
+  onCompareClick?: () => void;
 }
 
-const MainNavbar: React.FC<MainNavbarProps> = ({ onMyPageClick, onLoginModalOpen, onSavedAreasClick }) => {
+const MainNavbar: React.FC<MainNavbarProps> = ({ onMyPageClick, onLoginModalOpen, onSavedAreasClick, onCompareClick }) => {
   return (
     <nav className="pt-2 pl-2 space-y-1">
       <FirstLeftNavbar />
-      <SecondLeftNavbar onMyPageClick={onMyPageClick} onLoginModalOpen={onLoginModalOpen} onSavedAreasClick={onSavedAreasClick} />
+      <SecondLeftNavbar
+        onMyPageClick={onMyPageClick}
+        onLoginModalOpen={onLoginModalOpen}
+        onSavedAreasClick={onSavedAreasClick}
+        onCompareClick={onCompareClick}
+      />
       <ThirdLeftNavbar />
     </nav>
   );
-}
+};
 
 export default MainNavbar;
-
-
