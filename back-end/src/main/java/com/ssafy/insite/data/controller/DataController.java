@@ -10,6 +10,7 @@ import com.ssafy.insite.data.enums.SeoulDistrict;
 import com.ssafy.insite.data.service.DataService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class DataController {
     private final DataService dataService;
+
+    @GetMapping("/list-gu")
+    @Operation(summary = "자치구 목록 조회")
+    public BaseResponse<List<String>> getDistriceList() {
+        List<String> response = dataService.getDistriceList();
+        return new BaseResponse<>(response);
+    }
+
+    @GetMapping("/list-dong")
+    @Operation(summary = "행정동 목록 조회")
+    public BaseResponse<List<String>> getDongList(
+            @Parameter(description = "자치구명")
+            @RequestParam("district") SeoulDistrict district
+    ) {
+        List<String> response = dataService.getDongList(district);
+        return new BaseResponse<>(response);
+    }
 
     @GetMapping("/count-by-gu")
     @Operation(summary = "자치구별 상권 개수 조회")
