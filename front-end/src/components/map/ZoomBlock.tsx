@@ -52,6 +52,7 @@ export default function ZoomBlock() {
     seoulBoundariesRef.current = [];
   }, []);
 
+
   useEffect(() => {
     if (!map || !window.kakao) return;
 
