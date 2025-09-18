@@ -1,11 +1,13 @@
 package com.ssafy.insite.data.service;
 
 import com.ssafy.insite.data.dto.response.QuarterSummaryResponseDto;
+import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
+import com.ssafy.insite.data.enums.TradeAreaType;
 import java.util.List;
 
 public interface DataService {
@@ -14,6 +16,9 @@ public interface DataService {
     
     // 행정동 목록 조회
     List<String> getDongList(SeoulDistrict district);
+
+    // 상권 추천 결과 조회
+    RecommendationResponseDto findTop3ByDistrictAndType(SeoulDistrict district, TradeAreaType type);
     
     // 자치구별 상권 개수 조회
     SeoulDistrictCountResponseDto countByDistrict(SeoulDistrict district);
