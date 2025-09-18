@@ -15,4 +15,6 @@ export const API_ENDPOINTS = {
   SEND_VERIFICATION_CODE: `${API_BASE_URL}/api/v1/auth/verify/send-code`,
   CHECK_VERIFICATION_CODE: `${API_BASE_URL}/api/v1/auth/verify/check-code`,
   COUNT_BY_GU: `${API_BASE_URL}/api/v1/data/count-by-gu`,
+  COUNT_BY_DONG: `${API_BASE_URL}/api/v1/data/count-by-dong`,
+  TRADE_AREAS: `${API_BASE_URL}/api/v1/data/trade-areas`,
 } as const;
