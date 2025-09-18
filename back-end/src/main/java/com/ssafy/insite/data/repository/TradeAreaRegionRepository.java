@@ -1,6 +1,7 @@
 package com.ssafy.insite.data.repository;
 
 import static com.ssafy.insite.data.jooq.codegen.Tables.TRADE_AREA_REGION;
+import static com.ssafy.insite.data.jooq.codegen.Tables.TRADE_AREA_STOR_CD;
 
 import com.ssafy.insite.common.dto.response.BaseResponseStatus;
 import com.ssafy.insite.common.exception.BaseException;
@@ -16,12 +17,17 @@ import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
 import org.jooq.impl.DSL;
+import org.jooq.types.UInteger;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
 public class TradeAreaRegionRepository {
     private final DSLContext dsl;
+
+    private static Integer toInteger(UInteger v) {
+        return v == null ? null : v.intValue();
+    }
 
     // 자치구별 상권 개수 조회
     public SeoulDistrictCountResponseDto countByDistrict(SeoulDistrict district) {
@@ -82,9 +88,14 @@ public class TradeAreaRegionRepository {
                         TRADE_AREA_REGION.TRDAR_CD_NM,
                         TRADE_AREA_REGION.XCNTS_VALUE,
                         TRADE_AREA_REGION.YDNTS_VALUE,
-                        TRADE_AREA_REGION.RELM_AR
+                        TRADE_AREA_REGION.RELM_AR,
+                        TRADE_AREA_STOR_CD.STOR_CO,
+                        TRADE_AREA_STOR_CD.SIMILR_INDUTY_STOR_CO
                 )
                 .from(TRADE_AREA_REGION)
+                .leftJoin(TRADE_AREA_STOR_CD)
+                    .on(TRADE_AREA_REGION.TRDAR_CD.eq(TRADE_AREA_STOR_CD.TRDAR_CD)
+                        .and(TRADE_AREA_STOR_CD.SVC_INDUTY_CD_NM.eq("커피-음료")))
                 .where(
                         TRADE_AREA_REGION.SIGNGU_CD_NM.eq(gu)
                                 .and(TRADE_AREA_REGION.ADSTRD_CD_NM.eq(dong))
@@ -96,7 +107,9 @@ public class TradeAreaRegionRepository {
                         record.get(TRADE_AREA_REGION.TRDAR_CD_NM),
                         record.get(TRADE_AREA_REGION.XCNTS_VALUE),
                         record.get(TRADE_AREA_REGION.YDNTS_VALUE),
-                        record.get(TRADE_AREA_REGION.RELM_AR)
+                        record.get(TRADE_AREA_REGION.RELM_AR),
+                        toInteger(record.get(TRADE_AREA_STOR_CD.STOR_CO)),
+                        toInteger(record.get(TRADE_AREA_STOR_CD.SIMILR_INDUTY_STOR_CO))
                 ));
 
         return TradeAreasResponseDto.builder()
