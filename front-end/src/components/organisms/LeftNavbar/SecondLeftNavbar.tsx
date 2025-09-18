@@ -9,9 +9,15 @@ interface SecondLeftNavbarProps {
   onMyPageClick?: () => void;
   onLoginModalOpen?: () => void;
   onSavedAreasClick?: () => void;
+  onCompareClick?: () => void;
 }
 
-const SecondLeftNavbar: React.FC<SecondLeftNavbarProps> = ({ onMyPageClick, onLoginModalOpen, onSavedAreasClick }) => {
+const SecondLeftNavbar: React.FC<SecondLeftNavbarProps> = ({
+  onMyPageClick,
+  onLoginModalOpen,
+  onSavedAreasClick,
+  onCompareClick,
+}) => {
   const [active, setActive] = useState<Tab | null>(null);
 
   // 로그인 상태 확인 함수
@@ -53,6 +59,8 @@ const SecondLeftNavbar: React.FC<SecondLeftNavbarProps> = ({ onMyPageClick, onLo
                       // 로그인되지 않은 상태: 로그인 모달 열기
                       onLoginModalOpen?.();
                     }
+                  } else if (label === "상권비교") {
+                    onCompareClick?.();
                   }
                   setActive((prev) => (prev === label ? null : label));
                 }}
@@ -74,5 +82,3 @@ const SecondLeftNavbar: React.FC<SecondLeftNavbarProps> = ({ onMyPageClick, onLo
 };
 
 export default SecondLeftNavbar;
-
-

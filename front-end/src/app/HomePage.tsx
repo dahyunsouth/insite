@@ -113,6 +113,12 @@ export default function HomePage() {
     setIsCompareOpen(true);
   };
 
+  const handleCompareTabClick = () => {
+    setShowMyPage(false);
+    setShowMyMarket(false);
+    setIsCompareOpen(true);
+  };
+
   // 저장된 상권 닫기 핸들러
   const handleMyMarketClose = () => {
     setShowMyMarket(false);
@@ -185,6 +191,7 @@ export default function HomePage() {
               onMyPageClick={handleMyPageClick} 
               onLoginModalOpen={() => setIsAuthOpen(true)}
               onSavedAreasClick={handleSavedAreasClick}
+              onCompareClick={handleCompareTabClick}
             />
           )}
         </div>
