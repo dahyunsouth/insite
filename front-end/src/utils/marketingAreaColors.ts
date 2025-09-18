@@ -8,6 +8,7 @@ export interface ColorRange {
 
 // MarketingAreaRange.tsx와 동일한 색상 범위 정의
 export const COLOR_RANGES: ColorRange[] = [
+  { color: "#000000", label: "5개 미만", min: 0, max: 4 },
   { color: "#9DDE4D", label: "5 ~ 10개", min: 5, max: 10 },
   { color: "#FFD62B", label: "11 ~ 50개", min: 11, max: 50 },
   { color: "#FF8A36", label: "51 ~ 300개", min: 51, max: 300 },
@@ -16,8 +17,8 @@ export const COLOR_RANGES: ColorRange[] = [
   { color: "#8C2ED4", label: "2,000개 초과", min: 2001, max: Infinity },
 ];
 
-// 기본 색상 (상권 개수가 5개 미만이거나 데이터가 없는 경우)
-export const DEFAULT_COLOR = "#E5E7EB";
+// 기본 색상 (상권 개수가 5개 미만인 경우)
+export const DEFAULT_COLOR = "#000000"; // 검정색으로 변경
 
 /**
  * 상권 개수에 따른 색상 반환
@@ -25,10 +26,6 @@ export const DEFAULT_COLOR = "#E5E7EB";
  * @returns 해당 범위의 색상
  */
 export function getColorByCount(count: number): string {
-  if (count < 5) {
-    return DEFAULT_COLOR;
-  }
-  
   const range = COLOR_RANGES.find(range => count >= range.min && count <= range.max);
   return range ? range.color : DEFAULT_COLOR;
 }

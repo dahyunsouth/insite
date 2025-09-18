@@ -4,17 +4,18 @@ import { useState } from 'react';
 import TotalMenuBar from '@/components/molecules/LeftNavbar/TotalMenuBar';
 import TotalMarketingArea from '@/components/molecules/LeftNavbar/TotalMarketingArea';
 import TotalMonthlySales from '@/components/molecules/LeftNavbar/TotalMonthlySales';
-
 interface ThirdLeftNavbarProps {
   onMarketingAreaChange?: (show: boolean) => void;
+  showMarketingArea?: boolean;
 }
 
-const ThirdLeftNavbar: React.FC<ThirdLeftNavbarProps> = ({ onMarketingAreaChange }) => {
-  const [showMarketingArea, setShowMarketingArea] = useState(false);
+const ThirdLeftNavbar: React.FC<ThirdLeftNavbarProps> = ({ 
+  onMarketingAreaChange, 
+  showMarketingArea = false
+}) => {
   const [showMonthlySales, setShowMonthlySales] = useState(false);
 
   const handleMarketingAreaToggle = (show: boolean) => {
-    setShowMarketingArea(show);
     onMarketingAreaChange?.(show);
   };
 

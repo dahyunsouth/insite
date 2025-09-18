@@ -1,33 +1,58 @@
 'use client';
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useKakaoMapContext } from './KakaoMap';
 import adstrdAreaData from '../../data/AdstrdAreaValue.json';
 import adstrdNameData from '../../data/AdstrdValue.json';
 import seoulPolygonData from '../../data/SeoulPoligon.json';
+import signGuData from '../../data/SignGuValue.json';
 import { tmToWgs84 } from '../../utils/coordinateTransform';
+import { 
+  useDongMarketMode, 
+  applyDongMarketModePolygonStyle,
+  createDongMarketModeLabelContent,
+  handleDongMarketModeHover,
+  KakaoPolygon
+} from './MarketMode';
+import MarketModeModal from './MarketModeModal';
+import { 
+  applyDefaultModePolygonStyle,
+  createDongDefaultModeLabelContent,
+  handleDongDefaultModeHover,
+  updateDongPolygonsToDefaultMode
+} from './DefaultMode';
 
 // 타입 정의
-interface KakaoPolygon {
-  setMap: (map: any) => void;
-  setOptions: (options: any) => void;
-  getOptions?: () => any;
-}
-
 interface KakaoOverlay {
   setMap: (map: any) => void;
 }
 
+interface AdstrdPolygonProps {
+  showMarketingArea?: boolean;
+}
 
-export default function AdstrdCircle() {
+export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolygonProps) {
   const { map } = useKakaoMapContext();
   const adstrdPolygonsRef = useRef<KakaoPolygon[]>([]);
   const adstrdLabelsRef = useRef<KakaoOverlay[]>([]);
   const eventListenersRef = useRef<(() => void)[]>([]);
   const isShowingRef = useRef<boolean>(false);
-  const polygonMapRef = useRef<Map<string, {polygon: KakaoPolygon, centerLat: number, centerLng: number}>>(new Map());
+  const polygonMapRef = useRef<Map<string, {polygon: KakaoPolygon, centerLat: number, centerLng: number, dongName: string, guName: string}>>(new Map());
   const globalEventListenerRef = useRef<((e: Event) => void) | null>(null);
   const backgroundOverlayRef = useRef<KakaoOverlay | null>(null);
+  
+  // 행정동별 상권 모드 훅 사용
+  const { dongCountData, loadDongCountData } = useDongMarketMode();
+  const [dongCountCache, setDongCountCache] = useState<{[key: string]: number}>({});
+  const [isLoadingAllDongs, setIsLoadingAllDongs] = useState<boolean>(false);
+  const [loadingDogsCount, setLoadingDogsCount] = useState<number>(0);
+  const [totalDogsCount, setTotalDogsCount] = useState<number>(0);
+
+  // 상권 모드 상태 변화 디버깅
+  useEffect(() => {
+    console.log('🔍 AdstrdPoligon - showMarketingArea 상태 변화:', showMarketingArea);
+  }, [showMarketingArea]);
+
 
   // 좌표를 이용해서 가장 가까운 행정동 이름 찾기
   const findNearestAdstrdName = useCallback((centerLat: number, centerLng: number): string => {
@@ -56,6 +81,49 @@ export default function AdstrdCircle() {
 
     return nearestName;
   }, []);
+
+  // 행정동 코드로부터 자치구명을 찾기
+  const getGuNameFromDongCode = useCallback((dongCode: string): string => {
+    // 행정동 코드의 첫 5자리가 자치구 코드
+    const guCode = dongCode.substring(0, 5);
+    
+    // SignGuValue.json에서 해당 자치구 찾기
+    const signGuDataTyped = signGuData as any;
+    const guData = signGuDataTyped.DATA.find((gu: any) => gu.signgu_cd === guCode);
+    
+    console.log(`🔍 행정동 코드 "${dongCode}" -> 자치구 코드 "${guCode}" -> 자치구명 "${guData?.signgu_nm || '알 수 없음'}"`);
+    
+    return guData?.signgu_nm || '알 수 없음';
+  }, []);
+
+  // 좌표를 이용해서 가장 가까운 자치구명 찾기 (행정동 코드 기반)
+  const findNearestGuName = useCallback((centerLat: number, centerLng: number): string => {
+    const nameData = adstrdNameData as any;
+    if (!nameData.DATA || !Array.isArray(nameData.DATA)) {
+      return '알 수 없음';
+    }
+
+    let minDistance = Infinity;
+    let nearestDongCode = '';
+
+    nameData.DATA.forEach((district: any) => {
+      // TM 좌표를 위경도로 정확한 변환
+      const { lat: districtLat, lng: districtLng } = tmToWgs84(district.xcnts_value, district.ydnts_value);
+
+      // 거리 계산 (유클리드 거리)
+      const distance = Math.sqrt(
+        Math.pow(centerLat - districtLat, 2) + Math.pow(centerLng - districtLng, 2)
+      );
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestDongCode = district.adstrd_cd || '';
+      }
+    });
+
+    // 행정동 코드로부터 자치구명 추출
+    return getGuNameFromDongCode(nearestDongCode);
+  }, [getGuNameFromDongCode]);
 
   // 서울시 외부 영역 오버레이 표시 함수 (SeoulPoligon.json 사용)
   const showBackgroundOverlay = useCallback(() => {
@@ -145,27 +213,51 @@ export default function AdstrdCircle() {
 
     const globalEventHandler = (e: Event) => {
       const target = e.target as HTMLElement;
-      if (!target || !target.classList || !target.classList.contains('adstrd-label')) return;
+      console.log(`🖱️ 이벤트 감지: ${e.type}, 타겟:`, target, `클래스:`, target?.classList);
+      
+      if (!target || !target.classList || !target.classList.contains('adstrd-label')) {
+        console.log(`❌ 행정동 라벨이 아님: ${target?.className}`);
+        return;
+      }
 
       const labelId = target.id;
+      console.log(`🎯 행정동 라벨 이벤트: ${e.type}, ID: ${labelId}`);
+      
       const polygonData = polygonMapRef.current.get(labelId);
-      if (!polygonData) return;
+      if (!polygonData) {
+        console.log(`❌ 폴리곤 데이터 없음: ${labelId}`);
+        return;
+      }
 
-      const { polygon, centerLat, centerLng } = polygonData;
+      const { polygon, centerLat, centerLng, dongName, guName } = polygonData;
+      console.log(`📍 폴리곤 데이터: ${dongName} (${guName}), 좌표: ${centerLat}, ${centerLng}`);
 
       if (e.type === 'mouseenter') {
-        polygon.setOptions({
-          fillOpacity: 0.3,
-          strokeWeight: 2,
-          strokeOpacity: 1
-        });
+        // 현재 상권 모드 상태를 실시간으로 확인
+        const isMarketingMode = showMarketingArea;
+        
+        if (isMarketingMode) {
+          const dongKey = `${guName}-${dongName}`;
+          const count = dongCountCache[dongKey] || 0;
+          handleDongMarketModeHover(polygon, dongName, count, true);
+        } else {
+          handleDongDefaultModeHover(polygon, dongName, true);
+        }
       } else if (e.type === 'mouseleave') {
-        polygon.setOptions({
-          fillOpacity: 0,
-          strokeWeight: 1,
-          strokeOpacity: 0.8
-        });
+        // 현재 상권 모드 상태를 실시간으로 확인
+        const isMarketingMode = showMarketingArea;
+        
+        if (isMarketingMode) {
+          const dongKey = `${guName}-${dongName}`;
+          const count = dongCountCache[dongKey] || 0;
+          handleDongMarketModeHover(polygon, dongName, count, false);
+        } else {
+          handleDongDefaultModeHover(polygon, dongName, false);
+        }
       } else if (e.type === 'click') {
+        console.log(`🎯 행정동 클릭: ${dongName}`);
+        
+        // 지도 중심 이동 및 확대
         map.setCenter(new (window.kakao.maps as any).LatLng(centerLat, centerLng));
         map.setLevel(5);
       }
@@ -176,11 +268,13 @@ export default function AdstrdCircle() {
     document.addEventListener('click', globalEventHandler, true);
     
     globalEventListenerRef.current = globalEventHandler;
-  }, [map]);
+  }, [map, showMarketingArea, dongCountCache]);
 
   // 행정동별 폴리곤과 라벨 숨김 함수 (고성능 최적화)
   const hideAdstrdPolygons = useCallback(() => {
     if (!isShowingRef.current) return;
+
+    console.log(`🗑️ 행정동 폴리곤 정리 시작 - 현재 폴리곤: ${adstrdPolygonsRef.current.length}개, 라벨: ${adstrdLabelsRef.current.length}개`);
 
     // 즉시 상태 변경으로 중복 실행 방지
     isShowingRef.current = false;
@@ -190,26 +284,39 @@ export default function AdstrdCircle() {
     
     // 폴리곤 맵 정리
     polygonMapRef.current.clear();
+    
+    // 전역 이벤트 리스너 정리
+    if (globalEventListenerRef.current) {
+      document.removeEventListener('mouseenter', globalEventListenerRef.current, true);
+      document.removeEventListener('mouseleave', globalEventListenerRef.current, true);
+      document.removeEventListener('click', globalEventListenerRef.current, true);
+      globalEventListenerRef.current = null;
+    }
 
     // 병렬 처리로 빠른 제거
     const polygons = adstrdPolygonsRef.current;
     const labels = adstrdLabelsRef.current;
     
-    // 배치 처리로 한 번에 제거
-    requestAnimationFrame(() => {
-      polygons.forEach(polygon => polygon.setMap(null));
-      labels.forEach(label => label.setMap(null));
-    });
+    // 즉시 제거 (requestAnimationFrame 없이)
+    polygons.forEach(polygon => polygon.setMap(null));
+    labels.forEach(label => label.setMap(null));
     
     // 참조 즉시 정리
     adstrdPolygonsRef.current = [];
     adstrdLabelsRef.current = [];
     eventListenersRef.current = [];
+    
+    console.log(`✅ 행정동 폴리곤 정리 완료`);
   }, [hideBackgroundOverlay]);
 
   // 행정동별 폴리곤과 라벨 표시 함수 (레벨 6)
   const showAdstrdPolygons = useCallback(() => {
-    if (!map || !window.kakao || isShowingRef.current) return;
+    if (!map || !window.kakao || isShowingRef.current) {
+      console.log(`⚠️ showAdstrdPolygons 중단: map=${!!map}, kakao=${!!window.kakao}, isShowing=${isShowingRef.current}`);
+      return;
+    }
+
+    console.log(`🎨 행정동 폴리곤 생성 시작 - 상권모드: ${showMarketingArea}`);
 
     // 전역 이벤트 위임 설정
     setupGlobalEventDelegation();
@@ -229,6 +336,14 @@ export default function AdstrdCircle() {
     // 폴리곤 데이터 처리 - GeometryCollection 형태의 데이터
     const geometryCollection = adstrdAreaData as any;
     if (geometryCollection.geometries && Array.isArray(geometryCollection.geometries)) {
+      
+      // 상권 모드일 때 총 행정동 개수 설정 및 로딩 시작
+      if (showMarketingArea) {
+        const totalCount = geometryCollection.geometries.length;
+        setTotalDogsCount(totalCount);
+        setIsLoadingAllDongs(true);
+        console.log(`📊 총 행정동 개수: ${totalCount}개 - 로딩 시작`);
+      }
       geometryCollection.geometries.forEach((polygon: any, index: number) => {
       if (polygon.type === 'Polygon' && polygon.coordinates && polygon.coordinates.length > 0) {
         // 좌표 변환: TM 좌표계를 WGS84로 변환
@@ -266,26 +381,66 @@ export default function AdstrdCircle() {
         centerLng = centerLng / coordinates.length;
         const center = new (window.kakao.maps as any).LatLng(centerLat, centerLng);
 
-        // 행정동 이름 라벨 생성 (좌표 기반으로 실제 이름 찾기)
+        // 행정동 이름과 자치구명 찾기
         const dongName = findNearestAdstrdName(centerLat, centerLng);
+        const guName = findNearestGuName(centerLat, centerLng);
         const currentLabelId = `adstrd-label-${index}`;
-        const content = `<div id="${currentLabelId}" class="adstrd-label" style="
-          padding: 4px 8px;
-          font-size: ${fontSize}px;
-          font-weight: bold;
-          color: #000000;
-          text-align: center;
-          white-space: nowrap;
-          pointer-events: auto;
-          cursor: pointer;
-          text-shadow: none;
-          background-color: rgba(255, 255, 255, 0.9);
-          border-radius: 5px;
-          border: 1px solid rgba(0, 0, 0, 0.2);
-          transition: all 0.2s ease;
-        " onmouseover="this.style.backgroundColor='rgba(50, 136, 255, 0.8)'; this.style.color='#ffffff'; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1.1)'" 
-           onmouseout="this.style.backgroundColor='rgba(255, 255, 255, 0.9)'; this.style.color='#000000'; this.style.textShadow='none'; this.style.transform='scale(1)'"
-        >${dongName}</div>`;
+        
+        console.log(`📍 좌표 (${centerLat.toFixed(6)}, ${centerLng.toFixed(6)}) -> 자치구: "${guName}", 행정동: "${dongName}"`);
+        
+        // 상권 모드에서 상권 개수 로드 및 캐시
+        let content = '';
+        if (showMarketingArea) {
+          console.log(`🎯 행정동 상권모드 처리: "${guName}" "${dongName}"`);
+          // 상권 개수 비동기 로드
+          const dongKey = `${guName}-${dongName}`;
+          let count = dongCountCache[dongKey];
+          
+          if (count === undefined) {
+            console.log(`🔄 행정동 데이터 로드 필요: ${dongKey}`);
+            
+            // 로딩 카운터 증가
+            setLoadingDogsCount(prev => prev + 1);
+            setIsLoadingAllDongs(true);
+            
+            // 아직 로드되지 않은 경우 비동기 로드
+            loadDongCountData(guName, dongName).then((loadedCount) => {
+              console.log(`✅ 행정동 데이터 로드 완료: ${dongKey} = ${loadedCount}개`);
+              setDongCountCache(prev => ({
+                ...prev,
+                [dongKey]: loadedCount
+              }));
+              
+              // 로딩 카운터 감소
+              setLoadingDogsCount(prev => {
+                const newCount = prev - 1;
+                if (newCount <= 0) {
+                  setIsLoadingAllDongs(false);
+                }
+                return newCount;
+              });
+              
+              // 폴리곤 스타일 업데이트
+              applyDongMarketModePolygonStyle(kakaoPolygon, loadedCount);
+              
+              // 라벨 업데이트
+              const labelElement = document.getElementById(currentLabelId);
+              if (labelElement) {
+                labelElement.outerHTML = createDongMarketModeLabelContent(dongName, loadedCount, currentLabelId, fontSize, true);
+              }
+            });
+            count = 0; // 로딩 중에는 0으로 표시
+          } else {
+            console.log(`💾 행정동 캐시된 데이터 사용: ${dongKey} = ${count}개`);
+          }
+          
+          content = createDongMarketModeLabelContent(dongName, count, currentLabelId, fontSize, true);
+          applyDongMarketModePolygonStyle(kakaoPolygon, count);
+        } else {
+          console.log(`🔵 행정동 기본모드 처리: ${dongName}`);
+          content = createDongDefaultModeLabelContent(dongName, currentLabelId, fontSize);
+          applyDefaultModePolygonStyle(kakaoPolygon);
+        }
 
         const customOverlay = new (window.kakao.maps as any).CustomOverlay({
           map: map,
@@ -298,7 +453,9 @@ export default function AdstrdCircle() {
         polygonMapRef.current.set(currentLabelId, {
           polygon: kakaoPolygon,
           centerLat,
-          centerLng
+          centerLng,
+          dongName,
+          guName
         });
 
         labels.push(customOverlay);
@@ -309,7 +466,110 @@ export default function AdstrdCircle() {
     adstrdPolygonsRef.current = polygons;
     adstrdLabelsRef.current = labels;
     eventListenersRef.current = eventCleanups;
-  }, [map, findNearestAdstrdName, setupGlobalEventDelegation, showBackgroundOverlay]);
+    
+    console.log(`✅ 행정동 폴리곤 생성 완료 - 폴리곤: ${polygons.length}개, 라벨: ${labels.length}개`);
+    
+    // 기본 모드일 때는 로딩 즉시 완료
+    if (!showMarketingArea) {
+      setIsLoadingAllDongs(false);
+    }
+  }, [map, findNearestAdstrdName, findNearestGuName, setupGlobalEventDelegation, showBackgroundOverlay]);
+
+  // 상권 모드 변경 시 폴리곤 업데이트
+  useEffect(() => {
+    if (!isShowingRef.current) return;
+
+    console.log(`🔄 AdstrdPoligon 모드 변경 - 상권모드: ${showMarketingArea}`);
+    
+    // 상권 모드 변경 시 이벤트 핸들러만 재설정 (폴리곤 재생성 없이)
+    if (globalEventListenerRef.current) {
+      document.removeEventListener('mouseenter', globalEventListenerRef.current, true);
+      document.removeEventListener('mouseleave', globalEventListenerRef.current, true);
+      document.removeEventListener('click', globalEventListenerRef.current, true);
+      globalEventListenerRef.current = null;
+    }
+    setupGlobalEventDelegation();
+
+    // 기존 폴리곤들의 스타일만 업데이트 (재생성하지 않음)
+    if (showMarketingArea) {
+      console.log('🎯 기존 행정동 폴리곤들을 상권 모드로 업데이트');
+      setIsLoadingAllDongs(true); // 로딩 시작
+      
+      let pendingLoads = 0;
+      
+      // 각 폴리곤을 상권 모드 스타일로 업데이트
+      adstrdPolygonsRef.current.forEach((polygon, index) => {
+        const geometryCollection = adstrdAreaData as any;
+        if (geometryCollection.geometries && geometryCollection.geometries[index]) {
+          // 중심점 재계산
+          const coords = geometryCollection.geometries[index].coordinates[0];
+          let centerLat = 0;
+          let centerLng = 0;
+          coords.forEach((coord: number[]) => {
+            const { lat, lng } = tmToWgs84(coord[0], coord[1]);
+            centerLat += lat;
+            centerLng += lng;
+          });
+          centerLat = centerLat / coords.length;
+          centerLng = centerLng / coords.length;
+          
+          const dongName = findNearestAdstrdName(centerLat, centerLng);
+          const guName = findNearestGuName(centerLat, centerLng);
+          const dongKey = `${guName}-${dongName}`;
+          let count = dongCountCache[dongKey];
+          
+          if (count === undefined) {
+            // 데이터가 없으면 로드
+            pendingLoads++;
+            loadDongCountData(guName, dongName).then((loadedCount) => {
+              setDongCountCache(prev => ({
+                ...prev,
+                [dongKey]: loadedCount
+              }));
+              
+              // 폴리곤 스타일 업데이트
+              applyDongMarketModePolygonStyle(polygon, loadedCount);
+              
+              // 라벨 업데이트
+              const currentLabelId = `adstrd-label-${index}`;
+              const labelElement = document.getElementById(currentLabelId);
+              if (labelElement) {
+                labelElement.outerHTML = createDongMarketModeLabelContent(dongName, loadedCount, currentLabelId, 10, true);
+              }
+              
+              // 로딩 완료 체크
+              pendingLoads--;
+              if (pendingLoads <= 0) {
+                setIsLoadingAllDongs(false);
+              }
+            });
+            count = 0; // 임시로 0
+          } else {
+            count = dongCountCache[dongKey];
+          }
+          
+          // 폴리곤 스타일 업데이트
+          applyDongMarketModePolygonStyle(polygon, count);
+          
+          // 라벨 업데이트
+          const currentLabelId = `adstrd-label-${index}`;
+          const labelElement = document.getElementById(currentLabelId);
+          if (labelElement) {
+            labelElement.outerHTML = createDongMarketModeLabelContent(dongName, count, currentLabelId, 10, true);
+          }
+        }
+      });
+      
+      // 모든 데이터가 캐시되어 있으면 로딩 즉시 완료
+      if (pendingLoads === 0) {
+        setIsLoadingAllDongs(false);
+      }
+    } else {
+      console.log('🔵 기존 행정동 폴리곤들을 기본 모드로 업데이트');
+      // 행정동용 기본 모드 업데이트 함수 사용
+      updateDongPolygonsToDefaultMode(adstrdPolygonsRef.current, adstrdLabelsRef.current);
+    }
+  }, [showMarketingArea, setupGlobalEventDelegation, dongCountCache, findNearestAdstrdName, findNearestGuName]);
 
   useEffect(() => {
     if (!map || !window.kakao) return;
@@ -346,6 +606,7 @@ export default function AdstrdCircle() {
       
       // 정확히 레벨 6일 때만 표시
       if (currentLevel === 6 && !isShowingRef.current) {
+        console.log(`✅ 레벨 6 - 행정동 폴리곤 표시 준비`);
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
           showAdstrdPolygons();
@@ -382,5 +643,10 @@ export default function AdstrdCircle() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map]);
 
-  return null; // UI 요소 없음
+  return (
+    <>
+      {/* 행정동 상권 모드 로딩 모달 */}
+      <MarketModeModal isLoading={showMarketingArea && isLoadingAllDongs} />
+    </>
+  );
 }
