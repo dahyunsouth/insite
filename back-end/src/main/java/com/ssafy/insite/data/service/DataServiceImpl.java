@@ -3,11 +3,14 @@ package com.ssafy.insite.data.service;
 import com.ssafy.insite.common.utils.SeoulDistrictConverter;
 import com.ssafy.insite.common.utils.SeoulDongCatalog;
 import com.ssafy.insite.data.dto.response.QuarterSummaryResponseDto;
+import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
+import com.ssafy.insite.data.enums.TradeAreaType;
+import com.ssafy.insite.data.repository.RecommendationRepository;
 import com.ssafy.insite.data.repository.TradeAreaDetailRepository;
 import com.ssafy.insite.data.repository.TradeAreaRegionRepository;
 import com.ssafy.insite.data.repository.TradeAreaStorCdRepository;
@@ -24,8 +27,10 @@ public class DataServiceImpl implements DataService {
     private final TradeAreaRegionRepository tradeAreaRegionRepository;
     private final TradeAreaStorCdRepository tradeAreaStorCdRepository;
     private final TradeAreaDetailRepository tradeAreaDetailRepository;
+    private final RecommendationRepository recommendationRepository;
 
     // 자치구 목록 조회
+    @Override
     public List<String> getDistriceList() {
         return Arrays.stream(SeoulDistrict.values())
                 .map(SeoulDistrictConverter::toKorean)
@@ -34,11 +39,19 @@ public class DataServiceImpl implements DataService {
     }
 
     // 행정동 목록 조회
+    @Override
     public List<String> getDongList(SeoulDistrict district) {
         return SeoulDongCatalog.list(district).stream()
                 .map(name -> name.replace("?", "·"))
                 .sorted()
                 .collect(Collectors.toList());
+    }
+
+    // 상권 추천 결과 조회
+    @Override
+    @Transactional(readOnly = true)
+    public RecommendationResponseDto findTop3ByDistrictAndType(SeoulDistrict district, TradeAreaType type) {
+        return recommendationRepository.findTop3ByDistrictAndType(district, type);
     }
 
     // 자치구별 상권 개수 조회
