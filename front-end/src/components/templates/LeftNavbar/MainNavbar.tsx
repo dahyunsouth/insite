@@ -8,9 +8,10 @@ interface MainNavbarProps {
   onLoginModalOpen?: () => void;
   onSavedAreasClick?: () => void;
   onCompareClick?: () => void;
+  onMarketingAreaChange?: (show: boolean) => void;
 }
 
-const MainNavbar: React.FC<MainNavbarProps> = ({ onMyPageClick, onLoginModalOpen, onSavedAreasClick, onCompareClick }) => {
+const MainNavbar: React.FC<MainNavbarProps> = ({ onMyPageClick, onLoginModalOpen, onSavedAreasClick, onCompareClick, onMarketingAreaChange }) => {
   return (
     <nav className="pt-2 pl-2 space-y-1">
       <FirstLeftNavbar />
@@ -20,7 +21,7 @@ const MainNavbar: React.FC<MainNavbarProps> = ({ onMyPageClick, onLoginModalOpen
         onSavedAreasClick={onSavedAreasClick}
         onCompareClick={onCompareClick}
       />
-      <ThirdLeftNavbar />
+      <ThirdLeftNavbar onMarketingAreaChange={onMarketingAreaChange} />
     </nav>
   );
 };
