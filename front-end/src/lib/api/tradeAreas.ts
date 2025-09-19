@@ -154,41 +154,41 @@ export async function fetchTradeAreasDetail(guName: string, dongName: string) {
 
 // 실제 API 응답 구조에 맞는 인터페이스
 export interface TradeAreaDetail {
-  TRDAR_CD: string;
-  TRDAR_CD_NM: string;
-  trade_area_trdar_chnge_ix?: {
-    STDR_YYQU_CD: string;
-    TRDR_CHNGE_IX: string;
+  trdarCd: number;
+  trdarCdNm: string;
+  chnge?: {
+    stdrYyquCd: string;
+    trdrChngeIx: string;
   };
-  trade_area_sales_cd?: {
-    STDR_YYQU_CD: string;
-    THSMON_SELNG_AMT: number;
-    THSMON_SELNG_CO: number;
-    MDWK_SELNG_AMT: number;
-    WKEND_SELNG_AMT: number;
-    MDWK_SELNG_CO: number;
-    WKEND_SELNG_CO: number;
+  sales?: {
+    stdrYyquCd: string;
+    thsmonSelngAmt: number;
+    thsmonSelngCo: number;
+    mdwkSelngAmt: number;
+    wkendSelngAmt: number;
+    mdwkSelngCo: number;
+    wkendSelngCo: number;
   };
-  trade_area_stor_cd?: {
-    STDR_YYQU_CD: string;
-    STOR_CO: number;
-    FRC_STOR_CO: number;
-    OPBIZ_RT: number;
-    OPBIZ_STOR_CO: number;
-    CLSBIZ_RT: number;
-    CLSBIZ_STOR_CO: number;
+  stor?: {
+    stdrYyquCd: string;
+    storCo: number;
+    frcStorCo: number;
+    opbizRt: number;
+    opbizStorCo: number;
+    clsbizRt: number;
+    clsbizStorCo: number;
   };
-  trade_area_flpop_cd?: {
-    STDR_YYQU_CD: string;
-    TOT_FLPOP_CO: number;
+  flpop?: {
+    stdrYyquCd: number;
+    totFlpopCo: number;
   };
-  trade_area_repop_cd?: {
-    STDR_YYQU_CD: string;
-    TOT_REPOP_CO: number;
+  repop?: {
+    stdrYyquCd: string;
+    totRepopCo: number;
   };
-  trade_area_wrc_popltn_cd?: {
-    STDR_YYQU_CD: string;
-    TOT_WRC_POPLTN_CO: number;
+  wrc?: {
+    stdrYyquCd: string;
+    totWrcPopltnCo: number;
   };
 }
 
@@ -227,42 +227,50 @@ export async function fetchTradeAreaDetail(tradeAreaCode: number | string): Prom
 export function mapTradeAreaDetailToMetrics(detail: TradeAreaDetail | null) {
   if (!detail) {
     return {
-      sales: { key: "매출", value: "0", numValue: 0 },
-      stores: { key: "점포", value: "0", numValue: 0 },
-      residents: { key: "상주인구", value: "0", numValue: 0 },
-      workers: { key: "직장인구", value: "0", numValue: 0 },
+      sales: { key: "매출", value: "0 원", numValue: 0 },
+      stores: { key: "점포", value: "0 개", numValue: 0 },
+      floating: { key: "유동인구", value: "0 명", numValue: 0 },
+      residents: { key: "상주인구", value: "0 명", numValue: 0 },
+      workers: { key: "직장인구", value: "0 명", numValue: 0 },
       changeIndex: { key: "상권변화지표", value: "-", numValue: 0 }
     };
   }
 
   // 매출 (천만원 단위로 변환)
-  const salesAmount = detail.trade_area_sales_cd?.THSMON_SELNG_AMT || 0;
+  const salesAmount = detail.sales?.thsmonSelngAmt || 0;
   const salesValue = salesAmount >= 100000000 
-    ? `${Math.round(salesAmount / 100000000)}억` 
-    : `${Math.round(salesAmount / 10000)}만`;
+    ? `${Math.round(salesAmount / 100000000)}억 원` 
+    : `${Math.round(salesAmount / 10000)}만 원`;
 
   // 점포 수
-  const storeCount = detail.trade_area_stor_cd?.STOR_CO || 0;
-  const storeValue = storeCount.toString();
+  const storeCount = detail.stor?.storCo || 0;
+  const storeValue = `${storeCount} 개`;
 
-  // 상주인구 (천 단위로 변환)
-  const residentCount = detail.trade_area_repop_cd?.TOT_REPOP_CO || 0;
-  const residentValue = residentCount >= 1000 
-    ? `${Math.round(residentCount / 1000)}K` 
-    : residentCount.toString();
+  // 유동인구 (만 단위로 변환)
+  const floatingCount = detail.flpop?.totFlpopCo || 0;
+  const floatingValue = floatingCount >= 10000 
+    ? `${Math.round(floatingCount / 10000)}만 명` 
+    : `${floatingCount} 명`;
 
-  // 직장인구 (천 단위로 변환)
-  const workerCount = detail.trade_area_wrc_popltn_cd?.TOT_WRC_POPLTN_CO || 0;
-  const workerValue = workerCount >= 1000 
-    ? `${Math.round(workerCount / 1000)}K` 
-    : workerCount.toString();
+  // 상주인구 (만 단위로 변환)
+  const residentCount = detail.repop?.totRepopCo || 0;
+  const residentValue = residentCount >= 10000 
+    ? `${Math.round(residentCount / 10000)}만 명` 
+    : `${residentCount} 명`;
+
+  // 직장인구 (만 단위로 변환)
+  const workerCount = detail.wrc?.totWrcPopltnCo || 0;
+  const workerValue = workerCount >= 10000 
+    ? `${Math.round(workerCount / 10000)}만 명` 
+    : `${workerCount} 명`;
 
   // 상권변화지표
-  const changeIndex = detail.trade_area_trdar_chnge_ix?.TRDR_CHNGE_IX || "-";
+  const changeIndex = detail.chnge?.trdrChngeIx || "-";
 
   return {
     sales: { key: "매출", value: salesValue, numValue: salesAmount },
     stores: { key: "점포", value: storeValue, numValue: storeCount },
+    floating: { key: "유동인구", value: floatingValue, numValue: floatingCount },
     residents: { key: "상주인구", value: residentValue, numValue: residentCount },
     workers: { key: "직장인구", value: workerValue, numValue: workerCount },
     changeIndex: { key: "상권변화지표", value: changeIndex, numValue: 0 }

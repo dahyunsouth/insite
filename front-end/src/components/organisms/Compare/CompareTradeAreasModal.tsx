@@ -106,6 +106,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
   const metrics = [
     { key: metricsA.sales.key, a: loadingA ? "로딩중..." : metricsA.sales.value, b: loadingB ? "로딩중..." : metricsB.sales.value, aNum: metricsA.sales.numValue, bNum: metricsB.sales.numValue },
     { key: metricsA.stores.key, a: loadingA ? "로딩중..." : metricsA.stores.value, b: loadingB ? "로딩중..." : metricsB.stores.value, aNum: metricsA.stores.numValue, bNum: metricsB.stores.numValue },
+    { key: metricsA.floating.key, a: loadingA ? "로딩중..." : metricsA.floating.value, b: loadingB ? "로딩중..." : metricsB.floating.value, aNum: metricsA.floating.numValue, bNum: metricsB.floating.numValue },
     { key: metricsA.residents.key, a: loadingA ? "로딩중..." : metricsA.residents.value, b: loadingB ? "로딩중..." : metricsB.residents.value, aNum: metricsA.residents.numValue, bNum: metricsB.residents.numValue },
     { key: metricsA.workers.key, a: loadingA ? "로딩중..." : metricsA.workers.value, b: loadingB ? "로딩중..." : metricsB.workers.value, aNum: metricsA.workers.numValue, bNum: metricsB.workers.numValue },
     { key: metricsA.changeIndex.key, a: loadingA ? "로딩중..." : metricsA.changeIndex.value, b: loadingB ? "로딩중..." : metricsB.changeIndex.value, aNum: metricsA.changeIndex.numValue, bNum: metricsB.changeIndex.numValue },
@@ -214,7 +215,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
             {/* Lower Section: At a Glance */}
             {/* Selectors aligned to columns */}
             <div className="mt-10">
-              <div className="text-2xl font-extrabold text-gray-900">한 눈에 보기</div>
+              <div className="text-2xl font-extrabold text-gray-900">한눈에 보기</div>
               <div className={`mt-4 grid gap-x-10 ${showThird ? "grid-cols-[1fr_1fr_240px]" : "grid-cols-2"}`}>
                 <TradeAreaPicker
                   title="상권 A"
@@ -249,12 +250,12 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
                     <div className="py-6 border-t border-gray-200 flex items-center">
                       <div className="w-full">
                         <div className="flex items-center gap-3">
-                          <div className="h-4 flex-1 rounded bg-[#2563eb]" style={{ width: "75%" }} />
-                          <span className="text-sm text-gray-700">{m.aNum.toLocaleString()}</span>
+                          <div className="w-32 h-4 rounded bg-[#2563eb]" style={{ width: `${Math.max(m.aNum, m.bNum) > 0 ? (m.aNum / Math.max(m.aNum, m.bNum)) * 100 : 0}%` }} />
+                          <span className="text-sm text-gray-700 w-20 text-right">{m.aNum.toLocaleString()}</span>
                         </div>
                         <div className="mt-2 flex items-center gap-3">
-                          <div className="h-4 flex-1 rounded bg-[#f472b6]" style={{ width: "55%" }} />
-                          <span className="text-sm text-gray-700">{m.bNum.toLocaleString()}</span>
+                          <div className="w-32 h-4 rounded bg-[#f472b6]" style={{ width: `${Math.max(m.aNum, m.bNum) > 0 ? (m.bNum / Math.max(m.aNum, m.bNum)) * 100 : 0}%` }} />
+                          <span className="text-sm text-gray-700 w-20 text-right">{m.bNum.toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
