@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 type SearchBarProps = {
   onSearch?: (query: string) => void;
+  onSearchResultsShow?: (show: boolean, keyword: string) => void;
 };
 
-const SearchBar = ({ onSearch }: SearchBarProps) => {
+const SearchBar = ({ onSearch, onSearchResultsShow }: SearchBarProps) => {
   const [query, setQuery] = useState("");
   const [enterActive, setEnterActive] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -20,6 +21,9 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
       if (target && !containerRef.current.contains(target)) {
         // 바깥 클릭 시 포커스 해제 및 입력 값 초기화 → placeholder 노출
         setQuery("");
+        if (onSearchResultsShow) {
+          onSearchResultsShow(false, '');
+        }
         inputRef.current?.blur();
       }
     };
@@ -28,25 +32,57 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown);
     };
-  }, []);
+  }, [onSearchResultsShow]);
 
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     const trimmed = query.trim();
-    if (!trimmed) return;
+    if (!trimmed) {
+      if (onSearchResultsShow) {
+        onSearchResultsShow(false, '');
+      }
+      return;
+    }
+    
     if (onSearch) onSearch(trimmed);
-  };
+    if (onSearchResultsShow) {
+      onSearchResultsShow(true, trimmed);
+    }
+  }, [query, onSearch, onSearchResultsShow]);
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setQuery(value);
+    
+    // 입력값이 있으면 검색 결과 표시, 없으면 숨김
+    if (value.trim()) {
+      if (onSearchResultsShow) {
+        onSearchResultsShow(true, value.trim());
+      }
+    } else {
+      if (onSearchResultsShow) {
+        onSearchResultsShow(false, '');
+      }
+    }
+  }, [onSearchResultsShow]);
 
   return (
-    <div ref={containerRef} className="flex items-center w-full sm:w-64 md:w-72 lg:w-80 xl:w-96 2xl:w-[28rem] max-w-full">
+    <div ref={containerRef} className="relative flex items-center w-full sm:w-64 md:w-72 lg:w-80 xl:w-96 2xl:w-[28rem] max-w-full">
       <input
         ref={inputRef}
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={handleInputChange}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             setEnterActive(true);
             handleSearch();
             setTimeout(() => setEnterActive(false), 250);
+          }
+        }}
+        onFocus={() => {
+          if (query.trim()) {
+            if (onSearchResultsShow) {
+              onSearchResultsShow(true, query.trim());
+            }
           }
         }}
         placeholder="지하철명, 자치구명으로 검색"
@@ -62,6 +98,7 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
       >
         <MagnifyingGlassIcon className="h-5 w-5" />
       </button>
+      
     </div>
   );
 };

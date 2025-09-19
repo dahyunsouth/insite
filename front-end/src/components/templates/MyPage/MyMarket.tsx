@@ -29,20 +29,20 @@ const MyMarket: React.FC<MyMarketProps> = ({
   };
 
   return (
-    <div className={`p-4 bg-white h-screen ${className}`}>
+    <div className={`p-4 bg-white h-screen flex flex-col ${className}`}>
       <div className="flex items-center justify-start gap-2">
         <BtnBack onClick={onBack} />
         <h1 className="text-lg font-semibold text-gray-900">저장된 상권</h1>
       </div>
       <MyProfileInfo />
-      <div className="space-y-4 mt-4">
+      <div className="flex-1 space-y-4 mt-4 flex flex-col justify-between">
         {/* 저장된 상권 목록이 들어갈 영역 */}
         <div className="text-center text-gray-900">
-           <SavedMarketCard
-             className='flex items-start p-4 gap-4'
-             isSelected={isCardSelected}
-             onClick={handleCardClick}
-           >            
+          <SavedMarketCard
+            className='flex items-start p-4 gap-4'
+            isSelected={isCardSelected}
+            onClick={handleCardClick}
+          >            
              <CheckBox 
                checked={isCardSelected}
                onChange={handleCheckboxChange}
@@ -79,6 +79,9 @@ const MyMarket: React.FC<MyMarketProps> = ({
                </div>
              </div>
            </SavedMarketCard>
+        </div>
+        <div className='cursor-pointer flex justify-center items-center bg-[#3288FF] text-white rounded-lg p-2'>
+          <span className='text-md'>비교하기</span>
         </div>
       </div>
     </div>

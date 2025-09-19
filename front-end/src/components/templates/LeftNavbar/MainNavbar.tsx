@@ -18,6 +18,11 @@ interface MainNavbarProps {
   onMarketListClose?: () => void;
   onAddressClick?: (district: string, dong: string) => void;
   onAddressChange?: (district: string, dong: string) => void;
+  // SearchResultList 관련 props 추가
+  showSearchResults?: boolean;
+  searchKeyword?: string;
+  onSearchClose?: () => void;
+  onSearchResultsShow?: (show: boolean, keyword: string) => void;
 }
 
 const MainNavbar: React.FC<MainNavbarProps> = ({ 
@@ -32,12 +37,17 @@ const MainNavbar: React.FC<MainNavbarProps> = ({
   currentDong,
   onMarketListClose,
   onAddressClick,
-  onAddressChange
+  onAddressChange,
+  // SearchResultList 관련 props
+  showSearchResults,
+  searchKeyword,
+  onSearchClose,
+  onSearchResultsShow
 }) => {
   return (
     <nav className="py-2 pl-2 space-y-1 h-full flex flex-col">
       <div className="flex-shrink-0">
-        <FirstLeftNavbar />
+        <FirstLeftNavbar onSearchResultsShow={onSearchResultsShow} />
       </div>
       <div className="flex-shrink-0">
         <SecondLeftNavbar
@@ -58,10 +68,13 @@ const MainNavbar: React.FC<MainNavbarProps> = ({
       </div>
       <div className="flex-1 min-h-0">
         <FifthLeftNavbar 
-          isVisible={showMarketList || false}
+          isVisible={showMarketList || showSearchResults || false}
           district={currentDistrict || ''}
           dong={currentDong || ''}
           onClose={onMarketListClose || (() => {})}
+          showSearchResults={showSearchResults || false}
+          searchKeyword={searchKeyword || ''}
+          onSearchClose={onSearchClose}
         />
       </div>
     </nav>

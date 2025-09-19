@@ -1,11 +1,11 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import RadarChart from "@/components/molecules/Detail/Chart/RadarChart";
+import { fetchTradeAreaDetail, mapTradeAreaDetailToMetrics, TradeAreaDetail } from "@/lib/api/tradeAreas";
 import PcDetailPanel, { PcMeta } from "@/components/organisms/Compare/PcDetailPanel";
 import TradeAreaPicker, { TradeAreaSelection } from "@/components/molecules/Compare/TradeAreaPicker";
-import { fetchTradeAreaDetail, mapTradeAreaDetailToMetrics, TradeAreaDetail } from "@/lib/api/tradeAreas";
 
 type CompareTradeAreasModalProps = {
   open: boolean;
@@ -16,7 +16,6 @@ type CompareTradeAreasModalProps = {
 
 export default function CompareTradeAreasModal({ open, onClose, leftOpen = true }: CompareTradeAreasModalProps) {
   const [selectedPc, setSelectedPc] = useState<number>(0);
-  const [selectionA, setSelectionA] = useState<TradeAreaSelection>({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
   // API 데이터 상태
   const [detailA, setDetailA] = useState<TradeAreaDetail | null>(null);
   const [detailB, setDetailB] = useState<TradeAreaDetail | null>(null);
@@ -24,7 +23,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
   const [loadingB, setLoadingB] = useState<boolean>(false);
   const [errorA, setErrorA] = useState<string | null>(null);
   const [errorB, setErrorB] = useState<string | null>(null);
-
+  const [selectionA, setSelectionA] = useState<TradeAreaSelection>({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
   const [selectionB, setSelectionB] = useState<TradeAreaSelection>({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
   // Close on ESC
   useEffect(() => {
@@ -39,12 +38,6 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
   // Body scroll lock while modal open
   useEffect(() => {
     if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [open]);
   // 상권 A 데이터 로드
   useEffect(() => {
     if (!selectionA.tradeAreaCode) {
@@ -52,6 +45,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
       setErrorA(null);
       return;
     }
+
     const loadDetailA = async () => {
       setLoadingA(true);
       setErrorA(null);
@@ -65,6 +59,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
         setLoadingA(false);
       }
     };
+
     loadDetailA();
   }, [selectionA.tradeAreaCode]);
 
@@ -75,6 +70,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
       setErrorB(null);
       return;
     }
+
     const loadDetailB = async () => {
       setLoadingB(true);
       setErrorB(null);
@@ -88,9 +84,15 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
         setLoadingB(false);
       }
     };
+
     loadDetailB();
   }, [selectionB.tradeAreaCode]);
-
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
 
   if (!open) return null;
 
@@ -98,19 +100,14 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
   const cardMaxWidthClass = leftOpen ? "w-[min(920px,90%)]" : "w-[min(1200px,95%)]";
   const showThird = !leftOpen;
 
-
-  // API 데이터를 기반으로 metrics 생성 (매출, 점포, 인구, 상권 변화 지표 순)
-  const metricsA = mapTradeAreaDetailToMetrics(detailA);
-  const metricsB = mapTradeAreaDetailToMetrics(detailB);
-
   const metrics = [
-    { key: metricsA.sales.key, a: loadingA ? "로딩중..." : metricsA.sales.value, b: loadingB ? "로딩중..." : metricsB.sales.value, aNum: metricsA.sales.numValue, bNum: metricsB.sales.numValue },
-    { key: metricsA.stores.key, a: loadingA ? "로딩중..." : metricsA.stores.value, b: loadingB ? "로딩중..." : metricsB.stores.value, aNum: metricsA.stores.numValue, bNum: metricsB.stores.numValue },
-    { key: metricsA.floating.key, a: loadingA ? "로딩중..." : metricsA.floating.value, b: loadingB ? "로딩중..." : metricsB.floating.value, aNum: metricsA.floating.numValue, bNum: metricsB.floating.numValue },
-    { key: metricsA.residents.key, a: loadingA ? "로딩중..." : metricsA.residents.value, b: loadingB ? "로딩중..." : metricsB.residents.value, aNum: metricsA.residents.numValue, bNum: metricsB.residents.numValue },
-    { key: metricsA.workers.key, a: loadingA ? "로딩중..." : metricsA.workers.value, b: loadingB ? "로딩중..." : metricsB.workers.value, aNum: metricsA.workers.numValue, bNum: metricsB.workers.numValue },
-    { key: metricsA.changeIndex.key, a: loadingA ? "로딩중..." : metricsA.changeIndex.value, b: loadingB ? "로딩중..." : metricsB.changeIndex.value, aNum: metricsA.changeIndex.numValue, bNum: metricsB.changeIndex.numValue },
-  ] as const;
+  { key: "Foot Traffic", a: "410K", b: "410K", aNum: 2702, bNum: 2508 },
+  { key: "Stores", a: "97", b: "97", aNum: 2702, bNum: 2508 },
+  { key: "Residents", a: "2,702", b: "2,702", aNum: 2702, bNum: 2508 },
+  { key: "Workers", a: "5,275", b: "5,275", aNum: 2702, bNum: 2508 },
+  { key: "Attraction", a: "5,275", b: "5,275", aNum: 2702, bNum: 2508 },
+  { key: "Change Index", a: "HL", b: "HL", aNum: 2702, bNum: 2508 },
+] as const;
 
   return createPortal(
     <div
@@ -215,7 +212,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
             {/* Lower Section: At a Glance */}
             {/* Selectors aligned to columns */}
             <div className="mt-10">
-              <div className="text-2xl font-extrabold text-gray-900">한눈에 보기</div>
+              <div className="text-2xl font-extrabold text-gray-900">한 눈에 보기</div>
               <div className={`mt-4 grid gap-x-10 ${showThird ? "grid-cols-[1fr_1fr_240px]" : "grid-cols-2"}`}>
                 <TradeAreaPicker
                   title="상권 A"
@@ -250,12 +247,12 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
                     <div className="py-6 border-t border-gray-200 flex items-center">
                       <div className="w-full">
                         <div className="flex items-center gap-3">
-                          <div className="w-32 h-4 rounded bg-[#2563eb]" style={{ width: `${Math.max(m.aNum, m.bNum) > 0 ? (m.aNum / Math.max(m.aNum, m.bNum)) * 100 : 0}%` }} />
-                          <span className="text-sm text-gray-700 w-20 text-right">{m.aNum.toLocaleString()}</span>
+                          <div className="h-4 flex-1 rounded bg-[#2563eb]" style={{ width: "75%" }} />
+                          <span className="text-sm text-gray-700">{m.aNum.toLocaleString()}</span>
                         </div>
                         <div className="mt-2 flex items-center gap-3">
-                          <div className="w-32 h-4 rounded bg-[#f472b6]" style={{ width: `${Math.max(m.aNum, m.bNum) > 0 ? (m.bNum / Math.max(m.aNum, m.bNum)) * 100 : 0}%` }} />
-                          <span className="text-sm text-gray-700 w-20 text-right">{m.bNum.toLocaleString()}</span>
+                          <div className="h-4 flex-1 rounded bg-[#f472b6]" style={{ width: "55%" }} />
+                          <span className="text-sm text-gray-700">{m.bNum.toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
