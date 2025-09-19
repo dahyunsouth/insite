@@ -118,6 +118,25 @@ public class TradeAreaRegionRepository {
                         toInteger(record.get(TRADE_AREA_STOR_CD.STOR_CO)),
                         toInteger(record.get(TRADE_AREA_STOR_CD.SIMILR_INDUTY_STOR_CO))
                 ));
+        
+        /*
+        필요한 인덱스
+        
+        -- 행정동으로 빠르게 찾고, 곧바로 조인키(TRDAR_CD)까지 커버
+        CREATE INDEX ix_region_gu_dong_trdar
+        ON trade_area_region (signgu_cd_nm, adstrd_cd_nm, trdar_cd);
+
+        -- 동등조건(=) 컬럼을 선두로, 최신분기 선택 컬럼을 마지막에 배치
+        CREATE INDEX ix_stor_trdar_svc_yyqu
+        ON trade_area_stor_cd (trdar_cd, svc_induty_cd_nm, stdr_yyqu_cd);
+
+        -- 최신 분기 1행에서 바로 값까지 읽도록 커버링(인덱스 커짐)
+        CREATE INDEX ix_stor_trdar_svc_yyqu_cover
+        ON trade_area_stor_cd (
+        trdar_cd, svc_induty_cd_nm, stdr_yyqu_cd,
+        stor_co, similr_induty_stor_co
+        );
+         */
 
         return TradeAreasResponseDto.builder()
                 .districtNameKor(gu)
