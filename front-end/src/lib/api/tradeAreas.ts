@@ -227,11 +227,11 @@ export async function fetchTradeAreaDetail(tradeAreaCode: number | string): Prom
 export function mapTradeAreaDetailToMetrics(detail: TradeAreaDetail | null) {
   if (!detail) {
     return {
-      sales: { key: "매출", value: "0 원", numValue: 0 },
-      stores: { key: "점포", value: "0 개", numValue: 0 },
-      floating: { key: "유동인구", value: "0 명", numValue: 0 },
-      residents: { key: "상주인구", value: "0 명", numValue: 0 },
-      workers: { key: "직장인구", value: "0 명", numValue: 0 },
+      sales: { key: "매출", value: "-", numValue: 0 },
+      stores: { key: "점포", value: "-", numValue: 0 },
+      floating: { key: "유동인구", value: "-", numValue: 0 },
+      residents: { key: "상주인구", value: "-", numValue: 0 },
+      workers: { key: "직장인구", value: "-", numValue: 0 },
       changeIndex: { key: "상권변화지표", value: "-", numValue: 0 }
     };
   }
@@ -240,29 +240,29 @@ export function mapTradeAreaDetailToMetrics(detail: TradeAreaDetail | null) {
   const salesAmount = detail.sales?.thsmonSelngAmt || 0;
   const salesValue = salesAmount >= 100000000 
     ? `${(salesAmount / 100000000).toFixed(1)}억 원` 
-    : `${Math.round(salesAmount / 10000)}만 원`;
+    : `${Math.round(salesAmount / 10000).toLocaleString()}만 원`;
 
   // 점포 수
   const storeCount = detail.stor?.storCo || 0;
-  const storeValue = `${storeCount} 개`;
+  const storeValue = `${storeCount.toLocaleString()} 개`;
 
   // 유동인구 (만 단위로 변환)
   const floatingCount = detail.flpop?.totFlpopCo || 0;
   const floatingValue = floatingCount >= 10000 
-    ? `${Math.round(floatingCount / 10000)}만 명` 
-    : `${floatingCount} 명`;
+    ? `${Math.round(floatingCount / 10000).toLocaleString()}만 명` 
+    : `${floatingCount.toLocaleString()} 명`;
 
   // 상주인구 (만 단위로 변환)
   const residentCount = detail.repop?.totRepopCo || 0;
   const residentValue = residentCount >= 10000 
-    ? `${Math.round(residentCount / 10000)}만 명` 
-    : `${residentCount} 명`;
+    ? `${Math.round(residentCount / 10000).toLocaleString()}만 명` 
+    : `${residentCount.toLocaleString()} 명`;
 
   // 직장인구 (만 단위로 변환)
   const workerCount = detail.wrc?.totWrcPopltnCo || 0;
   const workerValue = workerCount >= 10000 
-    ? `${Math.round(workerCount / 10000)}만 명` 
-    : `${workerCount} 명`;
+    ? `${Math.round(workerCount / 10000).toLocaleString()}만 명` 
+    : `${workerCount.toLocaleString()} 명`;
 
   // 상권변화지표
   const changeIndex = detail.chnge?.trdrChngeIx || "-";
