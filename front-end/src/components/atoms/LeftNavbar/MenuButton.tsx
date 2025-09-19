@@ -40,7 +40,7 @@ export default function MenuButton({ className, onChange }: MenuButtonProps) {
       >
         월매출
       </button>
-      <button
+      {/* <button
         type="button"
         aria-pressed={active === "footTraffic"}
         onClick={() => select("footTraffic")}
@@ -55,7 +55,7 @@ export default function MenuButton({ className, onChange }: MenuButtonProps) {
         className={baseBtn + defaultClasses}
       >
         대중교통
-      </button>
+      </button> */}
     </div>
   );
 }

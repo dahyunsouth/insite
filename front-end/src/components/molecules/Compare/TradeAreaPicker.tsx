@@ -443,11 +443,11 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
   const stepTitle = (() => {
     switch (step) {
       case 1:
-        return "1단계. 자치구 선택";
+        return "1단계. 자치구 검색";
       case 2:
-        return "2단계. 행정동 선택";
+        return "2단계. 행정동 검색";
       case 3:
-        return "3단계. 상권 선택";
+        return "3단계. 상권 검색";
       default:
         return null;
     }
