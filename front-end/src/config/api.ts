@@ -1,6 +1,6 @@
 // API 설정
 // 배포된 서버 주소 사용 (환경 변수로 오버라이드 가능)
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://43.203.196.29:8080';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://43.203.196.29:8080';
 
 export const API_ENDPOINTS = {
   LOGIN: `${API_BASE_URL}/api/v1/auth/login`,
@@ -18,4 +18,5 @@ export const API_ENDPOINTS = {
   COUNT_BY_DONG: `${API_BASE_URL}/api/v1/data/count-by-dong`,
   TRADE_AREAS: `${API_BASE_URL}/api/v1/data/trade-areas`,
   TRADE_AREA_DETAIL: `${API_BASE_URL}/api/v1/data/trade-area-detail`,
+  REC_SYS: `${API_BASE_URL}/api/v1/data/rec-sys`,
 } as const;
