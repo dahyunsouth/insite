@@ -236,7 +236,7 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
   }, [step]);
 
   const selectedSignguName = value.signguCode ? value.signguCode : undefined;
-  const selectedAdstrdName = value.adstrdCode ? ADSTRD_NAME_BY_CODE.get(value.adstrdCode) : undefined;
+  const selectedAdstrdName = value.adstrdCode ? dongList.find(dong => dong === value.adstrdCode) : undefined;
   const selectedTradeArea = value.tradeAreaCode ? TRADE_AREA_BY_CODE.get(value.tradeAreaCode) : undefined;
   const selectedTradeAreaDisplay = selectedTradeArea
     ? selectedTradeArea.name.endsWith("상권")
@@ -246,13 +246,13 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
 
   const summary = useMemo(() => {
     if (!selectedSignguName && !selectedAdstrdName && !selectedTradeAreaDisplay) {
-      return "선택된 상권이 없습니다";
+      return "아직 선택된 상권이 없습니다.";
     }
     const parts: string[] = [];
     if (selectedSignguName) parts.push(selectedSignguName);
     if (selectedAdstrdName) parts.push(selectedAdstrdName);
     if (selectedTradeAreaDisplay) parts.push(selectedTradeAreaDisplay);
-    return parts.join(" → ") || "선택된 상권이 없습니다";
+    return parts.join(" > ") || "아직 선택된 상권이 없습니다.";
   }, [selectedAdstrdName, selectedSignguName, selectedTradeAreaDisplay]);
 
   const currentOptions: PickerOption[] = useMemo(() => {
@@ -443,11 +443,11 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
   const stepTitle = (() => {
     switch (step) {
       case 1:
-        return "1단계 → 구 선택";
+        return "1단계. 자치구 선택";
       case 2:
-        return "2단계 → 동 선택";
+        return "2단계. 행정동 선택";
       case 3:
-        return "3단계 → 상권 선택";
+        return "3단계. 상권 선택";
       default:
         return null;
     }

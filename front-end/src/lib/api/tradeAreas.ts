@@ -239,7 +239,7 @@ export function mapTradeAreaDetailToMetrics(detail: TradeAreaDetail | null) {
   // 매출 (천만원 단위로 변환)
   const salesAmount = detail.sales?.thsmonSelngAmt || 0;
   const salesValue = salesAmount >= 100000000 
-    ? `${Math.round(salesAmount / 100000000)}억 원` 
+    ? `${(salesAmount / 100000000).toFixed(1)}억 원` 
     : `${Math.round(salesAmount / 10000)}만 원`;
 
   // 점포 수
