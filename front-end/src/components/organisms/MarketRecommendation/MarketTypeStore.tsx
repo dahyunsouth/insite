@@ -55,7 +55,7 @@ const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const canRequestRecommendation = Boolean(
-    selectedDistrictName && marketType && storeSize && hasInteracted
+    selectedDistrictName && marketType
   );
 
   const submitButtonClass = canRequestRecommendation
@@ -161,7 +161,7 @@ const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({
           onMarketTypeChange={handleMarketTypeChange}
           initialValue={marketType}
         />
-        <StoreSize
+        {/* <StoreSize
           onSizeChange={handleStoreSizeChange}
           initialValue={storeSize}
         />
@@ -170,7 +170,7 @@ const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({
           initialMinFee={minFee}
           initialMaxFee={maxFee}
           initialHasInteracted={hasInteracted}
-        />
+        /> */}
       </div>
       <div className='flex flex-col gap-3'>
         {errorMessage && (

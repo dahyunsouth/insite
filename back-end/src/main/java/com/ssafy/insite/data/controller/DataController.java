@@ -6,7 +6,9 @@ import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaSalesInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaScoreResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaStorInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
 import com.ssafy.insite.data.enums.TradeAreaType;
@@ -91,18 +93,6 @@ public class DataController {
         return new BaseResponse<>(response);
     }
 
-    @GetMapping("/quarter-summary")
-    @Operation(summary = "상권 분기 요약 조회")
-    public BaseResponse<QuarterSummaryResponseDto> getQuarterSummary(
-            @Parameter(description = "기준_년분기_코드")
-            @RequestParam("stdrYyquCd") String stdrYyquCd,
-            @Parameter(description = "상권_코드")
-            @RequestParam("trdarCd") Integer trdarCd
-    ) {
-        QuarterSummaryResponseDto response = dataService.findQuarterSummary(stdrYyquCd, trdarCd);
-        return new BaseResponse<>(response);
-    }
-
     @GetMapping("/trade-area-detail")
     @Operation(summary = "상권 상세 정보 조회")
     public BaseResponse<TradeAreaDetailResponseDto> findTradeAreaDetail(
@@ -129,6 +119,26 @@ public class DataController {
             @RequestParam("dong") String dong
     ) {
         TradeAreasResponseDto response = dataService.listByDistrictAndDong(district, dong);
+        return new BaseResponse<>(response);
+    }
+
+    @GetMapping("/info/stor")
+    @Operation(summary = "상권별 점포 정보 조회")
+    public BaseResponse<TradeAreaStorInfoResponseDto> findStorInfoByCode(
+            @Parameter(description = "상권코드")
+            @RequestParam("trdarCd") int trdarCd
+    ) {
+        TradeAreaStorInfoResponseDto response = dataService.findStorInfoByCode(trdarCd);
+        return new BaseResponse<>(response);
+    }
+
+    @GetMapping("/info/sales")
+    @Operation(summary = "상권별 매출 정보 조회")
+    public BaseResponse<TradeAreaSalesInfoResponseDto> findSalesInfoByCode(
+            @Parameter(description = "상권코드")
+            @RequestParam("trdarCd") int trdarCd
+    ) {
+        TradeAreaSalesInfoResponseDto response = dataService.findSalesInfoByCode(trdarCd);
         return new BaseResponse<>(response);
     }
 }
