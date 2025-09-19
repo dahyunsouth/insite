@@ -50,6 +50,7 @@ public enum BaseResponseStatus {
     INVALID_DONG(HttpStatus.BAD_REQUEST, false, 2019, "행정동이 존재하지 않습니다."),
     INVALID_QUERY(HttpStatus.BAD_REQUEST, false, 2020, "검색 조건이 유효하지 않습니다."),
     INVALID_TRDAR_CD(HttpStatus.BAD_REQUEST, false, 2021, "상권 코드가 유효하지 않습니다."),
+    INVALID_TRDAR_CD_NM(HttpStatus.BAD_REQUEST, false, 2022, "상권명이 유효하지 않습니다."),
     ;
 
     private final HttpStatusCode httpStatusCode;
