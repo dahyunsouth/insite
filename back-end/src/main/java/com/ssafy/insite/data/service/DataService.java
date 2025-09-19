@@ -7,6 +7,7 @@ import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaSalesInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaScoreResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaStorInfoResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaWrcPopltnInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
 import com.ssafy.insite.data.enums.TradeAreaType;
@@ -45,4 +46,7 @@ public interface DataService {
 
     // 상권별 매출 정보 조회
     TradeAreaSalesInfoResponseDto findSalesInfoByCode(int trdarCd);
+
+    // 상권별 직장인구 정보 조회
+    TradeAreaWrcPopltnInfoResponseDto findWrcPopltnInfoByCode(int trdarCd);
 }

@@ -9,6 +9,7 @@ import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaSalesInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaScoreResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaStorInfoResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaWrcPopltnInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
 import com.ssafy.insite.data.enums.TradeAreaType;
@@ -17,6 +18,7 @@ import com.ssafy.insite.data.repository.TradeAreaDetailRepository;
 import com.ssafy.insite.data.repository.TradeAreaRegionRepository;
 import com.ssafy.insite.data.repository.TradeAreaSalesRepository;
 import com.ssafy.insite.data.repository.TradeAreaStorCdRepository;
+import com.ssafy.insite.data.repository.TradeAreaWrcPopltnRepository;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,6 +34,7 @@ public class DataServiceImpl implements DataService {
     private final TradeAreaDetailRepository tradeAreaDetailRepository;
     private final RecommendationRepository recommendationRepository;
     private final TradeAreaSalesRepository tradeAreaSalesRepository;
+    private final TradeAreaWrcPopltnRepository tradeAreaWrcPopltnRepository;
 
     // 자치구 목록 조회
     @Override
@@ -112,5 +115,12 @@ public class DataServiceImpl implements DataService {
     @Transactional(readOnly = true)
     public TradeAreaSalesInfoResponseDto findSalesInfoByCode(int trdarCd) {
         return tradeAreaSalesRepository.findSalesInfoByCode(trdarCd);
+    }
+
+    // 상권별 직장인구 정보 조회
+    @Override
+    @Transactional(readOnly = true)
+    public TradeAreaWrcPopltnInfoResponseDto findWrcPopltnInfoByCode(int trdarCd) {
+        return tradeAreaWrcPopltnRepository.findWrcPopltnInfoByCode(trdarCd);
     }
 }
