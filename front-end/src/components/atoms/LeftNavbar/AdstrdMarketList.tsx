@@ -117,7 +117,7 @@ export default function AdstrdMarketList({ district, dong, onClose }: AdstrdMark
         </h3>
         <button
           onClick={onClose}
-          className="p-1 rounded-full text-gray-400 hover:text-gray-600 active:text-gray-800 hover:bg-gray-100 active:bg-gray-200 transition-all duration-150"
+          className="cursor-pointer p-1 rounded-full text-gray-400 hover:text-gray-600 active:text-gray-800 hover:bg-gray-100 active:bg-gray-200 transition-all duration-150"
           aria-label="닫기"
         >
           <svg 
