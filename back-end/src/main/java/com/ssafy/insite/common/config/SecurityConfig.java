@@ -42,6 +42,7 @@ public class SecurityConfig {
                     var config = new org.springframework.web.cors.CorsConfiguration();
                     config.setAllowedOrigins(List.of(
                             "http://localhost:3000",
+                            "http://43.203.196.29:8080",
                             "https://j13e203.p.ssafy.io/"
                     ));
                     config.setAllowedMethods(List.of("*"));
