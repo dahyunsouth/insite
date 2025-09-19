@@ -4,6 +4,7 @@ import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaSalesInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaScoreResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaStorInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
@@ -36,9 +37,12 @@ public interface DataService {
     // 최신 분기 조회
     String findLatestQuarterCode();
 
-    // 행정동 내 상권 리스트 조회
+    // 행정동 내 상권 리스트 조회 (★ 인덱싱 필수)
     TradeAreasResponseDto listByDistrictAndDong(SeoulDistrict district, String dong);
 
     // 상권별 점포 정보 조회
     TradeAreaStorInfoResponseDto findStorInfoByCode(int trdarCd);
+
+    // 상권별 매출 정보 조회
+    TradeAreaSalesInfoResponseDto findSalesInfoByCode(int trdarCd);
 }

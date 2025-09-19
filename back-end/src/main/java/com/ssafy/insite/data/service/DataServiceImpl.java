@@ -6,6 +6,7 @@ import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaSalesInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaScoreResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaStorInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
@@ -14,6 +15,7 @@ import com.ssafy.insite.data.enums.TradeAreaType;
 import com.ssafy.insite.data.repository.RecommendationRepository;
 import com.ssafy.insite.data.repository.TradeAreaDetailRepository;
 import com.ssafy.insite.data.repository.TradeAreaRegionRepository;
+import com.ssafy.insite.data.repository.TradeAreaSalesRepository;
 import com.ssafy.insite.data.repository.TradeAreaStorCdRepository;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +31,7 @@ public class DataServiceImpl implements DataService {
     private final TradeAreaStorCdRepository tradeAreaStorCdRepository;
     private final TradeAreaDetailRepository tradeAreaDetailRepository;
     private final RecommendationRepository recommendationRepository;
+    private final TradeAreaSalesRepository tradeAreaSalesRepository;
 
     // 자치구 목록 조회
     @Override
@@ -90,7 +93,7 @@ public class DataServiceImpl implements DataService {
         return tradeAreaStorCdRepository.findLatestQuarterCode();
     }
 
-    // 행정동 내 상권 리스트 조회
+    // 행정동 내 상권 리스트 조회 (★ 인덱싱 필수)
     @Override
     @Transactional(readOnly = true)
     public TradeAreasResponseDto listByDistrictAndDong(SeoulDistrict district, String dong) {
@@ -102,5 +105,12 @@ public class DataServiceImpl implements DataService {
     @Transactional(readOnly = true)
     public TradeAreaStorInfoResponseDto findStorInfoByCode(int trdarCd) {
         return tradeAreaStorCdRepository.findStorInfoByCode(trdarCd);
+    }
+
+    // 상권별 매출 정보 조회
+    @Override
+    @Transactional(readOnly = true)
+    public TradeAreaSalesInfoResponseDto findSalesInfoByCode(int trdarCd) {
+        return tradeAreaSalesRepository.findSalesInfoByCode(trdarCd);
     }
 }

@@ -6,6 +6,7 @@ import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaSalesInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaScoreResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaStorInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
@@ -128,6 +129,16 @@ public class DataController {
             @RequestParam("trdarCd") int trdarCd
     ) {
         TradeAreaStorInfoResponseDto response = dataService.findStorInfoByCode(trdarCd);
+        return new BaseResponse<>(response);
+    }
+
+    @GetMapping("/info/sales")
+    @Operation(summary = "상권별 매출 정보 조회")
+    public BaseResponse<TradeAreaSalesInfoResponseDto> findSalesInfoByCode(
+            @Parameter(description = "상권코드")
+            @RequestParam("trdarCd") int trdarCd
+    ) {
+        TradeAreaSalesInfoResponseDto response = dataService.findSalesInfoByCode(trdarCd);
         return new BaseResponse<>(response);
     }
 }
