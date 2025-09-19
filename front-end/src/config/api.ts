@@ -29,5 +29,6 @@ export const API_ENDPOINTS = {
   COUNT_BY_GU: `${API_BASE_URL}/api/v1/data/count-by-gu`,
   COUNT_BY_DONG: `${API_BASE_URL}/api/v1/data/count-by-dong`,
   TRADE_AREAS: `${API_BASE_URL}/api/v1/data/trade-areas`,
+  TRADE_AREA_DETAIL: `${API_BASE_URL}/api/v1/data/trade-area-detail`,
   REC_SYS: `${API_BASE_URL}/api/v1/data/rec-sys`,
 } as const;
