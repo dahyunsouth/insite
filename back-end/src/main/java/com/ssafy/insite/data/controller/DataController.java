@@ -1,7 +1,6 @@
 package com.ssafy.insite.data.controller;
 
 import com.ssafy.insite.common.dto.response.BaseResponse;
-import com.ssafy.insite.data.dto.response.QuarterSummaryResponseDto;
 import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
