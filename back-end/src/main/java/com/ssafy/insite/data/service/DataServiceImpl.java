@@ -2,12 +2,12 @@ package com.ssafy.insite.data.service;
 
 import com.ssafy.insite.common.utils.SeoulDistrictConverter;
 import com.ssafy.insite.common.utils.SeoulDongCatalog;
-import com.ssafy.insite.data.dto.response.QuarterSummaryResponseDto;
 import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaScoreResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaStorInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
 import com.ssafy.insite.data.enums.TradeAreaType;
@@ -76,13 +76,6 @@ public class DataServiceImpl implements DataService {
         return tradeAreaRegionRepository.countByDong(district, dong);
     }
 
-    // 상권 분기 요약 조회
-    @Override
-    @Transactional(readOnly = true)
-    public QuarterSummaryResponseDto findQuarterSummary(String stdrYyquCd, Integer trdarCd) {
-        return tradeAreaStorCdRepository.findQuarterSummary(stdrYyquCd, trdarCd);
-    }
-
     // 상권 상세 정보 조회
     @Override
     @Transactional(readOnly = true)
@@ -102,5 +95,12 @@ public class DataServiceImpl implements DataService {
     @Transactional(readOnly = true)
     public TradeAreasResponseDto listByDistrictAndDong(SeoulDistrict district, String dong) {
         return tradeAreaRegionRepository.listByDistrictAndDong(district, dong);
+    }
+
+    // 상권별 점포 정보 조회
+    @Override
+    @Transactional(readOnly = true)
+    public TradeAreaStorInfoResponseDto findStorInfoByCode(int trdarCd) {
+        return tradeAreaStorCdRepository.findStorInfoByCode(trdarCd);
     }
 }
