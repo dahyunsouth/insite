@@ -71,6 +71,10 @@ export default function HomePage() {
   const [currentDistrict, setCurrentDistrict] = useState<string>('강남구');
   const [currentDong, setCurrentDong] = useState<string>('역삼동');
   const [selectedTradeAreaName, setSelectedTradeAreaName] = useState<string | null>(null);
+  
+  // 검색 결과 관련 상태 추가
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState('');
 
   // 최신 상태를 참조하기 위한 ref
   const showMarketListRef = useRef(showMarketList);
@@ -198,6 +202,29 @@ export default function HomePage() {
     setIsCompareOpen(false);
   };
 
+  // 검색 결과 관련 핸들러들
+  const handleSearchResultsShow = useCallback((show: boolean, keyword: string) => {
+    console.log('🔍 검색 결과 상태 변경:', { show, keyword });
+    setShowSearchResults(show);
+    setSearchKeyword(keyword);
+    
+    // 검색 결과가 표시되면 시장 목록 숨김
+    if (show) {
+      setShowMarketList(false);
+    } else {
+      // 검색 결과가 숨겨지면 시장 목록 다시 표시
+      setShowMarketList(true);
+    }
+  }, []);
+
+  const handleSearchClose = useCallback(() => {
+    console.log('🔍 검색 결과 닫기');
+    setShowSearchResults(false);
+    setSearchKeyword('');
+    // 검색 결과 닫을 때 시장 목록 다시 표시
+    setShowMarketList(true);
+  }, []);
+
   // 로드뷰 토글 핸들러
   const handleLoadViewToggle = (action: boolean | 'minimize' | 'restore') => {
     if (typeof action === 'boolean') {
@@ -276,6 +303,11 @@ export default function HomePage() {
               currentDistrict={currentDistrict}
               currentDong={currentDong}
               onMarketListClose={handleMarketListClose}
+              // 검색 결과 관련 props 추가
+              showSearchResults={showSearchResults}
+              searchKeyword={searchKeyword}
+              onSearchClose={handleSearchClose}
+              onSearchResultsShow={handleSearchResultsShow}
               onAddressClick={handleShowMarketList}
               onAddressChange={handleAddressChange}
             />
