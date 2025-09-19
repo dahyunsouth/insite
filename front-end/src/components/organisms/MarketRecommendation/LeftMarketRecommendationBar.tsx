@@ -35,19 +35,19 @@ const LeftMarketRecommendationBar: React.FC<LeftMarketRecommendationBarProps> = 
       title: '발달/골목 상권',
       value: '선호 상권 유형을 선택하세요.',
       isSelected: false
-    },
-    {
-      id: 3,
-      title: '규모',
-      value: '창업 규모를 선택하세요.',
-      isSelected: false
-    },
-    {
-      id: 4,
-      title: '월 임대료',
-      value: '창업 월 임대료 영역을 선택하세요.',
-      isSelected: false
     }
+    // {
+    //   id: 3,
+    //   title: '규모',
+    //   value: '창업 규모를 선택하세요.',
+    //   isSelected: false
+    // },
+    // {
+    //   id: 4,
+    //   title: '월 임대료',
+    //   value: '창업 월 임대료 영역을 선택하세요.',
+    //   isSelected: false
+    // }
   ]);
 
 
@@ -78,24 +78,24 @@ const LeftMarketRecommendationBar: React.FC<LeftMarketRecommendationBarProps> = 
                 value: selections.marketType || '선호 상권 유형을 선택하세요.',
                 isSelected: !!selections.marketType
               };
-            case 3: // 규모
-              return {
-                ...filter,
-                value: selections.storeSize || '창업 규모를 선택하세요.',
-                isSelected: !!selections.storeSize
-              };
-            case 4: // 월 임대료
-              // hasInteracted가 true인 경우에만 업데이트
-              if (selections.hasInteracted) {
-                const feeText = `${selections.minFee.toLocaleString()}원 ~ ${selections.maxFee.toLocaleString()}원`;
-                return {
-                  ...filter,
-                  value: feeText,
-                  isSelected: true
-                };
-              }
-              // hasInteracted가 false면 기존 상태 유지
-              return filter;
+            // case 3: // 규모
+            //   return {
+            //     ...filter,
+            //     value: selections.storeSize || '창업 규모를 선택하세요.',
+            //     isSelected: !!selections.storeSize
+            //   };
+            // case 4: // 월 임대료
+            //   // hasInteracted가 true인 경우에만 업데이트
+            //   if (selections.hasInteracted) {
+            //     const feeText = `${selections.minFee.toLocaleString()}원 ~ ${selections.maxFee.toLocaleString()}원`;
+            //     return {
+            //       ...filter,
+            //       value: feeText,
+            //       isSelected: true
+            //     };
+            //   }
+            //   // hasInteracted가 false면 기존 상태 유지
+            //   return filter;
             default:
               return filter;
           }
@@ -121,9 +121,7 @@ const LeftMarketRecommendationBar: React.FC<LeftMarketRecommendationBarProps> = 
           ? '선호 행정구를 선택하세요.'
           : filter.id === 2
           ? '선호 상권 유형을 선택하세요.'
-          : filter.id === 3
-          ? '창업 규모를 선택하세요.'
-          : '창업 월 임대료 영역을 선택하세요.'
+          : '선호 상권 유형을 선택하세요.'
       }))
     );
   };
