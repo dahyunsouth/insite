@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import MarketType from '@/components/atoms/MarketRecommendation/MarketType';
@@ -6,8 +6,11 @@ import StoreSize from '@/components/atoms/MarketRecommendation/StoreSize';
 import StoreRentalFee from '@/components/atoms/MarketRecommendation/StoreRentalFee';
 import MarketRecommendationLoding from './MarketRecommendationLoding';
 import MarketRecommendationResult from './MarketRecommendationResult';
+import { API_ENDPOINTS } from '@/config/api';
+import { BaseApiResponse, RecommendationResponse } from '@/types/recommendation';
 
 interface MarketTypeStoreProps {
+  selectedDistrictName: string | null;
   onSelectionsChange?: (selections: {
     marketType: string | null;
     storeSize: string | null;
@@ -25,17 +28,39 @@ interface MarketTypeStoreProps {
   } | null;
 }
 
-const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({ onSelectionsChange, onBack, initialSelections }) => {
+const toApiTradeAreaType = (value: string | null) => {
+  if (!value) return null;
+  if (value.includes('발달')) {
+    return '발달';
+  }
+  if (value.includes('골목')) {
+    return '골목';
+  }
+  return value;
+};
+
+const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({
+  selectedDistrictName,
+  onSelectionsChange,
+  onBack,
+  initialSelections,
+}) => {
   const [marketType, setMarketType] = useState<string | null>(initialSelections?.marketType || null);
   const [storeSize, setStoreSize] = useState<string | null>(initialSelections?.storeSize || null);
-  const [minFee, setMinFee] = useState<number>(initialSelections?.minFee || 0);
-  const [maxFee, setMaxFee] = useState<number>(initialSelections?.maxFee || 100000000);
+  const [minFee, setMinFee] = useState<number>(initialSelections?.minFee ?? 0);
+  const [maxFee, setMaxFee] = useState<number>(initialSelections?.maxFee ?? 100000000);
   const [hasInteracted, setHasInteracted] = useState<boolean>(initialSelections?.hasInteracted || false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [showResult, setShowResult] = useState<boolean>(false);
+  const [recommendation, setRecommendation] = useState<RecommendationResponse | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // 모든 필드가 입력되었는지 확인
-  const isAllFieldsFilled = marketType && storeSize && hasInteracted;
+  const canRequestRecommendation = Boolean(
+    selectedDistrictName && marketType && storeSize && hasInteracted
+  );
+
+  const submitButtonClass = canRequestRecommendation
+    ? 'bg-[#3288FF] text-white cursor-pointer hover:bg-blue-600'
+    : 'bg-gray-200 text-gray-400 cursor-not-allowed';
 
   const handleMarketTypeChange = (type: string | null) => {
     setMarketType(type);
@@ -44,7 +69,7 @@ const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({ onSelectionsChange, o
       storeSize,
       minFee,
       maxFee,
-      hasInteracted
+      hasInteracted,
     });
   };
 
@@ -55,7 +80,7 @@ const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({ onSelectionsChange, o
       storeSize: size,
       minFee,
       maxFee,
-      hasInteracted
+      hasInteracted,
     });
   };
 
@@ -68,71 +93,104 @@ const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({ onSelectionsChange, o
       storeSize,
       minFee: newMinFee,
       maxFee: newMaxFee,
-      hasInteracted: true
+      hasInteracted: true,
     });
   };
 
-  const handleRecommendationClick = () => {
+  const handleRecommendationClick = async () => {
+    if (!canRequestRecommendation || !selectedDistrictName || !marketType) {
+      return;
+    }
+
+    setErrorMessage(null);
     setIsLoading(true);
-    // 실제 추천 로직이 구현되면 여기서 API 호출 등을 처리
-    // 현재는 3초 후 로딩 종료 (테스트용)
-    setTimeout(() => {
+
+    const searchParams = new URLSearchParams({
+      district: selectedDistrictName,
+      type: toApiTradeAreaType(marketType) || '',
+    });
+
+    try {
+      const requestUrl = API_ENDPOINTS.REC_SYS + '?' + searchParams.toString();
+      const response = await fetch(requestUrl);
+      if (!response.ok) {
+        throw new Error('Request failed with status ' + response.status);
+      }
+
+      const data: BaseApiResponse<RecommendationResponse> = await response.json();
+      if (!data.isSuccess || !data.result) {
+        throw new Error(data.message || '추천 결과가 존재하지 않습니다.');
+      }
+
+      setRecommendation(data.result);
+    } catch (error) {
+      console.error('Failed to fetch recommendation result:', error);
+      setErrorMessage('추천 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
+    } finally {
       setIsLoading(false);
-      setShowResult(true);
-    }, 3000);
+    }
   };
 
   const handleBackFromResult = () => {
-    setShowResult(false);
+    setRecommendation(null);
   };
 
-  // 로딩 중일 때는 로딩 컴포넌트 표시
   if (isLoading) {
     return <MarketRecommendationLoding />;
   }
 
-  // 결과 페이지 표시
-  if (showResult) {
-    return <MarketRecommendationResult onBack={handleBackFromResult} />;
+  if (recommendation) {
+    return (
+      <MarketRecommendationResult
+        result={recommendation}
+        onBack={handleBackFromResult}
+      />
+    );
   }
 
   return (
-    <div className="w-full h-full flex flex-col justify-between">
-      <div className="flex flex-col space-y-6">
-        <MarketType 
-          onMarketTypeChange={handleMarketTypeChange} 
+    <div className='w-full h-full flex flex-col justify-between'>
+      <div className='flex flex-col space-y-6'>
+        <div className='bg-gray-50 border border-gray-200 rounded-2xl p-4'>
+          <p className='text-sm text-gray-600'>선택한 자치구</p>
+          <p className='text-lg font-semibold text-gray-900'>
+            {selectedDistrictName ?? '아직 선택하지 않았어요'}
+          </p>
+        </div>
+        <MarketType
+          onMarketTypeChange={handleMarketTypeChange}
           initialValue={marketType}
         />
-        <StoreSize 
-          onSizeChange={handleStoreSizeChange} 
+        <StoreSize
+          onSizeChange={handleStoreSizeChange}
           initialValue={storeSize}
         />
-        <StoreRentalFee 
+        <StoreRentalFee
           onFeeChange={handleFeeChange}
           initialMinFee={minFee}
           initialMaxFee={maxFee}
           initialHasInteracted={hasInteracted}
         />
       </div>
-      <div className="flex gap-2">
-        {/* 뒤로가기 */}
-        <button
-          onClick={onBack}
-          className='cursor-pointer rounded-xl bg-gray-300 px-4 py-3
-          text-gray-400 hover:text-white hover:bg-gray-400 transition-colors'>
-          &lt;
-        </button>
-        <button 
-          onClick={handleRecommendationClick}
-          className={`w-full py-3 px-4 rounded-lg transition-colors ${
-            isAllFieldsFilled
-              ? 'bg-[#3288FF] text-white cursor-pointer hover:bg-blue-600'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
-          disabled={!isAllFieldsFilled}
-        >
-          추천 결과 보기
-        </button>
+      <div className='flex flex-col gap-3'>
+        {errorMessage && (
+          <p className='text-sm text-red-500'>{errorMessage}</p>
+        )}
+        <div className='flex gap-2'>
+          <button
+            onClick={onBack}
+            className='cursor-pointer rounded-xl bg-gray-300 px-4 py-3 text-gray-400 hover:text-white hover:bg-gray-400 transition-colors'
+          >
+            &lt;
+          </button>
+          <button
+            onClick={handleRecommendationClick}
+            className={'w-full py-3 px-4 rounded-lg transition-colors ' + submitButtonClass}
+            disabled={!canRequestRecommendation}
+          >
+            추천 결과 보기
+          </button>
+        </div>
       </div>
     </div>
   );
