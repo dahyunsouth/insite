@@ -53,14 +53,14 @@ export default function AreaDetailModalTemplate({
           <XMarkIcon className="h-5 w-5 text-gray-700" />
         </button>
         <div className={"px-6 py-4 pr-16 " + (headerAlign === "center" ? "text-center" : "text-left") }>
+          {title && <h2 className="text-[20px] font-semibold text-[#3288FF]">{title}</h2>}
+          {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
           {/* Right actions (e.g., trade area dropdown) */}
           {headerRight && (
-            <div className="absolute right-6 top-1/2 -translate-y-1/2">
+            <div className="absolute right-16 top-1/2 -translate-y-1/2">
               {headerRight}
             </div>
           )}
-          {title && <h2 className="text-[20px] font-semibold text-[#3288FF]">{title}</h2>}
-          {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
         </div>
       </div>
 
