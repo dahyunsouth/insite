@@ -7,6 +7,7 @@ import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaScoreResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
 import com.ssafy.insite.data.enums.TradeAreaType;
@@ -52,6 +53,13 @@ public class DataServiceImpl implements DataService {
     @Transactional(readOnly = true)
     public RecommendationResponseDto findTop3ByDistrictAndType(SeoulDistrict district, TradeAreaType type) {
         return recommendationRepository.findTop3ByDistrictAndType(district, type);
+    }
+
+    // 상권 추천 점수 조회
+    @Override
+    @Transactional(readOnly = true)
+    public TradeAreaScoreResponseDto findTradeAreaScore(String tradeAreaName) {
+        return recommendationRepository.findTradeAreaScore(tradeAreaName);
     }
 
     // 자치구별 상권 개수 조회

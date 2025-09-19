@@ -6,6 +6,7 @@ import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaScoreResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
 import com.ssafy.insite.data.enums.TradeAreaType;
@@ -51,6 +52,17 @@ public class DataController {
             @RequestParam("type") TradeAreaType type
     ) {
         RecommendationResponseDto response = dataService.findTop3ByDistrictAndType(district, type);
+
+        return new BaseResponse<>(response);
+    }
+
+    @GetMapping("/score")
+    @Operation(summary = "상권 추천 점수 조회")
+    public BaseResponse<TradeAreaScoreResponseDto> findTradeAreaScore(
+            @Parameter(description = "상권명")
+            @RequestParam("trdarCdNm") String tradeAreaName
+    ) {
+        TradeAreaScoreResponseDto response = dataService.findTradeAreaScore(tradeAreaName);
 
         return new BaseResponse<>(response);
     }
