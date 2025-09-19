@@ -133,7 +133,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
             <h2 id="compare-modal-title" className="text-2xl font-extrabold text-gray-900">
               상권 비교하기
             </h2>
-            <p className="mt-1 text-sm text-gray-500">상권 A와 상권 B를 비교합니다.</p>
+            <p className="mt-1 text-sm text-gray-500">상권 2곳을 선택해 비교해보실 수 있습니다.</p>
 
             <button
               type="button"
@@ -218,13 +218,13 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
               <div className="text-2xl font-extrabold text-gray-900">한눈에 보기</div>
               <div className={`mt-4 grid gap-x-10 ${showThird ? "grid-cols-[1fr_1fr_240px]" : "grid-cols-2"}`}>
                 <TradeAreaPicker
-                  title="상권 A"
+                  title="상권 1"
                   value={selectionA}
                   onChange={setSelectionA}
                   accentColor="#2563eb"
                   backgroundColor="rgba(190, 210, 253, 0.1)"
                 />
-                <TradeAreaPicker title="상권 B"
+                <TradeAreaPicker title="상권 2"
                 value={selectionB}
                 onChange={setSelectionB}
                 accentColor="#f472b6"
@@ -239,21 +239,45 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
               {metrics.map((m, idx) => (
                 <React.Fragment key={`${m.key}-${idx}`}>
                   <div className="py-6 border-t border-gray-200">
-                    <div className="text-gray-500">{m.key}</div>
+                    <div className="text-gray-500 flex items-center gap-1">
+                      {m.key}
+                      <button
+                        type="button"
+                        className="text-gray-500 hover:text-gray-700 transition-colors"
+                        onClick={() => {/* TODO: 정보 모달 열기 */}}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                          <circle cx="12" cy="12" r="10"/>
+                          <text x="12" y="16" textAnchor="middle" fontSize="12" fill="white" fontWeight="bold">i</text>
+                        </svg>
+                      </button>
+                    </div>
                     <div className="mt-2 text-3xl sm:text-4xl font-extrabold text-gray-900">{m.a}</div>
                   </div>
                   <div className="py-6 border-t border-gray-200">
-                    <div className="text-gray-500">{m.key}</div>
+                    <div className="text-gray-500 flex items-center gap-1">
+                      {m.key}
+                      <button
+                        type="button"
+                        className="text-gray-500 hover:text-gray-700 transition-colors"
+                        onClick={() => {/* TODO: 정보 모달 열기 */}}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                          <circle cx="12" cy="12" r="10"/>
+                          <text x="12" y="16" textAnchor="middle" fontSize="12" fill="white" fontWeight="bold">i</text>
+                        </svg>
+                      </button>
+                    </div>
                     <div className="mt-2 text-3xl sm:text-4xl font-extrabold text-gray-900">{m.b}</div>
                   </div>
-                  {showThird && (
+                  {showThird && m.key !== "상권변화지표" && (
                     <div className="py-6 border-t border-gray-200 flex items-center">
                       <div className="w-full">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                           <div className="w-32 h-4 rounded bg-[#2563eb]" style={{ width: `${Math.max(m.aNum, m.bNum) > 0 ? (m.aNum / Math.max(m.aNum, m.bNum)) * 100 : 0}%` }} />
                           <span className="text-sm text-gray-700 w-20 text-right">{m.aNum.toLocaleString()}</span>
                         </div>
-                        <div className="mt-2 flex items-center gap-3">
+                        <div className="mt-2 flex items-center gap-2">
                           <div className="w-32 h-4 rounded bg-[#f472b6]" style={{ width: `${Math.max(m.aNum, m.bNum) > 0 ? (m.bNum / Math.max(m.aNum, m.bNum)) * 100 : 0}%` }} />
                           <span className="text-sm text-gray-700 w-20 text-right">{m.bNum.toLocaleString()}</span>
                         </div>
