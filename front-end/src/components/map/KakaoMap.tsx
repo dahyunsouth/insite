@@ -132,11 +132,15 @@ export function useKakaoMapContext() {
 export default function FullScreenKakaoMap({ 
   children, 
   cafeActive = false, 
-  showMarketingArea = false
+  showMarketingArea = false,
+  onTradeAreaSelect,
+  onShowMarketList
 }: { 
   children?: ReactNode; 
   cafeActive?: boolean; 
   showMarketingArea?: boolean;
+  onTradeAreaSelect?: (tradeAreaName: string | null) => void;
+  onShowMarketList?: (district: string, dong: string) => void;
 }) {
   const { notification, showNotification, hideNotification } = useNotification();
 
@@ -145,7 +149,7 @@ export default function FullScreenKakaoMap({
   return (
     <KakaoMapProvider showNotification={showNotification} cafeActive={cafeActive}>
       {/* 상권별 폴리곤 표시 컴포넌트 (레벨 1~5) */}
-      <TradeAreaPoligon />
+      <TradeAreaPoligon onTradeAreaSelect={onTradeAreaSelect} onShowMarketList={onShowMarketList} />
       
       {/* 로드뷰 컴포넌트 */}
       <LoadView 
