@@ -251,9 +251,9 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
     const parts: string[] = [];
     if (selectedSignguName) parts.push(selectedSignguName);
     if (selectedAdstrdName) parts.push(selectedAdstrdName);
-    if (selectedTradeAreaDisplay) parts.push(selectedTradeAreaDisplay);
+    // 상권까지 선택되어도 summary에는 구 > 동까지만 표시
     return parts.join(" > ") || "아직 선택된 상권이 없습니다.";
-  }, [selectedAdstrdName, selectedSignguName, selectedTradeAreaDisplay]);
+  }, [selectedAdstrdName, selectedSignguName]);
 
   const currentOptions: PickerOption[] = useMemo(() => {
     const keyword = normalize(query);
@@ -472,7 +472,9 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
       <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm" style={cardStyle}>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="text-sm font-semibold text-gray-900">{title}</div>
+            <div className="text-lg font-semibold text-gray-900">
+              {selectedTradeAreaDisplay ? selectedTradeAreaDisplay : title}
+            </div>
             <div className="mt-1 text-sm text-gray-600">{summary}</div>
           </div>
           {hasSelection && (
