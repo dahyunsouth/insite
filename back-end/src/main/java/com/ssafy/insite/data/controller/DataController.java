@@ -4,6 +4,7 @@ import com.ssafy.insite.common.dto.response.BaseResponse;
 import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaChngeIxInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaFlpopInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaRepopInfoResponseDto;
@@ -171,6 +172,16 @@ public class DataController {
             @RequestParam("trdarCd") int trdarCd
     ) {
         TradeAreaFlpopInfoResponseDto response = dataService.findFlpopInfoByCode(trdarCd);
+        return new BaseResponse<>(response);
+    }
+
+    @GetMapping("/info/chnge-ix")
+    @Operation(summary = "상권변화지표 정보 조회")
+    public BaseResponse<TradeAreaChngeIxInfoResponseDto> findChngeIxInfoByCode(
+            @Parameter(description = "상권코드")
+            @RequestParam("trdarCd") int trdarCd
+    ) {
+        TradeAreaChngeIxInfoResponseDto response = dataService.findChngeIxInfoByCode(trdarCd);
         return new BaseResponse<>(response);
     }
 }

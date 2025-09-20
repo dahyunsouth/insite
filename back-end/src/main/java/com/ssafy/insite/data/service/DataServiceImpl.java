@@ -5,6 +5,7 @@ import com.ssafy.insite.common.utils.SeoulDongCatalog;
 import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaChngeIxInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaFlpopInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaRepopInfoResponseDto;
@@ -16,6 +17,7 @@ import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
 import com.ssafy.insite.data.enums.TradeAreaType;
 import com.ssafy.insite.data.repository.RecommendationRepository;
+import com.ssafy.insite.data.repository.TradeAreaChngeIxRepository;
 import com.ssafy.insite.data.repository.TradeAreaDetailRepository;
 import com.ssafy.insite.data.repository.TradeAreaFlpopRepository;
 import com.ssafy.insite.data.repository.TradeAreaRegionRepository;
@@ -41,6 +43,7 @@ public class DataServiceImpl implements DataService {
     private final TradeAreaWrcPopltnRepository tradeAreaWrcPopltnRepository;
     private final TradeAreaRepopRepository tradeAreaRepopRepository;
     private final TradeAreaFlpopRepository tradeAreaFlpopRepository;
+    private final TradeAreaChngeIxRepository tradeAreaChngeIxRepository;
 
     // 자치구 목록 조회
     @Override
@@ -142,5 +145,12 @@ public class DataServiceImpl implements DataService {
     @Transactional(readOnly = true)
     public TradeAreaFlpopInfoResponseDto findFlpopInfoByCode(int trdarCd) {
         return tradeAreaFlpopRepository.findFlpopInfoByCode(trdarCd);
+    }
+
+    // 상권변화지표 정보 조회
+    @Override
+    @Transactional(readOnly = true)
+    public TradeAreaChngeIxInfoResponseDto findChngeIxInfoByCode(int trdarCd) {
+        return tradeAreaChngeIxRepository.findChngeIxInfoByCode(trdarCd);
     }
 }
