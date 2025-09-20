@@ -8,6 +8,7 @@ import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaSalesInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaScoreResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaStorInfoResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaWrcPopltnInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
 import com.ssafy.insite.data.enums.TradeAreaType;
@@ -138,6 +139,16 @@ public class DataController {
             @RequestParam("trdarCd") int trdarCd
     ) {
         TradeAreaSalesInfoResponseDto response = dataService.findSalesInfoByCode(trdarCd);
+        return new BaseResponse<>(response);
+    }
+
+    @GetMapping("/info/wrc-popltn")
+    @Operation(summary = "상권별 직장인구 정보 조회")
+    public BaseResponse<TradeAreaWrcPopltnInfoResponseDto> findWrcPopltnInfoByCode(
+            @Parameter(description = "상권코드")
+            @RequestParam("trdarCd") int trdarCd
+    ) {
+        TradeAreaWrcPopltnInfoResponseDto response = dataService.findWrcPopltnInfoByCode(trdarCd);
         return new BaseResponse<>(response);
     }
 }
