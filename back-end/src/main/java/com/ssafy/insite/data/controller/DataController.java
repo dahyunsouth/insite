@@ -4,7 +4,10 @@ import com.ssafy.insite.common.dto.response.BaseResponse;
 import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaChngeIxInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaFlpopInfoResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaRepopInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaSalesInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaScoreResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaStorInfoResponseDto;
@@ -149,6 +152,36 @@ public class DataController {
             @RequestParam("trdarCd") int trdarCd
     ) {
         TradeAreaWrcPopltnInfoResponseDto response = dataService.findWrcPopltnInfoByCode(trdarCd);
+        return new BaseResponse<>(response);
+    }
+
+    @GetMapping("/info/repop")
+    @Operation(summary = "상권별 상주인구 정보 조회")
+    public BaseResponse<TradeAreaRepopInfoResponseDto> findRepopInfoByCode(
+            @Parameter(description = "상권코드")
+            @RequestParam("trdarCd") int trdarCd
+    ) {
+        TradeAreaRepopInfoResponseDto response = dataService.findRepopInfoByCode(trdarCd);
+        return new BaseResponse<>(response);
+    }
+
+    @GetMapping("/info/flpop")
+    @Operation(summary = "상권별 유동인구 정보 조회")
+    public BaseResponse<TradeAreaFlpopInfoResponseDto> findFlpopInfoByCode(
+            @Parameter(description = "상권코드")
+            @RequestParam("trdarCd") int trdarCd
+    ) {
+        TradeAreaFlpopInfoResponseDto response = dataService.findFlpopInfoByCode(trdarCd);
+        return new BaseResponse<>(response);
+    }
+
+    @GetMapping("/info/chnge-ix")
+    @Operation(summary = "상권변화지표 정보 조회")
+    public BaseResponse<TradeAreaChngeIxInfoResponseDto> findChngeIxInfoByCode(
+            @Parameter(description = "상권코드")
+            @RequestParam("trdarCd") int trdarCd
+    ) {
+        TradeAreaChngeIxInfoResponseDto response = dataService.findChngeIxInfoByCode(trdarCd);
         return new BaseResponse<>(response);
     }
 }

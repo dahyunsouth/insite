@@ -48,8 +48,8 @@ export default function AreaDetailModal({ open, onClose, title, subtitle, onSele
         "fixed inset-0 z-50 flex items-start justify-end"
       }
     >
-      {/* backdrop
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} /> */}
+      {/* backdrop */}
+      {/* <div className="absolute inset-0 bg-black/30" onClick={onClose} /> */}
 
       {/* modal */}
       <div className="relative z-10 w-[calc(75vw-1rem)] mt-2 mr-2" onClick={(e) => e.stopPropagation()}>
