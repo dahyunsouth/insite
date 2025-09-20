@@ -6,6 +6,7 @@ import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaFlpopInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaRepopInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaSalesInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaScoreResponseDto;
@@ -16,6 +17,7 @@ import com.ssafy.insite.data.enums.SeoulDistrict;
 import com.ssafy.insite.data.enums.TradeAreaType;
 import com.ssafy.insite.data.repository.RecommendationRepository;
 import com.ssafy.insite.data.repository.TradeAreaDetailRepository;
+import com.ssafy.insite.data.repository.TradeAreaFlpopRepository;
 import com.ssafy.insite.data.repository.TradeAreaRegionRepository;
 import com.ssafy.insite.data.repository.TradeAreaRepopRepository;
 import com.ssafy.insite.data.repository.TradeAreaSalesRepository;
@@ -38,6 +40,7 @@ public class DataServiceImpl implements DataService {
     private final TradeAreaSalesRepository tradeAreaSalesRepository;
     private final TradeAreaWrcPopltnRepository tradeAreaWrcPopltnRepository;
     private final TradeAreaRepopRepository tradeAreaRepopRepository;
+    private final TradeAreaFlpopRepository tradeAreaFlpopRepository;
 
     // 자치구 목록 조회
     @Override
@@ -130,7 +133,14 @@ public class DataServiceImpl implements DataService {
     // 상권별 상주인구 정보 조회
     @Override
     @Transactional(readOnly = true)
-    public TradeAreaRepopInfoResponseDto findRepopInfoByCode(Integer trdarCd) {
+    public TradeAreaRepopInfoResponseDto findRepopInfoByCode(int trdarCd) {
         return tradeAreaRepopRepository.findRepopInfoByCode(trdarCd);
+    }
+
+    // 상권별 유동인구 정보 조회
+    @Override
+    @Transactional(readOnly = true)
+    public TradeAreaFlpopInfoResponseDto findFlpopInfoByCode(int trdarCd) {
+        return tradeAreaFlpopRepository.findFlpopInfoByCode(trdarCd);
     }
 }

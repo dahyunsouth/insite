@@ -5,6 +5,7 @@ import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaFlpopInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaRepopInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaSalesInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaScoreResponseDto;
@@ -160,6 +161,16 @@ public class DataController {
             @RequestParam("trdarCd") int trdarCd
     ) {
         TradeAreaRepopInfoResponseDto response = dataService.findRepopInfoByCode(trdarCd);
+        return new BaseResponse<>(response);
+    }
+
+    @GetMapping("/info/flpop")
+    @Operation(summary = "상권별 유동인구 정보 조회")
+    public BaseResponse<TradeAreaFlpopInfoResponseDto> findFlpopInfoByCode(
+            @Parameter(description = "상권코드")
+            @RequestParam("trdarCd") int trdarCd
+    ) {
+        TradeAreaFlpopInfoResponseDto response = dataService.findFlpopInfoByCode(trdarCd);
         return new BaseResponse<>(response);
     }
 }

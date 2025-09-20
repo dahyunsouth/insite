@@ -21,7 +21,7 @@ public class TradeAreaRepopRepository {
     }
 
     // 상권별 상주인구 정보 조회
-    public TradeAreaRepopInfoResponseDto findRepopInfoByCode(Integer trdarCd) {
+    public TradeAreaRepopInfoResponseDto findRepopInfoByCode(int trdarCd) {
         Record record = dsl.selectFrom(TRADE_AREA_REPOP_CD)
                 .where(TRADE_AREA_REPOP_CD.TRDAR_CD.eq(trdarCd))
                 .orderBy(TRADE_AREA_REPOP_CD.STDR_YYQU_CD.desc())
