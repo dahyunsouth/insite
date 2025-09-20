@@ -3,7 +3,10 @@ package com.ssafy.insite.data.service;
 import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaChngeIxInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaFlpopInfoResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaRepopInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaSalesInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaScoreResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaStorInfoResponseDto;
@@ -49,4 +52,13 @@ public interface DataService {
 
     // 상권별 직장인구 정보 조회
     TradeAreaWrcPopltnInfoResponseDto findWrcPopltnInfoByCode(int trdarCd);
+
+    // 상권별 상주인구 정보 조회
+    TradeAreaRepopInfoResponseDto findRepopInfoByCode(int trdarCd);
+
+    // 상권별 유동인구 정보 조회
+    TradeAreaFlpopInfoResponseDto findFlpopInfoByCode(int trdarCd);
+
+    // 상권변화지표 정보 조회
+    TradeAreaChngeIxInfoResponseDto findChngeIxInfoByCode(int trdarCd);
 }
