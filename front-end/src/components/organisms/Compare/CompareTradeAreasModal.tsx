@@ -16,6 +16,7 @@ type CompareTradeAreasModalProps = {
 
 export default function CompareTradeAreasModal({ open, onClose, leftOpen = true }: CompareTradeAreasModalProps) {
   const [selectedPc, setSelectedPc] = useState<number>(0);
+  const [activeTab, setActiveTab] = useState<'analysis' | 'data'>('analysis');
   const [selectionA, setSelectionA] = useState<TradeAreaSelection>({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
   // API 데이터 상태
   const [detailA, setDetailA] = useState<TradeAreaDetail | null>(null);
@@ -131,10 +132,12 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
           {/* Header */}
           <div className="relative px-8 pt-8 pb-4 border-b border-black/5 text-center">
             <h2 id="compare-modal-title" className="text-3xl font-extrabold text-gray-900">
-              상권 비교하기
+              {/* 상권 비교하기 */}
+              상권 비교
             </h2>
-            <p className="mt-1 text-sm text-gray-500">상권 2곳을 선택해 비교해보실 수 있습니다.</p>
+            <p className="mt-1 text-sm text-gray-500">모든 상권 중 두 곳을 선택해 한눈에 비교해보실 수 있습니다☺️</p>
 
+            {/* 상권 비교 모달 닫기 버튼 */}
             <button
               type="button"
               aria-label="Close"
@@ -150,9 +153,59 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
 
           {/* Body */}
           <div className="flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-8 py-8">
-            {/* Upper Section: Chart + Detail */}
-            {true && (
-              <div className="grid grid-cols-[400px_1fr] gap-x-8">
+            {/* Lower Section: At a Glance */}
+            {/* Selectors aligned to columns */}
+            <div className="mt-0">
+              {/* <div className="text-2xl font-extrabold text-gray-900">한눈에 보기</div> */}
+              <div className={`mt-0 grid gap-x-10 ${showThird ? "grid-cols-[1fr_1fr_240px]" : "grid-cols-2"}`}>
+                <TradeAreaPicker
+                  title="📍상권 1"
+                  value={selectionA}
+                  onChange={setSelectionA}
+                  accentColor="#2563eb"
+                  backgroundColor="rgba(190, 210, 253, 0.1)"
+                />
+                <TradeAreaPicker title="📍상권 2"
+                value={selectionB}
+                onChange={setSelectionB}
+                accentColor="#f472b6"
+                backgroundColor="rgba(252, 220, 237, 0.1)"
+                />
+                {showThird && <div />}
+              </div>
+            </div>
+
+            {/* Tab Navigation */}
+            <div className="mt-8 border-b border-gray-200">
+              <nav className="flex gap-8">
+                <button
+                  onClick={() => setActiveTab('analysis')}
+                  className={`pb-3 border-b-2 font-medium text-sm transition-colors ${
+                    activeTab === 'analysis'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  종합
+                </button>
+                <button
+                  onClick={() => setActiveTab('data')}
+                  className={`pb-3 border-b-2 font-medium text-sm transition-colors ${
+                    activeTab === 'data'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  상세
+                </button>
+              </nav>
+            </div>
+
+            {/* Tab Content */}
+            {activeTab === 'analysis' && (
+              <>
+                {/* Upper Section: Chart + Detail */}
+                <div className={`mt-6 grid gap-x-10 ${showThird ? "grid-cols-[1fr_1fr_240px]" : "grid-cols-2"}`}>
                 {/* Upper Left: Radar Chart */}
                 <div>
                   {(() => {
@@ -180,7 +233,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
                 </div>
 
                 {/* Upper Right: Detail panel */}
-                <div>
+                <div className={showThird ? "col-span-2" : ""}>
                   {(() => {
                   const pcs: PcMeta[] = [
                     { id:1, code:"지속성", name:"상권 생존 가능성", features:["운영_개월_평균","폐업_개월_평균","개업률"], meaning:"상권의 지속 가능성과 생존력", highText:"운영 60개월 이상, 폐업 36개월 이상, 개업률 10% 이상의 매우 안정적인 상권", lowText:"운영 12개월 미만, 폐업 6개월 미만, 개업률 1% 미만의 극도로 불안정한 상권" },
@@ -204,32 +257,13 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
                   );
                 })()}
                 </div>
-            </div>
+                </div>
+              </>
             )}
 
-            {/* Lower Section: At a Glance */}
-            {/* Selectors aligned to columns */}
-            <div className="mt-10">
-              <div className="text-2xl font-extrabold text-gray-900">한눈에 보기</div>
-              <div className={`mt-4 grid gap-x-10 ${showThird ? "grid-cols-[1fr_1fr_240px]" : "grid-cols-2"}`}>
-                <TradeAreaPicker
-                  title="📍상권 1"
-                  value={selectionA}
-                  onChange={setSelectionA}
-                  accentColor="#2563eb"
-                  backgroundColor="rgba(190, 210, 253, 0.1)"
-                />
-                <TradeAreaPicker title="📍상권 2"
-                value={selectionB}
-                onChange={setSelectionB}
-                accentColor="#f472b6"
-                backgroundColor="rgba(252, 220, 237, 0.1)"
-                />
-                {showThird && <div />}
-              </div>
-            </div>
-
-            {/* Metrics rows */}
+            {activeTab === 'data' && (
+              <>
+                {/* Metrics rows */}
             <div className={`mt-8 grid gap-x-10 ${showThird ? "grid-cols-[1fr_1fr_240px]" : "grid-cols-2"}`}>
               {metrics.map((m, idx) => (
                 <React.Fragment key={`${m.key}-${idx}`}>
@@ -264,7 +298,9 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
                   )}
                 </React.Fragment>
               ))}
-            </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
