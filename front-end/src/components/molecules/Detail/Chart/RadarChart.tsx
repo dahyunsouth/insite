@@ -85,7 +85,7 @@ export default function RadarChart({
 
   // Layout constants within a 300x300 viewbox
   const size = 300; // math space
-  const padding = 40; // for labels
+  const padding = 60; // for labels
   const cx = size / 2;
   const cy = size / 2;
   const radius = (size / 2) - padding;
@@ -136,7 +136,7 @@ export default function RadarChart({
           x={x}
           y={y + dy}
           textAnchor={textAnchor}
-          style={{ fontSize: 12, fill: active ? "#2563EB" : "#6B7280", fontWeight: active ? 600 : 400 }}
+          style={{ fontSize: 14, fill: active ? "#2563EB" : "#6B7280", fontWeight: active ? 600 : 400 }}
         >
           {lab}
         </text>

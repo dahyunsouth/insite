@@ -23,7 +23,7 @@ type PcDetailPanelProps = {
 
 export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = null, bScore = null, className }: PcDetailPanelProps) {
   const delta = aScore != null && bScore != null ? aScore - bScore : null;
-  const deltaLabel = delta == null ? "-" : (delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1));
+  const deltaLabel = delta == null ? "-" : (delta > 0 ? `+${Math.round(delta)}` : Math.round(delta).toString());
   const deltaColor = delta == null ? "text-gray-500" : delta > 0 ? "text-[#2563EB]" : delta < 0 ? "text-[#F472B6]" : "text-gray-600";
 
   return (
@@ -58,11 +58,11 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
       <div className="mt-4 grid grid-cols-3 items-end gap-3">
         <div>
           <div className="text-xs text-gray-500">{aName}</div>
-          <div className="text-2xl font-bold text-gray-900">{aScore != null ? aScore.toFixed(1) : '-'}</div>
+          <div className="text-2xl font-bold text-gray-900">{aScore != null ? Math.round(aScore) : '-'}</div>
         </div>
         <div>
           <div className="text-xs text-gray-500">{bName}</div>
-          <div className="text-2xl font-bold text-gray-900">{bScore != null ? bScore.toFixed(1) : '-'}</div>
+          <div className="text-2xl font-bold text-gray-900">{bScore != null ? Math.round(bScore) : '-'}</div>
         </div>
         <div className="text-right">
           <div className="text-xs text-gray-500">Δ A-B</div>

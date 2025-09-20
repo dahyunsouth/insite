@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import RadarChart from "@/components/molecules/Detail/Chart/RadarChart";
 import PcDetailPanel, { PcMeta } from "@/components/organisms/Compare/PcDetailPanel";
 import TradeAreaPicker, { TradeAreaSelection } from "@/components/molecules/Compare/TradeAreaPicker";
-import { fetchTradeAreaDetail, mapTradeAreaDetailToMetrics, TradeAreaDetail } from "@/lib/api/tradeAreas";
+import { fetchTradeAreaDetail, mapTradeAreaDetailToMetrics, TradeAreaDetail, fetchTradeAreaScore, TradeAreaScore, getTradeAreaNameByCode } from "@/lib/api/tradeAreas";
 
 type CompareTradeAreasModalProps = {
   open: boolean;
@@ -18,7 +18,9 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
   const [selectedPc, setSelectedPc] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<'analysis' | 'data'>('analysis');
   const [selectionA, setSelectionA] = useState<TradeAreaSelection>({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
-  // API 데이터 상태
+  const [selectionB, setSelectionB] = useState<TradeAreaSelection>({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
+  
+  // 상세 데이터 API 상태 (상세 탭용)
   const [detailA, setDetailA] = useState<TradeAreaDetail | null>(null);
   const [detailB, setDetailB] = useState<TradeAreaDetail | null>(null);
   const [loadingA, setLoadingA] = useState<boolean>(false);
@@ -26,7 +28,13 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
   const [errorA, setErrorA] = useState<string | null>(null);
   const [errorB, setErrorB] = useState<string | null>(null);
 
-  const [selectionB, setSelectionB] = useState<TradeAreaSelection>({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
+  // 종합 분석 점수 API 상태 (종합 탭용)
+  const [scoreA, setScoreA] = useState<TradeAreaScore | null>(null);
+  const [scoreB, setScoreB] = useState<TradeAreaScore | null>(null);
+  const [loadingScoreA, setLoadingScoreA] = useState<boolean>(false);
+  const [loadingScoreB, setLoadingScoreB] = useState<boolean>(false);
+  const [errorScoreA, setErrorScoreA] = useState<string | null>(null);
+  const [errorScoreB, setErrorScoreB] = useState<string | null>(null);
   // Close on ESC
   useEffect(() => {
     if (!open) return;
@@ -92,6 +100,61 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
     loadDetailB();
   }, [selectionB.tradeAreaCode]);
 
+  // 종합 분석 점수 A 데이터 로드
+  useEffect(() => {
+    if (!selectionA.tradeAreaCode) {
+      setScoreA(null);
+      setErrorScoreA(null);
+      return;
+    }
+    const loadScoreA = async () => {
+      setLoadingScoreA(true);
+      setErrorScoreA(null);
+      try {
+        const tradeAreaName = getTradeAreaNameByCode(selectionA.tradeAreaCode!);
+        if (tradeAreaName === "상권명 없음") {
+          throw new Error("상권명을 찾을 수 없습니다.");
+        }
+        const data = await fetchTradeAreaScore(tradeAreaName);
+        console.log('상권 A 종합 분석 점수:', data);
+        setScoreA(data);
+      } catch (err) {
+        setErrorScoreA(err instanceof Error ? err.message : "점수 데이터를 불러올 수 없습니다.");
+        setScoreA(null);
+      } finally {
+        setLoadingScoreA(false);
+      }
+    };
+    loadScoreA();
+  }, [selectionA.tradeAreaCode]);
+
+  // 종합 분석 점수 B 데이터 로드
+  useEffect(() => {
+    if (!selectionB.tradeAreaCode) {
+      setScoreB(null);
+      setErrorScoreB(null);
+      return;
+    }
+    const loadScoreB = async () => {
+      setLoadingScoreB(true);
+      setErrorScoreB(null);
+      try {
+        const tradeAreaName = getTradeAreaNameByCode(selectionB.tradeAreaCode!);
+        if (tradeAreaName === "상권명 없음") {
+          throw new Error("상권명을 찾을 수 없습니다.");
+        }
+        const data = await fetchTradeAreaScore(tradeAreaName);
+        console.log('상권 B 종합 분석 점수:', data);
+        setScoreB(data);
+      } catch (err) {
+        setErrorScoreB(err instanceof Error ? err.message : "점수 데이터를 불러올 수 없습니다.");
+        setScoreB(null);
+      } finally {
+        setLoadingScoreB(false);
+      }
+    };
+    loadScoreB();
+  }, [selectionB.tradeAreaCode]);
 
   if (!open) return null;
 
@@ -103,6 +166,12 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
   // API 데이터를 기반으로 metrics 생성 (매출, 점포, 인구, 상권 변화 지표 순)
   const metricsA = mapTradeAreaDetailToMetrics(detailA);
   const metricsB = mapTradeAreaDetailToMetrics(detailB);
+
+  // 상권명 추출 (종합 분석 데이터 또는 상세 데이터에서 가져오기)
+  const tradeAreaNameA = scoreA?.areaName || detailA?.basicInfo?.adstrdNm || 
+    (selectionA.tradeAreaCode ? getTradeAreaNameByCode(selectionA.tradeAreaCode) : "미선택");
+  const tradeAreaNameB = scoreB?.areaName || detailB?.basicInfo?.adstrdNm || 
+    (selectionB.tradeAreaCode ? getTradeAreaNameByCode(selectionB.tradeAreaCode) : "미선택");
 
   const metrics = [
     { key: metricsA.sales.key, a: loadingA ? "로딩중..." : metricsA.sales.value, b: loadingB ? "로딩중..." : metricsB.sales.value, aNum: metricsA.sales.numValue, bNum: metricsB.sales.numValue },
@@ -212,17 +281,39 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
                   const labels = [
                     "지속성","수익성","접근성","위험도","경쟁강도",
                   ];
-                  const aValues = [8.7,7.5,9.2,6.1,7.9];
-                  const bValues = [6.2,8.4,7.1,7.3,6.8];
+                  
+                  // API 데이터에서 점수 추출 (원본 값 그대로 사용)
+                  const aValues = scoreA ? [
+                    scoreA.sustainabilityScore,
+                    scoreA.profitabilityScore,
+                    scoreA.accessibilityScore,
+                    scoreA.riskScore,
+                    scoreA.competitionScore
+                  ] : [0, 0, 0, 0, 0];
+                  
+                  const bValues = scoreB ? [
+                    scoreB.sustainabilityScore,
+                    scoreB.profitabilityScore,
+                    scoreB.accessibilityScore,
+                    scoreB.riskScore,
+                    scoreB.competitionScore
+                  ] : [0, 0, 0, 0, 0];
+                  
+                  // 실제로 선택된 상권만 시리즈에 포함
+                  const series = [];
+                  if (scoreA && selectionA.tradeAreaCode) {
+                    series.push({ name: tradeAreaNameA, values: aValues, color: "#2563EB", dashed: false, fillOpacity: 0.08 });
+                  }
+                  if (scoreB && selectionB.tradeAreaCode) {
+                    series.push({ name: tradeAreaNameB, values: bValues, color: "#F472B6", dashed: true, fillOpacity: 0.08 });
+                  }
+                  
                   return (
                     <div className="mx-auto w-full aspect-square rounded-2xl border border-gray-200 bg-white p-6">
                       <RadarChart
                         labels={labels}
-                        series={[
-                          { name: "A", values: aValues, color: "#2563EB", dashed: false, fillOpacity: 0.08 },
-                          { name: "B", values: bValues, color: "#F472B6", dashed: true, fillOpacity: 0.08 },
-                        ]}
-                        maxValue={10}
+                        series={series}
+                        maxValue={100}
                         levels={5}
                         selectedAxis={selectedPc}
                         onSelectAxis={(idx) => setSelectedPc(idx)}
@@ -243,16 +334,32 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
                     { id:5, code:"경쟁강도", name:"경쟁 상황", features:["점포_수","운영_개월","점포_밀도"], meaning:"상권의 경쟁 강도와 경쟁 상황", highText:"점포 5개 이하, 유동인구 10만명 이상, 점포밀도 0.5개/100㎡ 이하의 경쟁이 약한 상권", lowText:"점포 30개 초과, 유동인구 3만명 미만, 점포밀도 3.0개/100㎡ 초과의 경쟁이 치열한 상권" },
                   ];
                   const labels = pcs.map((p) => p.code);
-                  const aValues = [8.7,7.5,9.2,6.1,7.9];
-                  const bValues = [6.2,8.4,7.1,7.3,6.8];
+                  
+                  // API 데이터에서 점수 추출 (원본 값 그대로 사용: 지속성, 수익성, 접근성, 위험도, 경쟁강도)
+                  const aValues = scoreA ? [
+                    scoreA.sustainabilityScore,
+                    scoreA.profitabilityScore,
+                    scoreA.accessibilityScore,
+                    scoreA.riskScore,
+                    scoreA.competitionScore
+                  ] : [0, 0, 0, 0, 0];
+                  
+                  const bValues = scoreB ? [
+                    scoreB.sustainabilityScore,
+                    scoreB.profitabilityScore,
+                    scoreB.accessibilityScore,
+                    scoreB.riskScore,
+                    scoreB.competitionScore
+                  ] : [0, 0, 0, 0, 0];
+                  
                   const idx = Math.max(0, Math.min(4, selectedPc ?? 0));
                   return (
                     <PcDetailPanel
                       pc={pcs[idx]}
-                      aName="A"
-                      bName="B"
-                      aScore={aValues[idx]}
-                      bScore={bValues[idx]}
+                      aName={tradeAreaNameA}
+                      bName={tradeAreaNameB}
+                      aScore={scoreA ? aValues[idx] : null}
+                      bScore={scoreB ? bValues[idx] : null}
                     />
                   );
                 })()}
