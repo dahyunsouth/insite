@@ -25,6 +25,7 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class TradeAreaRegionRepository {
     private final DSLContext dsl;
+    private final String induty = "커피-음료";
 
     private static Integer toInteger(UInteger v) {
         return v == null ? null : v.intValue();
@@ -96,12 +97,12 @@ public class TradeAreaRegionRepository {
                 .from(TRADE_AREA_REGION)
                 .leftJoin(TRADE_AREA_STOR_CD)
                     .on(TRADE_AREA_REGION.TRDAR_CD.eq(TRADE_AREA_STOR_CD.TRDAR_CD)
-                        .and(TRADE_AREA_STOR_CD.SVC_INDUTY_CD_NM.eq("커피-음료"))
+                        .and(TRADE_AREA_STOR_CD.SVC_INDUTY_CD_NM.eq(induty))
                             .and(TRADE_AREA_STOR_CD.STDR_YYQU_CD.eq(
                                     dsl.select(max(TRADE_AREA_STOR_CD.STDR_YYQU_CD))
                                             .from(TRADE_AREA_STOR_CD)
                                             .where(TRADE_AREA_STOR_CD.TRDAR_CD.eq(TRADE_AREA_REGION.TRDAR_CD))
-                                            .and(TRADE_AREA_STOR_CD.SVC_INDUTY_CD_NM.eq("커피-음료"))
+                                            .and(TRADE_AREA_STOR_CD.SVC_INDUTY_CD_NM.eq(induty))
                             )))
                 .where(
                         TRADE_AREA_REGION.SIGNGU_CD_NM.eq(gu)
