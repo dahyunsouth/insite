@@ -12,9 +12,11 @@ type CompareTradeAreasModalProps = {
   onClose: () => void;
   /** Whether the left sidebar (25%) is open. Controls overlay area and layout. */
   leftOpen?: boolean;
+  /** Modal type: 'compare' for full screen with dim, 'saved' for sidebar area */
+  modalType?: 'compare' | 'saved';
 };
 
-export default function CompareTradeAreasModal({ open, onClose, leftOpen = true }: CompareTradeAreasModalProps) {
+export default function CompareTradeAreasModal({ open, onClose, leftOpen = true, modalType = 'compare' }: CompareTradeAreasModalProps) {
   const [selectedPc, setSelectedPc] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<'analysis' | 'data'>('analysis');
   const [selectionA, setSelectionA] = useState<TradeAreaSelection>({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
@@ -158,9 +160,8 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
 
   if (!open) return null;
 
-  const containerLeftClass = leftOpen ? "left-[25%]" : "left-0";
-  const cardMaxWidthClass = leftOpen ? "w-[min(920px,90%)]" : "w-[min(1200px,95%)]";
-  const showThird = !leftOpen;
+  // showThird 로직: compare는 항상 3열, saved는 leftOpen 상태에 따라
+  const showThird = modalType === 'compare' ? true : !leftOpen;
 
 
   // API 데이터를 기반으로 metrics 생성 (매출, 점포, 인구, 상권 변화 지표 순)
@@ -168,9 +169,9 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
   const metricsB = mapTradeAreaDetailToMetrics(detailB);
 
   // 상권명 추출 (종합 분석 데이터 또는 상세 데이터에서 가져오기)
-  const tradeAreaNameA = scoreA?.areaName || detailA?.basicInfo?.adstrdNm || 
+  const tradeAreaNameA = scoreA?.areaName || detailA?.trdarCdNm || 
     (selectionA.tradeAreaCode ? getTradeAreaNameByCode(selectionA.tradeAreaCode) : "미선택");
-  const tradeAreaNameB = scoreB?.areaName || detailB?.basicInfo?.adstrdNm || 
+  const tradeAreaNameB = scoreB?.areaName || detailB?.trdarCdNm || 
     (selectionB.tradeAreaCode ? getTradeAreaNameByCode(selectionB.tradeAreaCode) : "미선택");
 
   const metrics = [
@@ -184,18 +185,25 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
 
   return createPortal(
     <div
-      className={`fixed inset-y-0 right-0 ${containerLeftClass} z-40`}
+      className={`fixed z-40 ${modalType === 'compare' ? 'inset-0' : ''}`}
+      style={modalType === 'saved' ? { 
+        left: '25%', 
+        right: '80px', 
+        top: 0, 
+        bottom: 0 
+      } : {}}
       role="dialog"
       aria-modal="true"
       aria-labelledby="compare-modal-title"
     >
-      {/* Dim only the right side */}
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-
-      {/* Centered modal card */}
-      <div className="relative z-10 flex min-h-screen items-center justify-center p-6">
+      {/* Modal positioned in center area */}
+      <div className={`relative z-10 flex items-center justify-center p-6 ${modalType === 'compare' ? 'min-h-screen' : 'h-full'}`}>
+        {/* Dim overlay for compare modal - behind modal */}
+        {modalType === 'compare' && (
+          <div className="absolute inset-0 bg-black/40 -z-10" onClick={onClose} />
+        )}
         <div
-          className={`${cardMaxWidthClass} rounded-3xl bg-white shadow-xl border border-black/5 max-h-[85vh] overflow-hidden flex flex-col`}
+          className="w-full max-w-6xl rounded-3xl bg-white shadow-xl border border-black/5 max-h-[85vh] overflow-hidden flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -327,7 +335,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true 
                 <div className={showThird ? "col-span-2" : ""}>
                   {(() => {
                   const pcs: PcMeta[] = [
-                    { id:1, code:"지속성", name:"상권 생존 가능성", features:["운영_개월_평균","폐업_개월_평균","개업률"], meaning:"상권의 지속 가능성과 생존력", highText:"운영 60개월 이상, 폐업 36개월 이상, 개업률 10% 이상의 매우 안정적인 상권", lowText:"운영 12개월 미만, 폐업 6개월 미만, 개업률 1% 미만의 극도로 불안정한 상권" },
+                    { id:1, code:"지속성", name:"상권 생존 가능성", features:["운영_개월_평균","폐업_개월_평균","개업률"], meaning:"상권의 생존 가능성을 ", highText:"운영 60개월 이상, 폐업 36개월 이상, 개업률 10% 이상의 매우 안정적인 상권", lowText:"운영 12개월 미만, 폐업 6개월 미만, 개업률 1% 미만의 극도로 불안정한 상권" },
                     { id:2, code:"수익성", name:"시장 잠재력", features:["시장_잠재력","수요_공급_균형","소득_수준","집객시설","예측_매출"], meaning:"상권의 수익성과 시장 잠재력", highText:"유사업종 50개 이상, 포화도 10% 이하, 유동인구 10만명/점포 이상, 소득 400만원 이상, 집객시설 50개 이상, 예측매출 1억원 이상의 높은 수익성 상권", lowText:"유사업종 10개 미만, 포화도 50% 초과, 유동인구 2만명/점포 미만, 소득 200만원 미만, 집객시설 10개 미만, 예측매출 1천만원 미만의 낮은 수익성 상권" },
                     { id:3, code:"접근성", name:"교통편의성", features:["지하철역_거리","버스정류장_거리"], meaning:"상권의 접근성과 교통편의성", highText:"지하철역 200m 이내, 버스정류장 100m 이내의 교통편의성이 매우 좋은 상권", lowText:"지하철역 3km 초과, 버스정류장 1km 초과의 교통편의성이 떨어지는 상권" },
                     { id:4, code:"위험도", name:"사업 위험 요소 (벌점 방식)", features:["유동인구/점포수","폐업_개월","폐업률"], meaning:"상권의 위험도와 사업 위험 요소", highText:"유동인구 10만명/점포 이상, 폐업 24개월 이상, 폐업률 2% 이하의 위험이 낮은 안정적 상권", lowText:"유동인구 2만명/점포 미만, 폐업 6개월 미만, 폐업률 20% 초과의 위험이 높은 불안정 상권" },

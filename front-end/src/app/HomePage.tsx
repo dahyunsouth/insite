@@ -63,6 +63,7 @@ export default function HomePage() {
   const [showMyPage, setShowMyPage] = useState(false);
   const [showMyMarket, setShowMyMarket] = useState(false);
   const [isCompareOpen, setIsCompareOpen] = useState(false);
+  const [isSavedCompareOpen, setIsSavedCompareOpen] = useState(false);
   const [isLoadViewActive, setIsLoadViewActive] = useState(false);
   const [isLoadViewMinimized, setIsLoadViewMinimized] = useState(false);
   const [isCafeActive, setIsCafeActive] = useState(false);
@@ -187,7 +188,6 @@ export default function HomePage() {
   // 저장된 상권 열기 핸들러
   const handleSavedAreasClick = () => {
     setShowMyMarket(true);
-    setIsCompareOpen(true);
   };
 
   const handleCompareTabClick = () => {
@@ -289,6 +289,7 @@ export default function HomePage() {
           {showMyMarket && (
             <MyMarket 
               onBack={handleMyMarketClose}
+              onCompareClick={() => setIsSavedCompareOpen(true)}
             />
           )}
           {!showMyPage && !showMyMarket && (
@@ -356,7 +357,20 @@ export default function HomePage() {
       />
 
       {/* Compare modal: right-side overlay (covers right 75%) */}
-      <CompareTradeAreasModal open={isCompareOpen} onClose={() => setIsCompareOpen(false)} leftOpen={false} />
+      <CompareTradeAreasModal 
+        open={isCompareOpen} 
+        onClose={() => setIsCompareOpen(false)} 
+        modalType="compare"
+        leftOpen={true}
+      />
+
+      {/* Saved areas compare modal */}
+      <CompareTradeAreasModal 
+        open={isSavedCompareOpen} 
+        onClose={() => setIsSavedCompareOpen(false)} 
+        modalType="saved"
+        leftOpen={!showMyMarket}
+      />
 
       {/* 인증 모달 (AuthModalWrapper) - 조건부 렌더 */}
       {isAuthOpen && (
