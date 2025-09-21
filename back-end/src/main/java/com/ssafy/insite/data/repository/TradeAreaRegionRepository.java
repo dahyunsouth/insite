@@ -93,8 +93,11 @@ public class TradeAreaRegionRepository {
                         TRADE_AREA_STOR_CD.SVC_INDUTY_CD_NM,
                         TRADE_AREA_STOR_CD.STOR_CO,
                         TRADE_AREA_STOR_CD.SIMILR_INDUTY_STOR_CO,
-                        DSL.rowNumber().over() // 윈도우 함수()
+                        // (윈도우 함수) 그룹화 및 정렬 후 각 행에 순번 - "rn = 1"이면 최신분기
+                        DSL.rowNumber().over()
+                                // '상권코드' 및 '서비스업종' 기준 그룹화
                                 .partitionBy(TRADE_AREA_STOR_CD.TRDAR_CD, TRADE_AREA_STOR_CD.SVC_INDUTY_CD_NM)
+                                // '분기별코드' 기준 정렬
                                 .orderBy(TRADE_AREA_STOR_CD.STDR_YYQU_CD.desc())
                                 .as("rn")
                 )
