@@ -15,6 +15,7 @@ interface MyPageProps {
   onEditInfo?: () => void;
   onSavedAreas?: () => void;
   onSavedAreasClose?: () => void;
+  onCompareClick?: (selectedTradeAreas: { trdarCd: string; trdarCdNm: string }[]) => void;
   className?: string;
 }
 
@@ -23,6 +24,7 @@ const MyPage: React.FC<MyPageProps> = ({
   onEditInfo,
   onSavedAreas,
   onSavedAreasClose,
+  onCompareClick,
   className = ''
 }) => {
   const [currentView, setCurrentView] = useState<'main' | 'saved-areas' | 'edit-info' | 'password-update'>('main');
@@ -57,6 +59,7 @@ const MyPage: React.FC<MyPageProps> = ({
       <UserProvider>
         <MyMarket 
           onBack={handleBackToMain}
+          onCompareClick={onCompareClick}
           className={className}
         />
       </UserProvider>
