@@ -13,10 +13,14 @@ import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaItemDto;
 import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
+import com.ssafy.insite.data.jooq.codegen.tables.TradeAreaRegion;
+import com.ssafy.insite.data.jooq.codegen.tables.TradeAreaStorCd;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.Record1;
+import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.jooq.types.UInteger;
 import org.springframework.stereotype.Repository;
@@ -82,6 +86,29 @@ public class TradeAreaRegionRepository {
             throw new BaseException(BaseResponseStatus.INVALID_DONG);
         }
 
+        // 최신분기만 가진 파생테이블
+        Table<?> latest = dsl
+                .select(
+                        TRADE_AREA_STOR_CD.TRDAR_CD,
+                        TRADE_AREA_STOR_CD.SVC_INDUTY_CD_NM,
+                        TRADE_AREA_STOR_CD.STOR_CO,
+                        TRADE_AREA_STOR_CD.SIMILR_INDUTY_STOR_CO,
+                        DSL.rowNumber().over() // 윈도우 함수()
+                                .partitionBy(TRADE_AREA_STOR_CD.TRDAR_CD, TRADE_AREA_STOR_CD.SVC_INDUTY_CD_NM)
+                                .orderBy(TRADE_AREA_STOR_CD.STDR_YYQU_CD.desc())
+                                .as("rn")
+                )
+                .from(TRADE_AREA_STOR_CD)
+                .where(TRADE_AREA_STOR_CD.SVC_INDUTY_CD_NM.eq(induty))
+                .asTable("latest");
+
+        // 파생테이블 컬럼 핸들
+        Field<Integer>  L_TRDAR_CD  = latest.field("TRDAR_CD", Integer.class);
+        Field<Integer>  L_RN        = latest.field("rn", Integer.class);
+        Field<UInteger> L_STOR_CO   = latest.field("STOR_CO", UInteger.class);
+        Field<UInteger> L_SIMILR_CO = latest.field("SIMILR_INDUTY_STOR_CO", UInteger.class);
+
+        // 메인 조회
         List<TradeAreaItemDto> areas = dsl
                 .select(
                         TRADE_AREA_REGION.TRDAR_SE_CD,
@@ -91,33 +118,27 @@ public class TradeAreaRegionRepository {
                         TRADE_AREA_REGION.XCNTS_VALUE,
                         TRADE_AREA_REGION.YDNTS_VALUE,
                         TRADE_AREA_REGION.RELM_AR,
-                        TRADE_AREA_STOR_CD.STOR_CO,
-                        TRADE_AREA_STOR_CD.SIMILR_INDUTY_STOR_CO
+                        L_STOR_CO,
+                        L_SIMILR_CO
                 )
                 .from(TRADE_AREA_REGION)
-                .leftJoin(TRADE_AREA_STOR_CD)
-                    .on(TRADE_AREA_REGION.TRDAR_CD.eq(TRADE_AREA_STOR_CD.TRDAR_CD)
-                        .and(TRADE_AREA_STOR_CD.SVC_INDUTY_CD_NM.eq(induty))
-                            .and(TRADE_AREA_STOR_CD.STDR_YYQU_CD.eq(
-                                    dsl.select(max(TRADE_AREA_STOR_CD.STDR_YYQU_CD))
-                                            .from(TRADE_AREA_STOR_CD)
-                                            .where(TRADE_AREA_STOR_CD.TRDAR_CD.eq(TRADE_AREA_REGION.TRDAR_CD))
-                                            .and(TRADE_AREA_STOR_CD.SVC_INDUTY_CD_NM.eq(induty))
-                            )))
+                .leftJoin(latest)
+                .on(TRADE_AREA_REGION.TRDAR_CD.eq(L_TRDAR_CD))
+                .and(L_RN.eq(DSL.inline(1))) // 최신 분기만 조인
                 .where(
                         TRADE_AREA_REGION.SIGNGU_CD_NM.eq(gu)
                                 .and(TRADE_AREA_REGION.ADSTRD_CD_NM.eq(dong))
                 )
-                .fetch(record -> new TradeAreaItemDto(
-                        record.get(TRADE_AREA_REGION.TRDAR_SE_CD),
-                        record.get(TRADE_AREA_REGION.TRDAR_SE_CD_NM),
-                        record.get(TRADE_AREA_REGION.TRDAR_CD),
-                        record.get(TRADE_AREA_REGION.TRDAR_CD_NM),
-                        record.get(TRADE_AREA_REGION.XCNTS_VALUE),
-                        record.get(TRADE_AREA_REGION.YDNTS_VALUE),
-                        record.get(TRADE_AREA_REGION.RELM_AR),
-                        toInteger(record.get(TRADE_AREA_STOR_CD.STOR_CO)),
-                        toInteger(record.get(TRADE_AREA_STOR_CD.SIMILR_INDUTY_STOR_CO))
+                .fetch(rec -> new TradeAreaItemDto(
+                        rec.get(TRADE_AREA_REGION.TRDAR_SE_CD),
+                        rec.get(TRADE_AREA_REGION.TRDAR_SE_CD_NM),
+                        rec.get(TRADE_AREA_REGION.TRDAR_CD),
+                        rec.get(TRADE_AREA_REGION.TRDAR_CD_NM),
+                        rec.get(TRADE_AREA_REGION.XCNTS_VALUE),
+                        rec.get(TRADE_AREA_REGION.YDNTS_VALUE),
+                        rec.get(TRADE_AREA_REGION.RELM_AR),
+                        toInteger(rec.get(L_STOR_CO)),
+                        toInteger(rec.get(L_SIMILR_CO))
                 ));
         
         /*
