@@ -6,6 +6,36 @@ import RadarChart from "@/components/molecules/Detail/Chart/RadarChart";
 import PcDetailPanel, { PcMeta } from "@/components/organisms/Compare/PcDetailPanel";
 import TradeAreaPicker, { TradeAreaSelection } from "@/components/molecules/Compare/TradeAreaPicker";
 import { fetchTradeAreaDetail, mapTradeAreaDetailToMetrics, TradeAreaDetail, fetchTradeAreaScore, TradeAreaScore, getTradeAreaNameByCode } from "@/lib/api/tradeAreas";
+import TradeAreaRawData from "@/data/TradeAreaValue.json";
+
+// TradeAreaRawData 타입 정의
+interface TradeAreaFileShape {
+  DESCRIPTION: Record<string, unknown>;
+  DATA: Array<{
+    trdar_cd: string;
+    trdar_cd_nm: string;
+    trdar_se_cd: string;
+    trdar_se_cd_nm: string;
+    signgu_cd: string;
+    signgu_cd_nm: string;
+    adstrd_cd: string;
+    adstrd_cd_nm: string;
+  }>;
+}
+
+// TradeAreaRawData에서 상권 코드로 자치구/행정동 정보를 매핑하는 Map 생성
+const TRADE_AREA_BY_CODE = (() => {
+  const json = TradeAreaRawData as unknown as TradeAreaFileShape;
+  return new Map(json.DATA.map((item) => [
+    item.trdar_cd,
+    {
+      signguCode: item.signgu_cd,
+      signguName: item.signgu_cd_nm,
+      adstrdCode: item.adstrd_cd,
+      adstrdName: item.adstrd_cd_nm,
+    }
+  ]));
+})();
 
 type CompareTradeAreasModalProps = {
   open: boolean;
@@ -14,9 +44,11 @@ type CompareTradeAreasModalProps = {
   leftOpen?: boolean;
   /** Modal type: 'compare' for full screen with dim, 'saved' for sidebar area */
   modalType?: 'compare' | 'saved';
+  /** Pre-selected trade areas from saved areas */
+  preSelectedTradeAreas?: { trdarCd: string; trdarCdNm: string }[];
 };
 
-export default function CompareTradeAreasModal({ open, onClose, leftOpen = true, modalType = 'compare' }: CompareTradeAreasModalProps) {
+export default function CompareTradeAreasModal({ open, onClose, leftOpen = true, modalType = 'compare', preSelectedTradeAreas }: CompareTradeAreasModalProps) {
   const [selectedPc, setSelectedPc] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<'analysis' | 'data'>('analysis');
   const [selectionA, setSelectionA] = useState<TradeAreaSelection>({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
@@ -46,6 +78,35 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [open, onClose]);
+
+  // Auto-select pre-selected trade areas when modal opens
+  useEffect(() => {
+    if (!open || !preSelectedTradeAreas || preSelectedTradeAreas.length === 0) return;
+    
+    // Reset selections first
+    setSelectionA({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
+    setSelectionB({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
+    
+    // Set first trade area to selection A
+    if (preSelectedTradeAreas.length >= 1) {
+      const tradeAreaInfo1 = TRADE_AREA_BY_CODE.get(preSelectedTradeAreas[0].trdarCd);
+      setSelectionA({ 
+        signguCode: tradeAreaInfo1?.signguCode || null, 
+        adstrdCode: tradeAreaInfo1?.adstrdCode || null, 
+        tradeAreaCode: preSelectedTradeAreas[0].trdarCd 
+      });
+    }
+    
+    // Set second trade area to selection B if available
+    if (preSelectedTradeAreas.length >= 2) {
+      const tradeAreaInfo2 = TRADE_AREA_BY_CODE.get(preSelectedTradeAreas[1].trdarCd);
+      setSelectionB({ 
+        signguCode: tradeAreaInfo2?.signguCode || null, 
+        adstrdCode: tradeAreaInfo2?.adstrdCode || null, 
+        tradeAreaCode: preSelectedTradeAreas[1].trdarCd 
+      });
+    }
+  }, [open, preSelectedTradeAreas]);
 
   // Body scroll lock while modal open
   useEffect(() => {

@@ -12,7 +12,7 @@ import { fetchTradeAreaDetail, TradeAreaDetail, fetchTradeAreaScore, TradeAreaSc
 
 interface MyMarketProps {
   onBack?: () => void;
-  onCompareClick?: () => void;
+  onCompareClick?: (selectedTradeAreas: { trdarCd: string; trdarCdNm: string }[]) => void;
   className?: string;
 }
 
@@ -52,9 +52,10 @@ const MyMarket: React.FC<MyMarketProps> = ({
     setSelectedCards(prev => {
       const newSet = new Set(prev);
       if (newSet.has(trdarCd)) {
+        // 이미 선택된 카드면 선택 해제
         newSet.delete(trdarCd);
       } else {
-        // 2개까지만 선택 가능
+        // 새로운 카드 선택 시 2개 제한 체크
         if (newSet.size >= 2) {
           alert('최대 2개까지만 선택할 수 있습니다.');
           return prev;
@@ -69,13 +70,14 @@ const MyMarket: React.FC<MyMarketProps> = ({
     setSelectedCards(prev => {
       const newSet = new Set(prev);
       if (checked) {
-        // 2개까지만 선택 가능
+        // 체크박스 선택 시 2개 제한 체크
         if (newSet.size >= 2) {
           alert('최대 2개까지만 선택할 수 있습니다.');
-          return prev;
+          return prev; // 상태 변경하지 않음
         }
         newSet.add(trdarCd);
       } else {
+        // 체크박스 해제 시 선택 해제
         newSet.delete(trdarCd);
       }
       return newSet;
@@ -146,6 +148,7 @@ const MyMarket: React.FC<MyMarketProps> = ({
                  className="flex-shrink-0"
                  onClick={(e) => {
                    e.stopPropagation();
+                   e.preventDefault();
                    handleCheckboxChange(area.trdarCd, !isSelected);
                  }}
                >
@@ -215,7 +218,23 @@ const MyMarket: React.FC<MyMarketProps> = ({
       <div className="flex-shrink-0 p-4">
         <div 
           className='cursor-pointer flex justify-center items-center bg-[#3288FF] text-white rounded-lg p-2'
-          onClick={onCompareClick}
+          onClick={() => {
+            console.log('🔍 MyMarket 비교하기 버튼 클릭됨');
+            console.log('🔍 selectedCards:', selectedCards);
+            console.log('🔍 tradeAreas:', tradeAreas);
+            if (onCompareClick) {
+              const selectedTradeAreas = tradeAreas
+                .filter(area => selectedCards.has(area.trdarCd))
+                .map(area => ({
+                  trdarCd: area.trdarCd,
+                  trdarCdNm: area.trdarCdNm
+                }));
+              console.log('🔍 선택된 상권들:', selectedTradeAreas);
+              onCompareClick(selectedTradeAreas);
+            } else {
+              console.log('❌ onCompareClick이 없음');
+            }
+          }}
         >
           <span className='text-md'>비교하기</span>
         </div>

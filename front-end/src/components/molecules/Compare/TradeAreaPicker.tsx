@@ -103,6 +103,20 @@ const SIGNGU_NAME_BY_CODE = new Map(SIGNGU_OPTIONS.map((item) => [item.code, ite
 const ADSTRD_NAME_BY_CODE = new Map(ADSTRD_OPTIONS.map((item) => [item.code, item.name]));
 const TRADE_AREA_BY_CODE = new Map(TRADE_AREA_OPTIONS.map((item) => [item.code, item]));
 
+// TradeAreaRawData에서 상권 코드로 자치구/행정동 정보를 매핑하는 Map 생성
+const TRADE_AREA_INFO_BY_CODE = (() => {
+  const json = TradeAreaRawData as unknown as TradeAreaFileShape;
+  return new Map(json.DATA.map((item) => [
+    item.trdar_cd,
+    {
+      signguCode: item.signgu_cd,
+      signguName: item.signgu_cd_nm,
+      adstrdCode: item.adstrd_cd,
+      adstrdName: item.adstrd_cd_nm,
+    }
+  ]));
+})();
+
 const normalize = (input: string) => input.trim().toLocaleLowerCase("ko-KR");
 
 type Step = 1 | 2 | 3 | 4;
@@ -235,8 +249,13 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
     setIsOpen(false);
   }, [step]);
 
-  const selectedSignguName = value.signguCode ? value.signguCode : undefined;
-  const selectedAdstrdName = value.adstrdCode ? dongList.find(dong => dong === value.adstrdCode) : undefined;
+  // 자치구/행정동 이름을 TradeAreaRawData에서 직접 가져오기
+  const selectedSignguName = value.signguCode ? 
+    (value.tradeAreaCode ? TRADE_AREA_INFO_BY_CODE.get(value.tradeAreaCode)?.signguName : guList.find(gu => gu === value.signguCode)) : 
+    undefined;
+  const selectedAdstrdName = value.adstrdCode ? 
+    (value.tradeAreaCode ? TRADE_AREA_INFO_BY_CODE.get(value.tradeAreaCode)?.adstrdName : dongList.find(dong => dong === value.adstrdCode)) : 
+    undefined;
   const selectedTradeArea = value.tradeAreaCode ? TRADE_AREA_BY_CODE.get(value.tradeAreaCode) : undefined;
   const selectedTradeAreaDisplay = selectedTradeArea
     ? selectedTradeArea.name.endsWith("상권")
