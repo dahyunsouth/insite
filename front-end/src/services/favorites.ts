@@ -1,4 +1,5 @@
 import { authManager } from '@/utils/auth';
+import { API_BASE_URL } from '@/config/api';
 
 // API 응답 타입 정의
 interface ApiResponse<T = any> {
@@ -19,9 +20,6 @@ interface FavoriteItem {
 interface FavoritesResult {
   favorites: FavoriteItem[];
 }
-
-// API 기본 URL (이미지에서 확인한 서버 주소)
-const API_BASE_URL = 'http://43.203.196.29:8080';
 
 class FavoritesService {
   // 저장된 상권 목록 조회
