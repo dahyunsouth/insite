@@ -48,7 +48,7 @@ export default function DetailNavbarTemplate({
           type="button"
           aria-label="닫기"
           onClick={onClose}
-          className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 hover:bg-white shadow-sm"
+          className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 hover:bg-white shadow-sm cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md"
         >
           <XMarkIcon className="h-5 w-5 text-gray-700" />
         </button>

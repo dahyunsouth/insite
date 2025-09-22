@@ -189,7 +189,7 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
     return { index: bestIdx, label: slot.label, value: slot.value };
   }, [data]);
 
-  const dayLabels = useMemo(() => data?.days?.map((d) => d.label.replace('요일', '')) ?? [], [data]);
+  const dayLabels = useMemo(() => data?.days?.map((d) => d.label) ?? [], [data]);
   const dayValues = useMemo(() => data?.days?.map((d) => d.value) ?? [], [data]);
   const dayMaxIndex = data?.dayMax?.index ?? null;
 
