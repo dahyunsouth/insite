@@ -431,7 +431,7 @@ export default function HomePage() {
       <DetailNavbar
         open={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
-        title={selectedTradeAreaName ? `${selectedTradeAreaName} 상권 현황` : "상권 현황"}
+        title={selectedTradeAreaName ? selectedTradeAreaName : "상권 현황"}
         trdarCode={selectedTradeAreaCode}
       />
 

@@ -7,7 +7,7 @@ import TradeAreaSelect from "@/components/molecules/Detail/TradeAreaSelect";
 import TimeSlotCard from "@/components/molecules/Detail/PopulationCard/FloatingPopulationCard";
 import StoreCard from "@/components/molecules/Detail/StoreCard";
 import ScoreCard from "@/components/molecules/Detail/ScoreCard";
-import SalesCard from "@/components/molecules/Detail/SalesCard";
+import SalesCard from "@/components/molecules/Detail/SalesCard/SalesCard";
 import ActionButtons from "@/components/atoms/Detail/ActionButtons";
 
 type DetailNavbarProps = {
@@ -111,10 +111,10 @@ export default function DetailNavbar({ open, onClose, title, subtitle, trdarCode
               {/* Debug: trdarCode = {trdarCode ?? selected?.code ?? null} */}
             </section>
             <section id="sales-section" className="scroll-mt-64">
-              <SalesCard trdarCode={selected?.code ?? null} />
+              <SalesCard trdarCode={trdarCode ?? selected?.code ?? null} />
             </section>
             <section id="store-section" className="scroll-mt-64">
-              <StoreCard trdarCode={selected?.code ?? null} />
+              <StoreCard trdarCode={trdarCode ?? selected?.code ?? null} />
             </section>
           </>
         </DetailNavbarTemplate>
