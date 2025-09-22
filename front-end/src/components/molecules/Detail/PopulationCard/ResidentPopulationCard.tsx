@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import PopulationToggle from "@/components/molecules/Detail/PopulationCard/PopulationToggle";
 import TimeSlotCard from "@/components/molecules/Detail/PopulationCard/FloatingPopulationCard";
-import ResidentPopulationCard from "@/components/molecules/Detail/PopulationCard/ResidentPopulationCard";
+import WorkPopulationCard from "@/components/molecules/Detail/PopulationCard/WorkPopulationCard";
 
 type Props = { 
   trdarCode: string | null;
@@ -11,21 +11,27 @@ type Props = {
   onPopulationTypeChange: (type: "유동" | "직장" | "상주") => void;
 };
 
-type WorkResponse = {
+type ResidentResponse = {
   quarter: string;
   trdarCd: string;
   trdarNm: string;
-  totalWorkers: number;
+  totalResident: number;
+  householdsTotal: number;
   male: number;
   female: number;
-  maleRate: number; // 0-100
-  femaleRate: number; // 0-100
+  maleRate: number;
+  femaleRate: number;
+  aptHouseholds: number;
+  nonAptHouseholds: number;
+  aptRate: number;
+  nonAptRate: number;
+  avgHouseholdSize: number;
   age: { [k in "10" | "20" | "30" | "40" | "50" | "60+"]: number };
   topAgeGroup: { key: string; value: number; rate: number };
 };
 
-export default function WorkPopulationCard({ trdarCode, populationType, onPopulationTypeChange }: Props) {
-  const [data, setData] = useState<WorkResponse | null>(null);
+export default function ResidentPopulationCard({ trdarCode, populationType, onPopulationTypeChange }: Props) {
+  const [data, setData] = useState<ResidentResponse | null>(null);
   const [quarter, setQuarter] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,10 +52,10 @@ export default function WorkPopulationCard({ trdarCode, populationType, onPopula
         if (aborted) return;
         setQuarter(q);
 
-        const url = `/api/seoul/trade-areas/workers/detail?quarter=${q}&trdar=${trdarCode}`;
+        const url = `/api/seoul/trade-areas/residents/detail?quarter=${q}&trdar=${trdarCode}`;
         const res = await fetch(url, { cache: "no-store" });
-        if (!res.ok) throw new Error("workers detail failed");
-        const payload = (await res.json()) as WorkResponse;
+        if (!res.ok) throw new Error("residents detail failed");
+        const payload = (await res.json()) as ResidentResponse;
         if (aborted) return;
         setData(payload);
       } catch (e: any) {
@@ -84,14 +90,14 @@ export default function WorkPopulationCard({ trdarCode, populationType, onPopula
     return <TimeSlotCard trdarCode={trdarCode} populationType={populationType} onPopulationTypeChange={onPopulationTypeChange} />;
   }
   
-  if (populationType === "상주") {
-    return <ResidentPopulationCard trdarCode={trdarCode} populationType={populationType} onPopulationTypeChange={onPopulationTypeChange} />;
+  if (populationType === "직장") {
+    return <WorkPopulationCard trdarCode={trdarCode} populationType={populationType} onPopulationTypeChange={onPopulationTypeChange} />;
   }
 
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h3 className="text-[18px] font-semibold text-gray-900">직장인구</h3>
+        <h3 className="text-[18px] font-semibold text-gray-900">상주인구</h3>
         <PopulationToggle
           selected={populationType}
           onChange={onPopulationTypeChange}
@@ -99,47 +105,68 @@ export default function WorkPopulationCard({ trdarCode, populationType, onPopula
       </div>
 
       {/* Caption */}
-      <div className="mt-1 text-right text-xs text-gray-400">{quarter ?? ""}</div>
+      <div className="mt-1 text-right text-xs text-gray-400">{quarter ?? "—"}</div>
 
       {/* Grid KPIs */}
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Total workers */}
+        {/* Total resident */}
         <KpiTile
-          title="총 직장인구"
-          primary={data ? `${formatNumber(data.totalWorkers)}명` : ""}
+          title="총 상주인구"
+          primary={data ? `${formatNumber(data.totalResident)}명` : "—"}
+          secondary={data ? `남 ${formatPercent(data.maleRate)} · 여 ${formatPercent(data.femaleRate)}` : "—"}
+        />
+        {/* Households */}
+        <KpiTile
+          title="총 가구 수"
+          primary={data ? `${formatNumber(data.householdsTotal)}가구` : "—"}
           secondary={
             data
-              ? `남 ${formatPercent(data.maleRate)} · 여 ${formatPercent(data.femaleRate)}`
-              : ""
+              ? Number.isFinite(data.avgHouseholdSize) && data.avgHouseholdSize > 0
+                ? `평균 가구원수 ${formatFixed(data.avgHouseholdSize, 1)}명`
+                : "—"
+              : "—"
           }
         />
-        {/* Male count */}
+        {/* Apt ratio */}
         <KpiTile
-          title="남성"
-          primary={data ? `${formatNumber(data.male)}명` : ""}
-          secondary={data ? `비중 ${formatPercent(data.maleRate)}` : ""}
-        />
-        {/* Female count */}
-        <KpiTile
-          title="여성"
-          primary={data ? `${formatNumber(data.female)}명` : ""}
-          secondary={data ? `비중 ${formatPercent(data.femaleRate)}` : ""}
+          title="아파트 비중"
+          primaryClass="text-[#2563EB]"
+          primary={data ? `${formatPercent(data.aptRate)}` : "—"}
+          secondary={data ? `아파트 ${formatNumber(data.aptHouseholds)} · 비아파트 ${formatNumber(data.nonAptHouseholds)}` : "—"}
         />
       </div>
 
-      {/* Gender composition */}
-      <div className="mt-4 rounded-2xl border border-gray-200 p-4">
-        <div className="text-sm font-semibold text-gray-700">성별 구성</div>
-        <div className="mt-2">
-          {data ? (
-            <SegmentBar
-              leftLabel={`남 ${formatPercent(data.maleRate)}`}
-              rightLabel={`여 ${formatPercent(data.femaleRate)}`}
-              leftRate={clamp01(data.maleRate / 100)}
-            />
-          ) : (
-            <Placeholder />
-          )}
+      {/* Gender and dwelling composition */}
+      <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div className="rounded-2xl border border-gray-200 p-4">
+          <div className="text-sm font-semibold text-gray-700">성별 구성</div>
+          <div className="mt-2">
+            {data ? (
+              <SegmentBar
+                leftLabel={`남 ${formatPercent(data.maleRate)}`}
+                rightLabel={`여 ${formatPercent(data.femaleRate)}`}
+                leftRate={clamp01(data.maleRate / 100)}
+              />
+            ) : (
+              <Placeholder />
+            )}
+          </div>
+        </div>
+        <div className="rounded-2xl border border-gray-200 p-4">
+          <div className="text-sm font-semibold text-gray-700">주거 유형</div>
+          <div className="mt-2">
+            {data ? (
+              <SegmentBar
+                leftColor="#10B981"
+                rightColor="#94A3B8"
+                leftLabel={`아파트 ${formatPercent(data.aptRate)}`}
+                rightLabel={`비아파트 ${formatPercent(data.nonAptRate)}`}
+                leftRate={clamp01(data.aptRate / 100)}
+              />
+            ) : (
+              <Placeholder />
+            )}
+          </div>
         </div>
       </div>
 
@@ -165,7 +192,7 @@ export default function WorkPopulationCard({ trdarCode, populationType, onPopula
 
       {/* Empty/Loading/Error */}
       {trdarCode == null ? (
-        <div className="mt-3 text-sm text-gray-500">상권을 선택하면 직장인구를 보여드려요.</div>
+        <div className="mt-3 text-sm text-gray-500">상권을 선택하면 상주인구를 보여드려요.</div>
       ) : loading ? (
         <div className="mt-3 text-sm text-gray-500">불러오는 중…</div>
       ) : error ? (
@@ -244,6 +271,10 @@ function formatNumber(v: number) {
 function formatPercent(v: number) {
   const digits = Math.abs(v) < 10 ? 1 : 0;
   return `${v.toFixed(digits)}%`;
+}
+
+function formatFixed(v: number, d = 1) {
+  return Number.isFinite(v) ? v.toFixed(d) : "—";
 }
 
 function clamp01(v: number) {

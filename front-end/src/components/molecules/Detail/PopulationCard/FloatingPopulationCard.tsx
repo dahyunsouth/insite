@@ -1,9 +1,17 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import TimeSlotBarChart from "@/components/molecules/Detail/Chart/TimeSlotBarChart";
+import FloatingPopulationTimeChart from "@/components/molecules/Detail/PopulationCard/Charts/FloatingPopulationTimeChart";
+import FloatingPopulationWeekChart from "@/components/molecules/Detail/PopulationCard/Charts/FloatingPopulationWeekChart";
+import PopulationToggle from "@/components/molecules/Detail/PopulationCard/PopulationToggle";
+import WorkPopulationCard from "@/components/molecules/Detail/PopulationCard/WorkPopulationCard";
+import ResidentPopulationCard from "@/components/molecules/Detail/PopulationCard/ResidentPopulationCard";
 
-type Props = { trdarCode: string | null };
+type Props = { 
+  trdarCode: string | null;
+  populationType: "유동" | "직장" | "상주";
+  onPopulationTypeChange: (type: "유동" | "직장" | "상주") => void;
+};
 
 type DetailResponse = {
   quarter: string;
@@ -17,8 +25,7 @@ type DetailResponse = {
   dayMin?: { index: number; label: string; value: number };
 };
 
-export default function TimeSlotCard({ trdarCode }: Props) {
-  const [quarter, setQuarter] = useState<string | null>(null);
+export default function TimeSlotCard({ trdarCode, populationType, onPopulationTypeChange }: Props) {
   const [data, setData] = useState<DetailResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,15 +46,14 @@ export default function TimeSlotCard({ trdarCode }: Props) {
         if (!qRes.ok) throw new Error("latest-quarter failed");
         const q = (await qRes.json()).quarter as string;
         if (aborted) return;
-        setQuarter(q);
 
         const dRes = await fetch(`/api/seoul/trade-areas/detail?quarter=${q}&trdar=${trdarCode}`, { cache: "no-store" });
         if (!dRes.ok) throw new Error("detail failed");
         const d = (await dRes.json()) as DetailResponse;
         if (aborted) return;
         setData(d);
-      } catch (e: any) {
-        if (!aborted) setError(e?.message ?? "load failed");
+      } catch (e: unknown) {
+        if (!aborted) setError(e instanceof Error ? e.message : "load failed");
       } finally {
         if (!aborted) setLoading(false);
       }
@@ -76,9 +82,24 @@ export default function TimeSlotCard({ trdarCode }: Props) {
   const dayValues = useMemo(() => data?.days?.map((d) => d.value) ?? [], [data]);
   const dayMaxIndex = data?.dayMax?.index ?? null;
 
+  // 토글 상태에 따라 다른 카드 렌더링
+  if (populationType === "직장") {
+    return <WorkPopulationCard trdarCode={trdarCode} populationType={populationType} onPopulationTypeChange={onPopulationTypeChange} />;
+  }
+  
+  if (populationType === "상주") {
+    return <ResidentPopulationCard trdarCode={trdarCode} populationType={populationType} onPopulationTypeChange={onPopulationTypeChange} />;
+  }
+
   return (
     <div>
-      <h3 className="text-[18px] font-semibold text-gray-900">유동인구</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-[18px] font-semibold text-gray-900">유동인구</h3>
+        <PopulationToggle
+          selected={populationType}
+          onChange={onPopulationTypeChange}
+        />
+      </div>
 
       {/* Segmented control: 시간대별 / 요일별 */}
       <div className="mt-4 w-full rounded-xl bg-gray-100 p-1">
@@ -88,7 +109,7 @@ export default function TimeSlotCard({ trdarCode }: Props) {
             onClick={() => setMode("time")}
             aria-pressed={mode === "time"}
             className={
-              `w-full justify-center rounded-xl px-4 py-4 text-sm font-medium ` +
+              `cursor-pointer w-full justify-center rounded-xl px-4 py-4 text-sm font-medium ` +
               (mode === "time" ? "bg-white text-[#3288FF] shadow-sm" : "text-gray-500")
             }
           >
@@ -99,7 +120,7 @@ export default function TimeSlotCard({ trdarCode }: Props) {
             onClick={() => setMode("dow")}
             aria-pressed={mode === "dow"}
             className={
-              `w-full justify-center rounded-xl px-4 py-4 text-sm font-medium ` +
+              `cursor-pointer w-full justify-center rounded-xl px-4 py-4 text-sm font-medium ` +
               (mode === "dow" ? "bg-white text-[#3288FF] shadow-sm" : "text-gray-500")
             }
           >
@@ -122,7 +143,7 @@ export default function TimeSlotCard({ trdarCode }: Props) {
               <>
                 <span className="font-medium">유동인구가 가장 많은 시간대는</span>
                 <span className="ml-1 font-bold text-rose-500">{data.max.label}</span>
-                <span className="ml-1 font-medium">예요.</span>
+                <span className="ml-1 font-medium">입니다.</span>
               </>
             ) : (
               <>
@@ -199,7 +220,7 @@ export default function TimeSlotCard({ trdarCode }: Props) {
       {mode === "time" ? (
         <div className="mt-4 rounded-2xl border border-gray-200 p-3 overflow-x-auto">
           {data && labels.length === 6 ? (
-            <TimeSlotBarChart labels={labels} values={values} maxIndex={maxIndex} />
+            <FloatingPopulationTimeChart labels={labels} values={values} maxIndex={maxIndex} />
           ) : (
             <div className="h-[260px] flex items-center justify-center text-sm text-gray-400">차트를 표시할 데이터가 없습니다.</div>
           )}
@@ -207,7 +228,7 @@ export default function TimeSlotCard({ trdarCode }: Props) {
       ) : (
         <div className="mt-4 rounded-2xl border border-gray-200 p-3 overflow-x-auto">
           {data && dayLabels.length === 7 && dayValues.some((v) => Number.isFinite(v) && v > 0) ? (
-            <TimeSlotBarChart labels={dayLabels} values={dayValues} maxIndex={dayMaxIndex} />
+            <FloatingPopulationWeekChart labels={dayLabels} values={dayValues} maxIndex={dayMaxIndex} />
           ) : (
             <div className="h-[260px] flex items-center justify-center text-sm text-gray-400">차트를 표시할 데이터가 없습니다.</div>
           )}

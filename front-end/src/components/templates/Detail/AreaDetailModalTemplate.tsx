@@ -65,7 +65,7 @@ export default function AreaDetailModalTemplate({
       </div>
 
       {/* Content: left cards stack + right aside (separate from cards) */}
-      <main className="px-4 pb-6">
+      <main className="px-4 py-4">
         <div className="md:grid md:grid-cols-[1fr_240px] md:gap-6">
           {/* Left column: stack of section cards */}
           <div>

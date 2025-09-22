@@ -4,10 +4,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import AreaDetailModalTemplate from "@/components/templates/Detail/AreaDetailModalTemplate";
 import TradeAreaSelect from "@/components/molecules/Detail/TradeAreaSelect";
-import TimeSlotCard from "@/components/molecules/Detail/TimeSlotCard";
+import TimeSlotCard from "@/components/molecules/Detail/PopulationCard/FloatingPopulationCard";
 import StoreCard from "@/components/molecules/Detail/StoreCard";
-import ResidentPopulationCard from "@/components/molecules/Detail/ResidentPopulationCard";
-import WorkPopulationCard from "@/components/molecules/Detail/WorkPopulationCard";
+import ScoreCard from "@/components/molecules/Detail/ScoreCard";
+import SalesCard from "@/components/molecules/Detail/SalesCard";
 
 type AreaDetailModalProps = {
   open: boolean;
@@ -24,6 +24,7 @@ type AreaDetailModalProps = {
  */
 export default function AreaDetailModal({ open, onClose, title, subtitle, onSelectTradeArea }: AreaDetailModalProps) {
   const [selected, setSelected] = useState<{ code: string; name: string } | null>(null);
+  const [populationType, setPopulationType] = useState<"유동" | "직장" | "상주">("유동");
 
   useEffect(() => {
     if (!open) return;
@@ -36,7 +37,7 @@ export default function AreaDetailModal({ open, onClose, title, subtitle, onSele
 
   const computedTitle = useMemo(() => {
     if (selected?.name) {
-      const suffix = " 상권 상황";
+      const suffix = " 상권 분석";
       return `${selected.name}${suffix}`;
     }
     return title;
@@ -72,19 +73,23 @@ export default function AreaDetailModal({ open, onClose, title, subtitle, onSele
               }}
             />
           }
-          sectionAside={<DetailAsideNav />}
+          sectionAside={<DetailAsideNav populationType={populationType} onPopulationTypeChange={setPopulationType} />}
         >
           <>
-            <section id="resident-section" className="scroll-mt-24">
-              <ResidentPopulationCard trdarCode={selected?.code ?? null} />
+            <section id="score-section" className="scroll-mt-64">
+              <ScoreCard trdarCode={selected?.code ?? null} />
             </section>
-            <section id="pop-section" className="scroll-mt-24">
-              <TimeSlotCard trdarCode={selected?.code ?? null} />
+            <section id="pop-section" className="scroll-mt-64">
+              <TimeSlotCard 
+                trdarCode={selected?.code ?? null} 
+                populationType={populationType}
+                onPopulationTypeChange={setPopulationType}
+              />
             </section>
-            <section id="work-section" className="scroll-mt-24">
-              <WorkPopulationCard trdarCode={selected?.code ?? null} />
+            <section id="sales-section" className="scroll-mt-64">
+              <SalesCard trdarCode={selected?.code ?? null} />
             </section>
-            <section id="store-section" className="scroll-mt-24">
+            <section id="store-section" className="scroll-mt-64">
               <StoreCard trdarCode={selected?.code ?? null} />
             </section>
           </>
@@ -95,19 +100,81 @@ export default function AreaDetailModal({ open, onClose, title, subtitle, onSele
   );
 }
 
-function DetailAsideNav() {
+function DetailAsideNav({ 
+  populationType, 
+  onPopulationTypeChange 
+}: { 
+  populationType: "유동" | "직장" | "상주";
+  onPopulationTypeChange: (type: "유동" | "직장" | "상주") => void;
+}) {
   const items = [
-    { id: "resident-section", label: "상주인구" },
-    { id: "work-section", label: "직장인구" },
-    { id: "pop-section", label: "유동인구" },
+    { id: "score-section", label: "종합추천점수" },
+    { id: "population-section", label: "인구", isParent: true },
+    { id: "pop-section", label: "유동인구", parentId: "population-section", populationType: "유동" },
+    { id: "pop-section", label: "직장인구", parentId: "population-section", populationType: "직장" },
+    { id: "pop-section", label: "상주인구", parentId: "population-section", populationType: "상주" },
+    { id: "sales-section", label: "매출" },
     { id: "store-section", label: "점포" },
   ];
   const [activeIndex, setActiveIndex] = React.useState(0);
-  function go(id: string, idx: number) {
+  function go(id: string, idx: number, itemPopulationType?: string) {
+    console.log("go function called:", { id, idx, itemPopulationType });
+    
+    // 인구 부모 섹션 클릭 시 바로 유동인구 섹션으로 처리
+    if (id === "population-section") {
+      console.log("Population section clicked, redirecting to pop-section");
+      // 유동인구 섹션으로 직접 이동
+      const popSection = document.getElementById("pop-section");
+      if (popSection) {
+        const modalContainer = popSection.closest('.overflow-y-auto');
+        if (modalContainer) {
+          const rect = popSection.getBoundingClientRect();
+          const containerRect = modalContainer.getBoundingClientRect();
+          const relativeTop = rect.top - containerRect.top;
+          const scrollTop = modalContainer.scrollTop;
+          const targetPosition = scrollTop + relativeTop - 100;
+          modalContainer.scrollTo({
+            top: Math.max(0, targetPosition),
+            behavior: "smooth"
+          });
+        }
+      }
+      setActiveIndex(2); // 유동인구 항목 인덱스
+      onPopulationTypeChange("유동");
+      return;
+    }
+    
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      // 모달 내부 스크롤 컨테이너를 찾아서 스크롤
+      const modalContainer = el.closest('.overflow-y-auto');
+      if (modalContainer) {
+        const rect = el.getBoundingClientRect();
+        const containerRect = modalContainer.getBoundingClientRect();
+        
+        // 모달 컨테이너 내에서의 상대적 위치 계산
+        const relativeTop = rect.top - containerRect.top;
+        const scrollTop = modalContainer.scrollTop;
+        const targetPosition = scrollTop + relativeTop - 100; // 100px 여백
+        
+        modalContainer.scrollTo({
+          top: Math.max(0, targetPosition),
+          behavior: "smooth"
+        });
+      } else {
+        // fallback: 기본 scrollIntoView
+        el.scrollIntoView({ 
+          behavior: "smooth", 
+          block: "start"
+        });
+      }
+      
       setActiveIndex(idx);
+      
+      // 인구 섹션 클릭 시 해당 토글 상태로 설정
+      if (id === "pop-section" && itemPopulationType) {
+        onPopulationTypeChange(itemPopulationType as "유동" | "직장" | "상주");
+      }
     }
   }
   return (
@@ -115,15 +182,28 @@ function DetailAsideNav() {
       <ul className="flex flex-col">
         {items.map((it, idx) => {
           const isActive = idx === activeIndex;
+          const isChild = it.parentId;
+          const itemPopulationType = (it as { populationType?: string }).populationType;
+          
+          // 인구 항목의 경우 토글 상태와 일치하고, 현재 인구 섹션이 활성화된 경우에만 하이라이트
+          const isPopulationSectionActive = activeIndex >= 2 && activeIndex <= 4; // 인구 섹션들 (유동인구, 직장인구, 상주인구)
+          const isPopulationItemActive = itemPopulationType && itemPopulationType === populationType && isPopulationSectionActive;
+          
+          // 하위 항목이 활성화되면 부모 항목도 활성화 상태로 표시
+          const activeItem = items[activeIndex];
+          const isParentOfActiveChild = it.isParent && activeItem?.parentId === it.id;
+          const shouldHighlight = isActive || isParentOfActiveChild || isPopulationItemActive;
+          
           return (
-            <li key={it.id} className={idx !== 0 ? "mt-3" : undefined}>
+            <li key={`${it.id}-${itemPopulationType || idx}`} className={idx !== 0 ? "mt-3" : undefined}>
               <button
                 type="button"
-                onClick={() => go(it.id, idx)}
+                onClick={() => go(it.id, idx, itemPopulationType)}
                 aria-current={isActive ? "page" : undefined}
                 className={
-                  "w-full text-left text-base leading-6 " +
-                  (isActive ? "text-[#3288FF] font-semibold" : "text-gray-400 hover:text-gray-600")
+                  "cursor-pointer w-full text-left text-base leading-6 " +
+                  (shouldHighlight ? "text-[#3288FF] font-semibold" : "text-gray-400 hover:text-gray-600") +
+                  (isChild ? " ml-4" : "")
                 }
               >
                 {it.label}

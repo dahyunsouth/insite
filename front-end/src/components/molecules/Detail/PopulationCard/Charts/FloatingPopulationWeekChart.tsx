@@ -3,13 +3,13 @@
 import React from "react";
 
 type Props = {
-  labels: string[]; // 6 labels
-  values: number[]; // 6 values
+  labels: string[]; // 7 labels (요일)
+  values: number[]; // 7 values
   maxIndex?: number | null;
   className?: string;
 };
 
-export default function TimeSlotBarChart({ labels, values, maxIndex = null, className }: Props) {
+export default function FloatingPopulationWeekChart({ labels, values, maxIndex = null, className }: Props) {
   const W = 560;
   const H = 260;
   const m = { top: 16, right: 12, bottom: 20, left: 60 };
@@ -17,35 +17,40 @@ export default function TimeSlotBarChart({ labels, values, maxIndex = null, clas
   const ch = H - m.top - m.bottom;
 
   const n = values.length;
-  const maxVal = Math.max(1, ...values);
+  const dataMin = Math.min(...values);
+  const dataMax = Math.max(...values);
+  const maxVal = Math.max(dataMax, 1); // Ensure we have at least 1 for scaling
   const scaleY = (v: number) => ch - (v / maxVal) * ch;
   const band = cw / (n * 1.4);
   const gap = band * 0.4;
 
-  // Dynamic colors by ranking: bottom 2 -> green, middle 2 -> orange, top 2 -> red
-  const GREEN = "#22c55e";
-  const ORANGE = "#fb923c";
+  // Dynamic colors: highest -> blue, lowest -> red, others -> gray
+  const BLUE = "#3288FF";
   const RED = "#ef4444";
-  const orderAsc = values
-    .map((v, i) => ({ v, i }))
-    .sort((a, b) => a.v - b.v)
-    .map((o) => o.i);
-  const colorByIndex: string[] = new Array(n).fill(ORANGE);
-  for (let j = 0; j < Math.min(2, n); j++) colorByIndex[orderAsc[j]] = GREEN; // lowest 2
-  for (let j = 0; j < Math.min(2, n); j++) colorByIndex[orderAsc[n - 1 - j]] = RED; // highest 2
-
-  const points = values.map((v, i) => {
-    const x = m.left + i * (band + gap) + band / 2;
-    const y = m.top + scaleY(v);
-    return `${x},${y}`;
+  const GRAY = "#9CA3AF";
+  
+  const maxValue = Math.max(...values);
+  const minValue = Math.min(...values);
+  
+  const colorByIndex: string[] = values.map((v) => {
+    if (v === maxValue) return BLUE;
+    if (v === minValue) return RED;
+    return GRAY;
   });
 
-  const ticks = 4; // 0, 25, 50, 75, 100% of max
-  const tickVals = Array.from({ length: ticks + 1 }, (_, i) => Math.round((maxVal * i) / ticks));
+
+  // Custom tick values with equal spacing: 0, 1/4 * max, 2/4 * max, 3/4 * max, max
+  const tickVals = [
+    0,
+    dataMax / 4,
+    dataMax / 2,
+    (3 * dataMax) / 4,
+    dataMax
+  ];
 
   return (
     <div className={(className ? `flex justify-center ${className}` : "flex justify-center")}>
-      <svg width={W} height={H} role="img" aria-label="시간대별 유동인구 막대 차트">
+      <svg width={W} height={H} role="img" aria-label="요일별 유동인구 막대 차트">
         {/* grid & axes */}
         {tickVals.map((tv, i) => {
           const y = m.top + scaleY(tv);
@@ -74,14 +79,6 @@ export default function TimeSlotBarChart({ labels, values, maxIndex = null, clas
           );
         })}
 
-        {/* dashed trend line */}
-        <polyline
-          points={points.join(" ")}
-          fill="none"
-          stroke="#60A5FA"
-          strokeDasharray="6,4"
-          strokeWidth={2}
-        />
 
         {/* x labels */}
         {labels.map((lb, i) => {
