@@ -158,7 +158,7 @@ function KpiTile({ title, primary, secondary, primaryClass = "" }: { title: stri
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-4">
       <div className="text-sm font-semibold text-gray-700">{title}</div>
-      <div className={`mt-2 text-[22px] font-bold text-gray-900 ${primaryClass}`}>{primary}</div>
+      <div className={`mt-2 text-[22px] font-bold ${primaryClass || 'text-gray-900'}`}>{primary}</div>
       <div className="mt-1 text-xs text-gray-500">{secondary}</div>
     </div>
   );
