@@ -276,3 +276,66 @@ export function mapTradeAreaDetailToMetrics(detail: TradeAreaDetail | null) {
     changeIndex: { key: "상권변화지표", value: changeIndex, numValue: 0 }
   };
 }
+
+// 종합 분석 점수 타입 정의
+export interface TradeAreaScore {
+  district: string;
+  dong: string;
+  areaName: string;
+  areaType: string;
+  totalScore: number;
+  sustainabilityScore: number;
+  profitabilityScore: number;
+  accessibilityScore: number;
+  riskScore: number;
+  competitionScore: number;
+}
+
+// 종합 분석 점수 API 응답 타입
+interface TradeAreaScoreResponse {
+  httpStatus: string;
+  isSuccess: boolean;
+  message: string;
+  code: number;
+  result: TradeAreaScore;
+}
+
+// 상권 코드로 상권명을 찾는 유틸 함수
+export function getTradeAreaNameByCode(tradeAreaCode: string): string {
+  // TradeAreaPicker에서 사용하는 데이터와 동일한 방식으로 불러오기
+  try {
+    const TradeAreaRawData = require("@/data/TradeAreaValue.json");
+    const tradeArea = TradeAreaRawData.DATA.find((item: any) => item.trdar_cd === tradeAreaCode);
+    return tradeArea?.trdar_cd_nm || "상권명 없음";
+  } catch (error) {
+    console.warn('Trade area data not found:', error);
+    return "상권명 없음";
+  }
+}
+
+// 종합 분석 점수 조회 API
+export async function fetchTradeAreaScore(tradeAreaName: string): Promise<TradeAreaScore> {
+  try {
+    const response = await fetch(`http://43.203.196.29:8080/api/v1/data/score?trdarCdNm=${encodeURIComponent(tradeAreaName)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: TradeAreaScoreResponse = await response.json();
+    
+    if (!data.isSuccess) {
+      throw new Error(data.message || '점수 조회에 실패했습니다.');
+    }
+
+    return data.result;
+  } catch (error) {
+    console.error('Error fetching trade area score:', error);
+    throw error;
+  }
+}
