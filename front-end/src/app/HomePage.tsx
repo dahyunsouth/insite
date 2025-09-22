@@ -355,6 +355,12 @@ export default function HomePage() {
             <MyMarket 
               onBack={handleMyMarketClose}
               onCompareClick={handleSavedCompareClick}
+              onDetailClick={(trdarCd, trdarCdNm) => {
+                setSelectedTradeAreaCode(trdarCd);
+                setSelectedTradeAreaName(trdarCdNm);
+                setIsDetailOpen(true);
+                setShowMyMarket(false); // MyMarket 모달 닫기
+              }}
             />
           )}
           {!showMyPage && !showMyMarket && (

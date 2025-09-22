@@ -6,7 +6,6 @@ import SavedMarketCard from '@/components/atoms/Market/Card/SavedMarketCard';
 import CheckBox from '@/components/atoms/Market/Button/CheckBox';
 import AlleyMarketBadge from '@/components/atoms/Market/Badge/AlleyMarketBadge';
 import DevelopmentMarketBadge from '@/components/atoms/Market/Badge/DevelopedMarketBadge';
-import BestClickMarketBadge from '@/components/atoms/Market/Badge/BestClickMarket';
 import BtnBack from '@/components/atoms/Common/Button/BtnBack';
 import { fetchTradeAreaDetail, TradeAreaDetail, fetchTradeAreaScore, TradeAreaScore } from '@/lib/api/tradeAreas';
 import { useFavorites } from '@/contexts/FavoritesContext';
@@ -16,6 +15,7 @@ import Notification from '@/components/map/Notification';
 interface MyMarketProps {
   onBack?: () => void;
   onCompareClick?: (selectedTradeAreas: { trdarCd: string; trdarCdNm: string }[]) => void;
+  onDetailClick?: (trdarCd: string, trdarCdNm: string) => void;
   className?: string;
 }
 
@@ -40,6 +40,7 @@ interface TradeAreaData {
 const MyMarket: React.FC<MyMarketProps> = ({
   onBack,
   onCompareClick,
+  onDetailClick,
   className = ''
 }) => {
   const [selectedCards, setSelectedCards] = useState<Set<string>>(new Set());
@@ -223,23 +224,37 @@ const MyMarket: React.FC<MyMarketProps> = ({
                    <div className="flex justify-between items-start">
                      <div className='text-lg font-bold flex justify-start space-x-2'>
                        <span>{area.trdarCdNm}</span>
-                       <div className='flex space-x-1'>
+                       {/* <div className='flex space-x-1'>
                          <DevelopmentMarketBadge />
-                         <BestClickMarketBadge />
-                       </div>
+                       </div> */}
                      </div>
-                     {/* 삭제 버튼 */}
-                     <button
-                       onClick={(e) => {
-                         e.stopPropagation();
-                         e.preventDefault();
-                         handleRemoveFavorite(area.trdarCd, area.trdarCdNm);
-                       }}
-                       className="text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50"
-                       title="저장 해제"
-                     >
-                       삭제
-                     </button>
+                     {/* 버튼들 */}
+                     <div className="flex gap-2">
+                       <button
+                         onClick={(e) => {
+                           e.stopPropagation();
+                           e.preventDefault();
+                           if (onDetailClick) {
+                             onDetailClick(area.trdarCd, area.trdarCdNm);
+                           }
+                         }}
+                         className="text-blue-500 hover:text-blue-700 text-sm px-2 py-1 rounded bg-blue-50 hover:bg-blue-100"
+                         title="상권 상세보기"
+                       >
+                         상세보기
+                       </button>
+                       <button
+                         onClick={(e) => {
+                           e.stopPropagation();
+                           e.preventDefault();
+                           handleRemoveFavorite(area.trdarCd, area.trdarCdNm);
+                         }}
+                         className="text-red-500 hover:text-pink-700 text-sm px-2 py-1 rounded bg-pink-50 hover:bg-pink-100"
+                         title="저장 해제"
+                       >
+                         저장 해제
+                       </button>
+                     </div>
                    </div>
                    {/* 저장된 상권 카드 내용 */}
                    <div className='flex flex-col gap-2 border-b pb-2'>
