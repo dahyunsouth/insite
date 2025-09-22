@@ -8,9 +8,8 @@ import AlleyMarketBadge from '@/components/atoms/Market/Badge/AlleyMarketBadge';
 import DevelopmentMarketBadge from '@/components/atoms/Market/Badge/DevelopedMarketBadge';
 import BestClickMarketBadge from '@/components/atoms/Market/Badge/BestClickMarket';
 import BtnBack from '@/components/atoms/Common/Button/BtnBack';
-import { fetchTradeAreaDetail, TradeAreaDetail, fetchTradeAreaScore, TradeAreaScore, getTradeAreaNameByCode } from '@/lib/api/tradeAreas';
-import { favoritesService } from '@/services/favorites';
-import { authManager } from '@/utils/auth';
+import { fetchTradeAreaDetail, TradeAreaDetail, fetchTradeAreaScore, TradeAreaScore } from '@/lib/api/tradeAreas';
+import { useFavorites } from '@/contexts/FavoritesContext';
 import { useNotification } from '@/components/map/useNotification';
 import Notification from '@/components/map/Notification';
 
@@ -45,9 +44,11 @@ const MyMarket: React.FC<MyMarketProps> = ({
 }) => {
   const [selectedCards, setSelectedCards] = useState<Set<string>>(new Set());
   const [tradeAreas, setTradeAreas] = useState<TradeAreaData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const { notification, showNotification, hideNotification } = useNotification();
+  
+  // Context에서 즐겨찾기 관련 상태와 함수 가져오기
+  const { favorites, isLoading, error, removeFavorite } = useFavorites();
 
   const handleCardClick = (trdarCd: string) => {
     setSelectedCards(prev => {
@@ -88,10 +89,7 @@ const MyMarket: React.FC<MyMarketProps> = ({
   // 저장 해제 기능
   const handleRemoveFavorite = async (trdarCd: string, trdarCdNm: string) => {
     try {
-      await favoritesService.removeFavorite(parseInt(trdarCd));
-      
-      // 목록에서 제거
-      setTradeAreas(prev => prev.filter(area => area.trdarCd !== trdarCd));
+      await removeFavorite(parseInt(trdarCd));
       
       // 선택된 카드에서도 제거
       setSelectedCards(prev => {
@@ -107,77 +105,19 @@ const MyMarket: React.FC<MyMarketProps> = ({
     }
   };
 
-  // 저장된 상권 목록 조회 및 상세 데이터 가져오기
+  // 즐겨찾기 목록이 변경될 때마다 상세 데이터 로드
   useEffect(() => {
-    const fetchSavedTradeAreas = async () => {
+    const fetchTradeAreaDetails = async () => {
+      if (favorites.length === 0) {
+        setTradeAreas([]);
+        return;
+      }
+
+      setIsLoadingDetails(true);
+
       try {
-        setIsLoading(true);
-        setError(null);
-
-        // 로그인 확인
-        if (!authManager.isLoggedIn()) {
-          setError('로그인이 필요합니다.');
-          setIsLoading(false);
-          return;
-        }
-
-        // 1. 저장된 상권 목록 조회
-        const favoritesResponse = await favoritesService.getFavorites();
-        
-        console.log('저장된 상권 목록 응답:', favoritesResponse);
-        
-        if (!favoritesResponse.isSuccess || !favoritesResponse.result?.favorites) {
-          setTradeAreas([]);
-          setIsLoading(false);
-          return;
-        }
-
-        const savedFavorites = favoritesResponse.result.favorites;
-        
-        if (savedFavorites.length === 0) {
-          setTradeAreas([]);
-          setIsLoading(false);
-          return;
-        }
-
-        console.log('저장된 상권 목록:', savedFavorites);
-
-        // 2. 상권 데이터 처리 (상권코드로 상권명 조회)
-        const tradeAreasWithCodes = savedFavorites.map((fav) => {
-          try {
-            // API 응답 구조 확인을 위한 로깅
-            console.log('상권 데이터:', fav);
-            
-            // 상권코드가 있는지 확인
-            if (!fav.trdarCd) {
-              console.error('상권코드가 없습니다:', fav);
-              return null;
-            }
-
-            // 상권코드로 상권명 조회
-            const trdarCdNm = getTradeAreaNameByCode(fav.trdarCd.toString());
-            
-            if (!trdarCdNm || trdarCdNm === "상권명 없음") {
-              console.error('상권명을 찾을 수 없습니다:', fav.trdarCd);
-              return null;
-            }
-
-            return { 
-              trdarCd: fav.trdarCd.toString(), 
-              trdarCdNm 
-            };
-          } catch (error) {
-            console.error(`상권 데이터 처리 실패:`, error);
-            // 에러 발생 시 해당 상권 건너뛰기
-            return null;
-          }
-        });
-
-        // null 값 제거
-        const validTradeAreas = tradeAreasWithCodes.filter(area => area !== null);
-
-        // 3. 상세 데이터와 점수 데이터 가져오기
-        const promises = validTradeAreas.map(async (area) => {
+        // 상세 데이터와 점수 데이터 가져오기
+        const promises = favorites.map(async (area) => {
           try {
             const [detail, score] = await Promise.all([
               fetchTradeAreaDetail(area.trdarCd),
@@ -206,16 +146,15 @@ const MyMarket: React.FC<MyMarketProps> = ({
         const results = await Promise.all(promises);
         setTradeAreas(results);
       } catch (error) {
-        console.error('저장된 상권 목록 조회 실패:', error);
-        setError('저장된 상권 목록을 불러올 수 없습니다.');
+        console.error('상권 상세 데이터 로딩 실패:', error);
         setTradeAreas([]);
       } finally {
-        setIsLoading(false);
+        setIsLoadingDetails(false);
       }
     };
 
-    fetchSavedTradeAreas();
-  }, []);
+    fetchTradeAreaDetails();
+  }, [favorites]);
 
   return (
     <div className={`bg-white h-screen flex flex-col ${className}`}>
@@ -244,10 +183,14 @@ const MyMarket: React.FC<MyMarketProps> = ({
               다시 시도
             </button>
           </div>
-        ) : tradeAreas.length === 0 ? (
+        ) : favorites.length === 0 ? (
           <div className="flex flex-col justify-center items-center h-32 space-y-2">
             <span className="text-gray-500">저장된 상권이 없습니다.</span>
             <span className="text-sm text-gray-400">상권 상세보기에서 상권을 저장해보세요.</span>
+          </div>
+        ) : isLoadingDetails ? (
+          <div className="flex justify-center items-center h-32">
+            <span className="text-gray-500">상권 상세 정보를 불러오는 중...</span>
           </div>
         ) : (
           <div className="space-y-4">

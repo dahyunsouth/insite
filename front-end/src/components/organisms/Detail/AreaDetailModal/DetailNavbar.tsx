@@ -9,7 +9,7 @@ import StoreCard from "@/components/molecules/Detail/StoreCard";
 import ScoreCard from "@/components/molecules/Detail/ScoreCard";
 import SalesCard from "@/components/molecules/Detail/SalesCard/SalesCard";
 import ActionButtons from "@/components/atoms/Detail/ActionButtons";
-import { favoritesService } from "@/services/favorites";
+import { useFavorites } from "@/contexts/FavoritesContext";
 import { authManager } from "@/utils/auth";
 import { useNotification } from "@/components/map/useNotification";
 import Notification from "@/components/map/Notification";
@@ -31,11 +31,13 @@ type DetailNavbarProps = {
 export default function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea }: DetailNavbarProps) {
   const [selected, setSelected] = useState<{ code: string; name: string } | null>(null);
   const [populationType, setPopulationType] = useState<"유동" | "직장" | "상주">("유동");
-  const [isSaved, setIsSaved] = useState(false);
   const [isComparing, setIsComparing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { notification, showNotification, hideNotification } = useNotification();
+  
+  // Context에서 즐겨찾기 관련 상태와 함수 가져오기
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
 
   useEffect(() => {
     if (!open) return;
@@ -65,31 +67,12 @@ export default function DetailNavbar({ open, onClose, title, subtitle, trdarCode
     return trdarCode ?? selected?.code ?? null;
   };
 
-  // 저장 상태 확인
-  const checkSavedStatus = async (trdarCode: string) => {
-    if (!authManager.isLoggedIn()) {
-      setIsSaved(false);
-      return;
-    }
-
-    try {
-      const isFavorite = await favoritesService.isFavorite(parseInt(trdarCode));
-      setIsSaved(isFavorite);
-    } catch (error) {
-      console.error('저장 상태 확인 실패:', error);
-      setIsSaved(false);
-    }
+  // 현재 상권이 저장되어 있는지 확인
+  const getCurrentIsSaved = (): boolean => {
+    const currentCode = getCurrentTrdarCode();
+    if (!currentCode) return false;
+    return isFavorite(parseInt(currentCode));
   };
-
-  // 모달이 열릴 때 저장 상태 확인
-  useEffect(() => {
-    if (open) {
-      const currentCode = getCurrentTrdarCode();
-      if (currentCode) {
-        checkSavedStatus(currentCode);
-      }
-    }
-  }, [open, trdarCode, selected]);
 
   const handleCompare = () => {
     setIsComparing(!isComparing);
@@ -113,16 +96,17 @@ export default function DetailNavbar({ open, onClose, title, subtitle, trdarCode
     setError(null);
 
     try {
-      if (isSaved) {
+      const currentIsSaved = getCurrentIsSaved();
+      const currentTrdarCdNm = selected?.name || title || '상권';
+      
+      if (currentIsSaved) {
         // 저장 해제
-        await favoritesService.removeFavorite(parseInt(currentCode));
-        setIsSaved(false);
+        await removeFavorite(parseInt(currentCode));
         showNotification('상권이 저장 목록에서 제거되었습니다.');
         console.log('상권 저장 해제 성공:', currentCode);
       } else {
         // 저장
-        await favoritesService.saveFavorite(parseInt(currentCode));
-        setIsSaved(true);
+        await addFavorite(parseInt(currentCode), currentTrdarCdNm);
         showNotification('상권이 저장되었습니다.');
         console.log('상권 저장 성공:', currentCode);
       }
@@ -167,7 +151,7 @@ export default function DetailNavbar({ open, onClose, title, subtitle, trdarCode
               onPopulationTypeChange={setPopulationType}
               onCompare={handleCompare}
               onSave={handleSave}
-              isSaved={isSaved}
+              isSaved={getCurrentIsSaved()}
               isComparing={isComparing}
               isLoading={isLoading}
               error={error}
