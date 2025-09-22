@@ -73,7 +73,11 @@ const RightActionBar: React.FC<RightActionBarProps> = ({
         {/* 상권추천 버튼 */}
         <button 
           onClick={() => {
-            router.push('/marketrecommendation');
+            if (isLoggedIn) {
+              router.push('/marketrecommendation');
+            } else {
+              setIsModalOpen(true);
+            }
           }}
           className="cursor-pointer focus:outline-none"
         >
