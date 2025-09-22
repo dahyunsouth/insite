@@ -11,6 +11,7 @@ import com.ssafy.insite.common.utils.SeoulDistrictConverter;
 import com.ssafy.insite.common.utils.SeoulDongCatalog;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaCodeResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaItemDto;
 import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record1;
+import org.jooq.Record2;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.jooq.types.UInteger;
@@ -166,6 +168,30 @@ public class TradeAreaRegionRepository {
                 .districtNameKor(gu)
                 .dongNameKor(dong)
                 .areas(areas)
+                .build();
+    }
+
+    // 상권명으로 상권코드 조회
+    public TradeAreaCodeResponseDto findCodeByName(String trdarCdNm) {
+        // 요청값의 특수문자('·', '.', ',')를 DB에 저장된 ?와 일치시키기 위해 치환
+        String normalized = trdarCdNm.replaceAll("[·.,]", "?");
+
+        Record2<Integer, String> record = dsl
+                .select(
+                        TRADE_AREA_REGION.TRDAR_CD,
+                        TRADE_AREA_REGION.TRDAR_CD_NM
+                )
+                .from(TRADE_AREA_REGION)
+                .where(TRADE_AREA_REGION.TRDAR_CD_NM.eq(normalized))
+                .fetchOne();
+
+        if (record == null) {
+            throw new BaseException(BaseResponseStatus.INVALID_TRDAR_CD_NM);
+        }
+
+        return TradeAreaCodeResponseDto.builder()
+                .trdarCd(record.value1())
+                .trdarCdNm(record.value2())
                 .build();
     }
 }

@@ -4,6 +4,7 @@ import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaChngeIxInfoResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaCodeResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaFlpopInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaRepopInfoResponseDto;
@@ -61,4 +62,7 @@ public interface DataService {
 
     // 상권변화지표 정보 조회
     TradeAreaChngeIxInfoResponseDto findChngeIxInfoByCode(int trdarCd);
+
+    // 상권명으로 상권코드 조회
+    TradeAreaCodeResponseDto findCodeByName(String trdarCdNm);
 }
