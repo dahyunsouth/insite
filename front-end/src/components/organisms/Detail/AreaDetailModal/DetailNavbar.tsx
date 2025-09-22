@@ -22,6 +22,9 @@ type DetailNavbarProps = {
   subtitle?: string;
   trdarCode?: string | null;
   onSelectTradeArea?: (opt: { code: string; name: string } | null) => void;
+  onAddToComparison?: (trdarCd: string, trdarCdNm: string) => void;
+  onRemoveFromComparison?: (trdarCd: string) => void;
+  isInComparison?: (trdarCd: string) => boolean;
 };
 
 /**
@@ -29,7 +32,7 @@ type DetailNavbarProps = {
  * - Renders portal + backdrop + ESC close
  * - Uses the Detail template for visuals (container/header/section-nav)
  */
-export default function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea }: DetailNavbarProps) {
+export default function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea, onAddToComparison, onRemoveFromComparison, isInComparison }: DetailNavbarProps) {
   const [selected, setSelected] = useState<{ code: string; name: string } | null>(null);
   const [populationType, setPopulationType] = useState<"유동" | "직장" | "상주">("유동");
   const [isComparing, setIsComparing] = useState(false);
@@ -39,6 +42,14 @@ export default function DetailNavbar({ open, onClose, title, subtitle, trdarCode
   
   // Context에서 즐겨찾기 관련 상태와 함수 가져오기
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+
+  // 비교함 상태에 따라 isComparing 동기화
+  useEffect(() => {
+    const currentCode = getCurrentTrdarCode();
+    if (currentCode && isInComparison) {
+      setIsComparing(isInComparison(currentCode));
+    }
+  }, [trdarCode, selected, isInComparison]);
 
   useEffect(() => {
     if (!open) return;
@@ -76,8 +87,29 @@ export default function DetailNavbar({ open, onClose, title, subtitle, trdarCode
   };
 
   const handleCompare = () => {
-    setIsComparing(!isComparing);
-    console.log("비교하기 클릭:", selected, "비교 상태:", !isComparing);
+    const currentCode = getCurrentTrdarCode();
+    const currentTrdarCdNm = selected?.name || title || '상권';
+    
+    if (!currentCode) {
+      console.error('상권 코드가 없습니다.');
+      return;
+    }
+
+    const isCurrentlyInComparison = isInComparison ? isInComparison(currentCode) : false;
+    
+    if (isCurrentlyInComparison) {
+      // 비교함에서 제거
+      onRemoveFromComparison?.(currentCode);
+      setIsComparing(false);
+      showNotification('비교함에서 제거되었습니다.');
+    } else {
+      // 비교함에 추가
+      onAddToComparison?.(currentCode, currentTrdarCdNm);
+      setIsComparing(true);
+      showNotification('비교함에 추가되었습니다.');
+    }
+    
+    console.log("비교하기 클릭:", currentCode, "비교 상태:", !isCurrentlyInComparison);
   };
 
   const handleSave = async () => {

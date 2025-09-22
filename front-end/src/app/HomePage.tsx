@@ -74,6 +74,30 @@ export default function HomePage() {
   const [isSavedCompareOpen, setIsSavedCompareOpen] = useState(false);
   const [selectedTradeArea1, setSelectedTradeArea1] = useState<{ trdarCd: string; trdarCdNm: string } | null>(null);
   const [selectedTradeArea2, setSelectedTradeArea2] = useState<{ trdarCd: string; trdarCdNm: string } | null>(null);
+  
+  // 비교함에 담긴 상권들 관리
+  const [comparisonTray, setComparisonTray] = useState<{ trdarCd: string; trdarCdNm: string }[]>([]);
+
+  // 비교함에 상권 추가
+  const addToComparisonTray = (trdarCd: string, trdarCdNm: string) => {
+    setComparisonTray(prev => {
+      // 이미 있는 상권인지 확인
+      const exists = prev.some(item => item.trdarCd === trdarCd);
+      if (exists) {
+        return prev; // 이미 있으면 추가하지 않음
+      }
+      // 최대 2개까지만 추가 가능
+      if (prev.length >= 2) {
+        return prev;
+      }
+      return [...prev, { trdarCd, trdarCdNm }];
+    });
+  };
+
+  // 비교함에서 상권 제거
+  const removeFromComparisonTray = (trdarCd: string) => {
+    setComparisonTray(prev => prev.filter(item => item.trdarCd !== trdarCd));
+  };
 
   // 디버깅용 useEffect
   useEffect(() => {
@@ -420,10 +444,11 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 비교함 담기 모달 - 항상 표시 */}
-      {/* 비교함 담기 모달 - 상권비교 모달이 닫혀있을 때만 표시 */}
-      {!isCompareOpen && (
+      {/* 비교함 담기 모달 - 비교함에 상권이 1개 이상일 때만 표시 */}
+      {!isCompareOpen && comparisonTray.length > 0 && (
         <ComparisonTray 
+          comparisonItems={comparisonTray}
+          onRemoveItem={removeFromComparisonTray}
           onCompareClick={(area1, area2) => {
             setSelectedTradeArea1(area1);
             setSelectedTradeArea2(area2);
@@ -439,6 +464,9 @@ export default function HomePage() {
         onClose={() => setIsDetailOpen(false)}
         title={selectedTradeAreaName ? selectedTradeAreaName : "상권 현황"}
         trdarCode={selectedTradeAreaCode}
+        onAddToComparison={addToComparisonTray}
+        onRemoveFromComparison={removeFromComparisonTray}
+        isInComparison={(trdarCd) => comparisonTray.some(item => item.trdarCd === trdarCd)}
       />
 
       {/* Compare modal: right-side overlay (covers right 75%) */}
