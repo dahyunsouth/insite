@@ -53,10 +53,24 @@ export default function AdstrdMarketList({ district, dong, onClose }: AdstrdMark
       setError('');
 
       try {
-        const url = `${API_ENDPOINTS.TRADE_AREAS}?district=${encodeURIComponent(district)}&dong=${encodeURIComponent(dong)}`;
-        console.log(`🌐 상권 리스트 API 호출: ${url}`);
+        // 파라미터 검증 강화
+        if (!district.trim() || !dong.trim()) {
+          console.error('❌ district 또는 dong이 비어있음:', { district, dong });
+          setError('지역 정보가 올바르지 않습니다.');
+          return;
+        }
 
-        const response = await fetch(url);
+        const url = `${API_ENDPOINTS.TRADE_AREAS}?district=${encodeURIComponent(district.trim())}&dong=${encodeURIComponent(dong.trim())}`;
+        console.log(`🌐 상권 리스트 API 호출: ${url}`);
+        console.log(`📋 요청 파라미터 - district: "${district}", dong: "${dong}"`);
+
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        });
         console.log(`📡 상권 리스트 응답: ${response.status} ${response.statusText}`);
 
         if (response.ok) {
@@ -73,7 +87,15 @@ export default function AdstrdMarketList({ district, dong, onClose }: AdstrdMark
           // 응답 상태코드와 상태 텍스트 로그
           console.error(`❌ 상권 리스트 API 실패 - 상태: ${response.status} ${response.statusText}`);
           console.error(`❌ 요청 URL: ${url}`);
-          console.error(`❌ 요청 파라미터: district=${district}, dong=${dong}`);
+          console.error(`❌ 요청 파라미터: district="${district}", dong="${dong}"`);
+          
+          // 400 오류의 경우 더 자세한 정보 제공
+          if (response.status === 400) {
+            console.error('❌ 400 Bad Request - 요청 파라미터를 확인해주세요');
+            setError(`잘못된 요청입니다. 지역 정보를 확인해주세요. (${district}, ${dong})`);
+          } else {
+            setError(`서버 오류가 발생했습니다. (${response.status})`);
+          }
           
           // 응답 본문 읽기 시도
           try {
