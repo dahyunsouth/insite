@@ -7,7 +7,7 @@ import StoreRentalFee from '@/components/atoms/MarketRecommendation/StoreRentalF
 import MarketRecommendationLoding from './MarketRecommendationLoding';
 import MarketRecommendationResult from './MarketRecommendationResult';
 import { API_ENDPOINTS } from '@/config/api';
-import { BaseApiResponse, RecommendationResponse } from '@/types/recommendation';
+import { BaseApiResponse, RecommendationResponse, RecommendationItem } from '@/types/recommendation';
 
 interface MarketTypeStoreProps {
   selectedDistrictName: string | null;
@@ -18,6 +18,9 @@ interface MarketTypeStoreProps {
     maxFee: number;
     hasInteracted: boolean;
   }) => void;
+  onRecommendationResultsChange?: (results: RecommendationItem[]) => void;
+  selectedItem?: RecommendationItem | null;
+  onItemSelect?: (item: RecommendationItem | null) => void;
   onBack?: () => void;
   initialSelections?: {
     marketType: string | null;
@@ -42,6 +45,9 @@ const toApiTradeAreaType = (value: string | null) => {
 const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({
   selectedDistrictName,
   onSelectionsChange,
+  onRecommendationResultsChange,
+  selectedItem,
+  onItemSelect,
   onBack,
   initialSelections,
 }) => {
@@ -123,6 +129,8 @@ const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({
       }
 
       setRecommendation(data.result);
+      // 부모 컴포넌트에 추천 결과 전달
+      onRecommendationResultsChange?.(data.result.items);
     } catch (error) {
       console.error('Failed to fetch recommendation result:', error);
       setErrorMessage('추천 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
@@ -133,6 +141,8 @@ const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({
 
   const handleBackFromResult = () => {
     setRecommendation(null);
+    // 추천 결과 초기화
+    onRecommendationResultsChange?.([]);
   };
 
   if (isLoading) {
@@ -143,6 +153,8 @@ const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({
     return (
       <MarketRecommendationResult
         result={recommendation}
+        selectedItem={selectedItem}
+        onItemSelect={onItemSelect}
         onBack={handleBackFromResult}
       />
     );
@@ -151,12 +163,6 @@ const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({
   return (
     <div className='w-full h-full flex flex-col justify-between'>
       <div className='flex flex-col space-y-6'>
-        <div className='bg-gray-50 border border-gray-200 rounded-2xl p-4'>
-          <p className='text-sm text-gray-600'>선택한 자치구</p>
-          <p className='text-lg font-semibold text-gray-900'>
-            {selectedDistrictName ?? '아직 선택하지 않았어요'}
-          </p>
-        </div>
         <MarketType
           onMarketTypeChange={handleMarketTypeChange}
           initialValue={marketType}

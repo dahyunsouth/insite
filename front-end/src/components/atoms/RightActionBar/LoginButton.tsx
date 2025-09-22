@@ -19,7 +19,10 @@ const LoginButton: React.FC<LoginButtonProps> = ({
   // 로그아웃 API 호출 함수
   const handleLogout = async () => {
     try {
+      // eslint-disable-next-line no-console
       console.log('로그아웃 시도 중...');
+      // eslint-disable-next-line no-console
+      console.log('로그아웃 요청 URL:', API_ENDPOINTS.LOGOUT);
       
       // localStorage에서 accessToken 가져오기
       const authToken = localStorage.getItem('authToken');
@@ -33,10 +36,14 @@ const LoginButton: React.FC<LoginButtonProps> = ({
         // 토큰이 이미 "Bearer "로 시작하는지 확인
         const token = authToken.startsWith('Bearer ') ? authToken : `Bearer ${authToken}`;
         headers['Authorization'] = token;
+        // eslint-disable-next-line no-console
         console.log('Authorization 헤더 추가됨:', token);
+        // eslint-disable-next-line no-console
         console.log('원본 authToken:', authToken);
       } else {
+        // eslint-disable-next-line no-console
         console.log('authToken이 없습니다');
+        // eslint-disable-next-line no-console
         console.log('localStorage 내용:', localStorage.getItem('authToken'));
       }
       
@@ -46,21 +53,30 @@ const LoginButton: React.FC<LoginButtonProps> = ({
         credentials: 'include', // 쿠키 포함
       });
 
+      // eslint-disable-next-line no-console
+      console.log('로그아웃 응답 상태:', response.status);
+      // eslint-disable-next-line no-console
+      console.log('로그아웃 응답 헤더:', Object.fromEntries(response.headers.entries()));
+
       const responseData = await response.json();
+      // eslint-disable-next-line no-console
       console.log('로그아웃 응답:', responseData);
 
       if (response.ok && responseData.isSuccess) {
         // 로그아웃 성공
         localStorage.removeItem('authToken'); // 로컬 스토리지에서 토큰 제거
+        // eslint-disable-next-line no-console
         console.log('로그아웃 성공');
         onLogoutSuccess?.(); // 상위 컴포넌트에 로그아웃 성공 알림
       } else {
         // 로그아웃 실패 (토큰 만료 등) - 프론트엔드에서 로그아웃 처리
+        // eslint-disable-next-line no-console
         console.warn('서버 로그아웃 실패, 클라이언트에서 로그아웃 처리:', responseData.message);
         localStorage.removeItem('authToken'); // 로컬 스토리지에서 토큰 제거
         onLogoutSuccess?.(); // 상위 컴포넌트에 로그아웃 성공 알림
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('로그아웃 중 오류 발생:', error);
       alert('로그아웃 중 오류가 발생했습니다.');
     }

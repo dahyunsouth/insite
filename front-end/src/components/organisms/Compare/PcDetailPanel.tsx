@@ -40,7 +40,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
   const deltaColor = delta == null ? "text-gray-500" : delta > 0 ? "text-[#2563EB]" : delta < 0 ? "text-[#F472B6]" : "text-gray-600";
 
   return (
-    <section className={("rounded-2xl border border-gray-200 bg-white p-5 h-full flex flex-col justify-between " + (className ?? "")).trim()} aria-labelledby="pc-detail-title" id="pc-detail">
+    <section className={("rounded-2xl border border-gray-200 bg-white p-5 h-full flex flex-col justify-between overflow-visible " + (className ?? "")).trim()} aria-labelledby="pc-detail-title" id="pc-detail">
       <header className="flex items-start justify-between gap-3">
         <div>
           <h3 id="pc-detail-title" className="text-lg font-semibold text-gray-900">{pc.code}</h3>
@@ -57,7 +57,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
 
       {/* Interpretation */}
       <div className="mt-4">
-        <div className="overflow-hidden rounded-xl border border-gray-200">
+        <div className="rounded-xl border border-gray-200">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
@@ -73,9 +73,6 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                     <td className="px-3 py-2 text-sm text-gray-900">
                       <div className="flex items-center gap-2">
                         <span>평균 운영 개월</span>
-                        <button className="cursor-pointer w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400 transition-colors">
-                          <span className="text-white text-xs font-medium">i</span>
-                        </button>
                       </div>
                     </td>
                     <td className="px-3 py-2 text-center text-sm text-gray-600">12개월 미만</td>
@@ -83,11 +80,24 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                   </tr>
                   <tr>
                     <td className="px-3 py-2 text-sm text-gray-900">
-                      <div className="flex items-center gap-2">
-                        <span>폐업 개월 평균</span>
-                        <button className="cursor-pointer w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400 transition-colors">
-                          <span className="text-white text-xs font-medium">i</span>
-                        </button>
+                      <div className="flex items-center gap-2 relative">
+                        <span>평균 폐업 개월</span>
+                        <div className="relative">
+                          <button 
+                            className="cursor-pointer w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400 transition-colors"
+                            onMouseEnter={() => setShowClosureMonthTooltip(true)}
+                            onMouseLeave={() => setShowClosureMonthTooltip(false)}
+                          >
+                            <span className="text-white text-xs font-medium">i</span>
+                          </button>
+                          {showClosureMonthTooltip && (
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                              · 폐업 전 평균 운영 개월 수<br/>
+                              · 해당 상권의 생존력 부족 위험도를 나타냅니다.
+                              <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </td>
                     <td className="px-3 py-2 text-center text-sm text-gray-600">6개월 미만</td>
@@ -106,8 +116,8 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showGaeeopryulTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-50 break-words min-w-max max-w-xs">
-                              최근 분기의 전체 점포 수 대비 개업한 점포 수
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                              최신 분기 기준, 해당 상권 내 전체 점포 수 대비 개업한 점포 수
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
                           )}
@@ -134,8 +144,11 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showMarketPotentialTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-50 break-words min-w-max max-w-xs">
-                              카페와 유사한 업종의 점포 수를 통해 책정한 식음료 시장 규모와 점포 수 대비 유사 업종 점포 수 비율로 책정한 커피 전문점 포화도로 시장 잠재력을 책정하였습니다.
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                              해당 상권 내<br/>
+                              카페와 유사한 업종의 점포 수를 통해 도출한 '식음료 시장 규모'와<br/>
+                              유사 업종 점포 수 대비 커피-음료 업종 점포 수 비율로 도출한 '커피 전문점 포화도'로<br/>
+                              시장 잠재력을 산정하였습니다.
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
                           )}
@@ -148,7 +161,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                   <tr>
                     <td className="px-3 py-2 text-sm text-gray-900">
                       <div className="flex items-center gap-2 relative">
-                        <span>수요 공급 균형</span>
+                        <span>수요-공급 균형</span>
                         <div className="relative">
                           <button 
                             className="cursor-pointer w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400 transition-colors"
@@ -158,8 +171,8 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showSupplyDemandTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-50 break-words min-w-max max-w-xs">
-                              유동인구 대비 점포 수
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                              해당 상권의 유동인구 대비 점포 수
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
                           )}
@@ -173,21 +186,6 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                     <td className="px-3 py-2 text-sm text-gray-900">
                       <div className="flex items-center gap-2 relative">
                         <span>소득 수준</span>
-                        <div className="relative">
-                          <button 
-                            className="cursor-pointer w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400 transition-colors"
-                            onMouseEnter={() => setShowIncomeLevelTooltip(true)}
-                            onMouseLeave={() => setShowIncomeLevelTooltip(false)}
-                          >
-                            <span className="text-white text-xs font-medium">i</span>
-                          </button>
-                          {showIncomeLevelTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-50 break-words min-w-max max-w-xs">
-                              월평균 소득금액
-                              <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
-                            </div>
-                          )}
-                        </div>
                       </div>
                     </td>
                     <td className="px-3 py-2 text-center text-sm text-gray-600">200만원 미만</td>
@@ -206,8 +204,10 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showAttractionFacilityTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-50 break-words min-w-max max-w-xs">
-                              고객 유입
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                              집객시설은 사람이나 유동인구를 끌어모으는 역할을 하는 시설을 의미합니다.<br/>
+                              주로 영화관, 대형마트, 병원, 학교, 관공서, 백화점 등<br/>
+                              다양한 상업·공공시설이 이에 해당합니다.
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
                           )}
@@ -220,10 +220,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                   <tr>
                     <td className="px-3 py-2 text-sm text-gray-900">
                       <div className="flex items-center gap-2">
-                        <span>예측 매출</span>
-                        <button className="cursor-pointer w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400 transition-colors">
-                          <span className="text-white text-xs font-medium">i</span>
-                        </button>
+                        <span>예상 매출액</span>
                       </div>
                     </td>
                     <td className="px-3 py-2 text-center text-sm text-gray-600">1천만원 미만</td>
@@ -246,8 +243,8 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showSubwayDistanceTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-50 break-words min-w-max max-w-xs">
-                              상위 3개 역의 가중평균
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                              해당 상권과 인접한 상위 3개 역까지의 거리(가중평균)
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
                           )}
@@ -260,7 +257,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                   <tr>
                     <td className="px-3 py-2 text-sm text-gray-900">
                       <div className="flex items-center gap-2 relative">
-                        <span>버스정류장 거리</span>
+                        <span>버스 정류장 거리</span>
                         <div className="relative">
                           <button 
                             className="cursor-pointer w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400 transition-colors"
@@ -270,8 +267,8 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showBusStopDistanceTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-50 break-words min-w-max max-w-xs">
-                              상위 3개 정류장의 가중평균
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                              해당 상권과 인접한 상위 3개 정류장까지의 거리(가중평균)
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
                           )}
@@ -288,7 +285,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                   <tr>
                     <td className="px-3 py-2 text-sm text-gray-900">
                       <div className="flex items-center gap-2 relative">
-                        <span>유동인구/점포수</span>
+                        <span>점포 수 대비 유동인구</span>
                         <div className="relative">
                           <button 
                             className="cursor-pointer w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400 transition-colors"
@@ -298,21 +295,21 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showPopulationStoreTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-50 break-words min-w-max max-w-xs">
-                              수요 부족 위험
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                              해당 상권의 수요부족 위험을 나타냅니다.
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
                           )}
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 py-2 text-center text-sm text-gray-600">2만명/점포 미만</td>
-                    <td className="px-3 py-2 text-center text-sm text-gray-600">10만명/점포 이상</td>
+                    <td className="px-3 py-2 text-center text-sm text-gray-600">2만명 미만</td>
+                    <td className="px-3 py-2 text-center text-sm text-gray-600">10만명 이상</td>
                   </tr>
                   <tr>
                     <td className="px-3 py-2 text-sm text-gray-900">
                       <div className="flex items-center gap-2 relative">
-                        <span>폐업 개월</span>
+                        <span>평균 폐업 개월</span>
                         <div className="relative">
                           <button 
                             className="cursor-pointer w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400 transition-colors"
@@ -322,8 +319,9 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showClosureMonthTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-50 break-words min-w-max max-w-xs">
-                              생존력 부족 위험
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                              · 폐업 전 평균 운영 개월 수<br/>
+                              · 해당 상권의 생존력 부족 위험도를 나타냅니다.
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
                           )}
@@ -346,8 +344,9 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showClosureRateTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-50 break-words min-w-max max-w-xs">
-                              시장 불안정 위험
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                              · 해당 상권 내 전체 점포 수 대비 폐업 점포 수<br/>
+                              · 해당 상권의 시장 불안정 위험을 나타냅니다.
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
                           )}
@@ -374,8 +373,8 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showStoreCountTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-50 break-words min-w-max max-w-xs">
-                              단순 점포 개수 기준
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                              해당 상권 내 '커피-음료' 업종을 영위하는 점포의 수
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
                           )}
@@ -388,7 +387,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                   <tr>
                     <td className="px-3 py-2 text-sm text-gray-900">
                       <div className="flex items-center gap-2 relative">
-                        <span>운영 개월</span>
+                        <span>수요 밀도</span>
                         <div className="relative">
                           <button 
                             className="cursor-pointer w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400 transition-colors"
@@ -398,8 +397,8 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showDemandDensityTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-50 break-words min-w-max max-w-xs">
-                              유동인구 대비 점포 밀도
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                              해당 상권 내 유동인구 대비 '커피-음료' 업종을 영위하는 점포의 수
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
                           )}
@@ -422,8 +421,8 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showStoreDensityTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-50 break-words min-w-max max-w-xs">
-                              100m²당 점포 밀도 기준
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                              해당 상권 내 100m²당 '커피-음료' 업종을 영위하는 점포의 수
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
                           )}

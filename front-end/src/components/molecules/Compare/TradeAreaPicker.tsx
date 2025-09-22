@@ -492,7 +492,7 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="text-lg font-semibold text-gray-900">
-              {selectedTradeAreaDisplay ? selectedTradeAreaDisplay : title}
+              {selectedTradeAreaDisplay ? `📍${selectedTradeAreaDisplay}` : title}
             </div>
             <div className="mt-1 text-sm text-gray-600">{summary}</div>
           </div>

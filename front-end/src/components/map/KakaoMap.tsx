@@ -9,6 +9,7 @@ import ZoomBlock from './ZoomBlock';
 import SignGuPoligon from './SignGuPoligon';
 import AdstrdPoligon from './AdstrdPoligon';
 import TradeAreaPoligon from './TradeAreaPoligon';
+import DetailModal from '../organisms/Detail/DetailModal';
 
 // KakaoMap Context 생성
 interface KakaoMapContextType {
@@ -76,7 +77,7 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
         if (!mapContainer.current) return;
 
         const options = {
-          center: new (window as any).kakao.maps.LatLng(37.501309, 127.039599),
+          center: new (window as any).kakao.maps.LatLng(37.5008, 127.0387),
           level: 3
         };
 
@@ -100,6 +101,35 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
       }
     };
   }, []);
+
+  // focusTradeArea 이벤트 리스너 등록 (지도가 준비된 후)
+  useEffect(() => {
+    if (!map) return;
+
+    const handleFocusTradeArea = (event: CustomEvent) => {
+      const { code, name, coordinates } = event.detail;
+      console.log('focusTradeArea 이벤트 수신:', { code, name, coordinates });
+      
+      if (map && coordinates) {
+        // 지도 중심을 해당 상권 좌표로 이동
+        const moveLatLon = new (window as any).kakao.maps.LatLng(coordinates.lat, coordinates.lng);
+        map.setCenter(moveLatLon);
+        
+        // 지도 레벨을 적절하게 설정 (상권 상세 보기)
+        map.setLevel(3);
+        
+        console.log('지도 중심 이동 완료:', coordinates);
+      }
+    };
+
+    // 이벤트 리스너 등록
+    window.addEventListener('focusTradeArea', handleFocusTradeArea as EventListener);
+
+    return () => {
+      // 이벤트 리스너 제거
+      window.removeEventListener('focusTradeArea', handleFocusTradeArea as EventListener);
+    };
+  }, [map]);
 
   return (
     <KakaoMapContext.Provider value={{ map, setMapType, zoomIn, zoomOut, getZoomLevel, showNotification }}>
@@ -139,17 +169,41 @@ export default function FullScreenKakaoMap({
   children?: ReactNode; 
   cafeActive?: boolean; 
   showMarketingArea?: boolean;
-  onTradeAreaSelect?: (tradeAreaName: string | null) => void;
+  onTradeAreaSelect?: (tradeAreaName: string | null, tradeAreaCode: string | null) => void;
   onShowMarketList?: (district: string, dong: string) => void;
 }) {
   const { notification, showNotification, hideNotification } = useNotification();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTradeArea, setSelectedTradeArea] = useState<{
+    name: string | null;
+    code: string | null;
+  }>({ name: null, code: null });
 
   console.log('FullScreenKakaoMap 렌더링:', { cafeActive });
+
+  // 상권 선택 핸들러
+  const handleTradeAreaSelect = (tradeAreaName: string | null, tradeAreaCode: string | null) => {
+    setSelectedTradeArea({ name: tradeAreaName, code: tradeAreaCode });
+    onTradeAreaSelect?.(tradeAreaName, tradeAreaCode);
+  };
+
+  // 안내바 클릭 핸들러
+  const handleNotificationClick = () => {
+    if (selectedTradeArea.name) {
+      setIsModalOpen(true);
+      hideNotification();
+    }
+  };
+
+  // 모달 닫기 핸들러
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
 
   return (
     <KakaoMapProvider showNotification={showNotification} cafeActive={cafeActive}>
       {/* 상권별 폴리곤 표시 컴포넌트 (레벨 1~5) */}
-      <TradeAreaPoligon onTradeAreaSelect={onTradeAreaSelect} onShowMarketList={onShowMarketList} />
+      <TradeAreaPoligon onTradeAreaSelect={handleTradeAreaSelect} onShowMarketList={onShowMarketList} />
       
       {/* 로드뷰 컴포넌트 */}
       <LoadView 
@@ -177,6 +231,16 @@ export default function FullScreenKakaoMap({
         message={notification.message}
         isVisible={notification.isVisible}
         onClose={hideNotification}
+        onClick={handleNotificationClick}
+      />
+
+      {/* 상권 상세 모달 */}
+      <DetailModal
+        open={isModalOpen}
+        onClose={handleModalClose}
+        title={selectedTradeArea.name ? `${selectedTradeArea.name} 상권 분석` : undefined}
+        subtitle="상권 상세 정보를 확인하세요"
+        trdarCode={selectedTradeArea.code}
       />
     </KakaoMapProvider>
   );

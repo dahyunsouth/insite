@@ -6,19 +6,43 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 type SearchBarProps = {
   onSearch?: (query: string) => void;
   onSearchResultsShow?: (show: boolean, keyword: string) => void;
+  resetTrigger?: number;
 };
 
-const SearchBar = ({ onSearch, onSearchResultsShow }: SearchBarProps) => {
+const SearchBar = ({ onSearch, onSearchResultsShow, resetTrigger }: SearchBarProps) => {
   const [query, setQuery] = useState("");
   const [enterActive, setEnterActive] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // resetTrigger가 변경되면 검색창 초기화
+  useEffect(() => {
+    if (resetTrigger !== undefined) {
+      setQuery("");
+      if (onSearchResultsShow) {
+        onSearchResultsShow(false, '');
+      }
+      inputRef.current?.blur();
+    }
+  }, [resetTrigger, onSearchResultsShow]);
 
   useEffect(() => {
     const handlePointerDown = (e: PointerEvent) => {
       if (!containerRef.current) return;
       const target = e.target as Node | null;
       if (target && !containerRef.current.contains(target)) {
+        // 검색 결과 영역도 체크하여 검색 결과 클릭 시에는 닫히지 않도록 함
+        const searchResultElement = document.querySelector('[data-search-results]');
+        if (searchResultElement && searchResultElement.contains(target)) {
+          return; // 검색 결과 영역 클릭 시에는 아무것도 하지 않음
+        }
+        
+        // 지도 영역 클릭 시에도 검색 결과가 닫히지 않도록 함
+        const mapElement = document.querySelector('#map');
+        if (mapElement && mapElement.contains(target)) {
+          return; // 지도 영역 클릭 시에는 아무것도 하지 않음
+        }
+        
         // 바깥 클릭 시 포커스 해제 및 입력 값 초기화 → placeholder 노출
         setQuery("");
         if (onSearchResultsShow) {
@@ -53,17 +77,8 @@ const SearchBar = ({ onSearch, onSearchResultsShow }: SearchBarProps) => {
     const value = e.target.value;
     setQuery(value);
     
-    // 입력값이 있으면 검색 결과 표시, 없으면 숨김
-    if (value.trim()) {
-      if (onSearchResultsShow) {
-        onSearchResultsShow(true, value.trim());
-      }
-    } else {
-      if (onSearchResultsShow) {
-        onSearchResultsShow(false, '');
-      }
-    }
-  }, [onSearchResultsShow]);
+    // 실시간 검색 결과 표시 제거 - 엔터키를 눌렀을 때만 검색 결과 표시
+  }, []);
 
   return (
     <div ref={containerRef} className="relative flex items-center w-full sm:w-64 md:w-72 lg:w-80 xl:w-96 2xl:w-[28rem] max-w-full">
@@ -79,11 +94,7 @@ const SearchBar = ({ onSearch, onSearchResultsShow }: SearchBarProps) => {
           }
         }}
         onFocus={() => {
-          if (query.trim()) {
-            if (onSearchResultsShow) {
-              onSearchResultsShow(true, query.trim());
-            }
-          }
+          // 포커스 시에도 실시간 검색 결과 표시하지 않음
         }}
         placeholder="지하철명, 자치구명으로 검색"
         aria-label="Search business area"
