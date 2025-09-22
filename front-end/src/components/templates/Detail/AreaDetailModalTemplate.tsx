@@ -14,6 +14,7 @@ type DetailNavbarTemplateProps = {
   sectionAside?: React.ReactNode;
   sectionNav?: React.ReactNode;
   children?: React.ReactNode;
+  showCloseButton?: boolean;
 };
 
 export default function DetailNavbarTemplate({
@@ -27,6 +28,7 @@ export default function DetailNavbarTemplate({
   sectionAside,
   sectionNav,
   children,
+  showCloseButton = true,
 }: DetailNavbarTemplateProps) {
   const asideNode = sectionAside ?? sectionNav;
 
@@ -44,14 +46,16 @@ export default function DetailNavbarTemplate({
         style={{ backgroundColor: "#FFFFFF" }}
       >
         {/* Close button (kept within sticky header) */}
-        <button
-          type="button"
-          aria-label="닫기"
-          onClick={onClose}
-          className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 hover:bg-white shadow-sm cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md"
-        >
-          <XMarkIcon className="h-5 w-5 text-gray-700" />
-        </button>
+        {showCloseButton && onClose && (
+          <button
+            type="button"
+            aria-label="닫기"
+            onClick={onClose}
+            className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 hover:bg-white shadow-sm cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md"
+          >
+            <XMarkIcon className="h-5 w-5 text-gray-700" />
+          </button>
+        )}
         <div className={"px-6 py-4 pr-16 " + (headerAlign === "center" ? "text-center" : "text-left") }>
           {title && <h2 className="text-[20px] font-semibold text-[#3288FF]">{title}</h2>}
           {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
@@ -68,45 +72,8 @@ export default function DetailNavbarTemplate({
       <main className="px-4 py-4">
         <div className="md:grid md:grid-cols-[1fr_240px] md:gap-6">
           {/* Left column: stack of section cards */}
-          <div>
-            {(() => {
-              let kids = React.Children.toArray(children ?? []);
-              // If a single top-level Fragment wraps multiple nodes, unwrap it
-              if (
-                kids.length === 1 &&
-                React.isValidElement(kids[0]) &&
-                // @ts-ignore: comparing to Fragment type
-                (kids[0] as any).type === React.Fragment
-              ) {
-                // @ts-ignore: access fragment children
-                kids = React.Children.toArray((kids[0] as any).props?.children ?? []);
-              }
-              if (kids.length === 0) {
-                return (
-                  <div className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
-                    <div className="p-[30px]">
-                      <DefaultPopulationCardSkeleton sectionTitle={sectionTitle} />
-                    </div>
-                  </div>
-                );
-              }
-              if (kids.length === 1) {
-                return (
-                  <div className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
-                    <div className="p-[30px]">{kids[0]}</div>
-                  </div>
-                );
-              }
-              return (
-                <div className="flex flex-col gap-4">
-                  {kids.map((node, idx) => (
-                    <div key={idx} className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
-                      <div className="p-[30px]">{node}</div>
-                    </div>
-                  ))}
-                </div>
-              );
-            })()}
+          <div className="flex flex-col gap-4">
+            {children}
           </div>
 
           {/* Right column: aside menu (sticky, non-scrolling) */}

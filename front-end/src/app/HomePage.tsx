@@ -5,7 +5,7 @@ import KakaoMap, { useKakaoMapContext } from '@/components/map/KakaoMap';
 import LoadView from '@/components/map/LoadView';
 import RightActionBar from '@/components/organisms/RightActionBar/RightActionBar';
 import CtaPillButton from '@/components/molecules/Detail/CtaPillButton/CtaPillButton';
-import DetailNavbar from '@/components/organisms/Detail/AreaDetailModal/DetailNavbar';
+import DetailModal from '@/components/organisms/Detail/DetailModal';
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
 import MainNavbar from '@/components/templates/LeftNavbar/MainNavbar';
 import MyPageMenu from '@/components/templates/MyPage/MyPage';
@@ -428,7 +428,7 @@ export default function HomePage() {
       )}
 
       {/* Area detail modal */}
-      <DetailNavbar
+      <DetailModal
         open={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
         title={selectedTradeAreaName ? selectedTradeAreaName : "상권 현황"}

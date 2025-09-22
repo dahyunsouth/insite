@@ -12,6 +12,7 @@ type ActionButtonsProps = {
   isSaved?: boolean;
   isComparing?: boolean;
   className?: string;
+  direction?: 'horizontal' | 'vertical';
 };
 
 export default function ActionButtons({ 
@@ -19,42 +20,53 @@ export default function ActionButtons({
   onSave, 
   isSaved = false, 
   isComparing = false,
-  className = "" 
+  className = "",
+  direction = 'vertical'
 }: ActionButtonsProps) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'save' | 'compare' | null>(null);
 
   const handleLoginSuccess = () => {
     setIsLoginModalOpen(false);
     // 로그인 성공 후 원래 액션 실행
-    if (onSave) onSave();
+    if (pendingAction === 'save' && onSave) {
+      onSave();
+    } else if (pendingAction === 'compare' && onCompare) {
+      onCompare();
+    }
+    setPendingAction(null);
   };
 
   const handleSaveClick = () => {
+    console.log('저장 버튼 클릭됨');
     if (authManager.isLoggedIn()) {
       if (onSave) onSave();
     } else {
+      setPendingAction('save');
       setIsLoginModalOpen(true);
     }
   };
 
   const handleCompareClick = () => {
+    console.log('비교 버튼 클릭됨');
     if (authManager.isLoggedIn()) {
       if (onCompare) onCompare();
     } else {
+      setPendingAction('compare');
       setIsLoginModalOpen(true);
     }
   };
 
   return (
     <>
-      <div className={`flex flex-col gap-2 ${className}`}>
+      <div className={`flex ${direction === 'horizontal' ? 'flex-row' : 'flex-col'} gap-2 ${className}`}>
         <button
         type="button"
         onClick={handleSaveClick}
-        className={`flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl border transition-colors duration-200 font-medium text-sm cursor-pointer ${
+        className={`flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl border transition-colors duration-200 font-medium text-sm cursor-pointer active:scale-95 active:shadow-sm ${
           isSaved 
-            ? "border-red-300 bg-red-50 text-red-600 hover:bg-red-100" 
-            : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+            ? "border-red-300 bg-red-50 text-red-600 hover:bg-red-100 active:bg-red-200" 
+            : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100"
         }`}
       >
         <HeartIcon className={`h-4 w-4 ${isSaved ? "fill-current text-red-500" : ""}`} />
@@ -63,10 +75,10 @@ export default function ActionButtons({
        <button
          type="button"
          onClick={handleCompareClick}
-         className={`flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl border transition-colors duration-200 font-medium text-sm cursor-pointer ${
+         className={`flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl border transition-colors duration-200 font-medium text-sm cursor-pointer active:scale-95 active:shadow-sm ${
            isComparing 
-             ? "border-blue-300 bg-blue-50 text-blue-600 hover:bg-blue-100" 
-             : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+             ? "border-blue-300 bg-blue-50 text-blue-600 hover:bg-blue-100 active:bg-blue-200" 
+             : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100"
          }`}
        >
          <ScaleIcon className={`h-4 w-4 ${isComparing ? "fill-current text-blue-500" : ""}`} />
@@ -82,14 +94,20 @@ export default function ActionButtons({
         {/* 배경 오버레이 */}
         <div 
           className="absolute inset-0 bg-black/20 backdrop-blur-[1px]"
-          onClick={() => setIsLoginModalOpen(false)}
+          onClick={() => {
+            setIsLoginModalOpen(false);
+            setPendingAction(null);
+          }}
         />
         
         {/* 모달 컨텐츠 */}
         <div className="relative z-10">
           <AuthModalWrapper 
             className="relative"
-            onClose={() => setIsLoginModalOpen(false)}
+            onClose={() => {
+              setIsLoginModalOpen(false);
+              setPendingAction(null);
+            }}
             onLoginSuccess={handleLoginSuccess}
           />
         </div>
