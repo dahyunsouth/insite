@@ -35,10 +35,7 @@ export default function ComparisonTray({ className, comparisonItems, onRemoveIte
                 </button>
               </>
             ) : (
-              <div className="bg-gray-200 rounded-xl p-2 min-w-[80px] max-w-[100px] shadow-md border-2 border-dashed border-gray-300">
-                <div className="text-xs font-medium text-gray-400 text-center">
-                  추가
-                </div>
+              <div className="bg-transparent rounded-xl p-2 min-w-[80px] max-w-[100px] h-[32px] border-2 border-dashed border-gray-400 flex items-center justify-center">
               </div>
             )}
           </div>
@@ -62,10 +59,7 @@ export default function ComparisonTray({ className, comparisonItems, onRemoveIte
                 </button>
               </>
             ) : (
-              <div className="bg-gray-200 rounded-xl p-2 min-w-[80px] max-w-[100px] shadow-md border-2 border-dashed border-gray-300">
-                <div className="text-xs font-medium text-gray-400 text-center">
-                  추가
-                </div>
+              <div className="bg-transparent rounded-xl p-2 min-w-[80px] max-w-[100px] h-[32px] border-2 border-dashed border-gray-400 flex items-center justify-center">
               </div>
             )}
           </div>
@@ -74,7 +68,7 @@ export default function ComparisonTray({ className, comparisonItems, onRemoveIte
         
         {/* 비교하기 버튼 */}
         <button 
-          className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-xl text-xs font-medium transition-colors ml-auto"
+          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-xl text-xs font-medium transition-colors ml-auto"
           onClick={() => {
             if (comparisonItems.length >= 1) {
               // 첫 번째 상권은 있으면 사용, 없으면 빈 객체
