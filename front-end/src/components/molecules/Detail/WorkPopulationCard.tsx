@@ -1,8 +1,15 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import PopulationToggle from "@/components/molecules/Detail/PopulationCard/PopulationToggle";
+import TimeSlotCard from "@/components/molecules/Detail/PopulationCard/FloatingPopulationCard";
+import ResidentPopulationCard from "@/components/molecules/Detail/PopulationCard/ResidentPopulationCard";
 
-type Props = { trdarCode: string | null };
+type Props = { 
+  trdarCode: string | null;
+  populationType: "유동" | "직장" | "상주";
+  onPopulationTypeChange: (type: "유동" | "직장" | "상주") => void;
+};
 
 type WorkResponse = {
   quarter: string;
@@ -17,7 +24,7 @@ type WorkResponse = {
   topAgeGroup: { key: string; value: number; rate: number };
 };
 
-export default function WorkPopulationCard({ trdarCode }: Props) {
+export default function WorkPopulationCard({ trdarCode, populationType, onPopulationTypeChange }: Props) {
   const [data, setData] = useState<WorkResponse | null>(null);
   const [quarter, setQuarter] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -72,9 +79,24 @@ export default function WorkPopulationCard({ trdarCode }: Props) {
     return { entries, max };
   }, [data]);
 
+  // 토글 상태에 따라 다른 카드 렌더링
+  if (populationType === "유동") {
+    return <TimeSlotCard trdarCode={trdarCode} populationType={populationType} onPopulationTypeChange={onPopulationTypeChange} />;
+  }
+  
+  if (populationType === "상주") {
+    return <ResidentPopulationCard trdarCode={trdarCode} populationType={populationType} onPopulationTypeChange={onPopulationTypeChange} />;
+  }
+
   return (
     <div>
-      <h3 className="text-[18px] font-semibold text-gray-900">직장인구</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-[18px] font-semibold text-gray-900">직장인구</h3>
+        <PopulationToggle
+          selected={populationType}
+          onChange={onPopulationTypeChange}
+        />
+      </div>
 
       {/* Caption */}
       <div className="mt-1 text-right text-xs text-gray-400">{quarter ?? ""}</div>

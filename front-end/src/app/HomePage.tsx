@@ -5,7 +5,7 @@ import KakaoMap, { useKakaoMapContext } from '@/components/map/KakaoMap';
 import LoadView from '@/components/map/LoadView';
 import RightActionBar from '@/components/organisms/RightActionBar/RightActionBar';
 import CtaPillButton from '@/components/molecules/Detail/CtaPillButton/CtaPillButton';
-import AreaDetailModal from '@/components/organisms/Detail/AreaDetailModal/AreaDetailModal';
+import DetailNavbar from '@/components/organisms/Detail/AreaDetailModal/DetailNavbar';
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
 import MainNavbar from '@/components/templates/LeftNavbar/MainNavbar';
 import MyPageMenu from '@/components/templates/MyPage/MyPage';
@@ -13,6 +13,7 @@ import MyMarket from '@/components/templates/MyPage/MyMarket';
 import NotificationBar from '@/components/atoms/Common/NotificationBar';
 import CompareTradeAreasModal from '@/components/organisms/Compare/CompareTradeAreasModal';
 import ComparisonTray from '@/components/organisms/Compare/ComparisonTray';
+import TradeAreaData from '@/data/TradeAreaValue.json';
 
 // 지도 타입 변경 핸들러 컴포넌트
 function MapTypeHandler({ 
@@ -55,6 +56,12 @@ function MapTypeHandler({
   );
 }
 
+// 상권코드로 상권명을 찾는 함수
+const getTradeAreaNameByCode = (trdarCode: string): string | null => {
+  const tradeArea = TradeAreaData.DATA.find(area => area.trdar_cd === trdarCode);
+  return tradeArea ? tradeArea.trdar_cd_nm : null;
+};
+
 export default function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLogoutNotification, setShowLogoutNotification] = useState(false);
@@ -80,6 +87,7 @@ export default function HomePage() {
   const [currentDistrict, setCurrentDistrict] = useState<string>('강남구');
   const [currentDong, setCurrentDong] = useState<string>('역삼동');
   const [selectedTradeAreaName, setSelectedTradeAreaName] = useState<string | null>(null);
+  const [selectedTradeAreaCode, setSelectedTradeAreaCode] = useState<string | null>(null);
   
   // 검색 결과 관련 상태 추가
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -321,7 +329,11 @@ export default function HomePage() {
       <KakaoMap 
         cafeActive={isCafeActive} 
         showMarketingArea={showMarketingArea}
-        onTradeAreaSelect={setSelectedTradeAreaName}
+        onTradeAreaSelect={(name, code) => {
+          console.log("🔍 상권 선택:", { name, code });
+          setSelectedTradeAreaName(name);
+          setSelectedTradeAreaCode(code);
+        }}
         onShowMarketList={handleShowMarketList}
       >
         {/* 좌측 네비게이션 바 */}
@@ -416,10 +428,11 @@ export default function HomePage() {
       )}
 
       {/* Area detail modal */}
-      <AreaDetailModal
+      <DetailNavbar
         open={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
-        title="상권 현황"
+        title={selectedTradeAreaName ? `${selectedTradeAreaName} 상권 현황` : "상권 현황"}
+        trdarCode={selectedTradeAreaCode}
       />
 
       {/* Compare modal: right-side overlay (covers right 75%) */}

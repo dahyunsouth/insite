@@ -151,12 +151,6 @@ const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({
   return (
     <div className='w-full h-full flex flex-col justify-between'>
       <div className='flex flex-col space-y-6'>
-        <div className='bg-gray-50 border border-gray-200 rounded-2xl p-4'>
-          <p className='text-sm text-gray-600'>선택한 자치구</p>
-          <p className='text-lg font-semibold text-gray-900'>
-            {selectedDistrictName ?? '아직 선택하지 않았어요'}
-          </p>
-        </div>
         <MarketType
           onMarketTypeChange={handleMarketTypeChange}
           initialValue={marketType}

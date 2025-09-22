@@ -19,7 +19,7 @@ interface KakaoOverlay {
 }
 
 interface TradeAreaPoligonProps {
-  onTradeAreaSelect?: (tradeAreaName: string | null) => void;
+  onTradeAreaSelect?: (tradeAreaName: string | null, tradeAreaCode: string | null) => void;
   onShowMarketList?: (district: string, dong: string) => void;
 }
 
@@ -205,8 +205,12 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
         map.setCenter(new (window.kakao.maps as any).LatLng(centerLat, centerLng));
         map.setLevel(4);
         
-        // 상권명을 부모 컴포넌트로 전달
-        onTradeAreaSelect?.(tradeAreaName);
+        // 상권명으로 상권코드 찾기
+        const tradeAreaCode = tradeAreaData.DATA.find(area => area.trdar_cd_nm === tradeAreaName)?.trdar_cd || null;
+        console.log("🔍 상권 클릭:", { tradeAreaName, tradeAreaCode });
+        
+        // 상권명과 상권코드를 부모 컴포넌트로 전달
+        onTradeAreaSelect?.(tradeAreaName, tradeAreaCode);
         
         // 상권리스트 활성화
         onShowMarketList?.(district, dong);
@@ -229,7 +233,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
     
     // 선택 상태 초기화
     selectedTradeAreaRef.current = null;
-    onTradeAreaSelect?.(null);
+    onTradeAreaSelect?.(null, null);
     
     // 폴리곤 맵 정리
     polygonMapRef.current.clear();
