@@ -258,6 +258,26 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
   const metricsA = mapTradeAreaDetailToMetrics(detailA);
   const metricsB = mapTradeAreaDetailToMetrics(detailB);
 
+  // 지표별 단위 매핑
+  const getUnit = (key: string) => {
+    switch (key) {
+      case '매출':
+        return '원';
+      case '점포':
+        return '개';
+      case '유동인구':
+        return '명';
+      case '상주인구':
+        return '명';
+      case '직장인구':
+        return '명';
+      case '상권변화지표':
+        return '';
+      default:
+        return '';
+    }
+  };
+
   // 상권명 추출 (종합 분석 데이터 또는 상세 데이터에서 가져오기)
   const tradeAreaNameA = scoreA?.areaName || detailA?.trdarCdNm || 
     (selectionA.tradeAreaCode ? getTradeAreaNameByCode(selectionA.tradeAreaCode) : "미선택");
@@ -469,34 +489,34 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
             {activeTab === 'data' && (
               <>
                 {/* Metrics rows */}
-            <div className={`mt-8 grid gap-x-10 ${showThird ? "grid-cols-[1fr_1fr_240px]" : "grid-cols-2"}`}>
+            <div className={`mt-2 grid gap-x-10 ${showThird ? "grid-cols-[1fr_1fr_240px]" : "grid-cols-2"}`}>
               {metrics.map((m, idx) => (
                 <React.Fragment key={`${m.key}-${idx}`}>
-                  <div className="py-6 border-t border-gray-200">
+                  <div className={`py-6 ${idx === 0 ? '' : 'border-t border-gray-200'}`}>
                     <div className="text-gray-500">
                       {m.key}
                     </div>
                     <div className="mt-2 text-3xl sm:text-4xl font-extrabold text-gray-900">{m.a}</div>
                   </div>
-                  <div className="py-6 border-t border-gray-200">
+                  <div className={`py-6 ${idx === 0 ? '' : 'border-t border-gray-200'}`}>
                     <div className="text-gray-500">
                       {m.key}
                     </div>
                     <div className="mt-2 text-3xl sm:text-4xl font-extrabold text-gray-900">{m.b}</div>
                   </div>
                   {showThird && m.key !== "상권변화지표" && (
-                    <div className="py-6 border-t border-gray-200 flex items-center">
+                    <div className={`py-6 ${idx === 0 ? '' : 'border-t border-gray-200'} flex items-center`}>
                       <div className="w-full">
                         <div className="text-gray-500 mb-2">
                           {m.key}
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-32 h-4 rounded bg-[#2563eb]" style={{ width: `${Math.max(m.aNum, m.bNum) > 0 ? (m.aNum / Math.max(m.aNum, m.bNum)) * 100 : 0}%` }} />
-                          <span className="text-sm text-gray-700 w-20 text-right">{m.aNum === 0 ? "-" : m.aNum.toLocaleString()}</span>
+                          <div className="w-24 h-4 rounded bg-[#2563eb]" style={{ width: `${Math.max(m.aNum, m.bNum) > 0 ? (m.aNum / Math.max(m.aNum, m.bNum)) * 100 : 0}%` }} />
+                          <span className="text-sm text-gray-700 text-right whitespace-nowrap">{m.aNum === 0 ? "-" : `${m.aNum.toLocaleString()}${getUnit(m.key)}`}</span>
                         </div>
                         <div className="mt-2 flex items-center gap-2">
-                          <div className="w-32 h-4 rounded bg-[#f472b6]" style={{ width: `${Math.max(m.aNum, m.bNum) > 0 ? (m.bNum / Math.max(m.aNum, m.bNum)) * 100 : 0}%` }} />
-                          <span className="text-sm text-gray-700 w-20 text-right">{m.bNum === 0 ? "-" : m.bNum.toLocaleString()}</span>
+                          <div className="w-24 h-4 rounded bg-[#f472b6]" style={{ width: `${Math.max(m.aNum, m.bNum) > 0 ? (m.bNum / Math.max(m.aNum, m.bNum)) * 100 : 0}%` }} />
+                          <span className="text-sm text-gray-700 text-right whitespace-nowrap">{m.bNum === 0 ? "-" : `${m.bNum.toLocaleString()}${getUnit(m.key)}`}</span>
                         </div>
                       </div>
                     </div>
