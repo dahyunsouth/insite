@@ -77,7 +77,7 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
         if (!mapContainer.current) return;
 
         const options = {
-          center: new (window as any).kakao.maps.LatLng(37.501309, 127.039599),
+          center: new (window as any).kakao.maps.LatLng(37.5008, 127.0387),
           level: 3
         };
 
@@ -95,18 +95,28 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
       });
     };
 
-    // focusTradeArea 이벤트 리스너 추가
+    return () => {
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
+  }, []);
+
+  // focusTradeArea 이벤트 리스너 등록 (지도가 준비된 후)
+  useEffect(() => {
+    if (!map) return;
+
     const handleFocusTradeArea = (event: CustomEvent) => {
       const { code, name, coordinates } = event.detail;
       console.log('focusTradeArea 이벤트 수신:', { code, name, coordinates });
       
-      if (mapInstance && coordinates) {
+      if (map && coordinates) {
         // 지도 중심을 해당 상권 좌표로 이동
         const moveLatLon = new (window as any).kakao.maps.LatLng(coordinates.lat, coordinates.lng);
-        mapInstance.setCenter(moveLatLon);
+        map.setCenter(moveLatLon);
         
         // 지도 레벨을 적절하게 설정 (상권 상세 보기)
-        mapInstance.setLevel(3);
+        map.setLevel(3);
         
         console.log('지도 중심 이동 완료:', coordinates);
       }
@@ -116,13 +126,10 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
     window.addEventListener('focusTradeArea', handleFocusTradeArea as EventListener);
 
     return () => {
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
       // 이벤트 리스너 제거
       window.removeEventListener('focusTradeArea', handleFocusTradeArea as EventListener);
     };
-  }, []);
+  }, [map]);
 
   return (
     <KakaoMapContext.Provider value={{ map, setMapType, zoomIn, zoomOut, getZoomLevel, showNotification }}>

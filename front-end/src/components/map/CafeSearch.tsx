@@ -25,6 +25,7 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
   const contentNodeRef = useRef<HTMLDivElement | null>(null);
   const psRef = useRef<any>(null);
   const currCategoryRef = useRef<string>('');
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   console.log('CafeSearch 렌더링:', { isActive, map: !!map, kakao: typeof window !== 'undefined' ? !!window.kakao : false });
 
@@ -82,6 +83,11 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
       if (psRef.current) {
         psRef.current = null;
       }
+      // 타이머 정리
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+        searchTimeoutRef.current = null;
+      }
     };
   }, [map, isActive]);
 
@@ -116,6 +122,46 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
     }
   }, [isActive]);
 
+  // 지도 이동 시 실시간 카페 재탐색
+  useEffect(() => {
+    if (!map || !isActive || !psRef.current) return;
+
+    console.log('지도 이동 이벤트 리스너 등록');
+
+    // 지도 이동 완료 시 카페 재탐색 (디바운싱 적용)
+    const handleMapIdle = () => {
+      if (currCategoryRef.current === 'CE7') {
+        console.log('지도 이동 완료, 카페 재탐색 예약');
+        
+        // 기존 타이머가 있다면 취소
+        if (searchTimeoutRef.current) {
+          clearTimeout(searchTimeoutRef.current);
+        }
+        
+        // 500ms 후에 재탐색 실행 (디바운싱)
+        searchTimeoutRef.current = setTimeout(() => {
+          console.log('디바운싱 완료, 카페 재탐색 시작');
+          searchPlaces();
+        }, 500);
+      }
+    };
+
+    // 지도 이동 완료 이벤트 리스너 등록
+    (window as any).kakao.maps.event.addListener(map, 'idle', handleMapIdle);
+
+    // cleanup 함수에서 이벤트 리스너 제거
+    return () => {
+      if ((window as any).kakao?.maps?.event) {
+        (window as any).kakao.maps.event.removeListener(map, 'idle', handleMapIdle);
+      }
+      // 타이머 정리
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+        searchTimeoutRef.current = null;
+      }
+    };
+  }, [map, isActive]);
+
   // 카테고리 검색을 요청하는 함수 (공식 코드와 동일)
   const searchPlaces = () => {
     if (!currCategoryRef.current) {
@@ -136,7 +182,7 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
     // 지도에 표시되고 있는 마커를 제거합니다
     removeMarker();
 
-    // 카테고리 검색 실행
+    // 카테고리 검색 실행 (최대 15개 제한)
     psRef.current.categorySearch(currCategoryRef.current, placesSearchCB, { useMapBounds: true });
   };
 
@@ -150,7 +196,7 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
       // 정상적으로 검색이 완료됐으면 지도에 마커를 표출합니다
       console.log('검색 성공, 마커 표시 시작:', data.length);
       displayPlaces(data);
-      showNotification(`${data.length}개의 카페를 찾았습니다.`);
+      showNotification(`최대 15개의 카페를 조회할 수 있습니다.`);
     } else if (status === (window as any).kakao.maps.services.Status.ZERO_RESULT) {
       console.log('검색 결과 없음');
       showNotification('검색 결과가 없습니다.');
