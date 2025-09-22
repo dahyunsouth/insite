@@ -1,12 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import { createPortal } from "react-dom";
 import ActionButtons from "@/components/atoms/Detail/ActionButtons";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { authManager } from "@/utils/auth";
 import { useNotification } from "@/components/map/useNotification";
 import Notification from "@/components/map/Notification";
-
+import DetailNavbarTemplate from "@/components/templates/Detail/AreaDetailModalTemplate";
+import ScoreCard from "@/components/molecules/Detail/ScoreCard";
+import MarketChangeIndicatorCard from "@/components/molecules/Detail/MarketChangeIndicator/MarketChangeIndicatorCard";
+import TimeSlotCard from "@/components/molecules/Detail/PopulationCard/FloatingPopulationCard";
+import SalesCard from "@/components/molecules/Detail/SalesCard/SalesCard";
+import StoreCard from "@/components/molecules/Detail/StoreCard/StoreCard";
 type DetailNavbarProps = {
   open: boolean;
   onClose: () => void;
@@ -29,7 +35,6 @@ type DetailSidebarProps = {
   isLoading?: boolean;
   error?: string | null;
 };
-
 /**
  * Organism: DetailNavbar
  * - Renders portal + backdrop + ESC close
@@ -232,22 +237,26 @@ export function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSele
   );
 }
 
-
-/**
- * Organism: DetailSidebar
- * - Manages the right side navigation and action buttons
- * - Handles scroll highlighting and navigation
- */
-export default function DetailSidebar({ 
+function DetailAsideNav({ 
   populationType, 
   onPopulationTypeChange,
   onCompare,
   onSave,
   isSaved,
-  isComparing
-}: DetailSidebarProps) {
+  isComparing,
+  isLoading,
+  error
+}: { 
+  populationType: "유동" | "직장" | "상주";
+  onPopulationTypeChange: (type: "유동" | "직장" | "상주") => void;
+  onCompare?: () => void;
+  onSave?: () => void;
+  isSaved?: boolean;
+  isComparing?: boolean;
+  isLoading?: boolean;
+  error?: string | null;
+}) {
   const [activeIndex, setActiveIndex] = useState(0);
-
   const items = [
     { id: "intro-section", label: "상권 소개" },
     { id: "score-section", label: "종합추천점수" },
@@ -538,5 +547,32 @@ export default function DetailSidebar({
         isLoading={isLoading}
       />
     </div>
+  );
+}
+
+/**
+ * Organism: DetailSidebar
+ * - Manages the right side navigation and action buttons
+ * - Handles scroll highlighting and navigation
+ */
+export default function DetailSidebar({ 
+  populationType, 
+  onPopulationTypeChange,
+  onCompare,
+  onSave,
+  isSaved,
+  isComparing
+}: DetailSidebarProps) {
+  return (
+    <DetailAsideNav
+      populationType={populationType}
+      onPopulationTypeChange={onPopulationTypeChange}
+      onCompare={onCompare}
+      onSave={onSave}
+      isSaved={isSaved}
+      isComparing={isComparing}
+      isLoading={false}
+      error={null}
+    />
   );
 }

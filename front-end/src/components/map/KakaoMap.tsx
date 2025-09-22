@@ -9,7 +9,7 @@ import ZoomBlock from './ZoomBlock';
 import SignGuPoligon from './SignGuPoligon';
 import AdstrdPoligon from './AdstrdPoligon';
 import TradeAreaPoligon from './TradeAreaPoligon';
-import DetailNavbar from '../organisms/Detail/AreaDetailModal/DetailNavbar';
+import DetailModal from '../organisms/Detail/DetailModal';
 
 // KakaoMap Context 생성
 interface KakaoMapContextType {
@@ -77,7 +77,7 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
         if (!mapContainer.current) return;
 
         const options = {
-          center: new (window as any).kakao.maps.LatLng(37.501309, 127.039599),
+          center: new (window as any).kakao.maps.LatLng(37.5008, 127.0387),
           level: 3
         };
 
@@ -101,6 +101,35 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
       }
     };
   }, []);
+
+  // focusTradeArea 이벤트 리스너 등록 (지도가 준비된 후)
+  useEffect(() => {
+    if (!map) return;
+
+    const handleFocusTradeArea = (event: CustomEvent) => {
+      const { code, name, coordinates } = event.detail;
+      console.log('focusTradeArea 이벤트 수신:', { code, name, coordinates });
+      
+      if (map && coordinates) {
+        // 지도 중심을 해당 상권 좌표로 이동
+        const moveLatLon = new (window as any).kakao.maps.LatLng(coordinates.lat, coordinates.lng);
+        map.setCenter(moveLatLon);
+        
+        // 지도 레벨을 적절하게 설정 (상권 상세 보기)
+        map.setLevel(3);
+        
+        console.log('지도 중심 이동 완료:', coordinates);
+      }
+    };
+
+    // 이벤트 리스너 등록
+    window.addEventListener('focusTradeArea', handleFocusTradeArea as EventListener);
+
+    return () => {
+      // 이벤트 리스너 제거
+      window.removeEventListener('focusTradeArea', handleFocusTradeArea as EventListener);
+    };
+  }, [map]);
 
   return (
     <KakaoMapContext.Provider value={{ map, setMapType, zoomIn, zoomOut, getZoomLevel, showNotification }}>
@@ -206,7 +235,7 @@ export default function FullScreenKakaoMap({
       />
 
       {/* 상권 상세 모달 */}
-      <DetailNavbar
+      <DetailModal
         open={isModalOpen}
         onClose={handleModalClose}
         title={selectedTradeArea.name ? `${selectedTradeArea.name} 상권 분석` : undefined}

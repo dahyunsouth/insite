@@ -18,9 +18,10 @@ interface SearchResultListProps {
   isVisible: boolean;
   searchKeyword: string;
   onClose: () => void;
+  onSearchReset?: () => void;
 }
 
-const SearchResultList = ({ isVisible, searchKeyword, onClose }: SearchResultListProps) => {
+const SearchResultList = ({ isVisible, searchKeyword, onClose, onSearchReset }: SearchResultListProps) => {
   const { map, showNotification } = useKakaoMapContext();
   const [searchResults, setSearchResults] = useState<SearchPlace[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,6 +33,42 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose }: SearchResultLis
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const infowindowRef = useRef<any>(null);
   const listRef = useRef<HTMLDivElement>(null);
+
+  // 마커 제거 함수
+  const removeMarkers = useCallback(() => {
+    setMarkers(prevMarkers => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      prevMarkers.forEach((marker) => {
+        try {
+          // 마커가 실제로 지도에 표시되어 있는지 확인
+          if (marker && (marker as any).getMap()) {
+            // 마커를 지도에서 제거
+            (marker as any).setMap(null);
+          }
+        } catch (error) {
+          console.error('마커 제거 중 오류:', error);
+        }
+      });
+      return [];
+    });
+    
+    // 인포윈도우도 닫기
+    if (infowindowRef.current) {
+      try {
+        infowindowRef.current.close();
+      } catch (error) {
+        console.error('인포윈도우 닫기 중 오류:', error);
+      }
+    }
+    
+    // 지도 새로고침을 위한 약간의 지연
+    setTimeout(() => {
+      if (map) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (map as any).relayout();
+      }
+    }, 100);
+  }, [map]);
 
   // Places API 초기화
   useEffect(() => {
@@ -105,6 +142,20 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose }: SearchResultLis
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (!map || !(window as any).kakao?.maps) return;
 
+    // 기존 마커들을 먼저 제거
+    setMarkers(prevMarkers => {
+      prevMarkers.forEach((marker) => {
+        try {
+          if (marker && (marker as any).getMap()) {
+            (marker as any).setMap(null);
+          }
+        } catch (error) {
+          console.error('기존 마커 제거 중 오류:', error);
+        }
+      });
+      return [];
+    });
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newMarkers: any[] = [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -123,6 +174,26 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose }: SearchResultLis
           (window as any).kakao.maps.event.addListener(marker, 'click', function() {
             displayInfowindow(marker, place.place_name);
             setSelectedIndex(index);
+            
+            // 마커 클릭 시 지도 중심을 해당 위치로 이동
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (map as any).setCenter(marker.getPosition());
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (map as any).setLevel(3);
+            
+            // 검색 결과 목록에서 해당 항목으로 스크롤
+            setTimeout(() => {
+              const listElement = listRef.current;
+              if (listElement) {
+                const targetElement = listElement.children[index] as HTMLElement;
+                if (targetElement) {
+                  targetElement.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                  });
+                }
+              }
+            }, 100);
           });
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -187,19 +258,28 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose }: SearchResultLis
     // 키워드로 장소 검색
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (psRef.current as any).keywordSearch(searchKeyword, placesSearchCB);
-  }, [searchKeyword, isVisible, placesSearchCB]);
+  }, [searchKeyword, isVisible, placesSearchCB, removeMarkers]);
 
-  // 마커 제거
-  const removeMarkers = () => {
-    setMarkers(prevMarkers => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      prevMarkers.forEach(marker => (marker as any).setMap(null));
-      return [];
-    });
-    if (infowindowRef.current) {
-      infowindowRef.current.close();
+
+  // 검색 결과창이 닫힐 때 마커 제거
+  useEffect(() => {
+    if (!isVisible) {
+      removeMarkers();
     }
-  };
+  }, [isVisible, removeMarkers]);
+
+  // 검색 키워드가 비어있을 때 마커 제거
+  useEffect(() => {
+    if (!searchKeyword.trim()) {
+      removeMarkers();
+    }
+  }, [searchKeyword, removeMarkers]);
+
+  // onClose 함수를 래핑하여 마커 제거 보장
+  const handleClose = useCallback(() => {
+    removeMarkers();
+    onClose();
+  }, [removeMarkers, onClose]);
 
   // 검색 결과 항목 클릭 핸들러
   const handleItemClick = (place: SearchPlace, index: number) => {
@@ -211,7 +291,7 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose }: SearchResultLis
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (map as any).setCenter(position);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (map as any).setLevel(2);
+    (map as any).setLevel(3);
 
     // 인포윈도우 표시
     if (markers[index]) {
@@ -224,22 +304,37 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose }: SearchResultLis
     return () => {
       removeMarkers();
     };
-  }, []);
+  }, [removeMarkers]);
 
   if (!isVisible) return null;
 
   return (
-    <div className="w-full h-full bg-white flex flex-col">
-      <div className="flex-shrink-0 p-3 border-b border-gray-100 flex justify-between items-center">
-        <h3 className="text-sm font-medium text-gray-700">
+    <div className="w-full h-full bg-white flex flex-col" data-search-results>
+      <div className="flex items-center justify-between p-6 pb-4 flex-shrink-0">
+        <h3 className="text-lg font-bold">
           검색 결과 {searchResults.length > 0 && `(${searchResults.length}개)`}
         </h3>
         <button
-          onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 text-lg font-bold"
-          aria-label="검색 결과 닫기"
+          onClick={() => {
+            handleClose();
+            if (onSearchReset) {
+              onSearchReset();
+            }
+          }}
+          className="cursor-pointer p-1 rounded-full text-gray-400 hover:text-gray-600 active:text-gray-800 hover:bg-gray-100 active:bg-gray-200 transition-all duration-150"
+          aria-label="닫기"
         >
-          ×
+          <svg 
+            width="20" 
+            height="20" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
       </div>
 

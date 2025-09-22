@@ -22,7 +22,12 @@ interface MainNavbarProps {
   showSearchResults?: boolean;
   searchKeyword?: string;
   onSearchClose?: () => void;
+  onSearchReset?: () => void;
   onSearchResultsShow?: (show: boolean, keyword: string) => void;
+  resetTrigger?: number;
+  // 상권 선택 관련 props
+  onTradeAreaSelect?: (tradeArea: any) => void;
+  selectedTradeArea?: any;
 }
 
 const MainNavbar: React.FC<MainNavbarProps> = ({ 
@@ -42,12 +47,17 @@ const MainNavbar: React.FC<MainNavbarProps> = ({
   showSearchResults,
   searchKeyword,
   onSearchClose,
-  onSearchResultsShow
+  onSearchReset,
+  onSearchResultsShow,
+  resetTrigger,
+  // 상권 선택 관련 props
+  onTradeAreaSelect,
+  selectedTradeArea
 }) => {
   return (
     <nav className="shadow-lg py-2 pl-2 space-y-1 h-full flex flex-col">
       <div className="flex-shrink-0">
-        <FirstLeftNavbar onSearchResultsShow={onSearchResultsShow} />
+        <FirstLeftNavbar onSearchResultsShow={onSearchResultsShow} resetTrigger={resetTrigger} />
       </div>
       <div className="flex-shrink-0">
         <SecondLeftNavbar
@@ -75,6 +85,9 @@ const MainNavbar: React.FC<MainNavbarProps> = ({
           showSearchResults={showSearchResults || false}
           searchKeyword={searchKeyword || ''}
           onSearchClose={onSearchClose}
+          onSearchReset={onSearchReset}
+          onTradeAreaSelect={onTradeAreaSelect}
+          selectedTradeArea={selectedTradeArea}
         />
       </div>
     </nav>
