@@ -6,6 +6,7 @@ import static org.jooq.impl.DSL.max;
 
 import com.ssafy.insite.common.dto.response.BaseResponseStatus;
 import com.ssafy.insite.common.exception.BaseException;
+import com.ssafy.insite.common.utils.RedisKeyGenerator;
 import com.ssafy.insite.common.utils.SeoulDistrictConverter;
 import com.ssafy.insite.common.utils.SeoulDongCatalog;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
@@ -15,6 +16,7 @@ import com.ssafy.insite.data.dto.response.TradeAreasResponseDto;
 import com.ssafy.insite.data.enums.SeoulDistrict;
 import com.ssafy.insite.data.jooq.codegen.tables.TradeAreaRegion;
 import com.ssafy.insite.data.jooq.codegen.tables.TradeAreaStorCd;
+import java.time.Duration;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
@@ -23,12 +25,14 @@ import org.jooq.Record1;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.jooq.types.UInteger;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
 public class TradeAreaRegionRepository {
     private final DSLContext dsl;
+    private final RedisTemplate<String, String> redisTemplate;
     private final String induty = "커피-음료";
 
     private static Integer toInteger(UInteger v) {
@@ -81,16 +85,30 @@ public class TradeAreaRegionRepository {
     // 행정동 내 상권 리스트 조회
     public TradeAreasResponseDto listByDistrictAndDong(SeoulDistrict district, String dong) {
         String gu = SeoulDistrictConverter.toKorean(district); // 국문 행정구명
+        String latestQuarterKey = RedisKeyGenerator.generateLatestQuarterKey();
 
         if (!SeoulDongCatalog.isValid(district, dong)) {
             throw new BaseException(BaseResponseStatus.INVALID_DONG);
         }
 
-        // 최신 분기 조회
-        String latestYyqu = dsl
-                .select(DSL.max(TRADE_AREA_STOR_CD.STDR_YYQU_CD))
-                .from(TRADE_AREA_STOR_CD)
-                .fetchOneInto(String.class);
+        // 최신 분기 캐싱
+        String cached = redisTemplate.opsForValue().get(latestQuarterKey);
+        String latestYyqu;
+
+        if (cached != null) {
+            latestYyqu = cached;
+        } else {
+            latestYyqu = dsl
+                    .select(DSL.max(TRADE_AREA_STOR_CD.STDR_YYQU_CD))
+                    .from(TRADE_AREA_STOR_CD)
+                    .fetchOneInto(String.class);
+
+            if (latestYyqu == null) {
+                throw new BaseException(BaseResponseStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            redisTemplate.opsForValue().set(latestQuarterKey, latestYyqu, Duration.ofHours(1)); // 캐시에 저장 (TTL: 1시간)
+        }
 
         // 메인 조회
         List<TradeAreaItemDto> areas = dsl
