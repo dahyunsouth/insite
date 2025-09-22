@@ -45,7 +45,7 @@ const MainNavbar: React.FC<MainNavbarProps> = ({
   onSearchResultsShow
 }) => {
   return (
-    <nav className="py-2 pl-2 space-y-1 h-full flex flex-col">
+    <nav className="shadow-lg py-2 pl-2 space-y-1 h-full flex flex-col">
       <div className="flex-shrink-0">
         <FirstLeftNavbar onSearchResultsShow={onSearchResultsShow} />
       </div>
