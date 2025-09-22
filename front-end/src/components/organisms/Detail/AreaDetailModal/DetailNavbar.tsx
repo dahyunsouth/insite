@@ -9,6 +9,10 @@ import StoreCard from "@/components/molecules/Detail/StoreCard";
 import ScoreCard from "@/components/molecules/Detail/ScoreCard";
 import SalesCard from "@/components/molecules/Detail/SalesCard/SalesCard";
 import ActionButtons from "@/components/atoms/Detail/ActionButtons";
+import { favoritesService } from "@/services/favorites";
+import { authManager } from "@/utils/auth";
+import { useNotification } from "@/components/map/useNotification";
+import Notification from "@/components/map/Notification";
 
 type DetailNavbarProps = {
   open: boolean;
@@ -29,6 +33,9 @@ export default function DetailNavbar({ open, onClose, title, subtitle, trdarCode
   const [populationType, setPopulationType] = useState<"유동" | "직장" | "상주">("유동");
   const [isSaved, setIsSaved] = useState(false);
   const [isComparing, setIsComparing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { notification, showNotification, hideNotification } = useNotification();
 
   useEffect(() => {
     if (!open) return;
@@ -53,14 +60,81 @@ export default function DetailNavbar({ open, onClose, title, subtitle, trdarCode
     console.log("[DetailNavbar] selection changed:", selected, "computedTitle:", computedTitle);
   }, [selected, computedTitle]);
 
+  // 현재 상권 코드 가져오기
+  const getCurrentTrdarCode = (): string | null => {
+    return trdarCode ?? selected?.code ?? null;
+  };
+
+  // 저장 상태 확인
+  const checkSavedStatus = async (trdarCode: string) => {
+    if (!authManager.isLoggedIn()) {
+      setIsSaved(false);
+      return;
+    }
+
+    try {
+      const isFavorite = await favoritesService.isFavorite(parseInt(trdarCode));
+      setIsSaved(isFavorite);
+    } catch (error) {
+      console.error('저장 상태 확인 실패:', error);
+      setIsSaved(false);
+    }
+  };
+
+  // 모달이 열릴 때 저장 상태 확인
+  useEffect(() => {
+    if (open) {
+      const currentCode = getCurrentTrdarCode();
+      if (currentCode) {
+        checkSavedStatus(currentCode);
+      }
+    }
+  }, [open, trdarCode, selected]);
+
   const handleCompare = () => {
     setIsComparing(!isComparing);
     console.log("비교하기 클릭:", selected, "비교 상태:", !isComparing);
   };
 
-  const handleSave = () => {
-    setIsSaved(!isSaved);
-    console.log("저장하기 클릭:", selected, "저장 상태:", !isSaved);
+  const handleSave = async () => {
+    const currentCode = getCurrentTrdarCode();
+    if (!currentCode) {
+      setError('상권 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    // 로그인 확인
+    if (!authManager.isLoggedIn()) {
+      setError('로그인이 필요합니다.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      if (isSaved) {
+        // 저장 해제
+        await favoritesService.removeFavorite(parseInt(currentCode));
+        setIsSaved(false);
+        showNotification('상권이 저장 목록에서 제거되었습니다.');
+        console.log('상권 저장 해제 성공:', currentCode);
+      } else {
+        // 저장
+        await favoritesService.saveFavorite(parseInt(currentCode));
+        setIsSaved(true);
+        showNotification('상권이 저장되었습니다.');
+        console.log('상권 저장 성공:', currentCode);
+      }
+      setError(null); // 성공 시 에러 메시지 제거
+    } catch (error) {
+      console.error('상권 저장/해제 실패:', error);
+      const errorMessage = error instanceof Error ? error.message : '저장 처리 중 오류가 발생했습니다.';
+      setError(errorMessage);
+      showNotification(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!open) return null;
@@ -95,6 +169,8 @@ export default function DetailNavbar({ open, onClose, title, subtitle, trdarCode
               onSave={handleSave}
               isSaved={isSaved}
               isComparing={isComparing}
+              isLoading={isLoading}
+              error={error}
             />
           }
         >
@@ -119,6 +195,13 @@ export default function DetailNavbar({ open, onClose, title, subtitle, trdarCode
           </>
         </DetailNavbarTemplate>
       </div>
+      
+      {/* 토스트 알림 */}
+      <Notification
+        message={notification.message}
+        isVisible={notification.isVisible}
+        onClose={hideNotification}
+      />
     </div>,
     document.body
   );
@@ -130,7 +213,9 @@ function DetailAsideNav({
   onCompare,
   onSave,
   isSaved,
-  isComparing
+  isComparing,
+  isLoading,
+  error
 }: { 
   populationType: "유동" | "직장" | "상주";
   onPopulationTypeChange: (type: "유동" | "직장" | "상주") => void;
@@ -138,6 +223,8 @@ function DetailAsideNav({
   onSave?: () => void;
   isSaved?: boolean;
   isComparing?: boolean;
+  isLoading?: boolean;
+  error?: string | null;
 }) {
   const items = [
     { id: "score-section", label: "종합추천점수" },
@@ -247,12 +334,20 @@ function DetailAsideNav({
         </ul>
       </nav>
       
+      {/* 에러 메시지 */}
+      {error && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
       {/* 액션 버튼들 */}
       <ActionButtons 
         onCompare={onCompare}
         onSave={onSave}
         isSaved={isSaved}
         isComparing={isComparing}
+        isLoading={isLoading}
       />
     </div>
   );
