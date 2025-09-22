@@ -6,6 +6,7 @@ import com.ssafy.insite.data.dto.response.RecommendationResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDistrictCountResponseDto;
 import com.ssafy.insite.data.dto.response.SeoulDongCountResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaChngeIxInfoResponseDto;
+import com.ssafy.insite.data.dto.response.TradeAreaCodeResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaFlpopInfoResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaRepopInfoResponseDto;
@@ -152,5 +153,12 @@ public class DataServiceImpl implements DataService {
     @Transactional(readOnly = true)
     public TradeAreaChngeIxInfoResponseDto findChngeIxInfoByCode(int trdarCd) {
         return tradeAreaChngeIxRepository.findChngeIxInfoByCode(trdarCd);
+    }
+
+    // 상권명으로 상권코드 조회
+    @Override
+    @Transactional(readOnly = true)
+    public TradeAreaCodeResponseDto findCodeByName(String trdarCdNm) {
+        return tradeAreaRegionRepository.findCodeByName(trdarCdNm);
     }
 }
