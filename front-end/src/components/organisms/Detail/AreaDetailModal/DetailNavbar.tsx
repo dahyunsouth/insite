@@ -2,29 +2,33 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import AreaDetailModalTemplate from "@/components/templates/Detail/AreaDetailModalTemplate";
+import DetailNavbarTemplate from "@/components/templates/Detail/AreaDetailModalTemplate";
 import TradeAreaSelect from "@/components/molecules/Detail/TradeAreaSelect";
 import TimeSlotCard from "@/components/molecules/Detail/PopulationCard/FloatingPopulationCard";
 import StoreCard from "@/components/molecules/Detail/StoreCard";
 import ScoreCard from "@/components/molecules/Detail/ScoreCard";
 import SalesCard from "@/components/molecules/Detail/SalesCard";
+import ActionButtons from "@/components/atoms/Detail/ActionButtons";
 
-type AreaDetailModalProps = {
+type DetailNavbarProps = {
   open: boolean;
   onClose: () => void;
   title?: string;
   subtitle?: string;
+  trdarCode?: string | null;
   onSelectTradeArea?: (opt: { code: string; name: string } | null) => void;
 };
 
 /**
- * Organism: AreaDetailModal
+ * Organism: DetailNavbar
  * - Renders portal + backdrop + ESC close
  * - Uses the Detail template for visuals (container/header/section-nav)
  */
-export default function AreaDetailModal({ open, onClose, title, subtitle, onSelectTradeArea }: AreaDetailModalProps) {
+export default function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea }: DetailNavbarProps) {
   const [selected, setSelected] = useState<{ code: string; name: string } | null>(null);
   const [populationType, setPopulationType] = useState<"유동" | "직장" | "상주">("유동");
+  const [isSaved, setIsSaved] = useState(false);
+  const [isComparing, setIsComparing] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -46,8 +50,18 @@ export default function AreaDetailModal({ open, onClose, title, subtitle, onSele
   useEffect(() => {
     // Debug log: verify selected and computed title changes
     // eslint-disable-next-line no-console
-    console.log("[AreaDetailModal] selection changed:", selected, "computedTitle:", computedTitle);
+    console.log("[DetailNavbar] selection changed:", selected, "computedTitle:", computedTitle);
   }, [selected, computedTitle]);
+
+  const handleCompare = () => {
+    setIsComparing(!isComparing);
+    console.log("비교하기 클릭:", selected, "비교 상태:", !isComparing);
+  };
+
+  const handleSave = () => {
+    setIsSaved(!isSaved);
+    console.log("저장하기 클릭:", selected, "저장 상태:", !isSaved);
+  };
 
   if (!open) return null;
 
@@ -57,8 +71,8 @@ export default function AreaDetailModal({ open, onClose, title, subtitle, onSele
       <div className="absolute inset-0 bg-black/30" onClick={onClose} /> */}
 
       {/* modal */}
-      <div className="relative z-10 w-[calc(75vw-1rem)] mt-2 mr-2" onClick={(e) => e.stopPropagation()}>
-        <AreaDetailModalTemplate
+      <div className="relative z-10 w-[calc(75vw-1rem)] h-[calc(100vh-1rem)] mt-2 mr-2" onClick={(e) => e.stopPropagation()}>
+        <DetailNavbarTemplate
           title={computedTitle}
           subtitle={subtitle}
           onClose={onClose}
@@ -67,13 +81,22 @@ export default function AreaDetailModal({ open, onClose, title, subtitle, onSele
               onChange={(opt) => {
                 // Debug log: dropdown change event
                 // eslint-disable-next-line no-console
-                console.log("[AreaDetailModal] dropdown onChange:", opt);
+                console.log("[DetailNavbar] dropdown onChange:", opt);
                 setSelected(opt);
                 onSelectTradeArea?.(opt);
               }}
             />
           }
-          sectionAside={<DetailAsideNav populationType={populationType} onPopulationTypeChange={setPopulationType} />}
+          sectionAside={
+            <DetailAsideNav 
+              populationType={populationType} 
+              onPopulationTypeChange={setPopulationType}
+              onCompare={handleCompare}
+              onSave={handleSave}
+              isSaved={isSaved}
+              isComparing={isComparing}
+            />
+          }
         >
           <>
             <section id="score-section" className="scroll-mt-64">
@@ -81,10 +104,11 @@ export default function AreaDetailModal({ open, onClose, title, subtitle, onSele
             </section>
             <section id="pop-section" className="scroll-mt-64">
               <TimeSlotCard 
-                trdarCode={selected?.code ?? null} 
+                trdarCode={trdarCode ?? selected?.code ?? null} 
                 populationType={populationType}
                 onPopulationTypeChange={setPopulationType}
               />
+              {/* Debug: trdarCode = {trdarCode ?? selected?.code ?? null} */}
             </section>
             <section id="sales-section" className="scroll-mt-64">
               <SalesCard trdarCode={selected?.code ?? null} />
@@ -93,7 +117,7 @@ export default function AreaDetailModal({ open, onClose, title, subtitle, onSele
               <StoreCard trdarCode={selected?.code ?? null} />
             </section>
           </>
-        </AreaDetailModalTemplate>
+        </DetailNavbarTemplate>
       </div>
     </div>,
     document.body
@@ -102,10 +126,18 @@ export default function AreaDetailModal({ open, onClose, title, subtitle, onSele
 
 function DetailAsideNav({ 
   populationType, 
-  onPopulationTypeChange 
+  onPopulationTypeChange,
+  onCompare,
+  onSave,
+  isSaved,
+  isComparing
 }: { 
   populationType: "유동" | "직장" | "상주";
   onPopulationTypeChange: (type: "유동" | "직장" | "상주") => void;
+  onCompare?: () => void;
+  onSave?: () => void;
+  isSaved?: boolean;
+  isComparing?: boolean;
 }) {
   const items = [
     { id: "score-section", label: "종합추천점수" },
@@ -178,40 +210,50 @@ function DetailAsideNav({
     }
   }
   return (
-    <nav aria-label="섹션 내비게이션" className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-      <ul className="flex flex-col">
-        {items.map((it, idx) => {
-          const isActive = idx === activeIndex;
-          const isChild = it.parentId;
-          const itemPopulationType = (it as { populationType?: string }).populationType;
-          
-          // 인구 항목의 경우 토글 상태와 일치하고, 현재 인구 섹션이 활성화된 경우에만 하이라이트
-          const isPopulationSectionActive = activeIndex >= 2 && activeIndex <= 4; // 인구 섹션들 (유동인구, 직장인구, 상주인구)
-          const isPopulationItemActive = itemPopulationType && itemPopulationType === populationType && isPopulationSectionActive;
-          
-          // 하위 항목이 활성화되면 부모 항목도 활성화 상태로 표시
-          const activeItem = items[activeIndex];
-          const isParentOfActiveChild = it.isParent && activeItem?.parentId === it.id;
-          const shouldHighlight = isActive || isParentOfActiveChild || isPopulationItemActive;
-          
-          return (
-            <li key={`${it.id}-${itemPopulationType || idx}`} className={idx !== 0 ? "mt-3" : undefined}>
-              <button
-                type="button"
-                onClick={() => go(it.id, idx, itemPopulationType)}
-                aria-current={isActive ? "page" : undefined}
-                className={
-                  "cursor-pointer w-full text-left text-base leading-6 " +
-                  (shouldHighlight ? "text-[#3288FF] font-semibold" : "text-gray-400 hover:text-gray-600") +
-                  (isChild ? " ml-4" : "")
-                }
-              >
-                {it.label}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
+    <div className="flex flex-col gap-4">
+      <nav aria-label="섹션 내비게이션" className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        <ul className="flex flex-col">
+          {items.map((it, idx) => {
+            const isActive = idx === activeIndex;
+            const isChild = it.parentId;
+            const itemPopulationType = (it as { populationType?: string }).populationType;
+            
+            // 인구 항목의 경우 토글 상태와 일치하고, 현재 인구 섹션이 활성화된 경우에만 하이라이트
+            const isPopulationSectionActive = activeIndex >= 2 && activeIndex <= 4; // 인구 섹션들 (유동인구, 직장인구, 상주인구)
+            const isPopulationItemActive = itemPopulationType && itemPopulationType === populationType && isPopulationSectionActive;
+            
+            // 하위 항목이 활성화되면 부모 항목도 활성화 상태로 표시
+            const activeItem = items[activeIndex];
+            const isParentOfActiveChild = it.isParent && activeItem?.parentId === it.id;
+            const shouldHighlight = isActive || isParentOfActiveChild || isPopulationItemActive;
+            
+            return (
+              <li key={`${it.id}-${itemPopulationType || idx}`} className={idx !== 0 ? "mt-3" : undefined}>
+                <button
+                  type="button"
+                  onClick={() => go(it.id, idx, itemPopulationType)}
+                  aria-current={isActive ? "page" : undefined}
+                  className={
+                    "cursor-pointer w-full text-left text-base leading-6 " +
+                    (shouldHighlight ? "text-[#3288FF] font-semibold" : "text-gray-400 hover:text-gray-600") +
+                    (isChild ? " ml-4" : "")
+                  }
+                >
+                  {it.label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+      
+      {/* 액션 버튼들 */}
+      <ActionButtons 
+        onCompare={onCompare}
+        onSave={onSave}
+        isSaved={isSaved}
+        isComparing={isComparing}
+      />
+    </div>
   );
 }

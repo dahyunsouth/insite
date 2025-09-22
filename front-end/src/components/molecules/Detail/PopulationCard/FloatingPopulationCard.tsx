@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import FloatingPopulationTimeChart from "@/components/molecules/Detail/PopulationCard/Charts/FloatingPopulationTimeChart";
 import FloatingPopulationWeekChart from "@/components/molecules/Detail/PopulationCard/Charts/FloatingPopulationWeekChart";
 import PopulationToggle from "@/components/molecules/Detail/PopulationCard/PopulationToggle";
 import WorkPopulationCard from "@/components/molecules/Detail/PopulationCard/WorkPopulationCard";
 import ResidentPopulationCard from "@/components/molecules/Detail/PopulationCard/ResidentPopulationCard";
+import FloatingPopulationInfoModal from "@/components/molecules/Detail/PopulationCard/InfoModal/FloatingPopulationInfoModal";
 
 type Props = { 
   trdarCode: string | null;
@@ -25,11 +26,57 @@ type DetailResponse = {
   dayMin?: { index: number; label: string; value: number };
 };
 
+type FlpopApiResponse = {
+  httpStatus: {
+    error: boolean;
+    is4xxClientError: boolean;
+    is5xxServerError: boolean;
+    is1xxInformational: boolean;
+    is2xxSuccessful: boolean;
+    is3xxRedirection: boolean;
+  };
+  isSuccess: boolean;
+  message: string;
+  code: number;
+  result: {
+    stdrYyquCd: number;
+    trdarSeCd: string;
+    trdarSeCdNm: string;
+    trdarCd: number;
+    trdarCdNm: string;
+    totFlpopCo: number;
+    mlFlpopCo: number;
+    fmlFlpopCo: number;
+    agrde10FlpopCo: number;
+    agrde20FlpopCo: number;
+    agrde30FlpopCo: number;
+    agrde40FlpopCo: number;
+    agrde50FlpopCo: number;
+    agrde60AboveFlpopCo: number;
+    tmzon0006FlpopCo: number;
+    tmzon0611FlpopCo: number;
+    tmzon1114FlpopCo: number;
+    tmzon1417FlpopCo: number;
+    tmzon1721FlpopCo: number;
+    tmzon2124FlpopCo: number;
+    monFlpopCo: number;
+    tuesFlpopCo: number;
+    wedFlpopCo: number;
+    thurFlpopCo: number;
+    friFlpopCo: number;
+    satFlpopCo: number;
+    sunFlpopCo: number;
+  };
+};
+
 export default function TimeSlotCard({ trdarCode, populationType, onPopulationTypeChange }: Props) {
   const [data, setData] = useState<DetailResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"time" | "dow">("time");
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+  const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     let aborted = false;
@@ -41,16 +88,80 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
       setLoading(true);
       setError(null);
       try {
-        // get latest quarter
-        const qRes = await fetch("/api/seoul/latest-quarter", { cache: "no-store" });
-        if (!qRes.ok) throw new Error("latest-quarter failed");
-        const q = (await qRes.json()).quarter as string;
+        // 새로운 유동인구 API 호출
+        console.log("🔍 유동인구 API 호출 시작:", trdarCode);
+        const dRes = await fetch(`/api/v1/data/info/flpop?trdarCd=${trdarCode}`, { cache: "no-store" });
+        if (!dRes.ok) throw new Error("flpop API failed");
+        const apiResponse = (await dRes.json()) as FlpopApiResponse;
+        console.log("🔍 유동인구 API 응답:", apiResponse);
         if (aborted) return;
 
-        const dRes = await fetch(`/api/seoul/trade-areas/detail?quarter=${q}&trdar=${trdarCode}`, { cache: "no-store" });
-        if (!dRes.ok) throw new Error("detail failed");
-        const d = (await dRes.json()) as DetailResponse;
-        if (aborted) return;
+        if (!apiResponse.isSuccess) {
+          throw new Error(apiResponse.message || "API request failed");
+        }
+
+        // API 응답을 DetailResponse 형식으로 변환
+        const result = apiResponse.result;
+        const d: DetailResponse = {
+          quarter: result.stdrYyquCd.toString(),
+          trdarCd: result.trdarCd.toString(),
+          trdarNm: result.trdarCdNm,
+          slots: [
+            { key: "tmzon0006", label: "00-06시", value: result.tmzon0006FlpopCo },
+            { key: "tmzon0611", label: "06-11시", value: result.tmzon0611FlpopCo },
+            { key: "tmzon1114", label: "11-14시", value: result.tmzon1114FlpopCo },
+            { key: "tmzon1417", label: "14-17시", value: result.tmzon1417FlpopCo },
+            { key: "tmzon1721", label: "17-21시", value: result.tmzon1721FlpopCo },
+            { key: "tmzon2124", label: "21-24시", value: result.tmzon2124FlpopCo },
+          ],
+          days: [
+            { key: "mon", label: "월요일", value: result.monFlpopCo },
+            { key: "tues", label: "화요일", value: result.tuesFlpopCo },
+            { key: "wed", label: "수요일", value: result.wedFlpopCo },
+            { key: "thur", label: "목요일", value: result.thurFlpopCo },
+            { key: "fri", label: "금요일", value: result.friFlpopCo },
+            { key: "sat", label: "토요일", value: result.satFlpopCo },
+            { key: "sun", label: "일요일", value: result.sunFlpopCo },
+          ],
+          max: { index: 0, label: "", value: 0 },
+          dayMax: { index: 0, label: "", value: 0 },
+          dayMin: { index: 0, label: "", value: 0 },
+        };
+
+        // 시간대별 최대값 찾기
+        let maxIndex = 0;
+        let maxValue = d.slots[0].value;
+        d.slots.forEach((slot, index) => {
+          if (slot.value > maxValue) {
+            maxValue = slot.value;
+            maxIndex = index;
+          }
+        });
+        d.max = { index: maxIndex, label: d.slots[maxIndex].label, value: maxValue };
+
+        // 요일별 최대/최소값 찾기
+        if (d.days) {
+          let dayMaxIndex = 0;
+          let dayMaxValue = d.days[0].value;
+          let dayMinIndex = 0;
+          let dayMinValue = d.days[0].value;
+          
+          d.days.forEach((day, index) => {
+            if (day.value > dayMaxValue) {
+              dayMaxValue = day.value;
+              dayMaxIndex = index;
+            }
+            if (day.value < dayMinValue) {
+              dayMinValue = day.value;
+              dayMinIndex = index;
+            }
+          });
+          
+          d.dayMax = { index: dayMaxIndex, label: d.days[dayMaxIndex].label, value: dayMaxValue };
+          d.dayMin = { index: dayMinIndex, label: d.days[dayMinIndex].label, value: dayMinValue };
+        }
+
+        console.log("🔍 변환된 데이터:", d);
         setData(d);
       } catch (e: unknown) {
         if (!aborted) setError(e instanceof Error ? e.message : "load failed");
@@ -78,7 +189,7 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
     return { index: bestIdx, label: slot.label, value: slot.value };
   }, [data]);
 
-  const dayLabels = useMemo(() => data?.days?.map((d) => d.label) ?? [], [data]);
+  const dayLabels = useMemo(() => data?.days?.map((d) => d.label.replace('요일', '')) ?? [], [data]);
   const dayValues = useMemo(() => data?.days?.map((d) => d.value) ?? [], [data]);
   const dayMaxIndex = data?.dayMax?.index ?? null;
 
@@ -94,7 +205,32 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h3 className="text-[18px] font-semibold text-gray-900">유동인구</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-[18px] font-semibold text-gray-900">유동인구</h3>
+          <button
+            ref={buttonRef}
+            type="button"
+            onClick={() => {
+              if (buttonRef.current) {
+                const rect = buttonRef.current.getBoundingClientRect();
+                setModalPosition({
+                  top: rect.top,
+                  left: rect.right
+                });
+              }
+              setIsInfoModalOpen(!isInfoModalOpen);
+            }}
+            className="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-gray-200 text-white transition-colors hover:bg-gray-400 active:bg-gray-600"
+            aria-label="유동인구 정보"
+          >
+            <span className="text-xs font-bold">i</span>
+          </button>
+          {data?.quarter && (
+            <span className="text-xs text-gray-400">
+              {data.quarter.slice(0, 4)}년도 {data.quarter.slice(4)}분기 기준
+            </span>
+          )}
+        </div>
         <PopulationToggle
           selected={populationType}
           onChange={onPopulationTypeChange}
@@ -130,7 +266,7 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
       </div>
 
       {/* Highlight */}
-      <div className="mt-4 rounded-xl bg-gray-50 px-4 py-4 text-gray-900">
+      <div className="mt-4 rounded-xl bg-gray-50 px-4 py-4 text-gray-900 text-center">
         {trdarCode == null ? (
           <span className="text-gray-500">상권을 선택하면 시간대별 유동인구를 보여드려요.</span>
         ) : loading ? (
@@ -142,14 +278,14 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
             {mode === "time" ? (
               <>
                 <span className="font-medium">유동인구가 가장 많은 시간대는</span>
-                <span className="ml-1 font-bold text-rose-500">{data.max.label}</span>
+                <span className="ml-1 font-bold" style={{ color: '#3288FF' }}>{data.max.label}</span>
                 <span className="ml-1 font-medium">입니다.</span>
               </>
             ) : (
               <>
                 <span className="font-medium">유동인구가 가장 많은 요일은</span>
-                <span className="ml-1 font-bold text-rose-500">{data.dayMax?.label ?? "알 수 없음"}</span>
-                <span className="ml-1 font-medium">예요.</span>
+                <span className="ml-1 font-bold" style={{ color: '#3288FF' }}>{data.dayMax?.label ?? "알 수 없음"}</span>
+                <span className="ml-1 font-medium">입니다.</span>
               </>
             )}
           </>
@@ -164,7 +300,7 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
           <div className="bg-[#3288FF1A] px-4 py-3 text-center text-sm font-semibold text-black">
             {mode === "time" ? "유동인구가 가장 많은 시간대" : "유동인구가 가장 많은 요일"}
           </div>
-          <div className="border-l border-gray-200 bg-[#3288FF1A] px-4 py-3 text-center text-sm font-semibold text-black">
+          <div className="border-l border-gray-200 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-black">
             {mode === "time" ? "유동인구가 가장 적은 시간대" : "유동인구가 가장 적은 요일"}
           </div>
           <div className="px-4 py-5 text-center text-black">
@@ -173,7 +309,7 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
                 <>
                   <span className="font-semibold">{timeMax.label}</span>
                   {typeof timeMax.value === "number" && (
-                    <span className="ml-2 text-gray-500">{timeMax.value.toLocaleString()}명</span>
+                    <span className="ml-2 text-gray-500 text-xs">{timeMax.value.toLocaleString()}명</span>
                   )}
                 </>
               ) : (
@@ -183,7 +319,7 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
               <>
                 <span className="font-semibold">{data.dayMax.label}</span>
                 {typeof data.dayMax.value === "number" && (
-                  <span className="ml-2 text-gray-500">{data.dayMax.value.toLocaleString()}명</span>
+                  <span className="ml-2 text-gray-500 text-xs">{data.dayMax.value.toLocaleString()}명</span>
                 )}
               </>
             ) : (
@@ -196,7 +332,7 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
                 <>
                   <span className="font-semibold">{timeMin.label}</span>
                   {typeof timeMin.value === "number" && (
-                    <span className="ml-2 text-gray-500">{timeMin.value.toLocaleString()}명</span>
+                    <span className="ml-2 text-gray-500 text-xs">{timeMin.value.toLocaleString()}명</span>
                   )}
                 </>
               ) : (
@@ -206,7 +342,7 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
               <>
                 <span className="font-semibold">{data.dayMin.label}</span>
                 {typeof data.dayMin.value === "number" && (
-                  <span className="ml-2 text-gray-500">{data.dayMin.value.toLocaleString()}명</span>
+                  <span className="ml-2 text-gray-500 text-xs">{data.dayMin.value.toLocaleString()}명</span>
                 )}
               </>
             ) : (
@@ -234,6 +370,13 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
           )}
         </div>
       )}
+
+      {/* Info Modal */}
+      <FloatingPopulationInfoModal 
+        isOpen={isInfoModalOpen} 
+        onClose={() => setIsInfoModalOpen(false)}
+        position={modalPosition}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import ToolTip from "./ToolTip";
 
 type Props = {
   labels: string[]; // 7 labels (요일)
@@ -10,9 +11,11 @@ type Props = {
 };
 
 export default function FloatingPopulationWeekChart({ labels, values, maxIndex = null, className }: Props) {
+  const [hoveredBar, setHoveredBar] = useState<number | null>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const W = 560;
   const H = 260;
-  const m = { top: 16, right: 12, bottom: 20, left: 60 };
+  const m = { top: 32, right: 12, bottom: 20, left: 60 };
   const cw = W - m.left - m.right;
   const ch = H - m.top - m.bottom;
 
@@ -39,21 +42,23 @@ export default function FloatingPopulationWeekChart({ labels, values, maxIndex =
   });
 
 
-  // Custom tick values with equal spacing: 0, 1/4 * max, 2/4 * max, 3/4 * max, max
+  // Custom tick values: 0, min, min + diff/3, min + 2*diff/3, max
   const tickVals = [
     0,
-    dataMax / 4,
-    dataMax / 2,
-    (3 * dataMax) / 4,
-    dataMax
+    minValue,
+    minValue + (maxValue - minValue) / 3,
+    minValue + (2 * (maxValue - minValue)) / 3,
+    maxValue
   ];
 
   return (
     <div className={(className ? `flex justify-center ${className}` : "flex justify-center")}>
-      <svg width={W} height={H} role="img" aria-label="요일별 유동인구 막대 차트">
+      <div className="relative">
+        <svg width={W} height={H} role="img" aria-label="요일별 유동인구 막대 차트">
         {/* grid & axes */}
         {tickVals.map((tv, i) => {
-          const y = m.top + scaleY(tv);
+          // Equal vertical spacing: divide chart height into 4 equal parts, reverse order (0 at bottom)
+          const y = m.top + ch - (i / 4) * ch;
           return (
             <g key={i}>
               <line x1={m.left} y1={y} x2={W - m.right} y2={y} stroke="#E5E7EB" strokeDasharray="2,2" />
@@ -67,18 +72,87 @@ export default function FloatingPopulationWeekChart({ labels, values, maxIndex =
         {/* bars */}
         {values.map((v, i) => {
           const x = m.left + i * (band + gap);
-          const y = m.top + scaleY(v);
-          const h = m.top + ch - y;
+          
+          // Calculate bar position based on Y-axis tick values
+          // Map data value to the tick scale: 0, min, min+diff/3, min+2*diff/3, max
+          let ratio;
+          if (v <= 0) {
+            ratio = 0;
+          } else if (v <= minValue) {
+            // Between 0 and minValue: map to 0-1/4 of chart height
+            ratio = (v / minValue) * 0.25;
+          } else if (v <= minValue + (maxValue - minValue) / 3) {
+            // Between minValue and 1/3 point: map to 1/4-2/4 of chart height
+            const segmentRatio = (v - minValue) / ((maxValue - minValue) / 3);
+            ratio = 0.25 + segmentRatio * 0.25;
+          } else if (v <= minValue + (2 * (maxValue - minValue)) / 3) {
+            // Between 1/3 and 2/3 point: map to 2/4-3/4 of chart height
+            const segmentRatio = (v - (minValue + (maxValue - minValue) / 3)) / ((maxValue - minValue) / 3);
+            ratio = 0.5 + segmentRatio * 0.25;
+          } else {
+            // Between 2/3 point and maxValue: map to 3/4-4/4 of chart height
+            const segmentRatio = (v - (minValue + (2 * (maxValue - minValue)) / 3)) / ((maxValue - minValue) / 3);
+            ratio = 0.75 + segmentRatio * 0.25;
+          }
+          
+          const barY = m.top + ch - ratio * ch;
+          const barHeight = ratio * ch;
+          
+          const isMaxValue = v === maxValue;
+          const isMinValue = v === minValue;
+          
           return (
             <g key={i}>
-              <rect x={x} y={y} width={band} height={h} fill={colorByIndex[i]} rx={4} />
-              <title>
-                {labels[i]}: {formatNumber(v)}
-              </title>
+              {v <= 0 ? null : (
+                <rect 
+                  x={x} 
+                  y={barY} 
+                  width={band} 
+                  height={barHeight} 
+                  fill={colorByIndex[i]} 
+                  rx={4}
+                  onMouseEnter={(e) => {
+                    setHoveredBar(i);
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const svgRect = e.currentTarget.closest('svg')?.getBoundingClientRect();
+                    if (svgRect) {
+                      setMousePosition({
+                        x: (rect.left + rect.width / 2) - svgRect.left,
+                        y: rect.top - svgRect.top  // 툴팁 하단이 막대 최상단과 맞도록
+                      });
+                    }
+                  }}
+                  onMouseLeave={() => setHoveredBar(null)}
+                  style={{ cursor: 'pointer' }}
+                />
+              )}
+              {isMaxValue && barHeight > 30 && (
+                <text
+                  x={x + band / 2}
+                  y={barY + 20}
+                  textAnchor="middle"
+                  fontSize={14}
+                  fontWeight="bold"
+                  fill="white"
+                >
+                  Max
+                </text>
+              )}
+              {isMinValue && barHeight > 30 && (
+                <text
+                  x={x + band / 2}
+                  y={barY + 20}
+                  textAnchor="middle"
+                  fontSize={14}
+                  fontWeight="bold"
+                  fill="white"
+                >
+                  Min
+                </text>
+              )}
             </g>
           );
         })}
-
 
         {/* x labels */}
         {labels.map((lb, i) => {
@@ -99,14 +173,28 @@ export default function FloatingPopulationWeekChart({ labels, values, maxIndex =
               const y = m.top + scaleY(values[maxIndex]);
               return (
                 <>
-                  <line x1={x} y1={y - 8} x2={x} y2={m.top + ch} stroke="#9CA3AF" strokeDasharray="2,4" />
-                  <polygon points={`${x},${y - 14} ${x - 6},${y - 4} ${x + 6},${y - 4}`} fill="#F97316" />
+                  <image
+                    x={x - 15}
+                    y={y - 32}
+                    width={30}
+                    height={30}
+                    href="/images/ic_crown.png"
+                  />
                 </>
               );
             })()}
           </g>
         )}
-      </svg>
+        </svg>
+        
+        {/* Custom Tooltip */}
+        <ToolTip
+          isVisible={hoveredBar !== null}
+          position={mousePosition}
+          label={hoveredBar !== null ? labels[hoveredBar] : ""}
+          value={hoveredBar !== null ? formatPreciseNumber(values[hoveredBar]) : ""}
+        />
+      </div>
     </div>
   );
 }
@@ -117,5 +205,10 @@ function formatNumber(v: number) {
     const x = v / 10000;
     return `${x.toFixed(x >= 10 ? 0 : 1)}만명`;
   }
+  return `${v.toLocaleString()}명`;
+}
+
+function formatPreciseNumber(v: number) {
+  // Always show precise number with comma separator for hover tooltips
   return `${v.toLocaleString()}명`;
 }

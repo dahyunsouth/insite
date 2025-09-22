@@ -1,9 +1,12 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import PopulationToggle from "@/components/molecules/Detail/PopulationCard/PopulationToggle";
 import TimeSlotCard from "@/components/molecules/Detail/PopulationCard/FloatingPopulationCard";
 import ResidentPopulationCard from "@/components/molecules/Detail/PopulationCard/ResidentPopulationCard";
+import WorkPopulationGenderChart from "@/components/molecules/Detail/PopulationCard/Charts/WorkPopulationGenderChart";
+import WorkPopulationAgeChart from "@/components/molecules/Detail/PopulationCard/Charts/WorkPopulationAgeChart";
+import WorkPopulationInfoModal from "@/components/molecules/Detail/PopulationCard/InfoModal/WorkPopulationInfoModal";
 
 type Props = { 
   trdarCode: string | null;
@@ -12,23 +15,54 @@ type Props = {
 };
 
 type WorkResponse = {
-  quarter: string;
-  trdarCd: string;
-  trdarNm: string;
-  totalWorkers: number;
-  male: number;
-  female: number;
-  maleRate: number; // 0-100
-  femaleRate: number; // 0-100
-  age: { [k in "10" | "20" | "30" | "40" | "50" | "60+"]: number };
-  topAgeGroup: { key: string; value: number; rate: number };
+  httpStatus: {
+    error: boolean;
+    is4xxClientError: boolean;
+    is5xxServerError: boolean;
+    is1xxInformational: boolean;
+    is2xxSuccessful: boolean;
+    is3xxRedirection: boolean;
+  };
+  isSuccess: boolean;
+  message: string;
+  code: number;
+  result: {
+    stdrYyquCd: string;
+    trdarSeCd: string;
+    trdarSeCdNm: string;
+    trdarCd: number;
+    trdarCdNm: string;
+    totWrcPopltnCo: number;
+    mlWrcPopltnCo: number;
+    fmlWrcPopltnCo: number;
+    agrde10WrcPopltnCo: number;
+    agrde20WrcPopltnCo: number;
+    agrde30WrcPopltnCo: number;
+    agrde40WrcPopltnCo: number;
+    agrde50WrcPopltnCo: number;
+    agrde60AboveWrcPopltnCo: number;
+    mag10WrcPopltnCo: number;
+    mag20WrcPopltnCo: number;
+    mag30WrcPopltnCo: number;
+    mag40WrcPopltnCo: number;
+    mag50WrcPopltnCo: number;
+    mag60AboveWrcPopltnCo: number;
+    fag10WrcPopltnCo: number;
+    fag20WrcPopltnCo: number;
+    fag30WrcPopltnCo: number;
+    fag40WrcPopltnCo: number;
+    fag50WrcPopltnCo: number;
+    fag60AboveWrcPopltnCo: number;
+  };
 };
 
 export default function WorkPopulationCard({ trdarCode, populationType, onPopulationTypeChange }: Props) {
   const [data, setData] = useState<WorkResponse | null>(null);
-  const [quarter, setQuarter] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+  const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     let aborted = false;
@@ -40,13 +74,7 @@ export default function WorkPopulationCard({ trdarCode, populationType, onPopula
       setLoading(true);
       setError(null);
       try {
-        const qRes = await fetch("/api/seoul/latest-quarter", { cache: "no-store" });
-        if (!qRes.ok) throw new Error("latest-quarter failed");
-        const q = (await qRes.json()).quarter as string;
-        if (aborted) return;
-        setQuarter(q);
-
-        const url = `/api/seoul/trade-areas/workers/detail?quarter=${q}&trdar=${trdarCode}`;
+        const url = `/api/v1/data/info/wrc-popltn?trdarCd=${trdarCode}`;
         const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) throw new Error("workers detail failed");
         const payload = (await res.json()) as WorkResponse;
@@ -64,20 +92,6 @@ export default function WorkPopulationCard({ trdarCode, populationType, onPopula
     };
   }, [trdarCode]);
 
-  const ageList = useMemo(() => {
-    const entries: Array<{ label: string; value: number }> = data
-      ? [
-          { label: "10대", value: data.age["10"] },
-          { label: "20대", value: data.age["20"] },
-          { label: "30대", value: data.age["30"] },
-          { label: "40대", value: data.age["40"] },
-          { label: "50대", value: data.age["50"] },
-          { label: "60대+", value: data.age["60+"] },
-        ]
-      : [];
-    const max = entries.reduce((m, e) => Math.max(m, e.value), 0);
-    return { entries, max };
-  }, [data]);
 
   // 토글 상태에 따라 다른 카드 렌더링
   if (populationType === "유동") {
@@ -91,77 +105,97 @@ export default function WorkPopulationCard({ trdarCode, populationType, onPopula
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h3 className="text-[18px] font-semibold text-gray-900">직장인구</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-[18px] font-semibold text-gray-900">직장인구</h3>
+          <button
+            ref={buttonRef}
+            type="button"
+            onClick={() => {
+              if (buttonRef.current) {
+                const rect = buttonRef.current.getBoundingClientRect();
+                setModalPosition({
+                  top: rect.top,
+                  left: rect.right
+                });
+              }
+              setIsInfoModalOpen(!isInfoModalOpen);
+            }}
+            className="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-gray-200 text-white transition-colors hover:bg-gray-400 active:bg-gray-600"
+            aria-label="직장인구 정보"
+          >
+            <span className="text-xs font-bold">i</span>
+          </button>
+          {data?.result?.stdrYyquCd && (
+            <span className="text-xs text-gray-400">
+              {data.result.stdrYyquCd.slice(0, 4)}년도 {data.result.stdrYyquCd.slice(4)}분기 기준
+            </span>
+          )}
+        </div>
         <PopulationToggle
           selected={populationType}
           onChange={onPopulationTypeChange}
         />
       </div>
 
-      {/* Caption */}
-      <div className="mt-1 text-right text-xs text-gray-400">{quarter ?? ""}</div>
 
       {/* Grid KPIs */}
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {/* Total workers */}
         <KpiTile
           title="총 직장인구"
-          primary={data ? `${formatNumber(data.totalWorkers)}명` : ""}
+          primary={data ? `${formatNumber(data.result.totWrcPopltnCo)}명` : ""}
           secondary={
             data
-              ? `남 ${formatPercent(data.maleRate)} · 여 ${formatPercent(data.femaleRate)}`
+              ? `남 ${formatPercent((data.result.mlWrcPopltnCo / data.result.totWrcPopltnCo) * 100)} · 여 ${formatPercent((data.result.fmlWrcPopltnCo / data.result.totWrcPopltnCo) * 100)}`
               : ""
           }
         />
         {/* Male count */}
         <KpiTile
           title="남성"
-          primary={data ? `${formatNumber(data.male)}명` : ""}
-          secondary={data ? `비중 ${formatPercent(data.maleRate)}` : ""}
+          primary={data ? `${formatNumber(data.result.mlWrcPopltnCo)}명` : ""}
+          secondary={data ? `비중 ${formatPercent((data.result.mlWrcPopltnCo / data.result.totWrcPopltnCo) * 100)}` : ""}
         />
         {/* Female count */}
         <KpiTile
           title="여성"
-          primary={data ? `${formatNumber(data.female)}명` : ""}
-          secondary={data ? `비중 ${formatPercent(data.femaleRate)}` : ""}
+          primary={data ? `${formatNumber(data.result.fmlWrcPopltnCo)}명` : ""}
+          secondary={data ? `비중 ${formatPercent((data.result.fmlWrcPopltnCo / data.result.totWrcPopltnCo) * 100)}` : ""}
         />
       </div>
 
       {/* Gender composition */}
-      <div className="mt-4 rounded-2xl border border-gray-200 p-4">
-        <div className="text-sm font-semibold text-gray-700">성별 구성</div>
-        <div className="mt-2">
-          {data ? (
-            <SegmentBar
-              leftLabel={`남 ${formatPercent(data.maleRate)}`}
-              rightLabel={`여 ${formatPercent(data.femaleRate)}`}
-              leftRate={clamp01(data.maleRate / 100)}
-            />
-          ) : (
-            <Placeholder />
-          )}
+      {data ? (
+        <div className="mt-4">
+          <WorkPopulationGenderChart 
+            maleRate={(data.result.mlWrcPopltnCo / data.result.totWrcPopltnCo) * 100} 
+            femaleRate={(data.result.fmlWrcPopltnCo / data.result.totWrcPopltnCo) * 100}
+            maleCount={data.result.mlWrcPopltnCo}
+            femaleCount={data.result.fmlWrcPopltnCo}
+          />
         </div>
-      </div>
+      ) : (
+        <div className="mt-4 rounded-2xl border border-gray-200 p-4">
+          <div className="text-sm font-semibold text-gray-700">성별 구성</div>
+          <div className="mt-2">
+            <Placeholder />
+          </div>
+        </div>
+      )}
 
       {/* Age distribution */}
-      <div className="mt-4 rounded-2xl border border-gray-200 p-4">
-        <div className="text-sm font-semibold text-gray-700">연령대 분포</div>
-        <div className="mt-2 space-y-2">
-          {data ? (
-            ageList.entries.map((e, idx) => (
-              <AgeBar
-                key={idx}
-                label={e.label}
-                value={e.value}
-                max={Math.max(1, ageList.max)}
-                highlight={data.topAgeGroup?.key?.startsWith(e.label.replace("대", ""))}
-              />
-            ))
-          ) : (
-            <div className="h-[120px] flex items-center justify-center text-sm text-gray-400">데이터가 없습니다.</div>
-          )}
+      {data ? (
+        <div className="mt-4">
+          <WorkPopulationAgeChart data={data.result} />
         </div>
-      </div>
+      ) : (
+        <div className="mt-4 rounded-2xl border border-gray-200 p-4">
+          <div className="text-sm font-semibold text-gray-700">연령대 분포</div>
+          <div className="mt-2">
+            <div className="h-[120px] flex items-center justify-center text-sm text-gray-400">데이터가 없습니다.</div>
+          </div>
+        </div>
+      )}
 
       {/* Empty/Loading/Error */}
       {trdarCode == null ? (
@@ -171,6 +205,13 @@ export default function WorkPopulationCard({ trdarCode, populationType, onPopula
       ) : error ? (
         <div className="mt-3 text-sm text-rose-600">데이터를 불러오지 못했어요. 잠시 후 다시 시도해주세요.</div>
       ) : null}
+
+      {/* Info Modal */}
+      <WorkPopulationInfoModal 
+        isOpen={isInfoModalOpen} 
+        onClose={() => setIsInfoModalOpen(false)}
+        position={modalPosition}
+      />
     </div>
   );
 }
@@ -185,49 +226,6 @@ function KpiTile({ title, primary, secondary, primaryClass = "" }: { title: stri
   );
 }
 
-function SegmentBar({
-  leftRate,
-  leftLabel,
-  rightLabel,
-  leftColor = "#3B82F6",
-  rightColor = "#EF4444",
-}: {
-  leftRate: number;
-  leftLabel: string;
-  rightLabel: string;
-  leftColor?: string;
-  rightColor?: string;
-}) {
-  const leftPct = Math.round(clamp01(leftRate) * 100);
-  const rightPct = 100 - leftPct;
-  return (
-    <div>
-      <div className="h-3 w-full overflow-hidden rounded-full bg-gray-100">
-        <div className="h-full" style={{ width: `${leftPct}%`, backgroundColor: leftColor }} />
-        <div className="h-full" style={{ width: `${rightPct}%`, backgroundColor: rightColor, marginTop: -12 }} />
-      </div>
-      <div className="mt-2 flex items-center justify-between text-xs text-gray-600">
-        <span>{leftLabel}</span>
-        <span>{rightLabel}</span>
-      </div>
-    </div>
-  );
-}
-
-function AgeBar({ label, value, max, highlight = false }: { label: string; value: number; max: number; highlight?: boolean }) {
-  const pct = Math.round((value / Math.max(1, max)) * 100);
-  return (
-    <div className="flex items-center gap-3">
-      <div className="w-12 shrink-0 text-xs text-gray-600 text-right">{label}</div>
-      <div className="flex-1">
-        <div className="h-3 w-full overflow-hidden rounded-full bg-gray-100">
-          <div className="h-full" style={{ width: `${pct}%`, backgroundColor: highlight ? "#2563EB" : "#9CA3AF" }} />
-        </div>
-      </div>
-      <div className="w-20 shrink-0 text-right text-xs text-gray-600">{formatNumber(value)}명</div>
-    </div>
-  );
-}
 
 function Placeholder() {
   return <div className="h-3 w-full rounded-full bg-gray-100" />;
@@ -246,7 +244,6 @@ function formatPercent(v: number) {
   return `${v.toFixed(digits)}%`;
 }
 
-function clamp01(v: number) {
-  return Math.max(0, Math.min(1, v));
-}
+
+
 

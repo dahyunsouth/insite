@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
-type AreaDetailModalTemplateProps = {
+type DetailNavbarTemplateProps = {
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
   onClose?: () => void;
@@ -16,7 +16,7 @@ type AreaDetailModalTemplateProps = {
   children?: React.ReactNode;
 };
 
-export default function AreaDetailModalTemplate({
+export default function DetailNavbarTemplate({
   title,
   subtitle,
   onClose,
@@ -27,13 +27,13 @@ export default function AreaDetailModalTemplate({
   sectionAside,
   sectionNav,
   children,
-}: AreaDetailModalTemplateProps) {
+}: DetailNavbarTemplateProps) {
   const asideNode = sectionAside ?? sectionNav;
 
   return (
     <div
       className={
-        "relative w-full rounded-3xl border border-black/5 shadow-xl max-h-[85vh] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden " +
+        "relative w-full h-full rounded-3xl border border-black/5 shadow-xl overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden " +
         (className ?? "")
       }
       style={{ backgroundColor: "#F8F9FA" }}
