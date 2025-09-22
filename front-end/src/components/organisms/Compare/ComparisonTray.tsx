@@ -12,33 +12,32 @@ type ComparisonTrayProps = {
 export default function ComparisonTray({ className, comparisonItems, onRemoveItem, onCompareClick }: ComparisonTrayProps) {
 
   return (
-    <div className={`fixed bottom-6 z-[60] px-4 max-w-[calc(100vw-2rem)] ${className || ""}`} 
-         style={{ left: 'calc(25vw + 0.5rem + 37.5vw - 50%)' }}>
-      <div className="bg-gray-800 rounded-3xl px-6 py-4 shadow-lg flex items-center gap-4">
+    <div className={`fixed bottom-6 right-20 z-[60] ${className || ""}`}>
+      <div className="bg-gray-800 rounded-3xl px-4 py-3 shadow-lg flex items-center gap-3">
         {/* 담긴 상권 카드들 - 2개 슬롯 고정 */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           {/* 첫 번째 상권 슬롯 */}
           <div className="relative">
             {comparisonItems[0] ? (
               <>
-                <div className="bg-white rounded-2xl p-3 min-w-[120px] shadow-md">
-                  <div className="text-sm font-medium text-gray-900">
+                <div className="bg-white rounded-xl p-2 min-w-[80px] max-w-[100px] shadow-md">
+                  <div className="text-xs font-medium text-gray-900 truncate">
                     {comparisonItems[0].trdarCdNm}
                   </div>
                 </div>
                 {/* X 버튼 - 비교함에서 제거 */}
                 <button 
                   onClick={() => onRemoveItem?.(comparisonItems[0].trdarCd)}
-                  className="absolute -top-2 -right-2 w-6 h-6 bg-black rounded-full flex items-center justify-center text-white text-sm hover:bg-gray-700 transition-colors"
+                  className="absolute -top-1 -right-1 w-4 h-4 bg-black rounded-full flex items-center justify-center text-white text-xs hover:bg-gray-700 transition-colors"
                   title="비교함에서 제거"
                 >
                   ×
                 </button>
               </>
             ) : (
-              <div className="bg-gray-200 rounded-2xl p-3 min-w-[120px] shadow-md border-2 border-dashed border-gray-300">
-                <div className="text-sm font-medium text-gray-400 text-center">
-                  상권 추가
+              <div className="bg-gray-200 rounded-xl p-2 min-w-[80px] max-w-[100px] shadow-md border-2 border-dashed border-gray-300">
+                <div className="text-xs font-medium text-gray-400 text-center">
+                  추가
                 </div>
               </div>
             )}
@@ -48,24 +47,24 @@ export default function ComparisonTray({ className, comparisonItems, onRemoveIte
           <div className="relative">
             {comparisonItems[1] ? (
               <>
-                <div className="bg-white rounded-2xl p-3 min-w-[120px] shadow-md">
-                  <div className="text-sm font-medium text-gray-900">
+                <div className="bg-white rounded-xl p-2 min-w-[80px] max-w-[100px] shadow-md">
+                  <div className="text-xs font-medium text-gray-900 truncate">
                     {comparisonItems[1].trdarCdNm}
                   </div>
                 </div>
                 {/* X 버튼 - 비교함에서 제거 */}
                 <button 
                   onClick={() => onRemoveItem?.(comparisonItems[1].trdarCd)}
-                  className="absolute -top-2 -right-2 w-6 h-6 bg-black rounded-full flex items-center justify-center text-white text-sm hover:bg-gray-700 transition-colors"
+                  className="absolute -top-1 -right-1 w-4 h-4 bg-black rounded-full flex items-center justify-center text-white text-xs hover:bg-gray-700 transition-colors"
                   title="비교함에서 제거"
                 >
                   ×
                 </button>
               </>
             ) : (
-              <div className="bg-gray-200 rounded-2xl p-3 min-w-[120px] shadow-md border-2 border-dashed border-gray-300">
-                <div className="text-sm font-medium text-gray-400 text-center">
-                  상권 추가
+              <div className="bg-gray-200 rounded-xl p-2 min-w-[80px] max-w-[100px] shadow-md border-2 border-dashed border-gray-300">
+                <div className="text-xs font-medium text-gray-400 text-center">
+                  추가
                 </div>
               </div>
             )}
@@ -75,7 +74,7 @@ export default function ComparisonTray({ className, comparisonItems, onRemoveIte
         
         {/* 비교하기 버튼 */}
         <button 
-          className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-2xl text-sm font-medium transition-colors ml-auto"
+          className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-xl text-xs font-medium transition-colors ml-auto"
           onClick={() => {
             if (comparisonItems.length >= 1) {
               // 첫 번째 상권은 있으면 사용, 없으면 빈 객체

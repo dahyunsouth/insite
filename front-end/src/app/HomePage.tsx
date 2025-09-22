@@ -14,6 +14,8 @@ import NotificationBar from '@/components/atoms/Common/NotificationBar';
 import CompareTradeAreasModal from '@/components/organisms/Compare/CompareTradeAreasModal';
 import ComparisonTray from '@/components/organisms/Compare/ComparisonTray';
 import TradeAreaData from '@/data/TradeAreaValue.json';
+import { useNotification } from '@/components/map/useNotification';
+import Notification from '@/components/map/Notification';
 
 // 지도 타입 변경 핸들러 컴포넌트
 function MapTypeHandler({ 
@@ -64,6 +66,7 @@ const getTradeAreaNameByCode = (trdarCode: string): string | null => {
 
 export default function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { notification, showNotification, hideNotification } = useNotification();
   const [showLogoutNotification, setShowLogoutNotification] = useState(false);
   const [showLoginNotification, setShowLoginNotification] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -84,19 +87,31 @@ export default function HomePage() {
       // 이미 있는 상권인지 확인
       const exists = prev.some(item => item.trdarCd === trdarCd);
       if (exists) {
+        console.log('비교함에 이미 존재하는 상권입니다:', trdarCdNm);
+        showNotification('이미 비교함에 담긴 상권입니다.');
         return prev; // 이미 있으면 추가하지 않음
       }
       // 최대 2개까지만 추가 가능
       if (prev.length >= 2) {
+        console.log('비교함이 가득참 - 최대 2개까지만 담을 수 있습니다. 시도한 상권:', trdarCdNm);
+        showNotification('비교함에는 최대 2개까지만 담을 수 있습니다.');
         return prev;
       }
+      console.log('비교함에 상권 추가 성공:', trdarCdNm);
+      showNotification('비교함에 추가되었습니다.');
       return [...prev, { trdarCd, trdarCdNm }];
     });
   };
 
   // 비교함에서 상권 제거
   const removeFromComparisonTray = (trdarCd: string) => {
-    setComparisonTray(prev => prev.filter(item => item.trdarCd !== trdarCd));
+    setComparisonTray(prev => {
+      const removedItem = prev.find(item => item.trdarCd === trdarCd);
+      if (removedItem) {
+        console.log('비교함에서 상권 제거:', removedItem.trdarCdNm);
+      }
+      return prev.filter(item => item.trdarCd !== trdarCd);
+    });
   };
 
   // 디버깅용 useEffect
@@ -533,6 +548,15 @@ export default function HomePage() {
         onClose={() => setShowLogoutNotification(false)}
         duration={3000}
       />
+
+      {/* 토스트 알림 */}
+      <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[100]">
+        <Notification
+          message={notification.message}
+          isVisible={notification.isVisible}
+          onClose={hideNotification}
+        />
+      </div>
 
     </div>
   );

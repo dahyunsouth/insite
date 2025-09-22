@@ -103,10 +103,10 @@ export default function DetailNavbar({ open, onClose, title, subtitle, trdarCode
       setIsComparing(false);
       showNotification('비교함에서 제거되었습니다.');
     } else {
-      // 비교함에 추가
+      // 비교함에 추가 - HomePage에서 토스트 알림을 처리하므로 여기서는 제거
       onAddToComparison?.(currentCode, currentTrdarCdNm);
       setIsComparing(true);
-      showNotification('비교함에 추가되었습니다.');
+      // showNotification('비교함에 추가되었습니다.'); // 제거 - HomePage에서 처리
     }
     
     console.log("비교하기 클릭:", currentCode, "비교 상태:", !isCurrentlyInComparison);
