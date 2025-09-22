@@ -13,7 +13,7 @@ const FirstLeftNavbar = ({ onSearchResultsShow }: FirstLeftNavbarProps) => {
         <TotalSearchBar onSearchResultsShow={onSearchResultsShow} />
       </div>
       <div className="w-full">
-        <TotalLiveRankBar />
+        {/* <TotalLiveRankBar /> */}
       </div>
       <div className='w-full'>
         {/* <TotalFilterBar /> */}
