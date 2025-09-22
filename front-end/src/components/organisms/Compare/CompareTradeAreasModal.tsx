@@ -46,9 +46,13 @@ type CompareTradeAreasModalProps = {
   modalType?: 'compare' | 'saved';
   /** Pre-selected trade areas from saved areas */
   preSelectedTradeAreas?: { trdarCd: string; trdarCdNm: string }[];
+  /** Pre-selected trade area 1 from comparison tray */
+  selectedTradeArea1?: { trdarCd: string; trdarCdNm: string } | null;
+  /** Pre-selected trade area 2 from comparison tray */
+  selectedTradeArea2?: { trdarCd: string; trdarCdNm: string } | null;
 };
 
-export default function CompareTradeAreasModal({ open, onClose, leftOpen = true, modalType = 'compare', preSelectedTradeAreas }: CompareTradeAreasModalProps) {
+export default function CompareTradeAreasModal({ open, onClose, leftOpen = true, modalType = 'compare', preSelectedTradeAreas, selectedTradeArea1, selectedTradeArea2 }: CompareTradeAreasModalProps) {
   const [selectedPc, setSelectedPc] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<'analysis' | 'data'>('analysis');
   const [selectionA, setSelectionA] = useState<TradeAreaSelection>({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
@@ -107,6 +111,31 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
       });
     }
   }, [open, preSelectedTradeAreas]);
+
+  // Auto-select trade areas from comparison tray
+  useEffect(() => {
+    if (!open || !selectedTradeArea1 || !selectedTradeArea2) return;
+    
+    // Reset selections first
+    setSelectionA({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
+    setSelectionB({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
+    
+    // Set trade area 1 to selection A
+    const tradeAreaInfo1 = TRADE_AREA_BY_CODE.get(selectedTradeArea1.trdarCd);
+    setSelectionA({ 
+      signguCode: tradeAreaInfo1?.signguCode || null, 
+      adstrdCode: tradeAreaInfo1?.adstrdCode || null, 
+      tradeAreaCode: selectedTradeArea1.trdarCd 
+    });
+    
+    // Set trade area 2 to selection B
+    const tradeAreaInfo2 = TRADE_AREA_BY_CODE.get(selectedTradeArea2.trdarCd);
+    setSelectionB({ 
+      signguCode: tradeAreaInfo2?.signguCode || null, 
+      adstrdCode: tradeAreaInfo2?.adstrdCode || null, 
+      tradeAreaCode: selectedTradeArea2.trdarCd 
+    });
+  }, [open, selectedTradeArea1, selectedTradeArea2]);
 
   // Body scroll lock while modal open
   useEffect(() => {
@@ -396,7 +425,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
                 <div className={showThird ? "col-span-2" : ""}>
                   {(() => {
                   const pcs: PcMeta[] = [
-                    { id:1, code:"지속성", name:"상권 생존 가능성", features:["운영_개월_평균","폐업_개월_평균","개업률"], meaning:"상권의 생존 가능성을 ", highText:"운영 60개월 이상, 폐업 36개월 이상, 개업률 10% 이상의 매우 안정적인 상권", lowText:"운영 12개월 미만, 폐업 6개월 미만, 개업률 1% 미만의 극도로 불안정한 상권" },
+                    { id:1, code:"지속성", name:"상권 생존 가능성", features:["운영_개월_평균","폐업_개월_평균","개업률"], meaning:"상권의 생존력을 나타내는 지표입니다.", highText:"운영 60개월 이상, 폐업 36개월 이상, 개업률 10% 이상의 매우 안정적인 상권", lowText:"운영 12개월 미만, 폐업 6개월 미만, 개업률 1% 미만의 극도로 불안정한 상권" },
                     { id:2, code:"수익성", name:"시장 잠재력", features:["시장_잠재력","수요_공급_균형","소득_수준","집객시설","예측_매출"], meaning:"상권의 수익성과 시장 잠재력", highText:"유사업종 50개 이상, 포화도 10% 이하, 유동인구 10만명/점포 이상, 소득 400만원 이상, 집객시설 50개 이상, 예측매출 1억원 이상의 높은 수익성 상권", lowText:"유사업종 10개 미만, 포화도 50% 초과, 유동인구 2만명/점포 미만, 소득 200만원 미만, 집객시설 10개 미만, 예측매출 1천만원 미만의 낮은 수익성 상권" },
                     { id:3, code:"접근성", name:"교통편의성", features:["지하철역_거리","버스정류장_거리"], meaning:"상권의 접근성과 교통편의성", highText:"지하철역 200m 이내, 버스정류장 100m 이내의 교통편의성이 매우 좋은 상권", lowText:"지하철역 3km 초과, 버스정류장 1km 초과의 교통편의성이 떨어지는 상권" },
                     { id:4, code:"위험도", name:"사업 위험 요소 (벌점 방식)", features:["유동인구/점포수","폐업_개월","폐업률"], meaning:"상권의 위험도와 사업 위험 요소", highText:"유동인구 10만명/점포 이상, 폐업 24개월 이상, 폐업률 2% 이하의 위험이 낮은 안정적 상권", lowText:"유동인구 2만명/점포 미만, 폐업 6개월 미만, 폐업률 20% 초과의 위험이 높은 불안정 상권" },
