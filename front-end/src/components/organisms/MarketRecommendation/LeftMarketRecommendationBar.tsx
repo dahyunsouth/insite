@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import MarketRecommendationResultRank from '../../atoms/MarketRecommendation/MarketRecommendationResultRank';
+import { RecommendationItem } from '@/types/recommendation';
 
 interface FilterItem {
   id: number;
@@ -18,11 +20,14 @@ interface LeftMarketRecommendationBarProps {
     maxFee: number;
     hasInteracted: boolean;
   } | null;
+  recommendationResults?: RecommendationItem[];
+  selectedItem?: RecommendationItem | null;
+  onItemSelect?: (item: RecommendationItem | null) => void;
   onReset?: () => void;
   onStepClick?: (step: number) => void;
 }
 
-const LeftMarketRecommendationBar: React.FC<LeftMarketRecommendationBarProps> = ({ selectedDistrict, selections, onReset, onStepClick }) => {
+const LeftMarketRecommendationBar: React.FC<LeftMarketRecommendationBarProps> = ({ selectedDistrict, selections, recommendationResults, selectedItem, onItemSelect, onReset, onStepClick }) => {
   const [filters, setFilters] = useState<FilterItem[]>([
     {
       id: 1,
@@ -131,7 +136,7 @@ const LeftMarketRecommendationBar: React.FC<LeftMarketRecommendationBarProps> = 
     className="
     flex flex-col justify-between
     h-full bg-white rounded-2xl shadow-sm
-    border border-gray-200 p-6 max-w-sm mx-auto">
+    border border-gray-200 p-6 w-full">
       {/* 필터 목록 */}
       <div className="space-y-4 mb-6">
         {filters.map((filter) => (
@@ -167,13 +172,25 @@ const LeftMarketRecommendationBar: React.FC<LeftMarketRecommendationBarProps> = 
         ))}
       </div>
 
-      {/* 초기화 버튼 */}
-      <button
-        onClick={handleReset}
-        className="cursor-pointer w-full bg-gray-300 hover:bg-gray-400 text-gray-500 hover:text-white py-3 px-4 rounded-lg transition-colors duration-200"
-      >
-        초기화
-      </button>
+      <div>
+      {/* 추천 순위 결과 - 결과가 있을 때만 표시 */}
+      {recommendationResults && recommendationResults.length > 0 && (
+        <div className="mb-6">
+          <MarketRecommendationResultRank 
+            results={recommendationResults} 
+            onItemClick={onItemSelect}
+          />
+        </div>
+      )}
+
+        {/* 초기화 버튼 */}
+        <button
+          onClick={handleReset}
+          className="cursor-pointer w-full bg-red-100 text-red-700 hover:bg-red-700 hover:text-white py-3 px-4 rounded-lg transition-colors duration-200"
+        >
+          초기화
+        </button>
+      </div>
     </div>
   );
 };

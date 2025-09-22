@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import MarketRecommendationMap from '@/components/atoms/MarketRecommendation/MarketRecommendationMap';
 import LeftMarketRecommendationBar from '@/components/organisms/MarketRecommendation/LeftMarketRecommendationBar';
 import MarketTypeStore from '@/components/organisms/MarketRecommendation/MarketTypeStore';
+import { RecommendationItem } from '@/types/recommendation';
 
 interface MarketRecommendationProps {
   onClose: () => void;
@@ -25,6 +26,8 @@ export default function MarketRecommendation({ onClose }: MarketRecommendationPr
     maxFee: number;
     hasInteracted: boolean;
   } | null>(null);
+  const [recommendationResults, setRecommendationResults] = useState<RecommendationItem[]>([]);
+  const [selectedItem, setSelectedItem] = useState<RecommendationItem | null>(null);
 
   const handleBackToHome = () => {
     onClose();
@@ -57,9 +60,20 @@ export default function MarketRecommendation({ onClose }: MarketRecommendationPr
     setSelections(newSelections);
   };
 
+  const handleRecommendationResultsChange = (results: RecommendationItem[]) => {
+    setRecommendationResults(results);
+  };
+
+  const handleItemSelect = (item: RecommendationItem | null) => {
+    console.log('Item selected in MarketRecommendation:', item);
+    setSelectedItem(item);
+  };
+
   const handleReset = () => {
     setSelectedDistrict({ id: null, name: null });
     setSelections(null);
+    setRecommendationResults([]);
+    setSelectedItem(null);
     setCurrentStep(1);
     setShowMap(true);
   };
@@ -100,6 +114,9 @@ export default function MarketRecommendation({ onClose }: MarketRecommendationPr
             <LeftMarketRecommendationBar
               selectedDistrict={selectedDistrict.name}
               selections={selections}
+              recommendationResults={recommendationResults}
+              selectedItem={selectedItem}
+              onItemSelect={handleItemSelect}
               onReset={handleReset}
               onStepClick={handleStepClick}
             />
@@ -115,6 +132,9 @@ export default function MarketRecommendation({ onClose }: MarketRecommendationPr
               <MarketTypeStore
                 selectedDistrictName={selectedDistrict.name}
                 onSelectionsChange={handleSelectionsChange}
+                onRecommendationResultsChange={handleRecommendationResultsChange}
+                selectedItem={selectedItem}
+                onItemSelect={handleItemSelect}
                 onBack={handleBack}
                 initialSelections={selections}
               />

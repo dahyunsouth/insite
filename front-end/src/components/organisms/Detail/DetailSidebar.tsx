@@ -1,151 +1,34 @@
-﻿"use client";
+"use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
-import DetailNavbarTemplate from "@/components/templates/Detail/AreaDetailModalTemplate";
-import TradeAreaSelect from "@/components/molecules/Detail/TradeAreaSelect";
-import TimeSlotCard from "@/components/molecules/Detail/PopulationCard/FloatingPopulationCard";
-import StoreCard from "@/components/molecules/Detail/StoreCard/StoreCard";
-import ScoreCard from "@/components/molecules/Detail/ScoreCard";
-import SalesCard from "@/components/molecules/Detail/SalesCard/SalesCard";
-import MarketChangeIndicatorCard from "@/components/molecules/Detail/MarketChangeIndicator/MarketChangeIndicatorCard";
+import React, { useEffect, useState } from "react";
 import ActionButtons from "@/components/atoms/Detail/ActionButtons";
 
-type DetailNavbarProps = {
-  open: boolean;
-  onClose: () => void;
-  title?: string;
-  subtitle?: string;
-  trdarCode?: string | null;
-  onSelectTradeArea?: (opt: { code: string; name: string } | null) => void;
-};
-
-/**
- * Organism: DetailNavbar
- * - Renders portal + backdrop + ESC close
- * - Uses the Detail template for visuals (container/header/section-nav)
- */
-export default function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea }: DetailNavbarProps) {
-  const [selected, setSelected] = useState<{ code: string; name: string } | null>(null);
-  const [populationType, setPopulationType] = useState<"유동" | "직장" | "상주">("유동");
-  const [isSaved, setIsSaved] = useState(false);
-  const [isComparing, setIsComparing] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-    const handle = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handle);
-    return () => window.removeEventListener("keydown", handle);
-  }, [open, onClose]);
-
-  const computedTitle = useMemo(() => {
-    if (selected?.name) {
-      const suffix = " 상권 분석";
-      return `${selected.name}${suffix}`;
-    }
-    return title;
-  }, [selected, title]);
-
-  useEffect(() => {
-    // Debug log: verify selected and computed title changes
-    // eslint-disable-next-line no-console
-    console.log("[DetailNavbar] selection changed:", selected, "computedTitle:", computedTitle);
-  }, [selected, computedTitle]);
-
-  const handleCompare = () => {
-    setIsComparing(!isComparing);
-    console.log("비교하기 클릭:", selected, "비교 상태:", !isComparing);
-  };
-
-  const handleSave = () => {
-    setIsSaved(!isSaved);
-    console.log("저장하기 클릭:", selected, "저장 상태:", !isSaved);
-  };
-
-  if (!open) return null;
-
-  return createPortal(
-    <div className="fixed inset-0 z-50 flex items-start justify-end">
-      {/* backdrop
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} /> */}
-
-      {/* modal */}
-      <div className="relative z-10 w-[calc(75vw-1rem)] h-[calc(100vh-1rem)] mt-2 mr-2" onClick={(e) => e.stopPropagation()}>
-        <DetailNavbarTemplate
-          title={computedTitle}
-          subtitle={subtitle}
-          onClose={onClose}
-          headerRight={
-            // 상권 검색 기능 주석처리
-            // <TradeAreaSelect
-            //   onChange={(opt) => {
-            //     // Debug log: dropdown change event
-            //     // eslint-disable-next-line no-console
-            //     console.log("[DetailNavbar] dropdown onChange:", opt);
-            //     setSelected(opt);
-            //     onSelectTradeArea?.(opt);
-            //   }}
-            // />
-            null
-          }
-          sectionAside={
-            <DetailAsideNav 
-              populationType={populationType} 
-              onPopulationTypeChange={setPopulationType}
-              onCompare={handleCompare}
-              onSave={handleSave}
-              isSaved={isSaved}
-              isComparing={isComparing}
-            />
-          }
-        >
-          <>
-            <section id="score-section" className="scroll-mt-64">
-              <ScoreCard trdarCode={selected?.code ?? null} />
-            </section>
-            <section id="market-change-section" className="scroll-mt-64">
-              <MarketChangeIndicatorCard trdarCode={trdarCode ?? selected?.code ?? null} />
-            </section>
-            <section id="pop-section" className="scroll-mt-64">
-              <TimeSlotCard 
-                trdarCode={trdarCode ?? selected?.code ?? null} 
-                populationType={populationType}
-                onPopulationTypeChange={setPopulationType}
-              />
-              {/* Debug: trdarCode = {trdarCode ?? selected?.code ?? null} */}
-            </section>
-            <section id="sales-section" className="scroll-mt-64">
-              <SalesCard trdarCode={trdarCode ?? selected?.code ?? null} />
-            </section>
-            <section id="store-section" className="scroll-mt-64">
-              <StoreCard trdarCode={trdarCode ?? selected?.code ?? null} />
-            </section>
-          </>
-        </DetailNavbarTemplate>
-      </div>
-    </div>,
-    document.body
-  );
-}
-
-function DetailAsideNav({ 
-  populationType, 
-  onPopulationTypeChange,
-  onCompare,
-  onSave,
-  isSaved,
-  isComparing
-}: { 
+type DetailSidebarProps = {
   populationType: "유동" | "직장" | "상주";
   onPopulationTypeChange: (type: "유동" | "직장" | "상주") => void;
   onCompare?: () => void;
   onSave?: () => void;
   isSaved?: boolean;
   isComparing?: boolean;
-}) {
+};
+
+/**
+ * Organism: DetailSidebar
+ * - Manages the right side navigation and action buttons
+ * - Handles scroll highlighting and navigation
+ */
+export default function DetailSidebar({ 
+  populationType, 
+  onPopulationTypeChange,
+  onCompare,
+  onSave,
+  isSaved,
+  isComparing
+}: DetailSidebarProps) {
+  const [activeIndex, setActiveIndex] = useState(0);
+
   const items = [
+    { id: "intro-section", label: "상권 소개" },
     { id: "score-section", label: "종합추천점수" },
     { id: "market-change-section", label: "상권 변화 지표" },
     { id: "population-section", label: "인구", isParent: true },
@@ -155,10 +38,9 @@ function DetailAsideNav({
     { id: "sales-section", label: "매출" },
     { id: "store-section", label: "점포" },
   ];
-  const [activeIndex, setActiveIndex] = React.useState(0);
 
   // 개선된 스크롤 하이라이터 로직
-  React.useEffect(() => {
+  useEffect(() => {
     // 모달 컨테이너 찾기 - 여러 방법 시도
     let modalContainer = document.querySelector('[style*="backgroundColor: #F8F9FA"].overflow-y-auto') as HTMLElement;
     
@@ -182,22 +64,22 @@ function DetailAsideNav({
       return;
     }
     
-
     let scrollTimeout: NodeJS.Timeout;
     let isAtTop = false;
     let isAtBottom = false;
     let lastActiveIndex = activeIndex; // 이전 상태를 추적하여 불필요한 리렌더링 방지
 
     const getSectionIndex = (sectionId: string) => {
-      if (sectionId === 'score-section') return 0;
-      if (sectionId === 'market-change-section') return 1;
+      if (sectionId === 'intro-section') return 0;
+      if (sectionId === 'score-section') return 1;
+      if (sectionId === 'market-change-section') return 2;
       if (sectionId === 'pop-section') {
-        if (populationType === '유동') return 3;
-        if (populationType === '직장') return 4;
-        if (populationType === '상주') return 5;
+        if (populationType === '유동') return 4;
+        if (populationType === '직장') return 5;
+        if (populationType === '상주') return 6;
       }
-      if (sectionId === 'sales-section') return 6;
-      if (sectionId === 'store-section') return 7;
+      if (sectionId === 'sales-section') return 7;
+      if (sectionId === 'store-section') return 8;
       return 0;
     };
 
@@ -239,9 +121,9 @@ function DetailAsideNav({
         if (atBottom && !isAtBottom) {
           isAtBottom = true;
           isAtTop = false;
-          if (lastActiveIndex !== 7) {
-            lastActiveIndex = 7;
-            setActiveIndex(7); // 점포
+          if (lastActiveIndex !== 8) {
+            lastActiveIndex = 8;
+            setActiveIndex(8); // 점포
           }
           return;
         } else if (!atBottom && isAtBottom) {
@@ -250,7 +132,7 @@ function DetailAsideNav({
         
         // 중간 영역에서는 가장 가까운 섹션 찾기 (클릭 로직과 동일한 계산 방식 사용)
         if (!isAtTop && !isAtBottom) {
-          const sections = ['score-section', 'market-change-section', 'pop-section', 'sales-section', 'store-section'];
+          const sections = ['intro-section', 'score-section', 'market-change-section', 'pop-section', 'sales-section', 'store-section'];
           let closestSection = sections[0];
           let minDistance = Infinity;
           
@@ -302,8 +184,8 @@ function DetailAsideNav({
       clearTimeout(scrollTimeout);
     };
   }, [populationType]);
+
   function go(id: string, idx: number, itemPopulationType?: string) {
-    
     // 사용자 클릭 상태 설정 (스크롤 감지 일시 중단)
     const modalContainer = document.querySelector('[style*="backgroundColor: #F8F9FA"].overflow-y-auto') as HTMLElement;
     if (modalContainer) {
@@ -352,7 +234,6 @@ function DetailAsideNav({
         
         const targetPosition = scrollTop + relativeTop - 100; // 스크롤 하이라이터와 동일한 100px 여백
         
-        
         modalContainer.scrollTo({
           top: Math.max(0, targetPosition),
           behavior: "smooth"
@@ -381,6 +262,7 @@ function DetailAsideNav({
       }
     }
   }
+
   return (
     <div className="flex flex-col gap-4">
       <nav aria-label="섹션 내비게이션" className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
