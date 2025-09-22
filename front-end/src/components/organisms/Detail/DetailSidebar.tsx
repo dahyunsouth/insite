@@ -1,7 +1,29 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import { createPortal } from "react-dom";
 import ActionButtons from "@/components/atoms/Detail/ActionButtons";
+import { useFavorites } from "@/contexts/FavoritesContext";
+import { authManager } from "@/utils/auth";
+import { useNotification } from "@/components/map/useNotification";
+import Notification from "@/components/map/Notification";
+import DetailNavbarTemplate from "@/components/templates/Detail/AreaDetailModalTemplate";
+import ScoreCard from "@/components/molecules/Detail/ScoreCard";
+import MarketChangeIndicatorCard from "@/components/molecules/Detail/MarketChangeIndicator/MarketChangeIndicatorCard";
+import TimeSlotCard from "@/components/molecules/Detail/PopulationCard/FloatingPopulationCard";
+import SalesCard from "@/components/molecules/Detail/SalesCard/SalesCard";
+import StoreCard from "@/components/molecules/Detail/StoreCard/StoreCard";
+type DetailNavbarProps = {
+  open: boolean;
+  onClose: () => void;
+  title?: string;
+  subtitle?: string;
+  trdarCode?: string | null;
+  onSelectTradeArea?: (opt: { code: string; name: string } | null) => void;
+  onAddToComparison?: (trdarCd: string, trdarCdNm: string) => void;
+  onRemoveFromComparison?: (trdarCd: string) => void;
+  isInComparison?: (trdarCd: string) => boolean;
+};
 
 type DetailSidebarProps = {
   populationType: "유동" | "직장" | "상주";
@@ -10,23 +32,231 @@ type DetailSidebarProps = {
   onSave?: () => void;
   isSaved?: boolean;
   isComparing?: boolean;
+  isLoading?: boolean;
+  error?: string | null;
 };
-
 /**
- * Organism: DetailSidebar
- * - Manages the right side navigation and action buttons
- * - Handles scroll highlighting and navigation
+ * Organism: DetailNavbar
+ * - Renders portal + backdrop + ESC close
+ * - Uses the Detail template for visuals (container/header/section-nav)
  */
-export default function DetailSidebar({ 
+export function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea, onAddToComparison, onRemoveFromComparison, isInComparison }: DetailNavbarProps) {
+  const [selected, setSelected] = useState<{ code: string; name: string } | null>(null);
+  const [populationType, setPopulationType] = useState<"유동" | "직장" | "상주">("유동");
+  const [isComparing, setIsComparing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { notification, showNotification, hideNotification } = useNotification();
+  
+  // Context에서 즐겨찾기 관련 상태와 함수 가져오기
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+
+  // 비교함 상태에 따라 isComparing 동기화
+  useEffect(() => {
+    const currentCode = getCurrentTrdarCode();
+    if (currentCode && isInComparison) {
+      setIsComparing(isInComparison(currentCode));
+    }
+  }, [trdarCode, selected, isInComparison]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handle = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handle);
+    return () => window.removeEventListener("keydown", handle);
+  }, [open, onClose]);
+
+  const computedTitle = useMemo(() => {
+    if (selected?.name) {
+      const suffix = " 상권 분석";
+      return `${selected.name}${suffix}`;
+    }
+    return title;
+  }, [selected, title]);
+
+  useEffect(() => {
+    // Debug log: verify selected and computed title changes
+    // eslint-disable-next-line no-console
+    console.log("[DetailNavbar] selection changed:", selected, "computedTitle:", computedTitle);
+  }, [selected, computedTitle]);
+
+  // 현재 상권 코드 가져오기
+  const getCurrentTrdarCode = (): string | null => {
+    return trdarCode ?? selected?.code ?? null;
+  };
+
+  // 현재 상권이 저장되어 있는지 확인
+  const getCurrentIsSaved = (): boolean => {
+    const currentCode = getCurrentTrdarCode();
+    if (!currentCode) return false;
+    return isFavorite(parseInt(currentCode));
+  };
+
+  const handleCompare = () => {
+    const currentCode = getCurrentTrdarCode();
+    const currentTrdarCdNm = selected?.name || title || '상권';
+    
+    if (!currentCode) {
+      console.error('상권 코드가 없습니다.');
+      return;
+    }
+
+    const isCurrentlyInComparison = isInComparison ? isInComparison(currentCode) : false;
+    
+    if (isCurrentlyInComparison) {
+      // 비교함에서 제거
+      onRemoveFromComparison?.(currentCode);
+      setIsComparing(false);
+      showNotification('비교함에서 제거되었습니다.');
+    } else {
+      // 비교함에 추가 - HomePage에서 토스트 알림을 처리하므로 여기서는 제거
+      onAddToComparison?.(currentCode, currentTrdarCdNm);
+      setIsComparing(true);
+      // showNotification('비교함에 추가되었습니다.'); // 제거 - HomePage에서 처리
+    }
+    
+    console.log("비교하기 클릭:", currentCode, "비교 상태:", !isCurrentlyInComparison);
+  };
+
+  const handleSave = async () => {
+    const currentCode = getCurrentTrdarCode();
+    if (!currentCode) {
+      setError('상권 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    // 로그인 확인
+    if (!authManager.isLoggedIn()) {
+      setError('로그인이 필요합니다.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const currentIsSaved = getCurrentIsSaved();
+      const currentTrdarCdNm = selected?.name || title || '상권';
+      
+      if (currentIsSaved) {
+        // 저장 해제
+        await removeFavorite(parseInt(currentCode));
+        showNotification('상권이 저장 목록에서 제거되었습니다.');
+        console.log('상권 저장 해제 성공:', currentCode);
+      } else {
+        // 저장
+        await addFavorite(parseInt(currentCode), currentTrdarCdNm);
+        showNotification('상권이 저장되었습니다.');
+        console.log('상권 저장 성공:', currentCode);
+      }
+      setError(null); // 성공 시 에러 메시지 제거
+    } catch (error) {
+      console.error('상권 저장/해제 실패:', error);
+      const errorMessage = error instanceof Error ? error.message : '저장 처리 중 오류가 발생했습니다.';
+      setError(errorMessage);
+      showNotification(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!open) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-start justify-end">
+      {/* backdrop
+      <div className="absolute inset-0 bg-black/30" onClick={onClose} /> */}
+
+      {/* modal */}
+      <div className="relative z-10 w-[calc(75vw-1rem)] h-[calc(100vh-1rem)] mt-2 mr-2" onClick={(e) => e.stopPropagation()}>
+        <DetailNavbarTemplate
+          title={computedTitle}
+          subtitle={subtitle}
+          onClose={onClose}
+          headerRight={
+            // 상권 검색 기능 주석처리
+            // <TradeAreaSelect
+            //   onChange={(opt) => {
+            //     // Debug log: dropdown change event
+            //     // eslint-disable-next-line no-console
+            //     console.log("[DetailNavbar] dropdown onChange:", opt);
+            //     setSelected(opt);
+            //     onSelectTradeArea?.(opt);
+            //   }}
+            // />
+            null
+          }
+          sectionAside={
+            <DetailAsideNav 
+              populationType={populationType} 
+              onPopulationTypeChange={setPopulationType}
+              onCompare={handleCompare}
+              onSave={handleSave}
+              isSaved={getCurrentIsSaved()}
+              isComparing={isComparing}
+              isLoading={isLoading}
+              error={error}
+            />
+          }
+        >
+          <>
+            <section id="score-section" className="scroll-mt-64">
+              <ScoreCard trdarCode={selected?.code ?? null} />
+            </section>
+            <section id="market-change-section" className="scroll-mt-64">
+              <MarketChangeIndicatorCard trdarCode={trdarCode ?? selected?.code ?? null} />
+            </section>
+            <section id="pop-section" className="scroll-mt-64">
+              <TimeSlotCard 
+                trdarCode={trdarCode ?? selected?.code ?? null} 
+                populationType={populationType}
+                onPopulationTypeChange={setPopulationType}
+              />
+              {/* Debug: trdarCode = {trdarCode ?? selected?.code ?? null} */}
+            </section>
+            <section id="sales-section" className="scroll-mt-64">
+              <SalesCard trdarCode={trdarCode ?? selected?.code ?? null} />
+            </section>
+            <section id="store-section" className="scroll-mt-64">
+              <StoreCard trdarCode={trdarCode ?? selected?.code ?? null} />
+            </section>
+          </>
+        </DetailNavbarTemplate>
+      </div>
+      
+      {/* 토스트 알림 */}
+      <Notification
+        message={notification.message}
+        isVisible={notification.isVisible}
+        onClose={hideNotification}
+      />
+    </div>,
+    document.body
+  );
+}
+
+function DetailAsideNav({ 
   populationType, 
   onPopulationTypeChange,
   onCompare,
   onSave,
   isSaved,
-  isComparing
-}: DetailSidebarProps) {
+  isComparing,
+  isLoading,
+  error
+}: { 
+  populationType: "유동" | "직장" | "상주";
+  onPopulationTypeChange: (type: "유동" | "직장" | "상주") => void;
+  onCompare?: () => void;
+  onSave?: () => void;
+  isSaved?: boolean;
+  isComparing?: boolean;
+  isLoading?: boolean;
+  error?: string | null;
+}) {
   const [activeIndex, setActiveIndex] = useState(0);
-
   const items = [
     { id: "intro-section", label: "상권 소개" },
     { id: "score-section", label: "종합추천점수" },
@@ -301,13 +531,48 @@ export default function DetailSidebar({
         </ul>
       </nav>
       
+      {/* 에러 메시지 */}
+      {error && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
       {/* 액션 버튼들 */}
       <ActionButtons 
         onCompare={onCompare}
         onSave={onSave}
         isSaved={isSaved}
         isComparing={isComparing}
+        isLoading={isLoading}
       />
     </div>
+  );
+}
+
+/**
+ * Organism: DetailSidebar
+ * - Manages the right side navigation and action buttons
+ * - Handles scroll highlighting and navigation
+ */
+export default function DetailSidebar({ 
+  populationType, 
+  onPopulationTypeChange,
+  onCompare,
+  onSave,
+  isSaved,
+  isComparing
+}: DetailSidebarProps) {
+  return (
+    <DetailAsideNav
+      populationType={populationType}
+      onPopulationTypeChange={onPopulationTypeChange}
+      onCompare={onCompare}
+      onSave={onSave}
+      isSaved={isSaved}
+      isComparing={isComparing}
+      isLoading={false}
+      error={null}
+    />
   );
 }

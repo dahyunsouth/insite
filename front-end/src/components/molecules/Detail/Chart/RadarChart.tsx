@@ -173,22 +173,6 @@ export default function RadarChart({
 
   return (
     <div className={"w-full h-full flex flex-col items-center justify-center " + (className ?? "")}> 
-      {/* Legend */}
-      <div className="mb-2 flex items-center gap-4 text-xs text-gray-600">
-        {series.map((s, i) => (
-          <div key={s.name} className="flex items-center gap-1">
-            <span
-              className="inline-block h-2 w-6"
-              style={{
-                background: "transparent",
-                borderTop: `2px ${s.dashed ? "dashed" : "solid"} ${s.color ?? colorsFallback[i % colorsFallback.length]}`,
-              }}
-            />
-            <span>{s.name}</span>
-          </div>
-        ))}
-      </div>
-
       <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full" preserveAspectRatio="xMidYMid meet" aria-hidden>
         {/* Grid */}
         <g>{gridPolygons}</g>
@@ -227,6 +211,22 @@ export default function RadarChart({
         {/* Labels */}
         <g>{labelNodes}</g>
       </svg>
+      
+      {/* Legend */}
+      <div className="mt-2 flex items-center gap-4 text-xs text-gray-600">
+        {series.map((s, i) => (
+          <div key={s.name} className="flex items-center gap-1">
+            <span
+              className="inline-block h-2 w-6"
+              style={{
+                background: "transparent",
+                borderTop: `2px ${s.dashed ? "dashed" : "solid"} ${s.color ?? colorsFallback[i % colorsFallback.length]}`,
+              }}
+            />
+            <span>{s.name}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

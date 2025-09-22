@@ -144,7 +144,21 @@ export default function AdstrdMarketList({ district, dong, onClose, onTradeAreaS
       setIsLoading(true);
       setError('');
 
-      await fetchLatestData(district, dong);
+      try {
+        // 파라미터 검증 강화
+        if (!district.trim() || !dong.trim()) {
+          console.error('❌ district 또는 dong이 비어있음:', { district, dong });
+          setError('지역 정보가 올바르지 않습니다.');
+          return;
+        }
+
+        await fetchLatestData(district, dong);
+      } catch (error) {
+        console.error('❌ 상권 데이터 로드 실패:', error);
+        setError('상권 데이터를 불러오는데 실패했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     // 행정동명 정규화 함수 (역삼동 -> 역삼1동)
@@ -167,6 +181,7 @@ export default function AdstrdMarketList({ district, dong, onClose, onTradeAreaS
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
           },
         });
         console.log(`📡 상권 리스트 응답: ${response.status} ${response.statusText}`);
@@ -189,7 +204,15 @@ export default function AdstrdMarketList({ district, dong, onClose, onTradeAreaS
           // 응답 상태코드와 상태 텍스트 로그
           console.error(`❌ 상권 리스트 API 실패 - 상태: ${response.status} ${response.statusText}`);
           console.error(`❌ 요청 URL: ${url}`);
-          console.error(`❌ 요청 파라미터: district=${district}, dong=${dong}`);
+          console.error(`❌ 요청 파라미터: district="${district}", dong="${dong}"`);
+          
+          // 400 오류의 경우 더 자세한 정보 제공
+          if (response.status === 400) {
+            console.error('❌ 400 Bad Request - 요청 파라미터를 확인해주세요');
+            setError(`잘못된 요청입니다. 지역 정보를 확인해주세요. (${district}, ${dong})`);
+          } else {
+            setError(`서버 오류가 발생했습니다. (${response.status})`);
+          }
           
           // 응답 본문 읽기 시도
           try {

@@ -11,6 +11,7 @@ type ActionButtonsProps = {
   onSave?: () => void;
   isSaved?: boolean;
   isComparing?: boolean;
+  isLoading?: boolean;
   className?: string;
   direction?: 'horizontal' | 'vertical';
 };
@@ -20,6 +21,7 @@ export default function ActionButtons({
   onSave, 
   isSaved = false, 
   isComparing = false,
+  isLoading = false,
   className = "",
   direction = 'vertical'
 }: ActionButtonsProps) {
@@ -70,7 +72,7 @@ export default function ActionButtons({
         }`}
       >
         <HeartIcon className={`h-4 w-4 ${isSaved ? "fill-current text-red-500" : ""}`} />
-        {isSaved ? "저장된 상권" : "저장하기"}
+        {isLoading ? "처리 중..." : isSaved ? "저장된 상권" : "저장하기"}
       </button>
        <button
          type="button"
