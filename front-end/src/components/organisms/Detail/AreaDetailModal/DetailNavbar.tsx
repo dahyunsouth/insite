@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import DetailNavbarTemplate from "@/components/templates/Detail/AreaDetailModalTemplate";
 import TradeAreaSelect from "@/components/molecules/Detail/TradeAreaSelect";
 import TimeSlotCard from "@/components/molecules/Detail/PopulationCard/FloatingPopulationCard";
-import StoreCard from "@/components/molecules/Detail/StoreCard";
+import StoreCard from "@/components/molecules/Detail/StoreCard/StoreCard";
 import ScoreCard from "@/components/molecules/Detail/ScoreCard";
 import SalesCard from "@/components/molecules/Detail/SalesCard/SalesCard";
 import ActionButtons from "@/components/atoms/Detail/ActionButtons";
@@ -77,15 +77,17 @@ export default function DetailNavbar({ open, onClose, title, subtitle, trdarCode
           subtitle={subtitle}
           onClose={onClose}
           headerRight={
-            <TradeAreaSelect
-              onChange={(opt) => {
-                // Debug log: dropdown change event
-                // eslint-disable-next-line no-console
-                console.log("[DetailNavbar] dropdown onChange:", opt);
-                setSelected(opt);
-                onSelectTradeArea?.(opt);
-              }}
-            />
+            // 상권 검색 기능 주석처리
+            // <TradeAreaSelect
+            //   onChange={(opt) => {
+            //     // Debug log: dropdown change event
+            //     // eslint-disable-next-line no-console
+            //     console.log("[DetailNavbar] dropdown onChange:", opt);
+            //     setSelected(opt);
+            //     onSelectTradeArea?.(opt);
+            //   }}
+            // />
+            null
           }
           sectionAside={
             <DetailAsideNav 
@@ -149,6 +151,103 @@ function DetailAsideNav({
     { id: "store-section", label: "점포" },
   ];
   const [activeIndex, setActiveIndex] = React.useState(0);
+
+  // Intersection Observer를 사용한 스크롤 감지
+  React.useEffect(() => {
+    const observerOptions = {
+      root: null, // viewport를 root로 사용
+      rootMargin: '-10% 0px -70% 0px', // 상단 10% 지점에서 감지 시작
+      threshold: 0
+    };
+
+    let isAtBottom = false; // 최하단 상태를 추적하는 플래그
+
+    const observer = new IntersectionObserver((entries) => {
+      // 최하단이면 Intersection Observer 무시
+      if (isAtBottom) return;
+
+      // 현재 화면에 보이는 섹션들과 그 위치 정보를 수집
+      const visibleSections = entries
+        .filter(entry => entry.isIntersecting)
+        .map(entry => ({
+          id: entry.target.id,
+          top: entry.boundingClientRect.top
+        }))
+        .sort((a, b) => a.top - b.top); // 위에서부터 정렬
+
+      if (visibleSections.length > 0) {
+        // 가장 위에 있는 섹션을 선택
+        const topSection = visibleSections[0].id;
+        
+        // 해당 섹션에 맞는 인덱스 찾기
+        let targetIndex = 0;
+        
+        if (topSection === 'score-section') {
+          targetIndex = 0;
+        } else if (topSection === 'pop-section') {
+          // 인구 섹션의 경우 현재 populationType에 따라 인덱스 결정
+          if (populationType === '유동') targetIndex = 2;
+          else if (populationType === '직장') targetIndex = 3;
+          else if (populationType === '상주') targetIndex = 4;
+        } else if (topSection === 'sales-section') {
+          targetIndex = 5;
+        } else if (topSection === 'store-section') {
+          targetIndex = 6;
+        }
+        
+        setActiveIndex(targetIndex);
+      }
+    }, observerOptions);
+
+    // 스크롤 최하단 감지를 위한 추가 로직 (디바운스 적용)
+    let scrollTimeout: NodeJS.Timeout;
+    const handleScroll = () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        const modalContainer = document.querySelector('.overflow-y-auto');
+        if (modalContainer) {
+          const { scrollTop, scrollHeight, clientHeight } = modalContainer;
+          // 더 관대한 최하단 감지 (50px 여백)
+          const atBottom = scrollTop + clientHeight >= scrollHeight - 50;
+          
+          if (atBottom && !isAtBottom) {
+            // 최하단에 도달했을 때
+            isAtBottom = true;
+            setActiveIndex(6); // 점포 섹션으로 설정
+          } else if (!atBottom && isAtBottom) {
+            // 최하단에서 벗어났을 때 (더 엄격한 조건)
+            const reallyNotAtBottom = scrollTop + clientHeight < scrollHeight - 100;
+            if (reallyNotAtBottom) {
+              isAtBottom = false;
+            }
+          }
+        }
+      }, 50); // 50ms 디바운스
+    };
+
+    // 관찰할 섹션들 등록
+    const sectionsToObserve = ['score-section', 'pop-section', 'sales-section', 'store-section'];
+    sectionsToObserve.forEach(sectionId => {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        observer.observe(element);
+      }
+    });
+
+    // 스크롤 이벤트 리스너 추가
+    const modalContainer = document.querySelector('.overflow-y-auto');
+    if (modalContainer) {
+      modalContainer.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      observer.disconnect();
+      if (modalContainer) {
+        modalContainer.removeEventListener('scroll', handleScroll);
+      }
+      clearTimeout(scrollTimeout);
+    };
+  }, [populationType]); // populationType이 변경되면 다시 설정
   function go(id: string, idx: number, itemPopulationType?: string) {
     console.log("go function called:", { id, idx, itemPopulationType });
     
