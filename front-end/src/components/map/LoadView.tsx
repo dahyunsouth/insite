@@ -155,13 +155,13 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
         // eslint-disable-next-line no-console
         console.log('마커 위치 설정 완료:', center);
         
-        // 로드뷰를 화면 중앙에 표시하도록 위치와 크기 설정
+        // 로드뷰를 오른쪽 상단에 표시하도록 위치와 크기 설정
         if (typeof window !== 'undefined') {
-          const centerX = (window.innerWidth - size.width) / 2;
-          const centerY = (window.innerHeight - size.height) / 2;
-          setPosition({ x: centerX, y: centerY });
+          const rightX = window.innerWidth - size.width - 20; // 오른쪽에서 20px 여백
+          const topY = 20; // 상단에서 20px 여백
+          setPosition({ x: rightX, y: topY });
           // eslint-disable-next-line no-console
-          console.log('로드뷰를 화면 중앙에 배치:', { x: centerX, y: centerY, size });
+          console.log('로드뷰를 오른쪽 상단에 배치:', { x: rightX, y: topY, size });
         }
         
         // 로드뷰의 위치를 지도 중심으로 설정합니다 (공식 코드와 동일)
@@ -205,13 +205,13 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
       console.log('상태 불일치 감지, 동기화 시작:', { isActive, overlayOn, isMinimized });
       
       if (isActive) {
-        // 로드뷰가 활성화되면 화면 중앙에 배치
+        // 로드뷰가 활성화되면 오른쪽 상단에 배치
         if (typeof window !== 'undefined') {
-          const centerX = (window.innerWidth - size.width) / 2;
-          const centerY = (window.innerHeight - size.height) / 2;
-          setPosition({ x: centerX, y: centerY });
+          const rightX = window.innerWidth - size.width - 20; // 오른쪽에서 20px 여백
+          const topY = 20; // 상단에서 20px 여백
+          setPosition({ x: rightX, y: topY });
           // eslint-disable-next-line no-console
-          console.log('로드뷰를 화면 중앙에 배치 (상태 동기화):', { x: centerX, y: centerY, size });
+          console.log('로드뷰를 오른쪽 상단에 배치 (상태 동기화):', { x: rightX, y: topY, size });
         }
         
         // 로드뷰가 활성화되면 오버레이 활성화
@@ -559,16 +559,6 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
     }
   }, [isDragging, isResizing, handleMouseMove]);
 
-  // 로드뷰 최소화 함수
-  const minimizeRoadview = () => {
-    // eslint-disable-next-line no-console
-    console.log('로드뷰 최소화 버튼 클릭');
-    
-    // 외부 상태를 통해 최소화 처리
-    if (onToggle) {
-      onToggle('minimize');
-    }
-  };
 
   // 로드뷰에서 X버튼을 눌렀을 때 로드뷰 모드를 완전히 종료하는 함수
   const closeRoadview = () => {
@@ -619,16 +609,6 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
             <span className="text-sm font-medium text-gray-700">로드뷰</span>
             <div className="absolute right-2 flex items-center gap-2">
               <button
-                onClick={minimizeRoadview}
-                className="cursor-pointer w-6 h-6 bg-yellow-500 text-white rounded flex items-center justify-center hover:bg-yellow-600 transition-all text-xs"
-                title="로드뷰 최소화 (모달창 숨기기)"
-              >
-                {/* 최소화 아이콘 (하단 바) */}
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-              </button>
-              <button
                 onClick={handleFullscreenToggle}
                 className="cursor-pointer w-6 h-6 bg-green-600 text-white rounded flex items-center justify-center hover:bg-green-700 transition-all text-xs"
                 title={isFullscreen ? '창 모드로 전환' : '전체화면으로 전환'}
@@ -672,16 +652,6 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
             {/* 일반 모드일 때: 기존 레이아웃 */}
             <span className="text-sm font-medium text-gray-700">로드뷰</span>
             <div className="flex items-center gap-2">
-              <button
-                onClick={minimizeRoadview}
-                className="cursor-pointer w-6 h-6 bg-yellow-500 text-white rounded flex items-center justify-center hover:bg-yellow-600 transition-all text-xs"
-                title="로드뷰 최소화 (모달창 숨기기)"
-              >
-                {/* 최소화 아이콘 (하단 바) */}
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-              </button>
               <button
                 onClick={handleFullscreenToggle}
                 className="cursor-pointer w-6 h-6 bg-green-600 text-white rounded flex items-center justify-center hover:bg-green-700 transition-all text-xs"

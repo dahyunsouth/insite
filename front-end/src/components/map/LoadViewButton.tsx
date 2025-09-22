@@ -37,12 +37,8 @@ const LoadViewButton: React.FC<LoadViewButtonProps> = ({
         // 로드뷰가 비활성화 상태 → 활성화
         onToggle(true);
       } else {
-        // 로드뷰가 활성화 상태 → 최소화/복원 토글
-        if (isMinimized) {
-          onToggle('restore');
-        } else {
-          onToggle('minimize');
-        }
+        // 로드뷰가 활성화 상태 → 완전히 꺼기
+        onToggle(false);
       }
     }
   };
@@ -65,16 +61,16 @@ const LoadViewButton: React.FC<LoadViewButtonProps> = ({
       <button
         onClick={handleClick}
         className={`
-          w-12 h-12 bg-white rounded-2xl shadow-md hover:shadow-lg
+          w-12 h-12 rounded-2xl shadow-md hover:shadow-lg
           flex items-center justify-center
-          text-gray-600
           transition-all duration-300 ease-in-out
-          hover:bg-gray-100
-          active:bg-gray-200
           focus:outline-none
           active:scale-[0.98]
           cursor-pointer
-          ${isActive ? 'bg-[#3288FF] text-white hover:bg-[#3288FF]' : ''}
+          ${isActive 
+            ? 'bg-[#3288FF] text-white hover:bg-[#3288FF]' 
+            : 'bg-white text-gray-600 hover:bg-gray-100'
+          }
           ${className}
         `}
       >
@@ -82,7 +78,7 @@ const LoadViewButton: React.FC<LoadViewButtonProps> = ({
             width="24" height="24" 
             viewBox="0 0 24 24" 
             fill="none" 
-            stroke="#808080" 
+            stroke="currentColor" 
             strokeWidth="2" 
             strokeLinecap="round" 
             strokeLinejoin="round" 
@@ -99,7 +95,7 @@ const LoadViewButton: React.FC<LoadViewButtonProps> = ({
       <div
         className={`
           absolute right-0 top-0
-          bg-gray-500 rounded-2xl shadow-lg
+          bg-[#3288FF] rounded-2xl shadow-lg
           overflow-hidden
           h-12 cursor-pointer
           flex h-full items-center justify-center text-white
