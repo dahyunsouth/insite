@@ -157,139 +157,165 @@ function DetailAsideNav({
   ];
   const [activeIndex, setActiveIndex] = React.useState(0);
 
-  // Intersection Observer를 사용한 스크롤 감지
+  // 개선된 스크롤 하이라이터 로직
   React.useEffect(() => {
-    const observerOptions = {
-      root: null, // viewport를 root로 사용
-      rootMargin: '-5% 0px -60% 0px', // 상단 5% 지점에서 감지 시작
-      threshold: 0
+    // 모달 컨테이너 찾기 - 여러 방법 시도
+    let modalContainer = document.querySelector('[style*="backgroundColor: #F8F9FA"].overflow-y-auto') as HTMLElement;
+    
+    if (!modalContainer) {
+      // 대안 방법: DetailNavbarTemplate의 특정 구조를 찾기
+      modalContainer = document.querySelector('.rounded-3xl.overflow-y-auto') as HTMLElement;
+    }
+    
+    if (!modalContainer) {
+      // 최종 대안: 모든 overflow-y-auto 요소 중에서 가장 큰 것 선택
+      const containers = document.querySelectorAll('.overflow-y-auto');
+      if (containers.length > 0) {
+        modalContainer = Array.from(containers).find(container => 
+          container.scrollHeight > container.clientHeight
+        ) as HTMLElement || containers[0] as HTMLElement;
+      }
+    }
+    
+    if (!modalContainer) {
+      console.warn('Modal container not found for scroll highlighting');
+      return;
+    }
+    
+
+    let scrollTimeout: NodeJS.Timeout;
+    let isAtTop = false;
+    let isAtBottom = false;
+    let lastActiveIndex = activeIndex; // 이전 상태를 추적하여 불필요한 리렌더링 방지
+
+    const getSectionIndex = (sectionId: string) => {
+      if (sectionId === 'score-section') return 0;
+      if (sectionId === 'market-change-section') return 1;
+      if (sectionId === 'pop-section') {
+        if (populationType === '유동') return 3;
+        if (populationType === '직장') return 4;
+        if (populationType === '상주') return 5;
+      }
+      if (sectionId === 'sales-section') return 6;
+      if (sectionId === 'store-section') return 7;
+      return 0;
     };
 
-    let isAtBottom = false; // 최하단 상태를 추적하는 플래그
-
-    const observer = new IntersectionObserver((entries) => {
-      // 최하단이면 Intersection Observer 무시
-      if (isAtBottom) return;
-
-      // 모든 섹션의 위치 정보를 수집 (intersecting 여부와 관계없이)
-      const allSections = entries.map(entry => ({
-        id: entry.target.id,
-        top: entry.boundingClientRect.top,
-        isIntersecting: entry.isIntersecting
-      }));
-
-      // 현재 화면에 보이는 섹션들
-      const visibleSections = allSections.filter(section => section.isIntersecting);
-      
-      // 화면에 보이는 섹션이 있으면 그 중 가장 위에 있는 섹션 선택
-      if (visibleSections.length > 0) {
-        const topSection = visibleSections.sort((a, b) => a.top - b.top)[0].id;
-        console.log('🔍 감지된 섹션 (visible):', topSection, 'visibleSections:', visibleSections);
-        
-        // 해당 섹션에 맞는 인덱스 찾기
-        let targetIndex = 0;
-        
-        if (topSection === 'score-section') {
-          targetIndex = 0;
-        } else if (topSection === 'market-change-section') {
-          targetIndex = 1;
-        } else if (topSection === 'pop-section') {
-          // 인구 섹션의 경우 현재 populationType에 따라 인덱스 결정
-          if (populationType === '유동') targetIndex = 3;
-          else if (populationType === '직장') targetIndex = 4;
-          else if (populationType === '상주') targetIndex = 5;
-        } else if (topSection === 'sales-section') {
-          targetIndex = 6;
-        } else if (topSection === 'store-section') {
-          targetIndex = 7;
-        }
-        
-        setActiveIndex(targetIndex);
-      } else {
-        // 화면에 보이는 섹션이 없을 때는 가장 가까운 섹션을 찾기
-        const closestSection = allSections.reduce((closest, current) => {
-          const currentDistance = Math.abs(current.top);
-          const closestDistance = Math.abs(closest.top);
-          return currentDistance < closestDistance ? current : closest;
-        });
-        
-        console.log('🔍 가장 가까운 섹션:', closestSection.id, 'distance:', closestSection.top);
-        
-        // 가장 가까운 섹션에 맞는 인덱스 찾기
-        let targetIndex = 0;
-        if (closestSection.id === 'score-section') {
-          targetIndex = 0;
-        } else if (closestSection.id === 'market-change-section') {
-          targetIndex = 1;
-        } else if (closestSection.id === 'pop-section') {
-          if (populationType === '유동') targetIndex = 3;
-          else if (populationType === '직장') targetIndex = 4;
-          else if (populationType === '상주') targetIndex = 5;
-        } else if (closestSection.id === 'sales-section') {
-          targetIndex = 6;
-        } else if (closestSection.id === 'store-section') {
-          targetIndex = 7;
-        }
-        
-        setActiveIndex(targetIndex);
-      }
-    }, observerOptions);
-
-    // 스크롤 최하단 감지를 위한 추가 로직 (디바운스 적용)
-    let scrollTimeout: NodeJS.Timeout;
     const handleScroll = () => {
+      // 사용자가 클릭 중일 때는 스크롤 감지 무시
+      if (modalContainer.hasAttribute('data-user-clicking')) return;
+      
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
-        const modalContainer = document.querySelector('.overflow-y-auto');
-        if (modalContainer) {
-          const { scrollTop, scrollHeight, clientHeight } = modalContainer;
-          // 더 관대한 최하단 감지 (50px 여백)
-          const atBottom = scrollTop + clientHeight >= scrollHeight - 50;
+        const { scrollTop, scrollHeight, clientHeight } = modalContainer;
+        
+        // 스크롤 가능한 높이가 충분하지 않으면 종합추천점수로 설정
+        if (scrollHeight <= clientHeight) {
+          if (lastActiveIndex !== 0) {
+            lastActiveIndex = 0;
+            setActiveIndex(0);
+          }
+          return;
+        }
+        
+        const scrollPercent = scrollTop / (scrollHeight - clientHeight);
+        
+        // 최상단 감지 (스크롤이 상단 10% 이내)
+        const atTop = scrollPercent <= 0.1;
+        if (atTop && !isAtTop) {
+          isAtTop = true;
+          isAtBottom = false;
+          if (lastActiveIndex !== 0) {
+            lastActiveIndex = 0;
+            setActiveIndex(0); // 종합추천점수
+          }
+          return;
+        } else if (!atTop && isAtTop) {
+          isAtTop = false;
+        }
+        
+        // 최하단 감지 (스크롤이 하단 10% 이내)
+        const atBottom = scrollPercent >= 0.9;
+        if (atBottom && !isAtBottom) {
+          isAtBottom = true;
+          isAtTop = false;
+          if (lastActiveIndex !== 7) {
+            lastActiveIndex = 7;
+            setActiveIndex(7); // 점포
+          }
+          return;
+        } else if (!atBottom && isAtBottom) {
+          isAtBottom = false;
+        }
+        
+        // 중간 영역에서는 가장 가까운 섹션 찾기 (클릭 로직과 동일한 계산 방식 사용)
+        if (!isAtTop && !isAtBottom) {
+          const sections = ['score-section', 'market-change-section', 'pop-section', 'sales-section', 'store-section'];
+          let closestSection = sections[0];
+          let minDistance = Infinity;
           
-          if (atBottom && !isAtBottom) {
-            // 최하단에 도달했을 때
-            isAtBottom = true;
-            setActiveIndex(7); // 점포 섹션으로 설정
-          } else if (!atBottom && isAtBottom) {
-            // 최하단에서 벗어났을 때 (더 엄격한 조건)
-            const reallyNotAtBottom = scrollTop + clientHeight < scrollHeight - 100;
-            if (reallyNotAtBottom) {
-              isAtBottom = false;
+          sections.forEach(sectionId => {
+            const element = document.getElementById(sectionId);
+            if (element) {
+              const rect = element.getBoundingClientRect();
+              const containerRect = modalContainer.getBoundingClientRect();
+              
+              // 클릭 로직과 동일한 계산: 섹션 상단이 화면 상단에서 100px 지점에 가장 가까운 섹션 선택
+              const sectionTop = rect.top - containerRect.top;
+              const targetPosition = 100; // 클릭 시 사용하는 100px 여백과 동일
+              
+              // 섹션이 화면에 보이는 경우에만 고려 (더 정확한 범위 설정)
+              if (sectionTop <= containerRect.height && sectionTop >= -rect.height) {
+                // 섹션이 목표 위치(100px) 위에 있으면 우선순위를 높임
+                let distance = Math.abs(sectionTop - targetPosition);
+                
+                // 섹션이 목표 위치보다 위에 있으면 약간의 가중치를 줘서 더 쉽게 선택되도록 함
+                if (sectionTop <= targetPosition) {
+                  distance *= 0.8; // 20% 가중치 감소
+                }
+                
+                if (distance < minDistance) {
+                  minDistance = distance;
+                  closestSection = sectionId;
+                }
+              }
             }
+          });
+          
+          const targetIndex = getSectionIndex(closestSection);
+          if (targetIndex !== lastActiveIndex) {
+            lastActiveIndex = targetIndex;
+            setActiveIndex(targetIndex);
           }
         }
-      }, 50); // 50ms 디바운스
+      }, 16); // 60fps에 맞춘 디바운스로 조정하여 안정성 향상
     };
 
-    // 관찰할 섹션들 등록
-    const sectionsToObserve = ['score-section', 'market-change-section', 'pop-section', 'sales-section', 'store-section'];
-    sectionsToObserve.forEach(sectionId => {
-      const element = document.getElementById(sectionId);
-      if (element) {
-        observer.observe(element);
-      }
-    });
-
+    // 초기 설정
+    handleScroll();
+    
     // 스크롤 이벤트 리스너 추가
-    const modalContainer = document.querySelector('.overflow-y-auto');
-    if (modalContainer) {
-      modalContainer.addEventListener('scroll', handleScroll);
-    }
+    modalContainer.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
-      observer.disconnect();
-      if (modalContainer) {
-        modalContainer.removeEventListener('scroll', handleScroll);
-      }
+      modalContainer.removeEventListener('scroll', handleScroll);
       clearTimeout(scrollTimeout);
     };
-  }, [populationType]); // populationType이 변경되면 다시 설정
+  }, [populationType]);
   function go(id: string, idx: number, itemPopulationType?: string) {
-    console.log("go function called:", { id, idx, itemPopulationType });
+    
+    // 사용자 클릭 상태 설정 (스크롤 감지 일시 중단)
+    const modalContainer = document.querySelector('[style*="backgroundColor: #F8F9FA"].overflow-y-auto') as HTMLElement;
+    if (modalContainer) {
+      // 클릭 상태를 나타내는 데이터 속성 설정
+      modalContainer.setAttribute('data-user-clicking', 'true');
+      setTimeout(() => {
+        modalContainer.removeAttribute('data-user-clicking');
+      }, 500); // 500ms 후 클릭 상태 해제
+    }
     
     // 인구 부모 섹션 클릭 시 바로 유동인구 섹션으로 처리
     if (id === "population-section") {
-      console.log("Population section clicked, redirecting to pop-section");
       // 유동인구 섹션으로 직접 이동
       const popSection = document.getElementById("pop-section");
       if (popSection) {
@@ -299,7 +325,8 @@ function DetailAsideNav({
           const containerRect = modalContainer.getBoundingClientRect();
           const relativeTop = rect.top - containerRect.top;
           const scrollTop = modalContainer.scrollTop;
-          const targetPosition = scrollTop + relativeTop - 100;
+          
+          const targetPosition = scrollTop + relativeTop - 100; // 스크롤 하이라이터와 동일한 100px 여백
           modalContainer.scrollTo({
             top: Math.max(0, targetPosition),
             behavior: "smooth"
@@ -322,7 +349,9 @@ function DetailAsideNav({
         // 모달 컨테이너 내에서의 상대적 위치 계산
         const relativeTop = rect.top - containerRect.top;
         const scrollTop = modalContainer.scrollTop;
-        const targetPosition = scrollTop + relativeTop - 100; // 100px 여백
+        
+        const targetPosition = scrollTop + relativeTop - 100; // 스크롤 하이라이터와 동일한 100px 여백
+        
         
         modalContainer.scrollTo({
           top: Math.max(0, targetPosition),
@@ -336,11 +365,19 @@ function DetailAsideNav({
         });
       }
       
-      setActiveIndex(idx);
-      
-      // 인구 섹션 클릭 시 해당 토글 상태로 설정
+      // 인구 섹션 클릭 시 해당 토글 상태로 설정하고 올바른 인덱스 설정
       if (id === "pop-section" && itemPopulationType) {
         onPopulationTypeChange(itemPopulationType as "유동" | "직장" | "상주");
+        // 인구 타입에 따라 올바른 인덱스 설정
+        if (itemPopulationType === "유동") {
+          setActiveIndex(3);
+        } else if (itemPopulationType === "직장") {
+          setActiveIndex(4);
+        } else if (itemPopulationType === "상주") {
+          setActiveIndex(5);
+        }
+      } else {
+        setActiveIndex(idx);
       }
     }
   }
