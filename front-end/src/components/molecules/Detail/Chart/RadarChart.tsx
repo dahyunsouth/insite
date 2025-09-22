@@ -85,7 +85,7 @@ export default function RadarChart({
 
   // Layout constants within a 300x300 viewbox
   const size = 300; // math space
-  const padding = 40; // for labels
+  const padding = 60; // for labels
   const cx = size / 2;
   const cy = size / 2;
   const radius = (size / 2) - padding;
@@ -121,6 +121,31 @@ export default function RadarChart({
     return <line key={j} x1={cx} y1={cy} x2={x} y2={y} stroke="#EEF2F7" />; // very light
   });
 
+  // 격자선 값 표시 (첫 번째 축에만 표시)
+  const gridValueNodes = Array.from({ length: levels }, (_, i) => {
+    const t = (i + 1) / levels;
+    const r = radius * t;
+    const value = (max * t).toFixed(0); // 정수로 표시
+    const a = startAngle; // 첫 번째 축 방향
+    const [x, y] = pointAt(r, a);
+    
+    return (
+      <text
+        key={`grid-value-${i}`}
+        x={x + 8} // 축선에서 약간 오른쪽으로
+        y={y} // 약간 위로
+        style={{ 
+          fontSize: 10, 
+          fill: "#9CA3AF", // gray-400
+          fontWeight: 400 
+        }}
+        textAnchor="start"
+      >
+        {value}
+      </text>
+    );
+  });
+
   const labelNodes = labels.map((lab, j) => {
     const a = startAngle + j * angleStep;
     const [x, y] = pointAt(radius + 16, a); // place slightly outside
@@ -136,7 +161,7 @@ export default function RadarChart({
           x={x}
           y={y + dy}
           textAnchor={textAnchor}
-          style={{ fontSize: 12, fill: active ? "#2563EB" : "#6B7280", fontWeight: active ? 600 : 400 }}
+          style={{ fontSize: 14, fill: active ? "#2563EB" : "#6B7280", fontWeight: active ? 600 : 400 }}
         >
           {lab}
         </text>
@@ -169,6 +194,8 @@ export default function RadarChart({
         <g>{gridPolygons}</g>
         {/* Axes */}
         <g>{axisLines}</g>
+        {/* Grid Values */}
+        <g>{gridValueNodes}</g>
         {/* Series */}
         {series.map((s, i) => (
           <g key={s.name}>

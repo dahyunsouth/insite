@@ -63,6 +63,14 @@ export default function HomePage() {
   const [showMyPage, setShowMyPage] = useState(false);
   const [showMyMarket, setShowMyMarket] = useState(false);
   const [isCompareOpen, setIsCompareOpen] = useState(false);
+  const [isSavedCompareOpen, setIsSavedCompareOpen] = useState(false);
+  const [selectedTradeArea1, setSelectedTradeArea1] = useState<{ trdarCd: string; trdarCdNm: string } | null>(null);
+  const [selectedTradeArea2, setSelectedTradeArea2] = useState<{ trdarCd: string; trdarCdNm: string } | null>(null);
+
+  // 디버깅용 useEffect
+  useEffect(() => {
+    console.log('🔍 isSavedCompareOpen 상태 변화:', isSavedCompareOpen);
+  }, [isSavedCompareOpen]);
   const [isLoadViewActive, setIsLoadViewActive] = useState(false);
   const [isLoadViewMinimized, setIsLoadViewMinimized] = useState(false);
   const [isCafeActive, setIsCafeActive] = useState(false);
@@ -187,7 +195,6 @@ export default function HomePage() {
   // 저장된 상권 열기 핸들러
   const handleSavedAreasClick = () => {
     setShowMyMarket(true);
-    setIsCompareOpen(true);
   };
 
   const handleCompareTabClick = () => {
@@ -200,6 +207,45 @@ export default function HomePage() {
   const handleMyMarketClose = () => {
     setShowMyMarket(false);
     setIsCompareOpen(false);
+    setIsSavedCompareOpen(false);
+    // 저장된 상권 모달이 닫힐 때 선택 상태 초기화
+    setSelectedTradeArea1(null);
+    setSelectedTradeArea2(null);
+  };
+
+  // 저장된 상권에서 비교하기 클릭 핸들러
+  const handleSavedCompareClick = (selectedTradeAreas: { trdarCd: string; trdarCdNm: string }[]) => {
+    console.log('🔍 handleSavedCompareClick 호출됨:', selectedTradeAreas);
+    if (selectedTradeAreas.length === 0) {
+      console.log('❌ 선택된 상권이 없음');
+      return; // 선택된 상권이 없으면 아무것도 하지 않음
+    }
+
+    // 현재 선택된 상권 상태 확인
+    const hasTradeArea1 = selectedTradeArea1 !== null;
+    const hasTradeArea2 = selectedTradeArea2 !== null;
+
+    if (selectedTradeAreas.length === 1) {
+      // 1개 선택된 경우
+      if (!hasTradeArea1) {
+        // 상권 1이 비어있으면 상권 1에 추가
+        setSelectedTradeArea1(selectedTradeAreas[0]);
+      } else if (!hasTradeArea2) {
+        // 상권 2가 비어있으면 상권 2에 추가
+        setSelectedTradeArea2(selectedTradeAreas[0]);
+      } else {
+        // 둘 다 선택되어 있으면 상권 2에 덮어쓰기
+        setSelectedTradeArea2(selectedTradeAreas[0]);
+      }
+    } else if (selectedTradeAreas.length === 2) {
+      // 2개 선택된 경우 - 항상 덮어쓰기
+      setSelectedTradeArea1(selectedTradeAreas[0]);
+      setSelectedTradeArea2(selectedTradeAreas[1]);
+    }
+
+    // 저장된 상권 모달 열기
+    console.log('✅ 저장된 상권 모달 열기 시도');
+    setIsSavedCompareOpen(true);
   };
 
   // 검색 결과 관련 핸들러들
@@ -282,13 +328,20 @@ export default function HomePage() {
           {showMyPage && (
             <MyPageMenu 
               onClose={handleMyPageClose}
-              onSavedAreas={() => setIsCompareOpen(true)}
-              onSavedAreasClose={() => setIsCompareOpen(false)}
+              onSavedAreasClose={() => {
+                setIsCompareOpen(false);
+                setIsSavedCompareOpen(false);
+                // 저장된 상권 모달이 닫힐 때 선택 상태 초기화
+                setSelectedTradeArea1(null);
+                setSelectedTradeArea2(null);
+              }}
+              onCompareClick={handleSavedCompareClick}
             />
           )}
           {showMyMarket && (
             <MyMarket 
               onBack={handleMyMarketClose}
+              onCompareClick={handleSavedCompareClick}
             />
           )}
           {!showMyPage && !showMyMarket && (
@@ -356,7 +409,30 @@ export default function HomePage() {
       />
 
       {/* Compare modal: right-side overlay (covers right 75%) */}
-      <CompareTradeAreasModal open={isCompareOpen} onClose={() => setIsCompareOpen(false)} leftOpen={false} />
+      <CompareTradeAreasModal 
+        open={isCompareOpen} 
+        onClose={() => setIsCompareOpen(false)} 
+        modalType="compare"
+        leftOpen={true}
+      />
+
+      {/* Saved areas compare modal */}
+      <CompareTradeAreasModal 
+        open={isSavedCompareOpen} 
+        onClose={() => {
+          console.log('🔍 저장된 상권 모달 닫기');
+          setIsSavedCompareOpen(false);
+          // 저장된 상권 모달이 닫힐 때 선택 상태 초기화
+          setSelectedTradeArea1(null);
+          setSelectedTradeArea2(null);
+        }} 
+        modalType="saved"
+        leftOpen={!showMyMarket}
+        preSelectedTradeAreas={[
+          ...(selectedTradeArea1 ? [selectedTradeArea1] : []),
+          ...(selectedTradeArea2 ? [selectedTradeArea2] : [])
+        ]}
+      />
 
       {/* 인증 모달 (AuthModalWrapper) - 조건부 렌더 */}
       {isAuthOpen && (
