@@ -12,6 +12,7 @@ import MyPageMenu from '@/components/templates/MyPage/MyPage';
 import MyMarket from '@/components/templates/MyPage/MyMarket';
 import NotificationBar from '@/components/atoms/Common/NotificationBar';
 import CompareTradeAreasModal from '@/components/organisms/Compare/CompareTradeAreasModal';
+import ComparisonTray from '@/components/organisms/Compare/ComparisonTray';
 
 // 지도 타입 변경 핸들러 컴포넌트
 function MapTypeHandler({ 
@@ -401,6 +402,19 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* 비교함 담기 모달 - 항상 표시 */}
+      {/* 비교함 담기 모달 - 상권비교 모달이 닫혀있을 때만 표시 */}
+      {!isCompareOpen && (
+        <ComparisonTray 
+          onCompareClick={(area1, area2) => {
+            setSelectedTradeArea1(area1);
+            setSelectedTradeArea2(area2);
+            setIsCompareOpen(true);
+            setIsDetailOpen(false);
+          }} 
+        />
+      )}
+
       {/* Area detail modal */}
       <AreaDetailModal
         open={isDetailOpen}
@@ -414,6 +428,8 @@ export default function HomePage() {
         onClose={() => setIsCompareOpen(false)} 
         modalType="compare"
         leftOpen={true}
+        selectedTradeArea1={selectedTradeArea1}
+        selectedTradeArea2={selectedTradeArea2}
       />
 
       {/* Saved areas compare modal */}
