@@ -359,7 +359,7 @@ export default function HomePage() {
                 setSelectedTradeAreaCode(trdarCd);
                 setSelectedTradeAreaName(trdarCdNm);
                 setIsDetailOpen(true);
-                setShowMyMarket(false); // MyMarket 모달 닫기
+                // MyMarket 모달은 그대로 유지
               }}
             />
           )}
