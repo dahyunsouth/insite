@@ -318,6 +318,7 @@ export function getTradeAreaNameByCode(tradeAreaCode: string): string {
 // 종합 분석 점수 조회 API
 export async function fetchTradeAreaScore(tradeAreaName: string): Promise<TradeAreaScore> {
   try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/data/score?trdarCdNm=${encodeURIComponent(tradeAreaName)}`, {
     const response = await fetch(`${BASE_URL}/api/v1/data/score?trdarCdNm=${encodeURIComponent(tradeAreaName)}`, {
       method: 'GET',
       headers: {
