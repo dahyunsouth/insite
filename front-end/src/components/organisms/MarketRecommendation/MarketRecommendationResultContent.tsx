@@ -342,7 +342,7 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
   }
 
   return (
-    <div className='flex flex-col flex-1 pt-4 gap-4 h-full'>
+    <div className='flex flex-col flex-1 gap-4 h-full'>
       <div className='flex-1'>
         {renderPrimaryCard(topThree[0])}
       </div>
