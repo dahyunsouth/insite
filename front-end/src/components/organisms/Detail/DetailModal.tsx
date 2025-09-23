@@ -193,9 +193,9 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
   if (!open) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-start justify-end">
+    <div className="fixed top-0 right-0 w-[calc(75vw-1rem)] h-full z-50 flex items-start justify-end">
       {/* modal */}
-      <div className="relative z-10 w-[calc(75vw-1rem)] h-[calc(100vh-1rem)] mt-2 mr-2" onClick={(e) => e.stopPropagation()}>
+      <div className="relative z-10 w-full h-[calc(100vh-1rem)] mt-2 mr-2" onClick={(e) => e.stopPropagation()}>
         <DetailNavbarTemplate
           title={computedTitle}
           subtitle={subtitle}
