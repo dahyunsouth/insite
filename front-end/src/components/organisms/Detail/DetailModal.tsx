@@ -42,6 +42,7 @@ type DetailModalProps = {
   onAddToComparison?: (trdarCd: string, trdarCdNm: string) => void;
   onRemoveFromComparison?: (trdarCd: string) => void;
   isInComparison?: (trdarCd: string) => boolean;
+  isNavbarOpen?: boolean;
 };
 
 /**
@@ -50,7 +51,7 @@ type DetailModalProps = {
  * - Uses the Detail template for visuals (container/header/section-nav)
  * - Manages the overall modal state and layout
  */
-export default function DetailModal({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea, onAddToComparison, onRemoveFromComparison, isInComparison }: DetailModalProps) {
+export default function DetailModal({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea, onAddToComparison, onRemoveFromComparison, isInComparison, isNavbarOpen = true }: DetailModalProps) {
   const [selected, setSelected] = useState<{ code: string; name: string } | null>(null);
   const [populationType, setPopulationType] = useState<"유동" | "직장" | "상주">("유동");
   const [isSaved, setIsSaved] = useState(false);
@@ -193,7 +194,9 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
   if (!open) return null;
 
   return createPortal(
-    <div className="fixed top-0 right-0 w-[calc(75vw-1rem)] h-full z-50 flex items-start justify-end">
+    <div className={`fixed top-0 right-0 h-full z-30 flex items-start justify-end ${
+      isNavbarOpen ? 'w-[calc(75vw-1rem)]' : 'w-[calc(100vw-1rem)]'
+    }`}>
       {/* modal */}
       <div className="relative z-10 w-full h-[calc(100vh-1rem)] mt-2 mr-2" onClick={(e) => e.stopPropagation()}>
         <DetailNavbarTemplate
