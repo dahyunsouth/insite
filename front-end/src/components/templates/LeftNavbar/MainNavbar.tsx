@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import FirstLeftNavbar from '@/components/organisms/LeftNavbar/FirstLeftNavbar';
 import SecondLeftNavbar from '@/components/organisms/LeftNavbar/SecondLeftNavbar';
 // import ThirdLeftNavbar from '@/components/organisms/LeftNavbar/ThirdLeftNavbar';
 import FourthLeftNavbar from '@/components/organisms/LeftNavbar/FourthLeftNavbar';
 import FifthLeftNavbar from '@/components/organisms/LeftNavbar/FifthLeftNavbar';
+import OpenButton from '@/components/atoms/Common/Button/OpenButton';
+import CloseButton from '@/components/atoms/Common/Button/CloseButton';
 
 interface MainNavbarProps {
   onMyPageClick?: () => void;
@@ -30,6 +32,8 @@ interface MainNavbarProps {
   selectedTradeArea?: any;
   // DetailModal 관련 props
   onDetailModalClose?: () => void;
+  // 네비게이션 바 상태 전달
+  onNavbarStateChange?: (isOpen: boolean) => void;
 }
 
 const MainNavbar: React.FC<MainNavbarProps> = ({ 
@@ -56,46 +60,80 @@ const MainNavbar: React.FC<MainNavbarProps> = ({
   onTradeAreaSelect,
   selectedTradeArea,
   // DetailModal 관련 props
-  onDetailModalClose
+  onDetailModalClose,
+  // 네비게이션 바 상태 전달
+  onNavbarStateChange
 }) => {
+  const [isOpen, setIsOpen] = useState(true);
+
+  const handleToggle = () => {
+    const newState = !isOpen;
+    setIsOpen(newState);
+    onNavbarStateChange?.(newState);
+  };
+
   return (
-    <nav className="shadow-lg py-2 pl-2 space-y-1 h-full flex flex-col">
-      <div className="flex-shrink-0">
-        <FirstLeftNavbar onSearchResultsShow={onSearchResultsShow} resetTrigger={resetTrigger} />
+    <div className="relative h-full z-[90]">
+      {/* 네비게이션 바 */}
+      <nav 
+        className={`
+          shadow-lg py-2 pl-2 space-y-1 h-full flex flex-col
+          transition-transform duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
+        <div className="flex-shrink-0">
+          <FirstLeftNavbar onSearchResultsShow={onSearchResultsShow} resetTrigger={resetTrigger} />
+        </div>
+        <div className="flex-shrink-0">
+          <SecondLeftNavbar
+            onMyPageClick={onMyPageClick}
+            onLoginModalOpen={onLoginModalOpen}
+            onSavedAreasClick={onSavedAreasClick}
+            onCompareClick={onCompareClick}
+            onDetailModalClose={onDetailModalClose}
+          />
+        </div>
+        {/* <div className="flex-shrink-0">
+          <ThirdLeftNavbar 
+            onMarketingAreaChange={onMarketingAreaChange} 
+            showMarketingArea={showMarketingArea}
+          /> */}
+        {/* </div> */}
+        <div className="flex-shrink-0">
+          <FourthLeftNavbar onAddressClick={onAddressClick} onAddressChange={onAddressChange} />
+        </div>
+        <div className="flex-1 min-h-0">
+          <FifthLeftNavbar 
+            isVisible={showMarketList || showSearchResults || false}
+            district={currentDistrict || ''}
+            dong={currentDong || ''}
+            onClose={onMarketListClose || (() => {})}
+            showSearchResults={showSearchResults || false}
+            searchKeyword={searchKeyword || ''}
+            onSearchClose={onSearchClose}
+            onSearchReset={onSearchReset}
+            onTradeAreaSelect={onTradeAreaSelect}
+            selectedTradeArea={selectedTradeArea}
+          />
+        </div>
+      </nav>
+      
+      {/* 토글 버튼 - 슬라이딩 애니메이션과 함께 */}
+      <div 
+        className={`
+          absolute top-1/2 -translate-y-1/2 z-[100]
+          transition-all duration-300 ease-in-out
+          ${isOpen ? 'left-full' : 'left-0'}
+        `}
+      >
+        {isOpen ? (
+          <CloseButton onClick={handleToggle} />
+        ) : (
+          <OpenButton onClick={handleToggle} />
+        )}
       </div>
-      <div className="flex-shrink-0">
-        <SecondLeftNavbar
-          onMyPageClick={onMyPageClick}
-          onLoginModalOpen={onLoginModalOpen}
-          onSavedAreasClick={onSavedAreasClick}
-          onCompareClick={onCompareClick}
-          onDetailModalClose={onDetailModalClose}
-        />
-      </div>
-      {/* <div className="flex-shrink-0">
-        <ThirdLeftNavbar 
-          onMarketingAreaChange={onMarketingAreaChange} 
-          showMarketingArea={showMarketingArea}
-        /> */}
-      {/* </div> */}
-      <div className="flex-shrink-0">
-        <FourthLeftNavbar onAddressClick={onAddressClick} onAddressChange={onAddressChange} />
-      </div>
-      <div className="flex-1 min-h-0">
-        <FifthLeftNavbar 
-          isVisible={showMarketList || showSearchResults || false}
-          district={currentDistrict || ''}
-          dong={currentDong || ''}
-          onClose={onMarketListClose || (() => {})}
-          showSearchResults={showSearchResults || false}
-          searchKeyword={searchKeyword || ''}
-          onSearchClose={onSearchClose}
-          onSearchReset={onSearchReset}
-          onTradeAreaSelect={onTradeAreaSelect}
-          selectedTradeArea={selectedTradeArea}
-        />
-      </div>
-    </nav>
+    </div>
   );
 };
 
