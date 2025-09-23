@@ -3,7 +3,7 @@
 import React from "react";
 import TimeSlotCard from "@/components/molecules/Detail/PopulationCard/FloatingPopulationCard";
 import StoreCard from "@/components/molecules/Detail/StoreCard/StoreCard";
-import ScoreCard from "@/components/molecules/Detail/ScoreCard";
+import ScoreCard from "@/components/molecules/Detail/ScoreCard/ScoreCard";
 import SalesCard from "@/components/molecules/Detail/SalesCard/SalesCard";
 import MarketChangeIndicatorCard from "@/components/molecules/Detail/MarketChangeIndicator/MarketChangeIndicatorCard";
 import TradeAreaIntroCard from "@/components/molecules/Detail/TradeAreaIntroCard";
@@ -48,7 +48,7 @@ export default function DetailContent({
   actionButtonsDirection = 'vertical'
 }: DetailContentProps) {
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-3">
       <section id="intro-section" className="scroll-mt-64">
         <div className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
           <div className="p-[30px]">
@@ -71,7 +71,7 @@ export default function DetailContent({
       <section id="score-section" className="scroll-mt-64">
         <div className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
           <div className="p-[30px]">
-            <ScoreCard trdarCode={trdarCode ?? null} />
+            <ScoreCard trdarCode={trdarCode ?? null} trdarCdNm={areaName} />
           </div>
         </div>
       </section>
