@@ -8,13 +8,20 @@ interface NowAddressProps {
   onAddressChange?: (district: string, dong: string) => void;
 }
 
+// 초기 주소 캐시 (역삼역 중심) - 정확한 행정동명으로 수정
+const INITIAL_ADDRESS_CACHE = {
+  gu: '강남구',
+  dong: '역삼1동', // 정확한 행정동명으로 수정
+  coordinates: { lat: 37.5008, lng: 127.0387 }
+};
+
 export default function NowAddress({ onAddressClick, onAddressChange }: NowAddressProps) {
   const { map } = useKakaoMapContext();
   const [currentAddress, setCurrentAddress] = useState<{
     gu: string;
     dong: string;
-  }>({ gu: '', dong: '' });
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  }>(INITIAL_ADDRESS_CACHE);
+  const [isLoading, setIsLoading] = useState<boolean>(false); // 초기 로딩 상태를 false로 변경
 
   // 좌표로 주소 검색하는 함수 (카카오맵 가이드 코드 기반)
   const searchAddrFromCoords = (coords: any, callback: (result: any[], status: any) => void) => {
@@ -53,10 +60,20 @@ export default function NowAddress({ onAddressClick, onAddressChange }: NowAddre
             gu = result[i].region_2depth_name; // "강남구"만 추출
             console.log(`🏢 자치구 발견 (region_2depth): ${gu}`);
           }
-          // 행정동 정보 찾기 - region_3depth_name 사용 (동 단위)
+          
+          // 행정동 정보 찾기 - 우선순위: H > B > L (행정동 > 법정동 > 리)
           if (result[i].region_type === 'H' && result[i].region_3depth_name) {
-            dong = result[i].region_3depth_name; // "역삼동"만 추출
+            // 행정동이 가장 정확함 (예: 역삼1동, 역삼2동)
+            dong = result[i].region_3depth_name;
             console.log(`🏠 행정동 발견 (region_3depth): ${dong}`);
+          } else if (result[i].region_type === 'B' && result[i].region_3depth_name && !dong) {
+            // 법정동은 행정동이 없을 때만 사용 (예: 역삼동)
+            dong = result[i].region_3depth_name;
+            console.log(`🏘️ 법정동 발견 (region_3depth): ${dong}`);
+          } else if (result[i].region_type === 'L' && result[i].region_3depth_name && !dong) {
+            // 리는 마지막 옵션
+            dong = result[i].region_3depth_name;
+            console.log(`🌳 리 발견 (region_3depth): ${dong}`);
           }
         }
       
@@ -94,11 +111,17 @@ export default function NowAddress({ onAddressClick, onAddressChange }: NowAddre
     }
   };
 
-  // 지도 중심 좌표 변경 시 주소 업데이트 (가이드 코드 기반)
+  // 초기 주소 캐시 적용 및 지도 중심 좌표 변경 시 주소 업데이트
   useEffect(() => {
     if (!map || !window.kakao) {
       console.log('❌ 지도 또는 카카오맵이 준비되지 않음');
       return;
+    }
+
+    // 초기 주소 캐시 적용 (즉시 표시)
+    console.log('🚀 초기 주소 캐시 적용:', INITIAL_ADDRESS_CACHE);
+    if (onAddressChange) {
+      onAddressChange(INITIAL_ADDRESS_CACHE.gu, INITIAL_ADDRESS_CACHE.dong);
     }
 
     // services가 로드될 때까지 대기
@@ -114,7 +137,21 @@ export default function NowAddress({ onAddressClick, onAddressChange }: NowAddre
       // 현재 지도 중심좌표로 주소를 검색해서 표시합니다 (가이드 코드와 동일)
       const initialCenter = map.getCenter();
       console.log('📍 초기 중심 좌표:', initialCenter.getLat(), initialCenter.getLng());
-      searchAddrFromCoords(initialCenter, displayCenterInfo);
+      
+      // 초기 좌표가 캐시된 좌표와 다를 때만 검색
+      const currentLat = initialCenter.getLat();
+      const currentLng = initialCenter.getLng();
+      const cacheLat = INITIAL_ADDRESS_CACHE.coordinates.lat;
+      const cacheLng = INITIAL_ADDRESS_CACHE.coordinates.lng;
+      
+      const isDifferentFromCache = Math.abs(currentLat - cacheLat) > 0.001 || Math.abs(currentLng - cacheLng) > 0.001;
+      
+      if (isDifferentFromCache) {
+        console.log('🔄 캐시와 다른 좌표, 주소 재검색');
+        searchAddrFromCoords(initialCenter, displayCenterInfo);
+      } else {
+        console.log('✅ 캐시된 주소 사용');
+      }
 
       // 중심 좌표나 확대 수준이 변경됐을 때 지도 중심 좌표에 대한 주소 정보를 표시하도록 이벤트를 등록합니다 (가이드 코드와 동일)
       const idleListener = () => {
@@ -136,7 +173,7 @@ export default function NowAddress({ onAddressClick, onAddressChange }: NowAddre
     const cleanup = checkServicesAndStart();
     
     return cleanup;
-  }, [map]);
+  }, [map, onAddressChange]);
 
   return (
     <div className="w-full bg-white p-4">

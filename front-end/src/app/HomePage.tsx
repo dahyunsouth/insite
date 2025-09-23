@@ -5,7 +5,7 @@ import KakaoMap, { useKakaoMapContext } from '@/components/map/KakaoMap';
 import LoadView from '@/components/map/LoadView';
 import RightActionBar from '@/components/organisms/RightActionBar/RightActionBar';
 import CtaPillButton from '@/components/molecules/Detail/CtaPillButton/CtaPillButton';
-import AreaDetailModal from '@/components/organisms/Detail/AreaDetailModal/AreaDetailModal';
+import DetailModal from '@/components/organisms/Detail/DetailModal';
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
 import MainNavbar from '@/components/templates/LeftNavbar/MainNavbar';
 import MyPageMenu from '@/components/templates/MyPage/MyPage';
@@ -13,6 +13,10 @@ import MyMarket from '@/components/templates/MyPage/MyMarket';
 import NotificationBar from '@/components/atoms/Common/NotificationBar';
 import CompareTradeAreasModal from '@/components/organisms/Compare/CompareTradeAreasModal';
 import ComparisonTray from '@/components/organisms/Compare/ComparisonTray';
+import TradeAreaData from '@/data/TradeAreaValue.json';
+import { useNotification } from '@/components/map/useNotification';
+import Notification from '@/components/map/Notification';
+import { tmToWgs84 } from '@/utils/coordinateTransform';
 
 // 지도 타입 변경 핸들러 컴포넌트
 function MapTypeHandler({ 
@@ -55,8 +59,15 @@ function MapTypeHandler({
   );
 }
 
+// 상권코드로 상권명을 찾는 함수
+const getTradeAreaNameByCode = (trdarCode: string): string | null => {
+  const tradeArea = TradeAreaData.DATA.find(area => area.trdar_cd === trdarCode);
+  return tradeArea ? tradeArea.trdar_cd_nm : null;
+};
+
 export default function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { notification, showNotification, hideNotification } = useNotification();
   const [showLogoutNotification, setShowLogoutNotification] = useState(false);
   const [showLoginNotification, setShowLoginNotification] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -67,6 +78,42 @@ export default function HomePage() {
   const [isSavedCompareOpen, setIsSavedCompareOpen] = useState(false);
   const [selectedTradeArea1, setSelectedTradeArea1] = useState<{ trdarCd: string; trdarCdNm: string } | null>(null);
   const [selectedTradeArea2, setSelectedTradeArea2] = useState<{ trdarCd: string; trdarCdNm: string } | null>(null);
+  
+  // 비교함에 담긴 상권들 관리
+  const [comparisonTray, setComparisonTray] = useState<{ trdarCd: string; trdarCdNm: string }[]>([]);
+
+  // 비교함에 상권 추가
+  const addToComparisonTray = (trdarCd: string, trdarCdNm: string) => {
+    setComparisonTray(prev => {
+      // 이미 있는 상권인지 확인
+      const exists = prev.some(item => item.trdarCd === trdarCd);
+      if (exists) {
+        console.log('비교함에 이미 존재하는 상권입니다:', trdarCdNm);
+        showNotification('이미 비교함에 담긴 상권입니다.');
+        return prev; // 이미 있으면 추가하지 않음
+      }
+      // 최대 2개까지만 추가 가능
+      if (prev.length >= 2) {
+        console.log('비교함이 가득참 - 최대 2개까지만 담을 수 있습니다. 시도한 상권:', trdarCdNm);
+        showNotification('비교함에는 최대 2개까지만 담을 수 있습니다.');
+        return prev;
+      }
+      console.log('비교함에 상권 추가 성공:', trdarCdNm);
+      showNotification('비교함에 추가되었습니다.');
+      return [...prev, { trdarCd, trdarCdNm }];
+    });
+  };
+
+  // 비교함에서 상권 제거
+  const removeFromComparisonTray = (trdarCd: string) => {
+    setComparisonTray(prev => {
+      const removedItem = prev.find(item => item.trdarCd === trdarCd);
+      if (removedItem) {
+        console.log('비교함에서 상권 제거:', removedItem.trdarCdNm);
+      }
+      return prev.filter(item => item.trdarCd !== trdarCd);
+    });
+  };
 
   // 디버깅용 useEffect
   useEffect(() => {
@@ -80,10 +127,16 @@ export default function HomePage() {
   const [currentDistrict, setCurrentDistrict] = useState<string>('강남구');
   const [currentDong, setCurrentDong] = useState<string>('역삼동');
   const [selectedTradeAreaName, setSelectedTradeAreaName] = useState<string | null>(null);
+  const [selectedTradeAreaCode, setSelectedTradeAreaCode] = useState<string | null>(null);
+  const [isNavbarOpen, setIsNavbarOpen] = useState(true);
   
   // 검색 결과 관련 상태 추가
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [resetTrigger, setResetTrigger] = useState(0);
+  
+  // 상권 선택 관련 상태 추가
+  const [selectedTradeArea, setSelectedTradeArea] = useState<any>(null);
 
   // 최신 상태를 참조하기 위한 ref
   const showMarketListRef = useRef(showMarketList);
@@ -132,6 +185,11 @@ export default function HomePage() {
     setShowMarketList(false);
     setCurrentDistrict('');
     setCurrentDong('');
+    
+    // 상세보기 안내바도 숨기기
+    setSelectedTradeAreaName(null);
+    setSelectedTradeAreaCode(null);
+    setSelectedTradeArea(null);
   };
 
   // 주소 변경 핸들러 (지도 이동 시 자동 호출) - ref로 최신 상태 참조
@@ -272,6 +330,135 @@ export default function HomePage() {
     setShowMarketList(true);
   }, []);
 
+  const handleSearchReset = useCallback(() => {
+    console.log('🔍 검색창 초기화');
+    setResetTrigger(prev => prev + 1);
+  }, []);
+
+  // 상권 폴리곤과 라벨 스타일 업데이트 함수
+  const updateTradeAreaStyle = useCallback((trdarCode: string, trdarName: string) => {
+    console.log('🎨 상권 스타일 업데이트:', { trdarCode, trdarName });
+    
+    // 이전에 선택된 상권 스타일 초기화
+    const previousSelected = document.querySelector('.tradearea-label.selected');
+    if (previousSelected) {
+      previousSelected.classList.remove('selected');
+      
+      // 기본 스타일로 복원
+      const prevElement = previousSelected as HTMLElement;
+      prevElement.style.zIndex = '100';
+      prevElement.style.transform = 'scale(1)';
+      prevElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+      prevElement.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+      prevElement.style.color = '#000000';
+      prevElement.style.textShadow = 'none';
+      prevElement.style.padding = '4px 8px';
+      prevElement.style.fontSize = '12px';
+      prevElement.style.fontWeight = 'bold';
+      prevElement.style.textAlign = 'center';
+      prevElement.style.whiteSpace = 'nowrap';
+      prevElement.style.pointerEvents = 'auto';
+      prevElement.style.cursor = 'pointer';
+      prevElement.style.borderRadius = '6px';
+      prevElement.style.border = '1px solid rgba(50, 136, 255, 0.8)';
+      prevElement.style.transition = 'all 0.2s ease';
+      prevElement.style.position = 'relative';
+    }
+    
+    // 새로운 상권 라벨 찾기 및 스타일 적용
+    const labelElements = document.querySelectorAll('.tradearea-label');
+    let targetLabel: HTMLElement | null = null;
+    
+    labelElements.forEach((label) => {
+      const labelElement = label as HTMLElement;
+      if (labelElement.textContent?.includes(trdarName)) {
+        targetLabel = labelElement;
+      }
+    });
+    
+    if (targetLabel) {
+      console.log('✅ 상권 라벨 찾음, 스타일 적용:', targetLabel);
+      
+      // 선택된 상태 클래스 추가
+      targetLabel.classList.add('selected');
+      
+      // 선택된 상권 스타일 적용 (TradeAreaPoligon.tsx와 동일)
+      targetLabel.style.zIndex = '9999';
+      targetLabel.style.transform = 'scale(1.05)';
+      targetLabel.style.boxShadow = '0 4px 12px rgba(50, 136, 255, 0.4)';
+      targetLabel.style.backgroundColor = 'rgba(50, 136, 255, 0.9)';
+      targetLabel.style.color = '#ffffff';
+      targetLabel.style.textShadow = '1px 1px 2px rgba(0,0,0,0.7)';
+      targetLabel.style.padding = '4px 8px';
+      targetLabel.style.fontSize = '12px';
+      targetLabel.style.fontWeight = 'bold';
+      targetLabel.style.textAlign = 'center';
+      targetLabel.style.whiteSpace = 'nowrap';
+      targetLabel.style.pointerEvents = 'auto';
+      targetLabel.style.cursor = 'pointer';
+      targetLabel.style.borderRadius = '6px';
+      targetLabel.style.border = '1px solid rgba(50, 136, 255, 0.8)';
+      targetLabel.style.transition = 'all 0.2s ease';
+      targetLabel.style.position = 'relative';
+      
+      console.log('🎨 상권 라벨 스타일 적용 완료');
+    } else {
+      console.log('❌ 상권 라벨을 찾을 수 없음:', trdarName);
+    }
+  }, []);
+
+  // 상권 선택 핸들러
+  const handleTradeAreaSelect = useCallback((tradeArea: any) => {
+    console.log('🏪 상권 선택됨:', tradeArea);
+    
+    // 선택된 상권 상태 업데이트
+    setSelectedTradeArea(tradeArea);
+    
+    // 상세보기 안내바를 위한 상태 업데이트
+    setSelectedTradeAreaName(tradeArea.trdarCdNm);
+    setSelectedTradeAreaCode(tradeArea.trdarCd);
+    
+    // TM 좌표를 WGS84로 변환
+    const wgs84Coords = tmToWgs84(tradeArea.xcntsValue, tradeArea.ydntsValue);
+    console.log('📍 좌표 변환 완료:', {
+      tm: { x: tradeArea.xcntsValue, y: tradeArea.ydntsValue },
+      wgs84: wgs84Coords
+    });
+    
+    // 지도 이동 이벤트 발생
+    const focusEvent = new CustomEvent('focusTradeArea', {
+      detail: {
+        code: tradeArea.trdarCd,
+        name: tradeArea.trdarCdNm,
+        coordinates: {
+          lat: wgs84Coords.lat,
+          lng: wgs84Coords.lng
+        }
+      }
+    });
+    
+    window.dispatchEvent(focusEvent);
+    console.log('🗺️ 지도 이동 이벤트 발생:', {
+      code: tradeArea.trdarCd,
+      name: tradeArea.trdarCdNm,
+      coordinates: wgs84Coords
+    });
+    
+    // 상권 폴리곤과 라벨 스타일 변경
+    setTimeout(() => {
+      updateTradeAreaStyle(tradeArea.trdarCd, tradeArea.trdarCdNm);
+      
+      // 폴리곤 스타일 변경을 위한 커스텀 이벤트 발생
+      const styleEvent = new CustomEvent('selectTradeArea', {
+        detail: {
+          code: tradeArea.trdarCd,
+          name: tradeArea.trdarCdNm
+        }
+      });
+      window.dispatchEvent(styleEvent);
+    }, 100); // 지도 이동 후 스타일 변경
+  }, []);
+
   // 로드뷰 토글 핸들러
   const handleLoadViewToggle = (action: boolean | 'minimize' | 'restore') => {
     if (typeof action === 'boolean') {
@@ -321,11 +508,15 @@ export default function HomePage() {
       <KakaoMap 
         cafeActive={isCafeActive} 
         showMarketingArea={showMarketingArea}
-        onTradeAreaSelect={setSelectedTradeAreaName}
+        onTradeAreaSelect={(name, code) => {
+          console.log("🔍 상권 선택:", { name, code });
+          setSelectedTradeAreaName(name);
+          setSelectedTradeAreaCode(code);
+        }}
         onShowMarketList={handleShowMarketList}
       >
         {/* 좌측 네비게이션 바 */}
-        <div className="fixed w-1/4 top-0 left-0 right-0 z-20 h-screen flex flex-col">
+        <div className="fixed w-1/4 top-0 left-0 right-0 z-[95] h-screen flex flex-col">
           {showMyPage && (
             <MyPageMenu 
               onClose={handleMyPageClose}
@@ -343,6 +534,12 @@ export default function HomePage() {
             <MyMarket 
               onBack={handleMyMarketClose}
               onCompareClick={handleSavedCompareClick}
+              onDetailClick={(trdarCd, trdarCdNm) => {
+                setSelectedTradeAreaCode(trdarCd);
+                setSelectedTradeAreaName(trdarCdNm);
+                setIsDetailOpen(true);
+                // MyMarket 모달은 그대로 유지
+              }}
             />
           )}
           {!showMyPage && !showMyMarket && (
@@ -351,6 +548,7 @@ export default function HomePage() {
               onLoginModalOpen={() => setIsAuthOpen(true)}
               onSavedAreasClick={handleSavedAreasClick}
               onCompareClick={handleCompareTabClick}
+              onNavbarStateChange={setIsNavbarOpen}
               onMarketingAreaChange={setShowMarketingArea}
               showMarketingArea={showMarketingArea}
               showMarketList={showMarketList}
@@ -361,9 +559,16 @@ export default function HomePage() {
               showSearchResults={showSearchResults}
               searchKeyword={searchKeyword}
               onSearchClose={handleSearchClose}
+              onSearchReset={handleSearchReset}
               onSearchResultsShow={handleSearchResultsShow}
+              resetTrigger={resetTrigger}
               onAddressClick={handleShowMarketList}
               onAddressChange={handleAddressChange}
+              // 상권 선택 관련 props 추가
+              onTradeAreaSelect={handleTradeAreaSelect}
+              selectedTradeArea={selectedTradeArea}
+              // DetailModal 관련 props
+              onDetailModalClose={() => setIsDetailOpen(false)}
             />
           )}
         </div>
@@ -402,10 +607,11 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 비교함 담기 모달 - 항상 표시 */}
-      {/* 비교함 담기 모달 - 상권비교 모달이 닫혀있을 때만 표시 */}
-      {!isCompareOpen && (
+      {/* 비교함 담기 모달 - 비교함에 상권이 1개 이상일 때만 표시 */}
+      {!isCompareOpen && comparisonTray.length > 0 && (
         <ComparisonTray 
+          comparisonItems={comparisonTray}
+          onRemoveItem={removeFromComparisonTray}
           onCompareClick={(area1, area2) => {
             setSelectedTradeArea1(area1);
             setSelectedTradeArea2(area2);
@@ -416,10 +622,15 @@ export default function HomePage() {
       )}
 
       {/* Area detail modal */}
-      <AreaDetailModal
+      <DetailModal
         open={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
-        title="상권 현황"
+        title={selectedTradeAreaName ? selectedTradeAreaName : "상권 현황"}
+        trdarCode={selectedTradeAreaCode}
+        onAddToComparison={addToComparisonTray}
+        onRemoveFromComparison={removeFromComparisonTray}
+        isInComparison={(trdarCd) => comparisonTray.some(item => item.trdarCd === trdarCd)}
+        isNavbarOpen={isNavbarOpen}
       />
 
       {/* Compare modal: right-side overlay (covers right 75%) */}
@@ -486,6 +697,15 @@ export default function HomePage() {
         onClose={() => setShowLogoutNotification(false)}
         duration={3000}
       />
+
+      {/* 토스트 알림 */}
+      <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[100]">
+        <Notification
+          message={notification.message}
+          isVisible={notification.isVisible}
+          onClose={hideNotification}
+        />
+      </div>
 
     </div>
   );

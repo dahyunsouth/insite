@@ -75,15 +75,23 @@ const LoginForm: React.FC<LoginFormProps> = ({
         }
 
         // JWT 토큰 저장
+        console.log('🔐 [LoginForm] 로그인 응답 데이터:', responseData);
+        console.log('🔐 [LoginForm] 응답 헤더 Authorization:', response.headers.get('Authorization'));
+        
         const authToken = response.headers.get('Authorization') || 
                          responseData.token || 
                          responseData.accessToken ||
                          responseData.result?.accessToken ||
                          responseData.result?.token;
         
+        console.log('🔐 [LoginForm] 추출된 토큰:', authToken);
+        console.log('🔐 [LoginForm] 토큰 저장 성공:', !!authToken);
         
         if (authToken) {
           localStorage.setItem('authToken', authToken);
+          console.log('✅ [LoginForm] 토큰이 localStorage에 저장됨');
+        } else {
+          console.error('❌ [LoginForm] 토큰을 찾을 수 없음');
         }
 
         // 로그인 성공 - 모달 닫기 및 로그인 성공 콜백 호출

@@ -1,11 +1,16 @@
 ﻿'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { RecommendationItem, RecommendationResponse } from '@/types/recommendation';
+import { API_ENDPOINTS } from '@/config/api';
+import { authManager } from '@/utils/auth';
+import MarketRecommendationResultContent from './MarketRecommendationResultContent';
 
 interface MarketRecommendationResultProps {
   result: RecommendationResponse;
+  selectedItem?: RecommendationItem | null;
+  onItemSelect?: (item: RecommendationItem | null) => void;
   onBack?: () => void;
 }
 
@@ -14,6 +19,8 @@ type RankStyle = {
   badgeBackground: string;
   badgeSrc: string;
   accent: string;
+  scoreBadgeBorder: string;
+  scoreBadgeText: string;
 };
 
 const RANK_STYLES: Record<number, RankStyle> = {
@@ -22,18 +29,24 @@ const RANK_STYLES: Record<number, RankStyle> = {
     badgeBackground: 'bg-orange-500',
     badgeSrc: '/badges/ic_first.svg',
     accent: 'border-orange-500',
+    scoreBadgeBorder: 'border-orange-600',
+    scoreBadgeText: 'text-orange-700',
   },
   2: {
     container: 'border border-blue-500 bg-blue-50',
     badgeBackground: 'bg-blue-500',
     badgeSrc: '/badges/ic_second.svg',
     accent: 'border-blue-500',
+    scoreBadgeBorder: 'border-blue-600',
+    scoreBadgeText: 'text-blue-700',
   },
   3: {
     container: 'border border-green-500 bg-green-50',
     badgeBackground: 'bg-green-700',
     badgeSrc: '/badges/ic_third.svg',
     accent: 'border-green-500',
+    scoreBadgeBorder: 'border-green-600',
+    scoreBadgeText: 'text-green-700',
   },
 };
 
@@ -42,124 +55,95 @@ const DEFAULT_STYLE: RankStyle = {
   badgeBackground: 'bg-gray-500',
   badgeSrc: '/badges/ic_first.svg',
   accent: 'border-gray-300',
+  scoreBadgeBorder: 'border-gray-300',
+  scoreBadgeText: 'text-gray-700',
 };
 
 const getStyle = (ranking: number): RankStyle => RANK_STYLES[ranking] || DEFAULT_STYLE;
 
-const formatScore = (value: number | null | undefined): string => {
-  if (value === null || value === undefined) {
-    return '-';
-  }
-  const numeric = Number(value);
-  if (Number.isNaN(numeric)) {
-    return '-';
-  }
-  return numeric.toFixed(2);
-};
+const MarketRecommendationResult: React.FC<MarketRecommendationResultProps> = ({ result, selectedItem: propSelectedItem, onItemSelect, onBack }) => {
+  const [nickname, setNickname] = useState<string>('');
+  const [selectedItem, setSelectedItem] = useState<RecommendationItem | null>(propSelectedItem || null);
+  
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await authManager.authenticatedRequest(API_ENDPOINTS.USER_INFO, {
+          method: 'GET',
+        });
+        
+        if (response.ok) {
+          const userData = await response.json();
+          if (userData.result?.nickname) {
+            setNickname(userData.result.nickname);
+          }
+        }
+      } catch (error) {
+        console.error('사용자 정보 가져오기 실패:', error);
+      }
+    };
+    
+    fetchUserInfo();
+  }, []);
 
-const ScoreSummary: React.FC<{ item: RecommendationItem }> = ({ item }) => (
-  <div className='space-y-1 text-sm text-gray-600'>
-    <p>
-      지속가능성 {formatScore(item.sustainabilityScore)} · 수익성 {formatScore(item.profitabilityScore)} · 접근성 {formatScore(item.accessibilityScore)}
-    </p>
-    <p>
-      위험도 {formatScore(item.riskScore)} · 경쟁강도 {formatScore(item.competitionScore)}
-    </p>
-  </div>
-);
-
-const MarketRecommendationResult: React.FC<MarketRecommendationResultProps> = ({ result, onBack }) => {
-  const topThree = result.items.slice(0, 3);
-  const secondaryItems = topThree.slice(1).filter((item): item is RecommendationItem => Boolean(item));
-  const areaTypeLabel = result.areaType ? result.areaType + ' 상권' : '상권';
-  const headerTitle = (result.district ? result.district + ' ' : '') + areaTypeLabel + ' 추천 결과';
-
-  const renderPrimaryCard = (item: RecommendationItem) => {
-    const style = getStyle(item.ranking);
-    const totalScoreLabel = '종합 추천 점수';
-    return (
-      <div key={item.ranking} className={'flex flex-1 rounded-xl py-4 px-6 ' + style.container}>
-        <div className='flex flex-col gap-4 justify-center items-center flex-1 p-4'>
-          <div className='flex items-center justify-center flex-1'>
-            <Image src={style.badgeSrc} alt={'ranking-badge-' + item.ranking} width={160} height={160} className='w-full h-full object-contain' />
-          </div>
-          <div className={'flex justify-between items-center rounded-full text-white px-6 py-2 ' + style.badgeBackground}>
-            {totalScoreLabel}
-            <span>{formatScore(item.totalScore)}</span>
-          </div>
-        </div>
-        <div className='flex flex-col flex-1 justify-center'>
-          <div className={'flex pb-4 mb-4 border-b ' + style.accent}>
-            <div className='text-2xl font-bold text-gray-800'>{item.areaName || '정보 없음'}</div>
-          </div>
-          <ScoreSummary item={item} />
-        </div>
-      </div>
-    );
+  // propSelectedItem이 변경될 때 내부 상태 동기화
+  useEffect(() => {
+    setSelectedItem(propSelectedItem || null);
+  }, [propSelectedItem]);
+  
+  const handleSelectedItemChange = (item: RecommendationItem | null) => {
+    setSelectedItem(item);
+    onItemSelect?.(item);
   };
 
-  const renderSecondaryCard = (item: RecommendationItem) => {
-    const style = getStyle(item.ranking);
-    const totalScoreLabel = '종합 추천 점수';
-    return (
-      <div key={item.ranking} className={'flex flex-1 rounded-xl py-1 px-6 ' + style.container}>
-        <div className='flex flex-col gap-4 justify-center items-center flex-1 p-4'>
-          <div className='flex items-center justify-center flex-1'>
-            <Image src={style.badgeSrc} alt={'ranking-badge-' + item.ranking} width={160} height={160} className='w-full h-full object-contain' />
-          </div>
-          <div className={'flex justify-between items-center rounded-full text-white px-6 py-2 ' + style.badgeBackground}>
-            {totalScoreLabel}
-            <span>{formatScore(item.totalScore)}</span>
-          </div>
-        </div>
-        <div className='flex flex-col flex-1 justify-center'>
-          <div className={'flex pb-4 mb-4 border-b ' + style.accent}>
-            <div className='text-2xl font-bold text-gray-800'>{item.areaName || '정보 없음'}</div>
-          </div>
-          <ScoreSummary item={item} />
-        </div>
-      </div>
-    );
+  const handleBackClick = () => {
+    if (selectedItem) {
+      // 상세 정보에서 추천 결과로 돌아가기
+      setSelectedItem(null);
+      onItemSelect?.(null);
+    } else {
+      // 추천 결과에서 이전 단계로 돌아가기
+      onBack?.();
+    }
   };
 
-  if (topThree.length === 0) {
-    return (
-      <div className='w-full h-full flex flex-col'>
-        <div className='flex items-center justify-between py-4 border-b'>
-          <button
-            onClick={onBack}
-            className='cursor-pointer rounded-xl px-4 py-3 text-gray-400 hover:text-gray-800'
-          >
-            &lt;
-          </button>
-          <h1 className='text-3xl font-semibold text-gray-800'>{headerTitle}</h1>
-          <div className='w-16' />
-        </div>
-        <div className='flex-1 flex items-center justify-center text-gray-500'>
-          추천 결과를 찾을 수 없습니다.
-        </div>
-      </div>
-    );
-  }
+  const headerTitle = selectedItem 
+    ? `${selectedItem.areaName}`
+    : nickname 
+      ? `👏🏻 ${nickname}님을 위한 맞춤 추천 결과` 
+      : '맞춤 추천 결과';
 
   return (
     <div className='w-full h-full flex flex-col'>
       <div className='flex items-center justify-between py-4 border-b'>
         <button
-          onClick={onBack}
+          onClick={handleBackClick}
           className='cursor-pointer rounded-xl px-4 py-3 text-gray-400 hover:text-gray-800'
         >
           &lt;
         </button>
-        <h1 className='text-3xl font-semibold text-gray-800'>{headerTitle}</h1>
+        <div className='flex items-center gap-4'>
+          {selectedItem && (
+            <div className='flex items-center'>
+              <Image 
+                src={getStyle(selectedItem.ranking).badgeSrc} 
+                alt={`ranking-badge-${selectedItem.ranking}`} 
+                width={40} 
+                height={40} 
+                className='w-10 h-10 object-contain' 
+              />
+            </div>
+          )}
+          <h1 className='text-3xl font-semibold text-gray-800'>{headerTitle}</h1>
+        </div>
         <div className='w-16' />
       </div>
-      <div className='flex flex-col flex-1 pt-4 gap-4 h-full'>
-        {renderPrimaryCard(topThree[0])}
-        <div className='flex-1 flex gap-4'>
-          {secondaryItems.map((item) => renderSecondaryCard(item))}
-        </div>
-      </div>
+      <MarketRecommendationResultContent 
+        result={result} 
+        onBack={onBack} 
+        selectedItem={selectedItem}
+        onSelectedItemChange={handleSelectedItemChange}
+      />
     </div>
   );
 };

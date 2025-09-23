@@ -63,7 +63,7 @@ const RightActionBar: React.FC<RightActionBarProps> = ({
   return (
     <div
       className={`
-        fixed right-4 top-1/2 -translate-y-1/2 z-40
+        fixed right-4 top-1/2 -translate-y-1/2 z-20
         flex flex-col items-end justify-between
         h-full py-4
         ${className}
@@ -73,9 +73,13 @@ const RightActionBar: React.FC<RightActionBarProps> = ({
         {/* 상권추천 버튼 */}
         <button 
           onClick={() => {
-            router.push('/marketrecommendation');
+            if (isLoggedIn) {
+              router.push('/marketrecommendation');
+            } else {
+              setIsModalOpen(true);
+            }
           }}
-          className="cursor-pointer focus:outline-none"
+          className="cursor-pointer focus:outline-none transition-transform duration-200 hover:scale-105"
         >
           <img 
             src="/MarketRecommendationButton.svg" 

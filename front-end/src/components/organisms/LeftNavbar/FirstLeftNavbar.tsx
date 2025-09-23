@@ -4,16 +4,17 @@ import TotalLiveRankBar from '@/components/molecules/LeftNavbar/TotalLiveRankBar
 
 interface FirstLeftNavbarProps {
   onSearchResultsShow?: (show: boolean, keyword: string) => void;
+  resetTrigger?: number;
 }
 
-const FirstLeftNavbar = ({ onSearchResultsShow }: FirstLeftNavbarProps) => {
+const FirstLeftNavbar = ({ onSearchResultsShow, resetTrigger }: FirstLeftNavbarProps) => {
   return (
     <div className="w-full bg-white flex flex-col items-center">
       <div className="w-full">
-        <TotalSearchBar onSearchResultsShow={onSearchResultsShow} />
+        <TotalSearchBar onSearchResultsShow={onSearchResultsShow} resetTrigger={resetTrigger} />
       </div>
       <div className="w-full">
-        <TotalLiveRankBar />
+        {/* <TotalLiveRankBar /> */}
       </div>
       <div className='w-full'>
         {/* <TotalFilterBar /> */}

@@ -7,6 +7,7 @@ import PcDetailPanel, { PcMeta } from "@/components/organisms/Compare/PcDetailPa
 import TradeAreaPicker, { TradeAreaSelection } from "@/components/molecules/Compare/TradeAreaPicker";
 import { fetchTradeAreaDetail, mapTradeAreaDetailToMetrics, TradeAreaDetail, fetchTradeAreaScore, TradeAreaScore, getTradeAreaNameByCode } from "@/lib/api/tradeAreas";
 import TradeAreaRawData from "@/data/TradeAreaValue.json";
+import MarketChangeIndicatorInfoModal from "@/components/molecules/Detail/MarketChangeIndicator/MarketChangeIndicatorInfoModal";
 
 // TradeAreaRawData 타입 정의
 interface TradeAreaFileShape {
@@ -73,6 +74,12 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
   const [loadingScoreB, setLoadingScoreB] = useState<boolean>(false);
   const [errorScoreA, setErrorScoreA] = useState<string | null>(null);
   const [errorScoreB, setErrorScoreB] = useState<string | null>(null);
+  
+  // 상권 변화 지표 툴팁 상태
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const tooltipRef = useRef<HTMLButtonElement>(null);
+  
   // Close on ESC
   useEffect(() => {
     if (!open) return;
@@ -258,11 +265,57 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
   const metricsA = mapTradeAreaDetailToMetrics(detailA);
   const metricsB = mapTradeAreaDetailToMetrics(detailB);
 
+  // 지표별 단위 매핑
+  const getUnit = (key: string) => {
+    switch (key) {
+      case '매출':
+        return '원';
+      case '점포':
+        return '개';
+      case '유동인구':
+        return '명';
+      case '상주인구':
+        return '명';
+      case '직장인구':
+        return '명';
+      case '상권변화지표':
+        return '';
+      default:
+        return '';
+    }
+  };
+
   // 상권명 추출 (종합 분석 데이터 또는 상세 데이터에서 가져오기)
   const tradeAreaNameA = scoreA?.areaName || detailA?.trdarCdNm || 
     (selectionA.tradeAreaCode ? getTradeAreaNameByCode(selectionA.tradeAreaCode) : "미선택");
   const tradeAreaNameB = scoreB?.areaName || detailB?.trdarCdNm || 
     (selectionB.tradeAreaCode ? getTradeAreaNameByCode(selectionB.tradeAreaCode) : "미선택");
+
+  // 툴팁 열기/닫기 함수
+  const handleTooltipToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (isTooltipOpen) {
+      setIsTooltipOpen(false);
+    } else {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const modalHeight = 640; // 모달의 대략적인 높이
+      const viewportHeight = window.innerHeight;
+      const bottomMargin = 50; // 뷰포트 하단에서 떨어질 거리
+      
+      // 모달이 화면 하단에서 잘리지 않도록 위치 조정
+      let topPosition = rect.top + window.scrollY - 10;
+      const maxTop = viewportHeight - modalHeight - bottomMargin;
+      
+      if (topPosition > maxTop) {
+        topPosition = maxTop;
+      }
+      
+      setTooltipPosition({
+        top: topPosition,
+        left: rect.right + window.scrollX + 8 // 버튼 오른쪽에 8px 간격으로 배치
+      });
+      setIsTooltipOpen(true);
+    }
+  };
 
   const metrics = [
     { key: metricsA.sales.key, a: loadingA ? "로딩중..." : metricsA.sales.value, b: loadingB ? "로딩중..." : metricsB.sales.value, aNum: metricsA.sales.numValue, bNum: metricsB.sales.numValue },
@@ -293,7 +346,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
           <div className="absolute inset-0 bg-black/40 -z-10" onClick={onClose} />
         )}
         <div
-          className="w-full max-w-6xl rounded-3xl bg-white shadow-xl border border-black/5 max-h-[85vh] overflow-hidden flex flex-col"
+          className="w-full max-w-6xl rounded-3xl bg-white shadow-xl border border-black/5 max-h-[85vh] overflow-visible flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -319,7 +372,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
           </div>
 
           {/* Body */}
-          <div className="flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-8 py-8">
+          <div className="flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-8 py-8 overflow-x-visible">
             {/* Lower Section: At a Glance */}
             {/* Selectors aligned to columns */}
             <div className="mt-0">
@@ -426,10 +479,10 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
                   {(() => {
                   const pcs: PcMeta[] = [
                     { id:1, code:"지속성", name:"상권 생존 가능성", features:["운영_개월_평균","폐업_개월_평균","개업률"], meaning:"상권의 생존력을 나타내는 지표입니다.", highText:"운영 60개월 이상, 폐업 36개월 이상, 개업률 10% 이상의 매우 안정적인 상권", lowText:"운영 12개월 미만, 폐업 6개월 미만, 개업률 1% 미만의 극도로 불안정한 상권" },
-                    { id:2, code:"수익성", name:"시장 잠재력", features:["시장_잠재력","수요_공급_균형","소득_수준","집객시설","예측_매출"], meaning:"상권의 수익성과 시장 잠재력", highText:"유사업종 50개 이상, 포화도 10% 이하, 유동인구 10만명/점포 이상, 소득 400만원 이상, 집객시설 50개 이상, 예측매출 1억원 이상의 높은 수익성 상권", lowText:"유사업종 10개 미만, 포화도 50% 초과, 유동인구 2만명/점포 미만, 소득 200만원 미만, 집객시설 10개 미만, 예측매출 1천만원 미만의 낮은 수익성 상권" },
-                    { id:3, code:"접근성", name:"교통편의성", features:["지하철역_거리","버스정류장_거리"], meaning:"상권의 접근성과 교통편의성", highText:"지하철역 200m 이내, 버스정류장 100m 이내의 교통편의성이 매우 좋은 상권", lowText:"지하철역 3km 초과, 버스정류장 1km 초과의 교통편의성이 떨어지는 상권" },
-                    { id:4, code:"위험도", name:"사업 위험 요소 (벌점 방식)", features:["유동인구/점포수","폐업_개월","폐업률"], meaning:"상권의 위험도와 사업 위험 요소", highText:"유동인구 10만명/점포 이상, 폐업 24개월 이상, 폐업률 2% 이하의 위험이 낮은 안정적 상권", lowText:"유동인구 2만명/점포 미만, 폐업 6개월 미만, 폐업률 20% 초과의 위험이 높은 불안정 상권" },
-                    { id:5, code:"경쟁강도", name:"경쟁 상황", features:["점포_수","운영_개월","점포_밀도"], meaning:"상권의 경쟁 강도와 경쟁 상황", highText:"점포 5개 이하, 유동인구 10만명 이상, 점포밀도 0.5개/100㎡ 이하의 경쟁이 약한 상권", lowText:"점포 30개 초과, 유동인구 3만명 미만, 점포밀도 3.0개/100㎡ 초과의 경쟁이 치열한 상권" },
+                    { id:2, code:"수익성", name:"시장 잠재력", features:["시장_잠재력","수요-공급_균형","소득_수준","집객시설","예측_매출"], meaning:"상권의 수익성과 시장 잠재력", highText:"유사업종 50개 이상, 포화도 10% 이하, 유동인구 10만명/점포 이상, 소득 400만원 이상, 집객시설 50개 이상, 예측매출 1억원 이상의 높은 수익성 상권", lowText:"유사업종 10개 미만, 포화도 50% 초과, 유동인구 2만명/점포 미만, 소득 200만원 미만, 집객시설 10개 미만, 예측매출 1천만원 미만의 낮은 수익성 상권" },
+                    { id:3, code:"접근성", name:"교통편의성", features:["지하철역_거리","버스_정류장_거리"], meaning:"상권의 교통 편의성을 나타냅니다.", highText:"지하철역 200m 이내, 버스정류장 100m 이내의 교통편의성이 매우 좋은 상권", lowText:"지하철역 3km 초과, 버스정류장 1km 초과의 교통편의성이 떨어지는 상권" },
+                    { id:4, code:"위험도", name:"사업 위험 요소 (벌점 방식)", features:["점포_수_대비_유동인구","폐업_개월","폐업률"], meaning:"상권의 위험도를 나타냅니다.", highText:"유동인구 10만명/점포 이상, 폐업 24개월 이상, 폐업률 2% 이하의 위험이 낮은 안정적 상권", lowText:"유동인구 2만명/점포 미만, 폐업 6개월 미만, 폐업률 20% 초과의 위험이 높은 불안정 상권" },
+                    { id:5, code:"경쟁강도", name:"경쟁 상황", features:["점포_수","수요_밀도","점포_밀도"], meaning:"상권의 경쟁 강도를 나타냅니다.", highText:"점포 5개 이하, 유동인구 10만명 이상, 점포밀도 0.5개/100㎡ 이하의 경쟁이 약한 상권", lowText:"점포 30개 초과, 유동인구 3만명 미만, 점포밀도 3.0개/100㎡ 초과의 경쟁이 치열한 상권" },
                   ];
                   const labels = pcs.map((p) => p.code);
                   
@@ -469,34 +522,53 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
             {activeTab === 'data' && (
               <>
                 {/* Metrics rows */}
-            <div className={`mt-8 grid gap-x-10 ${showThird ? "grid-cols-[1fr_1fr_240px]" : "grid-cols-2"}`}>
+            <div className={`mt-2 grid gap-x-10 ${showThird ? "grid-cols-[1fr_1fr_240px]" : "grid-cols-2"}`}>
               {metrics.map((m, idx) => (
                 <React.Fragment key={`${m.key}-${idx}`}>
-                  <div className="py-6 border-t border-gray-200">
-                    <div className="text-gray-500">
+                  <div className={`py-6 ${idx === 0 ? '' : 'border-t border-gray-200'}`}>
+                    <div className="text-gray-500 flex items-center gap-2">
                       {m.key}
+                      {m.key === "상권변화지표" && (
+                        <button
+                          ref={tooltipRef}
+                          onClick={handleTooltipToggle}
+                          className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+                          aria-label="상권 변화 지표 설명 보기"
+                        >
+                          <span className="text-xs text-gray-600">?</span>
+                        </button>
+                      )}
                     </div>
                     <div className="mt-2 text-3xl sm:text-4xl font-extrabold text-gray-900">{m.a}</div>
                   </div>
-                  <div className="py-6 border-t border-gray-200">
-                    <div className="text-gray-500">
+                  <div className={`py-6 ${idx === 0 ? '' : 'border-t border-gray-200'}`}>
+                    <div className="text-gray-500 flex items-center gap-2">
                       {m.key}
+                      {m.key === "상권변화지표" && (
+                        <button
+                          onClick={handleTooltipToggle}
+                          className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+                          aria-label="상권 변화 지표 설명 보기"
+                        >
+                          <span className="text-xs text-gray-600">?</span>
+                        </button>
+                      )}
                     </div>
                     <div className="mt-2 text-3xl sm:text-4xl font-extrabold text-gray-900">{m.b}</div>
                   </div>
                   {showThird && m.key !== "상권변화지표" && (
-                    <div className="py-6 border-t border-gray-200 flex items-center">
+                    <div className={`py-6 ${idx === 0 ? '' : 'border-t border-gray-200'} flex items-center`}>
                       <div className="w-full">
                         <div className="text-gray-500 mb-2">
                           {m.key}
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-32 h-4 rounded bg-[#2563eb]" style={{ width: `${Math.max(m.aNum, m.bNum) > 0 ? (m.aNum / Math.max(m.aNum, m.bNum)) * 100 : 0}%` }} />
-                          <span className="text-sm text-gray-700 w-20 text-right">{m.aNum === 0 ? "-" : m.aNum.toLocaleString()}</span>
+                          <div className="w-24 h-4 rounded bg-[#2563eb]" style={{ width: `${Math.max(m.aNum, m.bNum) > 0 ? (m.aNum / Math.max(m.aNum, m.bNum)) * 100 : 0}%` }} />
+                          <span className="text-sm text-gray-700 text-right whitespace-nowrap">{m.aNum === 0 ? "-" : `${m.aNum.toLocaleString()}${getUnit(m.key)}`}</span>
                         </div>
                         <div className="mt-2 flex items-center gap-2">
-                          <div className="w-32 h-4 rounded bg-[#f472b6]" style={{ width: `${Math.max(m.aNum, m.bNum) > 0 ? (m.bNum / Math.max(m.aNum, m.bNum)) * 100 : 0}%` }} />
-                          <span className="text-sm text-gray-700 w-20 text-right">{m.bNum === 0 ? "-" : m.bNum.toLocaleString()}</span>
+                          <div className="w-24 h-4 rounded bg-[#f472b6]" style={{ width: `${Math.max(m.aNum, m.bNum) > 0 ? (m.bNum / Math.max(m.aNum, m.bNum)) * 100 : 0}%` }} />
+                          <span className="text-sm text-gray-700 text-right whitespace-nowrap">{m.bNum === 0 ? "-" : `${m.bNum.toLocaleString()}${getUnit(m.key)}`}</span>
                         </div>
                       </div>
                     </div>
@@ -509,6 +581,13 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
           </div>
         </div>
       </div>
+      
+      {/* 상권 변화 지표 툴팁 모달 */}
+      <MarketChangeIndicatorInfoModal
+        isOpen={isTooltipOpen}
+        onClose={() => setIsTooltipOpen(false)}
+        position={tooltipPosition}
+      />
     </div>,
     document.body
   );

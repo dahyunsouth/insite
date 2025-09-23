@@ -1,4 +1,6 @@
-const BASE_URL = "http://43.203.196.29:8080";
+import { API_BASE_URL } from '@/config/api';
+
+const BASE_URL = API_BASE_URL;
 
 export async function fetchGuList(): Promise<string[]> {
   const response = await fetch(`${BASE_URL}/api/v1/data/list-gu`, {
@@ -264,8 +266,17 @@ export function mapTradeAreaDetailToMetrics(detail: TradeAreaDetail | null) {
     ? `${Math.round(workerCount / 10000).toLocaleString()}만 명` 
     : `${workerCount.toLocaleString()} 명`;
 
-  // 상권변화지표
-  const changeIndex = detail.chnge?.trdrChngeIx || "-";
+  // 상권변화지표 (코드를 한국어로 변환)
+  const getIndicatorName = (indicator: string) => {
+    switch (indicator) {
+      case "LL": return "다이나믹";
+      case "LH": return "상권 확장";
+      case "HL": return "상권 축소";
+      case "HH": return "정체";
+      default: return indicator;
+    }
+  };
+  const changeIndex = detail.chnge?.trdrChngeIx ? getIndicatorName(detail.chnge.trdrChngeIx) : "-";
 
   return {
     sales: { key: "매출", value: salesValue, numValue: salesAmount },
@@ -316,7 +327,7 @@ export function getTradeAreaNameByCode(tradeAreaCode: string): string {
 // 종합 분석 점수 조회 API
 export async function fetchTradeAreaScore(tradeAreaName: string): Promise<TradeAreaScore> {
   try {
-    const response = await fetch(`http://43.203.196.29:8080/api/v1/data/score?trdarCdNm=${encodeURIComponent(tradeAreaName)}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/data/score?trdarCdNm=${encodeURIComponent(tradeAreaName)}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

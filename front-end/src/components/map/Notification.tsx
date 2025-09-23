@@ -7,6 +7,7 @@ interface NotificationProps {
   isVisible: boolean;
   duration?: number; // 알림 표시 시간 (밀리초)
   onClose?: () => void;
+  onClick?: () => void; // 클릭 이벤트 핸들러 추가
 }
 
 const Notification: React.FC<NotificationProps> = ({
@@ -14,6 +15,7 @@ const Notification: React.FC<NotificationProps> = ({
   isVisible,
   duration = 3000,
   onClose,
+  onClick,
 }) => {
   const [show, setShow] = useState(false);
 
@@ -37,7 +39,10 @@ const Notification: React.FC<NotificationProps> = ({
 
   return (
     <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50">
-      <div className="bg-black/70 bg-opacity-80 text-white px-6 py-3 rounded-full shadow-lg">
+      <div 
+        className="bg-black/70 bg-opacity-80 text-white px-6 py-3 rounded-full shadow-lg cursor-pointer hover:bg-black/80 transition-colors"
+        onClick={onClick}
+      >
         <div className="flex items-center justify-center">
           <span className="text-sm font-medium whitespace-nowrap">
             {message}

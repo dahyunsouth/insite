@@ -7,6 +7,11 @@
   accessibilityScore: number;
   riskScore: number;
   competitionScore: number;
+  trdarCode?: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
 }
 
 export interface RecommendationResponse {
