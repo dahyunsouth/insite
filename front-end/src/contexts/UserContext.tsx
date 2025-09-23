@@ -67,37 +67,59 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   // JWT 토큰에서 사용자 정보 추출 시도 (백업용)
   const extractUserFromToken = (): UserInfo | null => {
     const token = authManager.getAccessToken();
+    console.log('🔍 [UserContext] 저장된 토큰:', token);
+    console.log('🔍 [UserContext] 토큰 유효성:', token ? isTokenValid(token) : false);
+    
     if (!token || !isTokenValid(token)) {
+      console.log('❌ [UserContext] 토큰이 없거나 유효하지 않음');
       return null;
     }
 
-    return extractUserInfoFromToken(token);
+    const userInfo = extractUserInfoFromToken(token);
+    console.log('🔍 [UserContext] 토큰에서 추출된 사용자 정보:', userInfo);
+    return userInfo;
   };
 
   // API에서 사용자 정보 가져오기
   const fetchUserInfoFromAPI = async (): Promise<UserInfo | null> => {
+    console.log('🌐 [UserContext] API 호출 시작 - fetchUserInfoFromAPI');
+    console.log('🌐 [UserContext] API URL:', API_ENDPOINTS.USER_INFO);
+    
     try {
       const response = await authManager.authenticatedRequest(API_ENDPOINTS.USER_INFO, {
         method: 'GET',
       });
 
+      console.log('🌐 [UserContext] API 응답 상태:', response.status);
+      console.log('🌐 [UserContext] API 응답 OK:', response.ok);
+
       if (!response.ok) {
+        console.error('❌ [UserContext] API 응답 실패:', response.status);
         throw new Error(`사용자 정보를 가져오는데 실패했습니다. (${response.status})`);
       }
 
       const data = await response.json();
+      console.log('🌐 [UserContext] API 응답 데이터:', data);
+      console.log('🌐 [UserContext] result 객체 상세:', data.result);
+      console.log('🌐 [UserContext] result 타입:', typeof data.result);
+      console.log('🌐 [UserContext] result 키들:', data.result ? Object.keys(data.result) : 'null');
       
       if (data.isSuccess && data.result) {
+        console.log('✅ [UserContext] API에서 사용자 정보 추출 성공:', data.result);
+        console.log('✅ [UserContext] 반환할 사용자 정보:', JSON.stringify(data.result, null, 2));
         return data.result;
       } else {
+        console.error('❌ [UserContext] API 응답 데이터 형식 오류:', data);
         throw new Error(data.message || '사용자 정보를 가져오는데 실패했습니다.');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.';
+      console.error('❌ [UserContext] API 호출 에러:', errorMessage);
       setError(errorMessage);
       
       // 인증 관련 에러인 경우 로그아웃 처리
       if (errorMessage.includes('Authentication failed') || errorMessage.includes('Please login again')) {
+        console.log('🔐 [UserContext] 인증 실패 - 토큰 삭제');
         authManager.clearTokens();
         setUserInfo(null);
       }
@@ -108,7 +130,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   // 사용자 정보 새로고침
   const refreshUserInfo = async (): Promise<void> => {
+    console.log('🔄 [UserContext] refreshUserInfo 시작');
+    console.log('🔄 [UserContext] 로그인 상태:', authManager.isLoggedIn());
+    
     if (!authManager.isLoggedIn()) {
+      console.log('❌ [UserContext] 로그인되지 않음');
       setUserInfo(null);
       setError('로그인이 필요합니다.');
       setLoading(false);
@@ -120,7 +146,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
     // 1. 먼저 캐시된 사용자 정보 확인 (즉시 표시)
     const cachedUserInfo = getCachedUserInfo();
+    console.log('🔄 [UserContext] 캐시된 사용자 정보:', cachedUserInfo);
+    
     if (cachedUserInfo) {
+      console.log('✅ [UserContext] 캐시된 정보 사용');
       setUserInfo(cachedUserInfo);
       setLoading(false);
       
@@ -138,8 +167,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
 
     // 2. JWT 토큰에서 사용자 정보 추출 시도 (백업)
+    console.log('🔄 [UserContext] JWT 토큰에서 사용자 정보 추출 시도');
     const tokenUserInfo = extractUserFromToken();
     if (tokenUserInfo) {
+      console.log('✅ [UserContext] 토큰에서 사용자 정보 추출 성공');
       setUserInfo(tokenUserInfo);
       setCachedUserInfo(tokenUserInfo);
       setLoading(false);
@@ -147,10 +178,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
 
     // 3. 마지막으로 API 호출
+    console.log('🔄 [UserContext] API 호출로 사용자 정보 가져오기');
     const apiUserInfo = await fetchUserInfoFromAPI();
     if (apiUserInfo) {
+      console.log('✅ [UserContext] API에서 사용자 정보 가져오기 성공');
       setUserInfo(apiUserInfo);
       setCachedUserInfo(apiUserInfo);
+    } else {
+      console.log('❌ [UserContext] API에서 사용자 정보 가져오기 실패');
     }
     
     setLoading(false);
