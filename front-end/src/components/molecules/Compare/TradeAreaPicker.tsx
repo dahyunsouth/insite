@@ -259,8 +259,8 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
   const selectedTradeArea = value.tradeAreaCode ? TRADE_AREA_BY_CODE.get(value.tradeAreaCode) : undefined;
   const selectedTradeAreaDisplay = selectedTradeArea
     ? selectedTradeArea.name.endsWith("상권")
-      ? selectedTradeArea.name
-      : `${selectedTradeArea.name} 상권`
+      ? selectedTradeArea.name.replace(" 상권", "").replace("상권", "")
+      : selectedTradeArea.name
     : undefined;
 
   const summary = useMemo(() => {
@@ -489,18 +489,18 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
   return (
     <>
       <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm" style={cardStyle}>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="text-lg font-semibold text-gray-900">
+        <div className="flex items-start justify-between gap-4 min-w-0">
+          <div className="flex-1 min-w-0">
+            <div className="text-lg font-semibold text-gray-900 truncate" title={selectedTradeAreaDisplay ? `📍${selectedTradeAreaDisplay}` : title}>
               {selectedTradeAreaDisplay ? `📍${selectedTradeAreaDisplay}` : title}
             </div>
-            <div className="mt-1 text-sm text-gray-600">{summary}</div>
+            <div className="mt-1 text-sm text-gray-600 truncate" title={summary}>{summary}</div>
           </div>
           {hasSelection && (
             <button
               type="button"
               onClick={handleReset}
-              className="rounded-full border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
+              className="rounded-full border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50 flex-shrink-0 whitespace-nowrap"
             >
               다시 선택하기
             </button>

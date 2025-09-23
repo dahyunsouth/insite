@@ -516,7 +516,7 @@ export default function HomePage() {
         onShowMarketList={handleShowMarketList}
       >
         {/* 좌측 네비게이션 바 */}
-        <div className="fixed w-1/4 top-0 left-0 right-0 z-[95] h-screen flex flex-col">
+        <div className={`fixed top-0 left-0 right-0 z-[95] h-screen flex flex-col transition-all duration-300 ease-in-out ${isNavbarOpen ? 'w-1/4' : 'w-0'}`}>
           {showMyPage && (
             <MyPageMenu 
               onClose={handleMyPageClose}

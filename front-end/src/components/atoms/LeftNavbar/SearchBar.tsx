@@ -81,7 +81,7 @@ const SearchBar = ({ onSearch, onSearchResultsShow, resetTrigger }: SearchBarPro
   }, []);
 
   return (
-    <div ref={containerRef} className="relative flex items-center w-full sm:w-64 md:w-72 lg:w-80 xl:w-96 2xl:w-[28rem] max-w-full">
+    <div ref={containerRef} className="relative px-4 py-1 flex items-center w-full sm:w-64 md:w-72 lg:w-80 xl:w-96 2xl:w-[28rem] max-w-full">
       <input
         ref={inputRef}
         value={query}
