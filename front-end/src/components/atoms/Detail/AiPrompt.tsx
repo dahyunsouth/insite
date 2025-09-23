@@ -1,6 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { getAiSummary } from '@/lib/api/aiSummary';
+import { AiSummaryData } from '@/types/aiSummary';
 
 type AiPromptProps = {
   areaName?: string;
@@ -14,6 +16,54 @@ type AiPromptProps = {
  * - 하드코딩된 상권 소개 내용을 제공
  */
 export default function AiPrompt({ areaName, trdarCode, ranking }: AiPromptProps) {
+  // AI 요약 정보 상태 관리
+  const [aiData, setAiData] = useState<AiSummaryData>({
+    summary: '',
+    features: [],
+    isLoading: true,
+    error: null
+  });
+
+  // AI 요약 정보를 가져오는 함수
+  const fetchAiSummary = async () => {
+    if (!trdarCode) {
+      setAiData({
+        summary: '',
+        features: [],
+        isLoading: false,
+        error: '상권 코드가 없습니다.'
+      });
+      return;
+    }
+
+    try {
+      setAiData(prev => ({ ...prev, isLoading: true, error: null }));
+      const result = await getAiSummary(trdarCode);
+      
+      if (result) {
+        setAiData({
+          summary: result.summary,
+          features: result.features,
+          isLoading: false,
+          error: null
+        });
+      } else {
+        throw new Error('AI 요약 정보를 가져올 수 없습니다.');
+      }
+    } catch (error) {
+      setAiData({
+        summary: '',
+        features: [],
+        isLoading: false,
+        error: error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.'
+      });
+    }
+  };
+
+  // 컴포넌트 마운트 시 AI 데이터 로드
+  useEffect(() => {
+    fetchAiSummary();
+  }, [trdarCode]);
   // 등수별 색상 스타일
   const getRankingStyle = (ranking?: number) => {
     switch (ranking) {
@@ -58,8 +108,8 @@ export default function AiPrompt({ areaName, trdarCode, ranking }: AiPromptProps
 
   const style = getRankingStyle(ranking);
 
-  // 하드코딩된 AI 상권 소개 텍스트
-  const getAiIntroText = (areaName?: string) => {
+  // Fallback 텍스트 (API 실패 시 사용)
+  const getFallbackText = (areaName?: string) => {
     if (!areaName) {
       return {
         title: "상권 분석 결과",
@@ -84,7 +134,14 @@ export default function AiPrompt({ areaName, trdarCode, ranking }: AiPromptProps
     };
   };
 
-  const aiData = getAiIntroText(areaName);
+  const fallbackData = getFallbackText(areaName);
+  
+  // 표시할 데이터 결정 (API 데이터 우선, 실패 시 fallback)
+  const displayData = {
+    title: fallbackData.title,
+    content: aiData.summary || fallbackData.content,
+    highlights: aiData.features.length > 0 ? aiData.features : fallbackData.highlights
+  };
 
   return (
     <div className="w-full h-full">
@@ -95,23 +152,41 @@ export default function AiPrompt({ areaName, trdarCode, ranking }: AiPromptProps
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
           </div>
-          <h4 className="text-lg font-semibold text-gray-800">{aiData.title}</h4>
+          <h4 className="text-lg font-semibold text-gray-800">{displayData.title}</h4>
         </div>
         
         <div className="flex-1 flex flex-col">
           <p className="text-gray-700 mb-4 leading-relaxed">
-            {aiData.content}
+            {aiData.isLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                <span>AI 분석 중...</span>
+              </div>
+            ) : aiData.error ? (
+              <span className="text-red-500">AI 분석 정보를 불러올 수 없습니다.</span>
+            ) : (
+              displayData.content
+            )}
           </p>
           
           <div className="space-y-2 flex-1">
             <h5 className="text-sm font-medium text-gray-600 mb-2">주요 특징:</h5>
             <ul className="space-y-1">
-              {aiData.highlights.map((highlight, index) => (
-                <li key={index} className="flex items-start text-sm text-gray-600">
-                  <span className={`w-1.5 h-1.5 ${style.dotColor} rounded-full mt-2 mr-2 flex-shrink-0`}></span>
-                  {highlight}
+              {aiData.isLoading ? (
+                <li className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600"></div>
+                  <span>특징 분석 중...</span>
                 </li>
-              ))}
+              ) : aiData.error ? (
+                <li className="text-sm text-red-500">특징 정보를 불러올 수 없습니다.</li>
+              ) : (
+                displayData.highlights.map((highlight, index) => (
+                  <li key={index} className="flex items-start text-sm text-gray-600">
+                    <span className={`w-1.5 h-1.5 ${style.dotColor} rounded-full mt-2 mr-2 flex-shrink-0`}></span>
+                    {highlight}
+                  </li>
+                ))
+              )}
             </ul>
           </div>
         </div>

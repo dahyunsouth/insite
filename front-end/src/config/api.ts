@@ -31,4 +31,5 @@ export const API_ENDPOINTS = {
   TRADE_AREAS: `${API_BASE_URL}/api/v1/data/trade-areas`,
   TRADE_AREA_DETAIL: `${API_BASE_URL}/api/v1/data/trade-area-detail`,
   REC_SYS: `${API_BASE_URL}/api/v1/data/rec-sys`,
+  AI_SUMMARY: `${API_BASE_URL}/api/v1/ai/summary`,
 } as const;
