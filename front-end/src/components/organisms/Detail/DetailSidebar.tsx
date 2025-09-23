@@ -8,7 +8,7 @@ import { authManager } from "@/utils/auth";
 import { useNotification } from "@/components/map/useNotification";
 import Notification from "@/components/map/Notification";
 import DetailNavbarTemplate from "@/components/templates/Detail/AreaDetailModalTemplate";
-import ScoreCard from "@/components/molecules/Detail/ScoreCard";
+import ScoreCard from "@/components/molecules/Detail/ScoreCard/ScoreCard";
 import MarketChangeIndicatorCard from "@/components/molecules/Detail/MarketChangeIndicator/MarketChangeIndicatorCard";
 import TimeSlotCard from "@/components/molecules/Detail/PopulationCard/FloatingPopulationCard";
 import SalesCard from "@/components/molecules/Detail/SalesCard/SalesCard";
@@ -23,6 +23,8 @@ type DetailNavbarProps = {
   onAddToComparison?: (trdarCd: string, trdarCdNm: string) => void;
   onRemoveFromComparison?: (trdarCd: string) => void;
   isInComparison?: (trdarCd: string) => boolean;
+  populationType: "유동" | "직장" | "상주";
+  onPopulationTypeChange: (type: "유동" | "직장" | "상주") => void;
 };
 
 type DetailSidebarProps = {
@@ -40,9 +42,8 @@ type DetailSidebarProps = {
  * - Renders portal + backdrop + ESC close
  * - Uses the Detail template for visuals (container/header/section-nav)
  */
-export function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea, onAddToComparison, onRemoveFromComparison, isInComparison }: DetailNavbarProps) {
+export function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea, onAddToComparison, onRemoveFromComparison, isInComparison, populationType, onPopulationTypeChange }: DetailNavbarProps) {
   const [selected, setSelected] = useState<{ code: string; name: string } | null>(null);
-  const [populationType, setPopulationType] = useState<"유동" | "직장" | "상주">("유동");
   const [isComparing, setIsComparing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -227,7 +228,7 @@ export function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSele
               <TimeSlotCard 
                 trdarCode={trdarCode ?? selected?.code ?? null} 
                 populationType={populationType}
-                onPopulationTypeChange={setPopulationType}
+                onPopulationTypeChange={onPopulationTypeChange}
               />
               {/* Debug: trdarCode = {trdarCode ?? selected?.code ?? null} */}
             </section>
@@ -272,9 +273,19 @@ function DetailAsideNav({
   error?: string | null;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  
+  // 인구 타입이 변경될 때 올바른 인덱스로 설정
+  useEffect(() => {
+    if (activeIndex >= 3 && activeIndex <= 5) { // 인구 섹션이 활성화된 경우
+      const correctIndex = populationType === "유동" ? 3 : populationType === "직장" ? 4 : 5;
+      if (activeIndex !== correctIndex) {
+        setActiveIndex(correctIndex);
+      }
+    }
+  }, [populationType, activeIndex]);
   const items = [
     { id: "intro-section", label: "상권 소개" },
-    { id: "score-section", label: "종합추천점수" },
+    { id: "score-section", label: "종합 추천 점수" },
     { id: "market-change-section", label: "상권 변화 지표" },
     { id: "population-section", label: "인구", isParent: true },
     { id: "pop-section", label: "유동인구", parentId: "population-section", populationType: "유동" },
@@ -518,13 +529,17 @@ function DetailAsideNav({
             const itemPopulationType = (it as { populationType?: string }).populationType;
             
             // 인구 항목의 경우 토글 상태와 일치하고, 현재 인구 섹션이 활성화된 경우에만 하이라이트
-            const isPopulationSectionActive = activeIndex >= 2 && activeIndex <= 4; // 인구 섹션들 (유동인구, 직장인구, 상주인구)
+            const isPopulationSectionActive = activeIndex >= 4 && activeIndex <= 6; // 인구 섹션들 (유동인구, 직장인구, 상주인구)
             const isPopulationItemActive = itemPopulationType && itemPopulationType === populationType && isPopulationSectionActive;
             
             // 하위 항목이 활성화되면 부모 항목도 활성화 상태로 표시
             const activeItem = items[activeIndex];
             const isParentOfActiveChild = it.isParent && activeItem?.parentId === it.id;
-            const shouldHighlight = isActive || isParentOfActiveChild || isPopulationItemActive;
+            
+            // 인구 섹션의 경우, 정확한 인구 타입 매칭만 허용
+            // 인구 자식 항목들은 정확한 타입 매칭만 허용
+            const isPopulationChild = itemPopulationType !== undefined;
+            const shouldHighlight = isActive || isParentOfActiveChild || (isPopulationChild ? isPopulationItemActive : false);
             
             return (
               <li key={`${it.id}-${itemPopulationType || idx}`} className={idx !== 0 ? "mt-3" : undefined}>
