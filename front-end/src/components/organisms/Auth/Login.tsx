@@ -17,7 +17,7 @@ interface LoginOrganismProps {
 }
 
 const LoginOrganism: React.FC<LoginOrganismProps> = ({ 
-  className = "flex flex-col items-center justify-between",
+  className = "flex flex-col items-center justify-center",
   onSignUpClick,
   onClose,
   onLoginSuccess,
@@ -25,22 +25,23 @@ const LoginOrganism: React.FC<LoginOrganismProps> = ({
 }) => {
   return (
     <AuthenticationCard className={className}>
+      <div className="w-full">
+        <AuthenticationLabel type="login" />
+      </div>
       
-        <div className="w-full">
-          <AuthenticationLabel type="login" />
-        </div>
-        
+      <div className="w-full">
         <LoginForm onClose={onClose} onLoginSuccess={onLoginSuccess} />
         
         <SignUpPrompt
           onSignUpClick={onSignUpClick}  // ✅ 전달
           // signUpHref={signUpHref}        // (선택)
         />
+      </div>
 
+      <div className="w-full">
         <SocialLoginHeader />
-
         <SocialLoginForm />
-      
+      </div>
     </AuthenticationCard>
   );
 };
