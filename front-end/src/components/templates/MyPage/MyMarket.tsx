@@ -51,6 +51,17 @@ const MyMarket: React.FC<MyMarketProps> = ({
   // Context에서 즐겨찾기 관련 상태와 함수 가져오기
   const { favorites, isLoading, error, removeFavorite } = useFavorites();
 
+  // 상권 변화 지표 코드를 한국어로 변환
+  const getIndicatorName = (indicator: string) => {
+    switch (indicator) {
+      case "LL": return "다이나믹";
+      case "LH": return "상권 확장";
+      case "HL": return "상권 축소";
+      case "HH": return "정체";
+      default: return indicator;
+    }
+  };
+
   const handleCardClick = (trdarCd: string) => {
     setSelectedCards(prev => {
       const newSet = new Set(prev);
@@ -275,7 +286,7 @@ const MyMarket: React.FC<MyMarketProps> = ({
                          </div>
                          <div className='flex justify-between'>
                            <span className='font-bold text-gray-900'>상권변화지표</span>
-                           <span className='text-gray-900'>{area.detail.chnge?.trdrChngeIx || '-'}</span>
+                           <span className='text-gray-900'>{getIndicatorName(area.detail.chnge?.trdrChngeIx) || '-'}</span>
                          </div>
                        </>
                      ) : (
