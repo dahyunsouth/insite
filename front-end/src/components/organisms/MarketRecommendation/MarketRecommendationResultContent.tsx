@@ -332,7 +332,11 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
   if (topThree.length === 0) {
     return (
       <div className='flex-1 flex items-center justify-center text-gray-500'>
-        추천 결과를 찾을 수 없습니다.
+        <div className='text-center'>
+          <div className='text-8xl mb-4'>😢</div>
+          <div>해당 조건에 맞는 상권이 없습니다.</div>
+          <div>다시 설정해주세요</div>
+        </div>
       </div>
     );
   }
