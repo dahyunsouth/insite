@@ -115,14 +115,14 @@ const MarketRecommendationResult: React.FC<MarketRecommendationResultProps> = ({
 
   return (
     <div className='w-full h-full flex flex-col'>
-      <div className='flex items-center justify-between py-4 border-b'>
+      <div className='flex items-center justify-between py-4 mb-4 border-b'>
         <button
           onClick={handleBackClick}
-          className='cursor-pointer rounded-xl px-4 py-3 text-gray-400 hover:text-gray-800'
+          className='cursor-pointer rounded-xl px-4 py-2 text-gray-400 hover:text-gray-800'
         >
           &lt;
         </button>
-        <div className='flex items-center gap-4'>
+        <div className='flex items-center gap-4 pb-2'>
           {selectedItem && (
             <div className='flex items-center'>
               <Image 
