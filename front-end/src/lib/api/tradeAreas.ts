@@ -1,4 +1,6 @@
-const BASE_URL = "http://43.203.196.29:8080";
+import { API_BASE_URL } from '@/config/api';
+
+const BASE_URL = API_BASE_URL;
 
 export async function fetchGuList(): Promise<string[]> {
   const response = await fetch(`${BASE_URL}/api/v1/data/list-gu`, {
@@ -316,7 +318,7 @@ export function getTradeAreaNameByCode(tradeAreaCode: string): string {
 // 종합 분석 점수 조회 API
 export async function fetchTradeAreaScore(tradeAreaName: string): Promise<TradeAreaScore> {
   try {
-    const response = await fetch(`http://43.203.196.29:8080/api/v1/data/score?trdarCdNm=${encodeURIComponent(tradeAreaName)}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/data/score?trdarCdNm=${encodeURIComponent(tradeAreaName)}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
