@@ -26,6 +26,7 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             "/api/v1/auth/verify/send-code",
             "/api/v1/auth/verify/check-code",
             "/api/v1/data/**",
+            "/api/v1/ai/**",
             "/api/seoul/**"
     };
 
