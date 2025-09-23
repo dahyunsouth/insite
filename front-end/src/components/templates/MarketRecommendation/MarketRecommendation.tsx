@@ -9,9 +9,17 @@ import { RecommendationItem } from '@/types/recommendation';
 
 interface MarketRecommendationProps {
   onClose: () => void;
+  onAddToComparison?: (trdarCd: string, trdarCdNm: string) => void;
+  onRemoveFromComparison?: (trdarCd: string) => void;
+  isInComparison?: (trdarCd: string) => boolean;
 }
 
-export default function MarketRecommendation({ onClose }: MarketRecommendationProps) {
+export default function MarketRecommendation({ 
+  onClose, 
+  onAddToComparison, 
+  onRemoveFromComparison, 
+  isInComparison 
+}: MarketRecommendationProps) {
   const router = useRouter();
   const [selectedDistrict, setSelectedDistrict] = useState<{
     id: string | null;
@@ -137,6 +145,9 @@ export default function MarketRecommendation({ onClose }: MarketRecommendationPr
                 onItemSelect={handleItemSelect}
                 onBack={handleBack}
                 initialSelections={selections}
+                onAddToComparison={onAddToComparison}
+                onRemoveFromComparison={onRemoveFromComparison}
+                isInComparison={isInComparison}
               />
             )}
           </div>
