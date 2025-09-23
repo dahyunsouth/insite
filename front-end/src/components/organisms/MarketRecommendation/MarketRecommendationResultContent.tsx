@@ -8,6 +8,8 @@ import TradeAreaRawData from '@/data/TradeAreaValue.json';
 import { tmToWgs84 } from '@/utils/coordinateTransform';
 import { getAiSummary } from '@/lib/api/aiSummary';
 import { AiSummaryData } from '@/types/aiSummary';
+import { useFavorites } from '@/contexts/FavoritesContext';
+import { authManager } from '@/utils/auth';
 
 interface MarketRecommendationResultContentProps {
   result: RecommendationResponse;
@@ -151,7 +153,12 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
   const [populationType, setPopulationType] = useState<"유동" | "직장" | "상주">("유동");
   const [isSaved, setIsSaved] = useState(false);
   const [isComparing, setIsComparing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const detailContainerRef = useRef<HTMLDivElement>(null);
+  
+  // FavoritesContext 사용
+  const { addFavorite, removeFavorite, isFavorite } = useFavorites();
   
   // AI 요약 정보 상태 관리 (캐싱을 위해 Map 사용)
   const [aiSummaryCache, setAiSummaryCache] = useState<Map<string, AiSummaryData>>(new Map());
@@ -159,9 +166,65 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
   const topThree = result.items.slice(0, 3);
   const secondaryItems = topThree.slice(1).filter((item): item is RecommendationItem => Boolean(item));
 
-  const handleSave = () => {
-    console.log('상권 저장:', selectedItem?.areaName);
-    setIsSaved(!isSaved);
+  const handleSave = async () => {
+    console.log('💾 [MarketRecommendationResultContent] handleSave 함수 시작');
+    
+    if (!selectedItem) {
+      console.error('💾 [MarketRecommendationResultContent] 선택된 상권이 없음');
+      setError('상권 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    const trdarCode = selectedItem.trdarCode || getTradeAreaCodeByName(selectedItem.areaName);
+    if (!trdarCode) {
+      console.error('💾 [MarketRecommendationResultContent] 상권 코드가 없음');
+      setError('상권 코드를 찾을 수 없습니다.');
+      return;
+    }
+
+    // 로그인 확인
+    const isLoggedIn = authManager.isLoggedIn();
+    console.log('💾 [MarketRecommendationResultContent] 로그인 상태:', isLoggedIn);
+    
+    if (!isLoggedIn) {
+      console.log('💾 [MarketRecommendationResultContent] 로그인 필요');
+      setError('로그인이 필요합니다.');
+      return;
+    }
+
+    console.log('💾 [MarketRecommendationResultContent] 로딩 시작');
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const currentIsSaved = isFavorite(parseInt(trdarCode));
+      const currentTrdarCdNm = selectedItem.areaName || '상권';
+      
+      console.log('💾 [MarketRecommendationResultContent] 현재 저장 상태:', currentIsSaved);
+      console.log('💾 [MarketRecommendationResultContent] 상권명:', currentTrdarCdNm);
+      
+      if (currentIsSaved) {
+        // 저장 해제
+        console.log('💾 [MarketRecommendationResultContent] 저장 해제 API 호출 시작');
+        await removeFavorite(parseInt(trdarCode));
+        setIsSaved(false);
+        console.log('✅ [MarketRecommendationResultContent] 상권 저장 해제 성공:', trdarCode);
+      } else {
+        // 저장
+        console.log('💾 [MarketRecommendationResultContent] 저장 API 호출 시작');
+        await addFavorite(parseInt(trdarCode), currentTrdarCdNm);
+        setIsSaved(true);
+        console.log('✅ [MarketRecommendationResultContent] 상권 저장 성공:', trdarCode);
+      }
+      setError(null); // 성공 시 에러 메시지 제거
+    } catch (error) {
+      console.error('❌ [MarketRecommendationResultContent] 상권 저장/해제 실패:', error);
+      const errorMessage = error instanceof Error ? error.message : '저장 처리 중 오류가 발생했습니다.';
+      setError(errorMessage);
+    } finally {
+      console.log('💾 [MarketRecommendationResultContent] 로딩 종료');
+      setIsLoading(false);
+    }
   };
 
   const handleCompare = () => {
@@ -175,10 +238,25 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
       // 상세페이지 컨테이너의 스크롤을 맨 위로 이동
       detailContainerRef.current.scrollTop = 0;
     }
+    
     // 선택된 아이템이 변경되면 저장/비교 상태 초기화
-    setIsSaved(false);
     setIsComparing(false);
-  }, [selectedItem]);
+    setError(null);
+    
+    // 저장 상태를 실제 FavoritesContext에서 확인
+    if (selectedItem) {
+      const trdarCode = selectedItem.trdarCode || getTradeAreaCodeByName(selectedItem.areaName);
+      if (trdarCode) {
+        const currentIsSaved = isFavorite(parseInt(trdarCode));
+        setIsSaved(currentIsSaved);
+        console.log('💾 [MarketRecommendationResultContent] 저장 상태 업데이트:', currentIsSaved, trdarCode);
+      } else {
+        setIsSaved(false);
+      }
+    } else {
+      setIsSaved(false);
+    }
+  }, [selectedItem, isFavorite]);
 
   // 1등 아이템의 AI 요약 정보 가져오기
   useEffect(() => {
@@ -436,6 +514,7 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
           onCompare={handleCompare}
           isSaved={isSaved}
           isComparing={isComparing}
+          isLoading={isLoading}
         />
       </div>
     );
