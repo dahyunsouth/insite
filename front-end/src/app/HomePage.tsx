@@ -128,6 +128,7 @@ export default function HomePage() {
   const [currentDong, setCurrentDong] = useState<string>('역삼동');
   const [selectedTradeAreaName, setSelectedTradeAreaName] = useState<string | null>(null);
   const [selectedTradeAreaCode, setSelectedTradeAreaCode] = useState<string | null>(null);
+  const [isNavbarOpen, setIsNavbarOpen] = useState(true);
   
   // 검색 결과 관련 상태 추가
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -515,7 +516,7 @@ export default function HomePage() {
         onShowMarketList={handleShowMarketList}
       >
         {/* 좌측 네비게이션 바 */}
-        <div className="fixed w-1/4 top-0 left-0 right-0 z-20 h-screen flex flex-col">
+        <div className="fixed w-1/4 top-0 left-0 right-0 z-[95] h-screen flex flex-col">
           {showMyPage && (
             <MyPageMenu 
               onClose={handleMyPageClose}
@@ -547,6 +548,7 @@ export default function HomePage() {
               onLoginModalOpen={() => setIsAuthOpen(true)}
               onSavedAreasClick={handleSavedAreasClick}
               onCompareClick={handleCompareTabClick}
+              onNavbarStateChange={setIsNavbarOpen}
               onMarketingAreaChange={setShowMarketingArea}
               showMarketingArea={showMarketingArea}
               showMarketList={showMarketList}
@@ -628,6 +630,7 @@ export default function HomePage() {
         onAddToComparison={addToComparisonTray}
         onRemoveFromComparison={removeFromComparisonTray}
         isInComparison={(trdarCd) => comparisonTray.some(item => item.trdarCd === trdarCd)}
+        isNavbarOpen={isNavbarOpen}
       />
 
       {/* Compare modal: right-side overlay (covers right 75%) */}
