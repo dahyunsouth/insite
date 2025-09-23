@@ -37,6 +37,9 @@ type DetailModalProps = {
   subtitle?: string;
   trdarCode?: string | null;
   onSelectTradeArea?: (opt: { code: string; name: string } | null) => void;
+  onAddToComparison?: (trdarCd: string, trdarCdNm: string) => void;
+  onRemoveFromComparison?: (trdarCd: string) => void;
+  isInComparison?: (trdarCd: string) => boolean;
 };
 
 /**
@@ -45,7 +48,7 @@ type DetailModalProps = {
  * - Uses the Detail template for visuals (container/header/section-nav)
  * - Manages the overall modal state and layout
  */
-export default function DetailModal({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea }: DetailModalProps) {
+export default function DetailModal({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea, onAddToComparison, onRemoveFromComparison, isInComparison }: DetailModalProps) {
   const [selected, setSelected] = useState<{ code: string; name: string } | null>(null);
   const [populationType, setPopulationType] = useState<"유동" | "직장" | "상주">("유동");
   const [isSaved, setIsSaved] = useState(false);
@@ -74,9 +77,36 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
     console.log("[DetailModal] selection changed:", selected, "computedTitle:", computedTitle);
   }, [selected, computedTitle]);
 
+  // 비교함 상태에 따라 isComparing 동기화
+  useEffect(() => {
+    const currentCode = trdarCode ?? selected?.code ?? null;
+    if (currentCode && isInComparison) {
+      setIsComparing(isInComparison(currentCode));
+    }
+  }, [trdarCode, selected, isInComparison]);
+
   const handleCompare = () => {
-    setIsComparing(!isComparing);
-    console.log("비교하기 클릭:", selected, "비교 상태:", !isComparing);
+    const currentCode = trdarCode ?? selected?.code ?? null;
+    const currentTrdarCdNm = selected?.name || title || '상권';
+    
+    if (!currentCode) {
+      console.error('상권 코드가 없습니다.');
+      return;
+    }
+
+    const isCurrentlyInComparison = isInComparison ? isInComparison(currentCode) : false;
+    
+    if (isCurrentlyInComparison) {
+      // 비교함에서 제거
+      onRemoveFromComparison?.(currentCode);
+      setIsComparing(false);
+      console.log("비교함에서 제거:", currentCode);
+    } else {
+      // 비교함에 추가
+      onAddToComparison?.(currentCode, currentTrdarCdNm);
+      setIsComparing(true);
+      console.log("비교함에 추가:", currentCode, currentTrdarCdNm);
+    }
   };
 
   const handleSave = () => {
