@@ -295,7 +295,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
 
   return createPortal(
     <div
-      className={`fixed z-40 ${modalType === 'compare' ? 'inset-0' : ''}`}
+      className={`fixed z-[95] ${modalType === 'compare' ? 'inset-0' : ''}`}
       style={modalType === 'saved' ? { 
         left: '25%', 
         right: '80px', 

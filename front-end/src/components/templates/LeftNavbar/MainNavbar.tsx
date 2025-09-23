@@ -78,14 +78,13 @@ const MainNavbar: React.FC<MainNavbarProps> = ({
       <nav 
         className={`
           shadow-lg py-2 pl-2 space-y-1 h-full flex flex-col
-          transition-transform duration-300 ease-in-out
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          transition-all duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0 w-auto' : '-translate-x-full w-0'}
+          overflow-hidden
         `}
       >
         <div className="flex-shrink-0">
           <FirstLeftNavbar onSearchResultsShow={onSearchResultsShow} resetTrigger={resetTrigger} />
-        </div>
-        <div className="flex-shrink-0">
           <SecondLeftNavbar
             onMyPageClick={onMyPageClick}
             onLoginModalOpen={onLoginModalOpen}
