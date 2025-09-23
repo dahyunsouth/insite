@@ -266,8 +266,17 @@ export function mapTradeAreaDetailToMetrics(detail: TradeAreaDetail | null) {
     ? `${Math.round(workerCount / 10000).toLocaleString()}만 명` 
     : `${workerCount.toLocaleString()} 명`;
 
-  // 상권변화지표
-  const changeIndex = detail.chnge?.trdrChngeIx || "-";
+  // 상권변화지표 (코드를 한국어로 변환)
+  const getIndicatorName = (indicator: string) => {
+    switch (indicator) {
+      case "LL": return "다이나믹";
+      case "LH": return "상권 확장";
+      case "HL": return "상권 축소";
+      case "HH": return "정체";
+      default: return indicator;
+    }
+  };
+  const changeIndex = detail.chnge?.trdrChngeIx ? getIndicatorName(detail.chnge.trdrChngeIx) : "-";
 
   return {
     sales: { key: "매출", value: salesValue, numValue: salesAmount },

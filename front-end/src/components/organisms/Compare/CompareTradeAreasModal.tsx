@@ -7,6 +7,7 @@ import PcDetailPanel, { PcMeta } from "@/components/organisms/Compare/PcDetailPa
 import TradeAreaPicker, { TradeAreaSelection } from "@/components/molecules/Compare/TradeAreaPicker";
 import { fetchTradeAreaDetail, mapTradeAreaDetailToMetrics, TradeAreaDetail, fetchTradeAreaScore, TradeAreaScore, getTradeAreaNameByCode } from "@/lib/api/tradeAreas";
 import TradeAreaRawData from "@/data/TradeAreaValue.json";
+import MarketChangeIndicatorInfoModal from "@/components/molecules/Detail/MarketChangeIndicator/MarketChangeIndicatorInfoModal";
 
 // TradeAreaRawData 타입 정의
 interface TradeAreaFileShape {
@@ -73,6 +74,12 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
   const [loadingScoreB, setLoadingScoreB] = useState<boolean>(false);
   const [errorScoreA, setErrorScoreA] = useState<string | null>(null);
   const [errorScoreB, setErrorScoreB] = useState<string | null>(null);
+  
+  // 상권 변화 지표 툴팁 상태
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const tooltipRef = useRef<HTMLButtonElement>(null);
+  
   // Close on ESC
   useEffect(() => {
     if (!open) return;
@@ -284,6 +291,32 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
   const tradeAreaNameB = scoreB?.areaName || detailB?.trdarCdNm || 
     (selectionB.tradeAreaCode ? getTradeAreaNameByCode(selectionB.tradeAreaCode) : "미선택");
 
+  // 툴팁 열기/닫기 함수
+  const handleTooltipToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (isTooltipOpen) {
+      setIsTooltipOpen(false);
+    } else {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const modalHeight = 640; // 모달의 대략적인 높이
+      const viewportHeight = window.innerHeight;
+      const bottomMargin = 50; // 뷰포트 하단에서 떨어질 거리
+      
+      // 모달이 화면 하단에서 잘리지 않도록 위치 조정
+      let topPosition = rect.top + window.scrollY - 10;
+      const maxTop = viewportHeight - modalHeight - bottomMargin;
+      
+      if (topPosition > maxTop) {
+        topPosition = maxTop;
+      }
+      
+      setTooltipPosition({
+        top: topPosition,
+        left: rect.right + window.scrollX + 8 // 버튼 오른쪽에 8px 간격으로 배치
+      });
+      setIsTooltipOpen(true);
+    }
+  };
+
   const metrics = [
     { key: metricsA.sales.key, a: loadingA ? "로딩중..." : metricsA.sales.value, b: loadingB ? "로딩중..." : metricsB.sales.value, aNum: metricsA.sales.numValue, bNum: metricsB.sales.numValue },
     { key: metricsA.stores.key, a: loadingA ? "로딩중..." : metricsA.stores.value, b: loadingB ? "로딩중..." : metricsB.stores.value, aNum: metricsA.stores.numValue, bNum: metricsB.stores.numValue },
@@ -493,14 +526,33 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
               {metrics.map((m, idx) => (
                 <React.Fragment key={`${m.key}-${idx}`}>
                   <div className={`py-6 ${idx === 0 ? '' : 'border-t border-gray-200'}`}>
-                    <div className="text-gray-500">
+                    <div className="text-gray-500 flex items-center gap-2">
                       {m.key}
+                      {m.key === "상권변화지표" && (
+                        <button
+                          ref={tooltipRef}
+                          onClick={handleTooltipToggle}
+                          className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+                          aria-label="상권 변화 지표 설명 보기"
+                        >
+                          <span className="text-xs text-gray-600">?</span>
+                        </button>
+                      )}
                     </div>
                     <div className="mt-2 text-3xl sm:text-4xl font-extrabold text-gray-900">{m.a}</div>
                   </div>
                   <div className={`py-6 ${idx === 0 ? '' : 'border-t border-gray-200'}`}>
-                    <div className="text-gray-500">
+                    <div className="text-gray-500 flex items-center gap-2">
                       {m.key}
+                      {m.key === "상권변화지표" && (
+                        <button
+                          onClick={handleTooltipToggle}
+                          className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+                          aria-label="상권 변화 지표 설명 보기"
+                        >
+                          <span className="text-xs text-gray-600">?</span>
+                        </button>
+                      )}
                     </div>
                     <div className="mt-2 text-3xl sm:text-4xl font-extrabold text-gray-900">{m.b}</div>
                   </div>
@@ -529,6 +581,13 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
           </div>
         </div>
       </div>
+      
+      {/* 상권 변화 지표 툴팁 모달 */}
+      <MarketChangeIndicatorInfoModal
+        isOpen={isTooltipOpen}
+        onClose={() => setIsTooltipOpen(false)}
+        position={tooltipPosition}
+      />
     </div>,
     document.body
   );
