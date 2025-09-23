@@ -36,8 +36,9 @@ type ApiResponse = {
   result: StoreResponse;
 };
 
-const BACKEND_BASE_URL = (process.env.NEXT_PUBLIC_BACKEND_BASE_URL ?? "http://43.203.196.29:8080").replace(/\/+$/, "");
-const STORE_INFO_ENDPOINT = `${BACKEND_BASE_URL}/api/v1/data/info/stor`;
+import { API_BASE_URL } from '@/config/api';
+
+const STORE_INFO_ENDPOINT = `${API_BASE_URL}/api/v1/data/info/stor`;
 
 export default function StoreCard({ trdarCode }: Props) {
   const [data, setData] = useState<StoreResponse | null>(null);
