@@ -51,6 +51,17 @@ const MyMarket: React.FC<MyMarketProps> = ({
   // Context에서 즐겨찾기 관련 상태와 함수 가져오기
   const { favorites, isLoading, error, removeFavorite } = useFavorites();
 
+  // 상권 변화 지표 코드를 한국어로 변환
+  const getIndicatorName = (indicator: string) => {
+    switch (indicator) {
+      case "LL": return "다이나믹";
+      case "LH": return "상권 확장";
+      case "HL": return "상권 축소";
+      case "HH": return "정체";
+      default: return indicator;
+    }
+  };
+
   const handleCardClick = (trdarCd: string) => {
     setSelectedCards(prev => {
       const newSet = new Set(prev);
@@ -200,7 +211,7 @@ const MyMarket: React.FC<MyMarketProps> = ({
               return (
               <SavedMarketCard
                 key={area.trdarCd}
-                className='flex items-start p-4 gap-4'
+                className='flex items-start p-4 gap-4 w-full overflow-hidden'
                 isSelected={isSelected}
                 onClick={() => handleCardClick(area.trdarCd)}
               >            
@@ -216,17 +227,19 @@ const MyMarket: React.FC<MyMarketProps> = ({
                      checked={isSelected}
                    />
                  </div>
-                 <div className='flex flex-col gap-2 w-full'>
+                 <div className='flex flex-col gap-2 w-full min-w-0'>
                    {/* 저장된 상권 카드 헤더 */}
-                   <div className="flex justify-between items-start">
-                     <div className='text-lg font-bold flex justify-start space-x-2'>
-                       <span>{area.trdarCdNm}</span>
+                   <div className="flex justify-between items-start gap-2 min-w-0">
+                     <div className='text-lg font-bold flex-1 min-w-0'>
+                       <span className="block truncate" title={area.trdarCdNm}>
+                         {area.trdarCdNm}
+                       </span>
                        {/* <div className='flex space-x-1'>
                          <DevelopmentMarketBadge />
                        </div> */}
                      </div>
-                     {/* 버튼들 */}
-                     <div className="flex gap-2">
+                     {/* 버튼들 - 절대 줄바꿈 안됨 */}
+                     <div className="flex gap-1 flex-shrink-0">
                        <button
                          onClick={(e) => {
                            e.stopPropagation();
@@ -235,7 +248,7 @@ const MyMarket: React.FC<MyMarketProps> = ({
                              onDetailClick(area.trdarCd, area.trdarCdNm);
                            }
                          }}
-                         className="text-blue-500 hover:text-blue-700 text-sm px-2 py-1 rounded bg-blue-50 hover:bg-blue-100"
+                         className="text-blue-500 hover:text-blue-700 text-xs px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 whitespace-nowrap"
                          title="상권 상세보기"
                        >
                          상세보기
@@ -246,7 +259,7 @@ const MyMarket: React.FC<MyMarketProps> = ({
                            e.preventDefault();
                            handleRemoveFavorite(area.trdarCd, area.trdarCdNm);
                          }}
-                         className="text-red-500 hover:text-pink-700 text-sm px-2 py-1 rounded bg-pink-50 hover:bg-pink-100"
+                         className="text-red-500 hover:text-pink-700 text-xs px-2 py-1 rounded bg-pink-50 hover:bg-pink-100 whitespace-nowrap"
                          title="저장 해제"
                        >
                          저장 해제
@@ -254,7 +267,7 @@ const MyMarket: React.FC<MyMarketProps> = ({
                      </div>
                    </div>
                    {/* 저장된 상권 카드 내용 */}
-                   <div className='flex flex-col gap-2 border-b pb-2'>
+                   <div className='flex flex-col gap-2 border-b pb-2 min-w-0'>
                      {area.loading ? (
                        <div className='text-center py-4'>
                          <span className='text-gray-500'>데이터 로딩 중...</span>
@@ -265,17 +278,17 @@ const MyMarket: React.FC<MyMarketProps> = ({
                        </div>
                      ) : area.detail ? (
                        <>
-                         <div className='flex justify-between'>
-                           <span className='font-bold text-gray-900'>월 매출액</span>
-                           <span className='text-gray-900'>{area.detail.sales?.thsmonSelngAmt?.toLocaleString() || '-'}원</span>
+                         <div className='flex justify-between items-center min-w-0'>
+                           <span className='font-bold text-gray-900 flex-shrink-0'>월 매출액</span>
+                           <span className='text-gray-900 text-right truncate ml-2'>{area.detail.sales?.thsmonSelngAmt?.toLocaleString() || '-'}원</span>
                          </div>
-                         <div className='flex justify-between'>
-                           <span className='font-bold text-gray-900'>점포 수</span>
-                           <span className='text-gray-900'>{area.detail.stor?.storCo?.toLocaleString() || '-'}개</span>
+                         <div className='flex justify-between items-center min-w-0'>
+                           <span className='font-bold text-gray-900 flex-shrink-0'>점포 수</span>
+                           <span className='text-gray-900 text-right truncate ml-2'>{area.detail.stor?.storCo?.toLocaleString() || '-'}개</span>
                          </div>
-                         <div className='flex justify-between'>
-                           <span className='font-bold text-gray-900'>상권변화지표</span>
-                           <span className='text-gray-900'>{area.detail.chnge?.trdrChngeIx || '-'}</span>
+                         <div className='flex justify-between items-center min-w-0'>
+                           <span className='font-bold text-gray-900 flex-shrink-0'>상권변화지표</span>
+                           <span className='text-gray-900 text-right truncate ml-2'>{getIndicatorName(area.detail.chnge?.trdrChngeIx) || '-'}</span>
                          </div>
                        </>
                      ) : (
@@ -284,9 +297,9 @@ const MyMarket: React.FC<MyMarketProps> = ({
                        </div>
                      )}
                    </div>
-                   <div className='flex justify-between'>
-                     <span className='font-bold text-gray-900'>종합추천점수</span>
-                     <span className='text-blue-500 font-bold'>
+                   <div className='flex justify-between items-center min-w-0'>
+                     <span className='font-bold text-gray-900 flex-shrink-0'>종합추천점수</span>
+                     <span className='text-blue-500 font-bold text-right truncate ml-2'>
                        {area.score?.totalScore ? `${Math.round(area.score.totalScore)}점` : '-'}
                      </span>
                    </div>

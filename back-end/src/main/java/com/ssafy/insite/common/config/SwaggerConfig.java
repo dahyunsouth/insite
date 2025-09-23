@@ -65,4 +65,12 @@ public class SwaggerConfig {
                 .pathsToMatch("/api/v1/favorites/**")    // API 경로 지정
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi aiApi() {
+        return GroupedOpenApi.builder()
+                .group("ai API")                  // Swagger UI에서 선택할 그룹명
+                .pathsToMatch("/api/v1/ai/**")    // API 경로 지정
+                .build();
+    }
 }
