@@ -10,6 +10,7 @@ interface SecondLeftNavbarProps {
   onLoginModalOpen?: () => void;
   onSavedAreasClick?: () => void;
   onCompareClick?: () => void;
+  onDetailModalClose?: () => void;
 }
 
 const SecondLeftNavbar: React.FC<SecondLeftNavbarProps> = ({
@@ -17,6 +18,7 @@ const SecondLeftNavbar: React.FC<SecondLeftNavbarProps> = ({
   onLoginModalOpen,
   onSavedAreasClick,
   onCompareClick,
+  onDetailModalClose,
 }) => {
   const [active, setActive] = useState<Tab | null>(null);
 
@@ -60,6 +62,8 @@ const SecondLeftNavbar: React.FC<SecondLeftNavbarProps> = ({
                       onLoginModalOpen?.();
                     }
                   } else if (label === "상권비교") {
+                    // DetailModal이 열려있다면 먼저 닫기
+                    onDetailModalClose?.();
                     onCompareClick?.();
                   }
                   setActive((prev) => (prev === label ? null : label));

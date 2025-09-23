@@ -565,6 +565,8 @@ export default function HomePage() {
               // 상권 선택 관련 props 추가
               onTradeAreaSelect={handleTradeAreaSelect}
               selectedTradeArea={selectedTradeArea}
+              // DetailModal 관련 props
+              onDetailModalClose={() => setIsDetailOpen(false)}
             />
           )}
         </div>
