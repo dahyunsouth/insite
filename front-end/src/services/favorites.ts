@@ -49,6 +49,10 @@ class FavoritesService {
 
   // 상권 저장
   async saveFavorite(trdarCd: number): Promise<ApiResponse<null>> {
+    console.log('🌐 [FavoritesService] saveFavorite API 호출 시작');
+    console.log('🌐 [FavoritesService] 상권 코드:', trdarCd);
+    console.log('🌐 [FavoritesService] API URL:', `${API_BASE_URL}/api/v1/favorites?trdarCd=${trdarCd}`);
+    
     try {
       const response = await authManager.authenticatedRequest(
         `${API_BASE_URL}/api/v1/favorites?trdarCd=${trdarCd}`,
@@ -60,20 +64,29 @@ class FavoritesService {
         }
       );
 
+      console.log('🌐 [FavoritesService] API 응답 상태:', response.status);
+      console.log('🌐 [FavoritesService] API 응답 OK:', response.ok);
+
       if (!response.ok) {
+        console.error('❌ [FavoritesService] API 응답 실패:', response.status);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data: ApiResponse<null> = await response.json();
+      console.log('✅ [FavoritesService] API 응답 데이터:', data);
       return data;
     } catch (error) {
-      console.error('상권 저장 실패:', error);
+      console.error('❌ [FavoritesService] 상권 저장 실패:', error);
       throw error;
     }
   }
 
   // 상권 저장 해제
   async removeFavorite(trdarCd: number): Promise<ApiResponse<null>> {
+    console.log('🌐 [FavoritesService] removeFavorite API 호출 시작');
+    console.log('🌐 [FavoritesService] 상권 코드:', trdarCd);
+    console.log('🌐 [FavoritesService] API URL:', `${API_BASE_URL}/api/v1/favorites/${trdarCd}`);
+    
     try {
       const response = await authManager.authenticatedRequest(
         `${API_BASE_URL}/api/v1/favorites/${trdarCd}`,
@@ -85,14 +98,19 @@ class FavoritesService {
         }
       );
 
+      console.log('🌐 [FavoritesService] API 응답 상태:', response.status);
+      console.log('🌐 [FavoritesService] API 응답 OK:', response.ok);
+
       if (!response.ok) {
+        console.error('❌ [FavoritesService] API 응답 실패:', response.status);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data: ApiResponse<null> = await response.json();
+      console.log('✅ [FavoritesService] API 응답 데이터:', data);
       return data;
     } catch (error) {
-      console.error('상권 저장 해제 실패:', error);
+      console.error('❌ [FavoritesService] 상권 저장 해제 실패:', error);
       throw error;
     }
   }

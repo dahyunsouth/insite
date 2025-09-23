@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useContext } from "react";
 import { createPortal } from "react-dom";
 import DetailNavbarTemplate from "@/components/templates/Detail/AreaDetailModalTemplate";
 import DetailContent from "./DetailContent";
 import DetailSidebar from "./DetailSidebar";
 import TradeAreaRawData from "@/data/TradeAreaValue.json";
 import { tmToWgs84 } from "@/utils/coordinateTransform";
+import { FavoritesContext } from "@/contexts/FavoritesContext";
+import { authManager } from "@/utils/auth";
 
 // 상권 코드로부터 좌표를 가져오는 함수 (실제 JSON 데이터 사용)
 const getCoordinatesFromTrdarCode = (trdarCode: string): { lat: number; lng: number } | undefined => {
@@ -53,6 +55,19 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
   const [populationType, setPopulationType] = useState<"유동" | "직장" | "상주">("유동");
   const [isSaved, setIsSaved] = useState(false);
   const [isComparing, setIsComparing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // FavoritesContext 사용
+  const { addFavorite, removeFavorite, isFavorite } = useContext(FavoritesContext);
+
+  // trdarCode가 전달되면 selected 상태 업데이트
+  useEffect(() => {
+    if (trdarCode && title) {
+      console.log('💾 [DetailModal] trdarCode와 title로 selected 상태 업데이트:', { trdarCode, title });
+      setSelected({ code: trdarCode, name: title });
+    }
+  }, [trdarCode, title]);
 
   useEffect(() => {
     if (!open) return;
@@ -85,6 +100,16 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
     }
   }, [trdarCode, selected, isInComparison]);
 
+  // 저장 상태 동기화
+  useEffect(() => {
+    const currentCode = trdarCode ?? selected?.code ?? null;
+    if (currentCode) {
+      const saved = isFavorite(parseInt(currentCode));
+      console.log('💾 [DetailModal] 저장 상태 동기화:', { currentCode, saved });
+      setIsSaved(saved);
+    }
+  }, [trdarCode, selected, isFavorite]);
+
   const handleCompare = () => {
     const currentCode = trdarCode ?? selected?.code ?? null;
     const currentTrdarCdNm = selected?.name || title || '상권';
@@ -109,9 +134,60 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
     }
   };
 
-  const handleSave = () => {
-    setIsSaved(!isSaved);
-    console.log("저장하기 클릭:", selected, "저장 상태:", !isSaved);
+  const handleSave = async () => {
+    console.log('💾 [DetailModal] handleSave 함수 시작');
+    const currentCode = trdarCode ?? selected?.code ?? null;
+    console.log('💾 [DetailModal] 현재 상권 코드:', currentCode);
+    
+    if (!currentCode) {
+      console.error('💾 [DetailModal] 상권 코드가 없음');
+      setError('상권 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    // 로그인 확인
+    const isLoggedIn = authManager.isLoggedIn();
+    console.log('💾 [DetailModal] 로그인 상태:', isLoggedIn);
+    
+    if (!isLoggedIn) {
+      console.log('💾 [DetailModal] 로그인 필요 - 에러 설정');
+      setError('로그인이 필요합니다.');
+      return;
+    }
+
+    console.log('💾 [DetailModal] 로딩 시작');
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const currentIsSaved = isFavorite(parseInt(currentCode));
+      const currentTrdarCdNm = selected?.name || title || '상권';
+      
+      console.log('💾 [DetailModal] 현재 저장 상태:', currentIsSaved);
+      console.log('💾 [DetailModal] 상권명:', currentTrdarCdNm);
+      
+      if (currentIsSaved) {
+        // 저장 해제
+        console.log('💾 [DetailModal] 저장 해제 API 호출 시작');
+        await removeFavorite(parseInt(currentCode));
+        setIsSaved(false);
+        console.log('✅ [DetailModal] 상권 저장 해제 성공:', currentCode);
+      } else {
+        // 저장
+        console.log('💾 [DetailModal] 저장 API 호출 시작');
+        await addFavorite(parseInt(currentCode), currentTrdarCdNm);
+        setIsSaved(true);
+        console.log('✅ [DetailModal] 상권 저장 성공:', currentCode);
+      }
+      setError(null); // 성공 시 에러 메시지 제거
+    } catch (error) {
+      console.error('❌ [DetailModal] 상권 저장/해제 실패:', error);
+      const errorMessage = error instanceof Error ? error.message : '저장 처리 중 오류가 발생했습니다.';
+      setError(errorMessage);
+    } finally {
+      console.log('💾 [DetailModal] 로딩 종료');
+      setIsLoading(false);
+    }
   };
 
   if (!open) return null;
@@ -145,6 +221,14 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
               onSave={handleSave}
               isSaved={isSaved}
               isComparing={isComparing}
+              isLoading={isLoading}
+              trdarCode={trdarCode ?? selected?.code ?? null}
+              title={title || selected?.name}
+              subtitle={subtitle}
+              onSelectTradeArea={onSelectTradeArea}
+              onAddToComparison={onAddToComparison}
+              onRemoveFromComparison={onRemoveFromComparison}
+              isInComparison={isInComparison}
             />
           }
         >
