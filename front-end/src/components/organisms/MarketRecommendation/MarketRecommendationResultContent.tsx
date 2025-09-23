@@ -16,6 +16,9 @@ interface MarketRecommendationResultContentProps {
   onBack?: () => void;
   selectedItem: RecommendationItem | null;
   onSelectedItemChange?: (selectedItem: RecommendationItem | null) => void;
+  onAddToComparison?: (trdarCd: string, trdarCdNm: string) => void;
+  onRemoveFromComparison?: (trdarCd: string) => void;
+  isInComparison?: (trdarCd: string) => boolean;
 }
 
 type RankStyle = {
@@ -149,7 +152,15 @@ const ScoreSummary: React.FC<{ item: RecommendationItem; className?: string }> =
   );
 };
 
-const MarketRecommendationResultContent: React.FC<MarketRecommendationResultContentProps> = ({ result, onBack, selectedItem, onSelectedItemChange }) => {
+const MarketRecommendationResultContent: React.FC<MarketRecommendationResultContentProps> = ({ 
+  result, 
+  onBack, 
+  selectedItem, 
+  onSelectedItemChange,
+  onAddToComparison,
+  onRemoveFromComparison,
+  isInComparison
+}) => {
   const [populationType, setPopulationType] = useState<"유동" | "직장" | "상주">("유동");
   const [isSaved, setIsSaved] = useState(false);
   const [isComparing, setIsComparing] = useState(false);
@@ -228,8 +239,37 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
   };
 
   const handleCompare = () => {
-    console.log('상권 비교:', selectedItem?.areaName);
-    setIsComparing(!isComparing);
+    console.log('🔍 [MarketRecommendationResultContent] handleCompare 함수 시작');
+    
+    if (!selectedItem) {
+      console.error('🔍 [MarketRecommendationResultContent] 선택된 상권이 없음');
+      return;
+    }
+
+    const trdarCode = selectedItem.trdarCode || getTradeAreaCodeByName(selectedItem.areaName);
+    if (!trdarCode) {
+      console.error('🔍 [MarketRecommendationResultContent] 상권 코드가 없음');
+      return;
+    }
+
+    const currentTrdarCdNm = selectedItem.areaName || '상권';
+    const isCurrentlyInComparison = isInComparison ? isInComparison(trdarCode) : false;
+    
+    console.log('🔍 [MarketRecommendationResultContent] 현재 비교 상태:', isCurrentlyInComparison);
+    console.log('🔍 [MarketRecommendationResultContent] 상권 코드:', trdarCode);
+    console.log('🔍 [MarketRecommendationResultContent] 상권명:', currentTrdarCdNm);
+    
+    if (isCurrentlyInComparison) {
+      // 비교함에서 제거
+      console.log('🔍 [MarketRecommendationResultContent] 비교함에서 제거');
+      onRemoveFromComparison?.(trdarCode);
+      setIsComparing(false);
+    } else {
+      // 비교함에 추가
+      console.log('🔍 [MarketRecommendationResultContent] 비교함에 추가');
+      onAddToComparison?.(trdarCode, currentTrdarCdNm);
+      setIsComparing(true);
+    }
   };
 
   // selectedItem이 변경될 때 스크롤을 맨 위로 이동하고 상태 초기화
@@ -239,24 +279,31 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
       detailContainerRef.current.scrollTop = 0;
     }
     
-    // 선택된 아이템이 변경되면 저장/비교 상태 초기화
-    setIsComparing(false);
+    // 선택된 아이템이 변경되면 에러 상태 초기화
     setError(null);
     
-    // 저장 상태를 실제 FavoritesContext에서 확인
+    // 저장 상태와 비교 상태를 실제 상태에서 확인
     if (selectedItem) {
       const trdarCode = selectedItem.trdarCode || getTradeAreaCodeByName(selectedItem.areaName);
       if (trdarCode) {
+        // 저장 상태 확인
         const currentIsSaved = isFavorite(parseInt(trdarCode));
         setIsSaved(currentIsSaved);
         console.log('💾 [MarketRecommendationResultContent] 저장 상태 업데이트:', currentIsSaved, trdarCode);
+        
+        // 비교 상태 확인
+        const currentIsComparing = isInComparison ? isInComparison(trdarCode) : false;
+        setIsComparing(currentIsComparing);
+        console.log('🔍 [MarketRecommendationResultContent] 비교 상태 업데이트:', currentIsComparing, trdarCode);
       } else {
         setIsSaved(false);
+        setIsComparing(false);
       }
     } else {
       setIsSaved(false);
+      setIsComparing(false);
     }
-  }, [selectedItem, isFavorite]);
+  }, [selectedItem, isFavorite, isInComparison]);
 
   // 1등 아이템의 AI 요약 정보 가져오기
   useEffect(() => {
