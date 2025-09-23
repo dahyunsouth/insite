@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-const TABS = ["상권비교", "저장된 상권", "마이페이지"] as const;
+const TABS = ["상권비교", "상권 보관함", "마이페이지"] as const;
 type Tab = typeof TABS[number];
 
 interface SecondLeftNavbarProps {
@@ -52,7 +52,7 @@ const SecondLeftNavbar: React.FC<SecondLeftNavbarProps> = ({
                       // 로그인되지 않은 상태: 로그인 모달 열기
                       onLoginModalOpen?.();
                     }
-                  } else if (label === "저장된 상권") {
+                  } else if (label === "상권 보관함") {
                     // 로그인 상태 확인
                     if (checkLoginStatus()) {
                       // 로그인된 상태: 저장된 상권 페이지 열기
@@ -71,7 +71,7 @@ const SecondLeftNavbar: React.FC<SecondLeftNavbarProps> = ({
                 className={
                   baseBtn +
                   (isActive
-                    ? " font-semibold"
+                    ? " font-normal"
                     : " font-normal hover:font-semibold")
                 }
               >

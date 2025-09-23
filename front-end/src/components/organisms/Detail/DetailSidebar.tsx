@@ -521,7 +521,7 @@ function DetailAsideNav({
 
   return (
     <div className="flex flex-col gap-4">
-      <nav aria-label="섹션 내비게이션" className="rounded-2xl border border-gray-300 bg-white p-4">
+      <nav aria-label="섹션 내비게이션" className="rounded-[30px] border border-gray-300 bg-white p-8">
         <ul className="flex flex-col">
           {items.map((it, idx) => {
             const isActive = idx === activeIndex;

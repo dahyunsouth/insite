@@ -641,6 +641,7 @@ export default function HomePage() {
         leftOpen={true}
         selectedTradeArea1={selectedTradeArea1}
         selectedTradeArea2={selectedTradeArea2}
+        navbarOpen={isNavbarOpen}
       />
 
       {/* Saved areas compare modal */}
@@ -659,6 +660,7 @@ export default function HomePage() {
           ...(selectedTradeArea1 ? [selectedTradeArea1] : []),
           ...(selectedTradeArea2 ? [selectedTradeArea2] : [])
         ]}
+        navbarOpen={isNavbarOpen}
       />
 
       {/* 인증 모달 (AuthModalWrapper) - 조건부 렌더 */}

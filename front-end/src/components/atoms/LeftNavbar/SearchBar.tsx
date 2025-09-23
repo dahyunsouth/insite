@@ -96,7 +96,7 @@ const SearchBar = ({ onSearch, onSearchResultsShow, resetTrigger }: SearchBarPro
         onFocus={() => {
           // 포커스 시에도 실시간 검색 결과 표시하지 않음
         }}
-        placeholder="지하철명, 자치구명으로 검색"
+        placeholder="지하철역, 자치구로 검색"
         aria-label="Search business area"
         className="flex-1 w-full min-w-0 bg-transparent border-none outline-none focus:outline-none focus:ring-0 placeholder-gray-400 focus:placeholder-transparent text-black px-0 transition-all"
         type="text"

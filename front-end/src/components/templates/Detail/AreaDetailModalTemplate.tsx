@@ -35,14 +35,14 @@ export default function DetailNavbarTemplate({
   return (
     <div
       className={
-        "relative w-full h-full rounded-3xl border border-black/5 shadow-xl overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden " +
+        "relative w-full h-full border border-black/5 shadow-xl overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden " +
         (className ?? "")
       }
       style={{ backgroundColor: "#F8F9FA" }}
     >
       {/* Header */}
       <div
-        className="sticky top-0 z-10 relative rounded-t-3xl border-b border-black/5 bg-white"
+        className="sticky top-0 z-10 relative border-b border-black/5 bg-white"
         style={{ backgroundColor: "#FFFFFF" }}
       >
         {/* Close button (kept within sticky header) */}
@@ -57,7 +57,7 @@ export default function DetailNavbarTemplate({
           </button>
         )}
         <div className={"px-6 py-4 pr-16 " + (headerAlign === "center" ? "text-center" : "text-left") }>
-          {title && <h2 className="text-[20px] font-semibold text-[#3288FF]">{title}</h2>}
+          {title && <h2 className="text-[20px] font-semibold">{title}</h2>}
           {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
           {/* Right actions (e.g., trade area dropdown) */}
           {headerRight && (
@@ -70,7 +70,7 @@ export default function DetailNavbarTemplate({
 
       {/* Content: left cards stack + right aside (separate from cards) */}
       <main className="px-4 py-4">
-        <div className="md:grid md:grid-cols-[1fr_240px] md:gap-6">
+        <div className="md:grid md:grid-cols-[1fr_240px] gap-4">
           {/* Left column: stack of section cards */}
           <div className="flex flex-col gap-4">
             {children}

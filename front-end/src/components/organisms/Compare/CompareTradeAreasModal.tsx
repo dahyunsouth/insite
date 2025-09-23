@@ -51,9 +51,11 @@ type CompareTradeAreasModalProps = {
   selectedTradeArea1?: { trdarCd: string; trdarCdNm: string } | null;
   /** Pre-selected trade area 2 from comparison tray */
   selectedTradeArea2?: { trdarCd: string; trdarCdNm: string } | null;
+  /** Whether the navbar is open */
+  navbarOpen?: boolean;
 };
 
-export default function CompareTradeAreasModal({ open, onClose, leftOpen = true, modalType = 'compare', preSelectedTradeAreas, selectedTradeArea1, selectedTradeArea2 }: CompareTradeAreasModalProps) {
+export default function CompareTradeAreasModal({ open, onClose, leftOpen = true, modalType = 'compare', preSelectedTradeAreas, selectedTradeArea1, selectedTradeArea2, navbarOpen = true }: CompareTradeAreasModalProps) {
   const [selectedPc, setSelectedPc] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<'analysis' | 'data'>('analysis');
   const [selectionA, setSelectionA] = useState<TradeAreaSelection>({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
@@ -328,25 +330,26 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
 
   return createPortal(
     <div
-      className={`fixed z-[95] ${modalType === 'compare' ? 'inset-0' : ''}`}
+      className={`fixed z-[90] ${modalType === 'compare' ? 'inset-0' : ''}`}
       style={modalType === 'saved' ? { 
         left: '25%', 
         right: '80px', 
         top: 0, 
         bottom: 0 
+      } : modalType === 'compare' ? {
+        left: navbarOpen ? '25%' : '0%',
+        right: 0,
+        top: 0,
+        bottom: 0
       } : {}}
       role="dialog"
       aria-modal="true"
       aria-labelledby="compare-modal-title"
     >
       {/* Modal positioned in center area */}
-      <div className={`relative z-10 flex items-center justify-center p-6 ${modalType === 'compare' ? 'min-h-screen' : 'h-full'}`}>
-        {/* Dim overlay for compare modal - behind modal */}
-        {modalType === 'compare' && (
-          <div className="absolute inset-0 bg-black/40 -z-10" onClick={onClose} />
-        )}
+      <div className={`relative z-10 flex items-center justify-center ${modalType === 'compare' ? 'h-screen' : 'h-full'}`}>
         <div
-          className="w-full max-w-6xl rounded-3xl bg-white shadow-xl border border-black/5 max-h-[85vh] overflow-visible flex flex-col"
+          className="w-full h-full bg-white shadow-xl border border-black/5 overflow-visible flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -362,7 +365,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
               type="button"
               aria-label="Close"
               onClick={onClose}
-              className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 hover:bg-gray-50 shadow-sm border border-gray-200"
+              className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 hover:bg-gray-50 shadow-sm border border-gray-200 cursor-pointer"
             >
               <span className="sr-only">Close</span>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" strokeWidth="1.5" stroke="currentColor" className="h-5 w-5 text-gray-700">
@@ -400,7 +403,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
               <nav className="flex gap-8">
                 <button
                   onClick={() => setActiveTab('analysis')}
-                  className={`pb-3 border-b-2 font-medium text-sm transition-colors ${
+                  className={`pb-3 border-b-2 font-medium text-sm transition-colors cursor-pointer ${
                     activeTab === 'analysis'
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -410,7 +413,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
                 </button>
                 <button
                   onClick={() => setActiveTab('data')}
-                  className={`pb-3 border-b-2 font-medium text-sm transition-colors ${
+                  className={`pb-3 border-b-2 font-medium text-sm transition-colors cursor-pointer ${
                     activeTab === 'data'
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
