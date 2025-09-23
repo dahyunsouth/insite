@@ -42,8 +42,9 @@ public class GmsClient {
 
         List<Map<String, String>> messages = new ArrayList<>();
         messages.add(Map.of("role", "system", "content", "Answer in Korean."
-                + "내가 보내준 특정 상권의 이름과 정보를 바탕으로 상권 데이터를 요약하고,"
-                + "주요 특징을 주요 특징을 3~4개 항목으로 bullet point로 작성해줘"));
+                + "내가 보내준 특정 상권의 이름과 정보를 바탕으로 상권 데이터를 요약하고, "
+                + "주요 특징을 주요 특징을 3~4개 항목으로 bullet point로 작성해줘. "
+                + "상권 요약에서는 해당 상권의 분위기나 특징들을 포함해야 해. "));
         messages.add(Map.of("role", "user", "content", prompt));
 
         body.put("messages", messages);
