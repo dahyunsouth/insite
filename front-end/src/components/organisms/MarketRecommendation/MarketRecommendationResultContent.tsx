@@ -155,6 +155,9 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
   
   // AI 요약 정보 상태 관리 (캐싱을 위해 Map 사용)
   const [aiSummaryCache, setAiSummaryCache] = useState<Map<string, AiSummaryData>>(new Map());
+  
+  const topThree = result.items.slice(0, 3);
+  const secondaryItems = topThree.slice(1).filter((item): item is RecommendationItem => Boolean(item));
 
   const handleSave = () => {
     console.log('상권 저장:', selectedItem?.areaName);
@@ -165,9 +168,6 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
     console.log('상권 비교:', selectedItem?.areaName);
     setIsComparing(!isComparing);
   };
-  
-  const topThree = result.items.slice(0, 3);
-  const secondaryItems = topThree.slice(1).filter((item): item is RecommendationItem => Boolean(item));
 
   // selectedItem이 변경될 때 스크롤을 맨 위로 이동하고 상태 초기화
   useLayoutEffect(() => {
@@ -179,6 +179,20 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
     setIsSaved(false);
     setIsComparing(false);
   }, [selectedItem]);
+
+  // 1등 아이템의 AI 요약 정보 가져오기
+  useEffect(() => {
+    if (topThree[0]) {
+      fetchAiSummaryForItem(topThree[0]);
+    }
+  }, [topThree[0]?.trdarCode, topThree[0]?.areaName]);
+
+  // 2등, 3등 아이템들의 AI 요약 정보 가져오기
+  useEffect(() => {
+    secondaryItems.forEach(item => {
+      fetchAiSummaryForItem(item);
+    });
+  }, [secondaryItems.map(item => `${item.trdarCode}-${item.areaName}`).join(',')]);
 
   const handleCardClick = (item: RecommendationItem) => {
     onSelectedItemChange?.(item);
@@ -226,11 +240,6 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
     // AI 요약 정보 가져오기
     const trdarCode = item.trdarCode || getTradeAreaCodeByName(item.areaName || '');
     const aiData = trdarCode ? aiSummaryCache.get(trdarCode) : null;
-    
-    // 컴포넌트 마운트 시 AI 데이터 로드
-    useEffect(() => {
-      fetchAiSummaryForItem(item);
-    }, [item.trdarCode, item.areaName]);
     
     // Fallback 텍스트 (API 실패 시 사용)
     const getFallbackContent = (areaName: string) => ({
@@ -319,11 +328,6 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
     // AI 요약 정보 가져오기
     const trdarCode = item.trdarCode || getTradeAreaCodeByName(item.areaName || '');
     const aiData = trdarCode ? aiSummaryCache.get(trdarCode) : null;
-    
-    // 컴포넌트 마운트 시 AI 데이터 로드
-    useEffect(() => {
-      fetchAiSummaryForItem(item);
-    }, [item.trdarCode, item.areaName]);
     
     // Fallback 텍스트 (API 실패 시 사용)
     const getFallbackContent = (ranking: number, areaName: string) => {
