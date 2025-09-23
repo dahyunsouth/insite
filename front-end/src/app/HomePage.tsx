@@ -17,6 +17,7 @@ import TradeAreaData from '@/data/TradeAreaValue.json';
 import { useNotification } from '@/components/map/useNotification';
 import Notification from '@/components/map/Notification';
 import { tmToWgs84 } from '@/utils/coordinateTransform';
+import { useComparisonStore } from '@/stores/comparisonStore';
 
 // 지도 타입 변경 핸들러 컴포넌트
 function MapTypeHandler({ 
@@ -79,40 +80,36 @@ export default function HomePage() {
   const [selectedTradeArea1, setSelectedTradeArea1] = useState<{ trdarCd: string; trdarCdNm: string } | null>(null);
   const [selectedTradeArea2, setSelectedTradeArea2] = useState<{ trdarCd: string; trdarCdNm: string } | null>(null);
   
-  // 비교함에 담긴 상권들 관리
-  const [comparisonTray, setComparisonTray] = useState<{ trdarCd: string; trdarCdNm: string }[]>([]);
+  // Zustand store에서 비교함 상태 관리
+  const { 
+    comparisonTray, 
+    addToComparison, 
+    removeFromComparison, 
+    isInComparison 
+  } = useComparisonStore();
 
-  // 비교함에 상권 추가
+  // 비교함에 상권 추가 (알림 포함)
   const addToComparisonTray = (trdarCd: string, trdarCdNm: string) => {
-    setComparisonTray(prev => {
-      // 이미 있는 상권인지 확인
-      const exists = prev.some(item => item.trdarCd === trdarCd);
-      if (exists) {
-        console.log('비교함에 이미 존재하는 상권입니다:', trdarCdNm);
-        showNotification('이미 비교함에 담긴 상권입니다.');
-        return prev; // 이미 있으면 추가하지 않음
-      }
-      // 최대 2개까지만 추가 가능
-      if (prev.length >= 2) {
-        console.log('비교함이 가득참 - 최대 2개까지만 담을 수 있습니다. 시도한 상권:', trdarCdNm);
-        showNotification('비교함에는 최대 2개까지만 담을 수 있습니다.');
-        return prev;
-      }
-      console.log('비교함에 상권 추가 성공:', trdarCdNm);
-      showNotification('비교함에 추가되었습니다.');
-      return [...prev, { trdarCd, trdarCdNm }];
-    });
+    const currentLength = comparisonTray.length;
+    const exists = comparisonTray.some(item => item.trdarCd === trdarCd);
+    
+    if (exists) {
+      showNotification('이미 비교함에 담긴 상권입니다.');
+      return;
+    }
+    
+    if (currentLength >= 2) {
+      showNotification('비교함에는 최대 2개까지만 담을 수 있습니다.');
+      return;
+    }
+    
+    addToComparison(trdarCd, trdarCdNm);
+    showNotification('비교함에 추가되었습니다.');
   };
 
   // 비교함에서 상권 제거
   const removeFromComparisonTray = (trdarCd: string) => {
-    setComparisonTray(prev => {
-      const removedItem = prev.find(item => item.trdarCd === trdarCd);
-      if (removedItem) {
-        console.log('비교함에서 상권 제거:', removedItem.trdarCdNm);
-      }
-      return prev.filter(item => item.trdarCd !== trdarCd);
-    });
+    removeFromComparison(trdarCd);
   };
 
   // 디버깅용 useEffect
@@ -629,7 +626,7 @@ export default function HomePage() {
         trdarCode={selectedTradeAreaCode}
         onAddToComparison={addToComparisonTray}
         onRemoveFromComparison={removeFromComparisonTray}
-        isInComparison={(trdarCd) => comparisonTray.some(item => item.trdarCd === trdarCd)}
+        isInComparison={isInComparison}
         isNavbarOpen={isNavbarOpen}
       />
 

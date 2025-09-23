@@ -29,6 +29,9 @@ interface MarketTypeStoreProps {
     maxFee: number;
     hasInteracted: boolean;
   } | null;
+  onAddToComparison?: (trdarCd: string, trdarCdNm: string) => void;
+  onRemoveFromComparison?: (trdarCd: string) => void;
+  isInComparison?: (trdarCd: string) => boolean;
 }
 
 const toApiTradeAreaType = (value: string | null) => {
@@ -50,6 +53,9 @@ const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({
   onItemSelect,
   onBack,
   initialSelections,
+  onAddToComparison,
+  onRemoveFromComparison,
+  isInComparison,
 }) => {
   const [marketType, setMarketType] = useState<string | null>(initialSelections?.marketType || null);
   const [storeSize, setStoreSize] = useState<string | null>(initialSelections?.storeSize || null);
@@ -156,6 +162,9 @@ const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({
         selectedItem={selectedItem}
         onItemSelect={onItemSelect}
         onBack={handleBackFromResult}
+        onAddToComparison={onAddToComparison}
+        onRemoveFromComparison={onRemoveFromComparison}
+        isInComparison={isInComparison}
       />
     );
   }
