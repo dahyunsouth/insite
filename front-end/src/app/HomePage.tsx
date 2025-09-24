@@ -14,6 +14,7 @@ import MyMarket from '@/components/templates/MyPage/MyMarket';
 import NotificationBar from '@/components/atoms/Common/NotificationBar';
 import CompareTradeAreasModal from '@/components/organisms/Compare/CompareTradeAreasModal';
 import ComparisonTray from '@/components/organisms/Compare/ComparisonTray';
+import NewCompareModal from '@/components/organisms/Compare/NewCompareModal';
 import TradeAreaData from '@/data/TradeAreaValue.json';
 import { useNotification } from '@/components/map/useNotification';
 import Notification from '@/components/map/Notification';
@@ -93,6 +94,9 @@ export default function HomePage() {
   const [isSavedCompareOpen, setIsSavedCompareOpen] = useState(false);
   const [selectedTradeArea1, setSelectedTradeArea1] = useState<{ trdarCd: string; trdarCdNm: string } | null>(null);
   const [selectedTradeArea2, setSelectedTradeArea2] = useState<{ trdarCd: string; trdarCdNm: string } | null>(null);
+  
+  // 새로운 상권 비교 모달 상태
+  const [isNewCompareModalOpen, setIsNewCompareModalOpen] = useState(false);
   
   // Zustand store에서 비교함 상태 관리
   const { 
@@ -721,6 +725,23 @@ export default function HomePage() {
           onClose={hideNotification}
         />
       </div>
+
+      {/* 새로운 상권 비교 모달 테스트 버튼 */}
+      <div className="fixed top-4 right-4 z-[500]">
+        <button
+          onClick={() => setIsNewCompareModalOpen(true)}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
+        >
+          새 상권 비교 모달 테스트
+        </button>
+      </div>
+
+      {/* 새로운 상권 비교 모달 */}
+      <NewCompareModal 
+        open={isNewCompareModalOpen}
+        onClose={() => setIsNewCompareModalOpen(false)}
+        navbarOpen={isNavbarOpen}
+      />
 
     </div>
   );
