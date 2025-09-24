@@ -402,8 +402,8 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
           </div>
            <ScoreSummary item={item} />
            <div className='mt-3 space-y-3'>
-             <div>
-               <div className='text-sm font-semibold text-gray-700 mb-1'>💡 AI 추천 이유</div>
+             <div className='bg-gray-50 border border-gray-200 rounded-lg p-3'>
+               <div className='text-sm font-semibold text-gray-700 mb-2'>💡 AI 추천 이유</div>
                <div className='text-xs text-gray-600 leading-relaxed text-justify'>
                  {aiData?.isLoading ? (
                    <div className="flex items-center gap-2">
@@ -418,7 +418,7 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
                </div>
              </div>
              <div>
-               <div className='text-sm font-semibold text-gray-700 mb-1'>📋 주요 특징</div>
+               {/* <div className='text-sm font-semibold text-gray-700 mb-1'>📋 주요 특징</div>
                <div className='text-xs text-gray-600 leading-relaxed'>
                  {aiData?.isLoading ? (
                    <div className="flex items-center gap-2">
@@ -428,7 +428,7 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
                  ) : aiData?.error ? (
                    <span className="text-red-500">특징 정보를 불러올 수 없습니다.</span>
                  ) : (
-                   <ul className="space-y-1">
+                   <ul className="space-y-0.1">
                      {displayFeatures.map((feature, index) => (
                        <li key={index} className="flex items-start gap-2">
                          <span className="text-gray-400 mt-1">•</span>
@@ -437,7 +437,7 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
                      ))}
                    </ul>
                  )}
-               </div>
+               </div> */}
              </div>
            </div>
         </div>
@@ -510,8 +510,8 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
           </div>
           <ScoreSummary item={item} />
           <div className='mt-3'>
-            <div>
-              <div className='text-sm font-semibold text-gray-700 mb-1'>💡 AI 추천 이유</div>
+            <div className='bg-gray-50 border border-gray-200 rounded-lg p-3'>
+              <div className='text-sm font-semibold text-gray-700 mb-2'>💡 AI 추천 이유</div>
               <div className='text-xs text-gray-600 leading-relaxed text-justify'>
                 {aiData?.isLoading ? (
                   <div className="flex items-center gap-2">
