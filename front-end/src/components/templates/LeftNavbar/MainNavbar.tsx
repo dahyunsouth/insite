@@ -73,7 +73,7 @@ const MainNavbar: React.FC<MainNavbarProps> = ({
   };
 
   return (
-    <div className="relative h-full z-[90]">
+    <div className="relative h-full z-[300]">
       {/* 네비게이션 바 */}
       <nav 
         className={`
@@ -123,7 +123,7 @@ const MainNavbar: React.FC<MainNavbarProps> = ({
       {/* 토글 버튼 - 슬라이딩 애니메이션과 함께 */}
       <div 
         className={`
-          absolute top-1/2 -translate-y-1/2 z-[100]
+          absolute top-1/2 -translate-y-1/2 z-[310]
           transition-all duration-300 ease-in-out
           ${isOpen ? 'left-full' : 'left-0'}
         `}

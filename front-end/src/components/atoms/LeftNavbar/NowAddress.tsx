@@ -179,7 +179,7 @@ export default function NowAddress({ onAddressClick, onAddressChange }: NowAddre
     <div className="w-full bg-white p-4">
       {/* 헤더 영역 */}
       <div className="mb-3">
-        <span className="text-sm px-2">지금 보고계신 곳은</span>
+        <span className="text-sm px-2">지금 보고 계신 곳은</span>
       </div>
       
       {/* 주소 표시 영역 */}
@@ -201,7 +201,7 @@ export default function NowAddress({ onAddressClick, onAddressChange }: NowAddre
           >
             <div
               className="inline-block text-2xl font-bold"
-              style={{ color: '#3288FF' }}
+              // style={{ color: '#3288FF' }}
             >
               {currentAddress.gu} {currentAddress.dong}
             </div>

@@ -54,7 +54,7 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
 
     // 커스텀 오버레이 생성 (앵커 설정 포함, 높은 z-index로 상권명 박스보다 위에 표시)
     const overlay = new (window as any).kakao.maps.CustomOverlay({ 
-      zIndex: 10000,  // 상권명 박스(z-index: 9999)보다 높게 설정
+      zIndex: 140,  // MAP_CUSTOM_OVERLAY 계층 사용
       xAnchor: 0.5,   // 가로 중앙
       yAnchor: 1.1    // 세로 하단 (마커 위쪽에 표시)
     });
@@ -326,7 +326,7 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
       '" title="' + place.place_name + '">' + place.place_name + '</a>';
     
     // 닫기 버튼 추가
-    content += '<button onclick="this.closest(\'.overlay_info\').parentElement.style.display=\'none\'" style="' +
+    content += '<button style="' +
       'background: none; ' +
       'border: none; ' +
       'color: white; ' +
@@ -433,6 +433,16 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
     content += '</div>';
 
     contentNodeRef.current.innerHTML = content;
+    
+    // 닫기 버튼 이벤트 리스너 등록
+    const closeButton = contentNodeRef.current.querySelector('button');
+    if (closeButton) {
+      closeButton.addEventListener('click', () => {
+        if (placeOverlayRef.current) {
+          placeOverlayRef.current.setMap(null);
+        }
+      });
+    }
     
     // 오버레이 위치 설정 (마커 위쪽에 표시)
     placeOverlayRef.current.setPosition(new (window as any).kakao.maps.LatLng(place.y, place.x));

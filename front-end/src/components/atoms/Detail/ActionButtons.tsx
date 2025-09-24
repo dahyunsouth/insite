@@ -100,7 +100,7 @@ export default function ActionButtons({
 
     {/* 로그인 모달 - Portal을 사용해서 document.body에 직접 렌더링 */}
     {isLoginModalOpen && createPortal(
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center py-8">
+      <div className="fixed inset-0 z-[510] flex items-center justify-center py-8">
         {/* 배경 오버레이 */}
         <div 
           className="absolute inset-0 bg-black/20 backdrop-blur-[1px]"

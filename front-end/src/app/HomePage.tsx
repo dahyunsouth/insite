@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import KakaoMap, { useKakaoMapContext } from '@/components/map/KakaoMap';
 import LoadView from '@/components/map/LoadView';
 import RightActionBar from '@/components/organisms/RightActionBar/RightActionBar';
+import LoginBar from '@/components/organisms/RightActionBar/LoginBar';
 import CtaPillButton from '@/components/molecules/Detail/CtaPillButton/CtaPillButton';
 import DetailModal from '@/components/organisms/Detail/DetailModal';
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
@@ -28,7 +29,9 @@ function MapTypeHandler({
   isLoadViewMinimized,
   onLoadViewToggle,
   isCafeActive,
-  onCafeToggle
+  onCafeToggle,
+  onCompareClick,
+  onMyPageClick
 }: { 
   isLoggedIn: boolean;
   onLogoutSuccess: () => void;
@@ -38,6 +41,8 @@ function MapTypeHandler({
   onLoadViewToggle: (action: boolean | 'minimize' | 'restore') => void;
   isCafeActive: boolean;
   onCafeToggle: (categoryId: string) => void;
+  onCompareClick: () => void;
+  onMyPageClick: () => void;
 }) {
   const mapContext = useKakaoMapContext();
   
@@ -46,17 +51,26 @@ function MapTypeHandler({
   };
 
   return (
-    <RightActionBar 
-      onMapTypeChange={handleMapTypeChange} 
-      isLoggedIn={isLoggedIn}
-      onLogoutSuccess={onLogoutSuccess}
-      onLoginSuccess={onLoginSuccess}
-      isLoadViewActive={isLoadViewActive}
-      isLoadViewMinimized={isLoadViewMinimized}
-      onLoadViewToggle={onLoadViewToggle}
-      isCafeActive={isCafeActive}
-      onCafeToggle={onCafeToggle}
-    />
+    <>
+      {/* 우측 상단: 로그인 관련 버튼들 */}
+      <LoginBar 
+        isLoggedIn={isLoggedIn}
+        onLogoutSuccess={onLogoutSuccess}
+        onLoginSuccess={onLoginSuccess}
+        onCompareClick={onCompareClick}
+        onProfileClick={onMyPageClick}
+      />
+      
+      {/* 우측 하단: 지도 컨트롤 버튼들 */}
+      <RightActionBar 
+        onMapTypeChange={handleMapTypeChange} 
+        isLoadViewActive={isLoadViewActive}
+        isLoadViewMinimized={isLoadViewMinimized}
+        onLoadViewToggle={onLoadViewToggle}
+        isCafeActive={isCafeActive}
+        onCafeToggle={onCafeToggle}
+      />
+    </>
   );
 }
 
@@ -513,7 +527,7 @@ export default function HomePage() {
         onShowMarketList={handleShowMarketList}
       >
         {/* 좌측 네비게이션 바 */}
-        <div className={`fixed top-0 left-0 right-0 z-[95] h-screen flex flex-col transition-all duration-300 ease-in-out ${isNavbarOpen ? 'w-1/4' : 'w-0'}`}>
+        <div className={`fixed top-0 left-0 right-0 z-[300] h-screen flex flex-col transition-all duration-300 ease-in-out ${isNavbarOpen ? 'w-1/4' : 'w-0'}`}>
           {showMyPage && (
             <MyPageMenu 
               onClose={handleMyPageClose}
@@ -582,6 +596,8 @@ export default function HomePage() {
           onLoadViewToggle={handleLoadViewToggle}
           isCafeActive={isCafeActive}
           onCafeToggle={handleCafeToggle}
+          onCompareClick={handleCompareTabClick}
+          onMyPageClick={handleMyPageClick}
         />
 
         {/* 로드뷰 컴포넌트 - KakaoMap 내부에 배치하되 DOM 안정성 유지 */}
@@ -698,7 +714,7 @@ export default function HomePage() {
       />
 
       {/* 토스트 알림 */}
-      <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[100]">
+      <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[400]">
         <Notification
           message={notification.message}
           isVisible={notification.isVisible}

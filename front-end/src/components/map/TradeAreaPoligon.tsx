@@ -524,7 +524,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
         border: 1px solid rgba(50, 136, 255, 0.8);
         transition: all 0.2s ease;
         position: relative;
-        z-index: 100;
+        z-index: 130;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       ">${cachedPolygon.tradeAreaName}</div>`;
 
@@ -680,7 +680,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
           border: 1px solid rgba(50, 136, 255, 0.8);
           transition: all 0.2s ease;
           position: relative;
-          z-index: 100;
+          z-index: 130;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         ">${tradeArea.trdar_cd_nm}</div>`;
 

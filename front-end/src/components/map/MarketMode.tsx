@@ -428,7 +428,7 @@ export function createDongMarketModeLabelContent(
     border: 1px solid ${labelBorderColor};
     transition: all 0.2s ease;
     line-height: 1.2;
-    z-index: 1000;
+    z-index: 120;
   " onmouseover="this.style.backgroundColor='${hoverBackgroundColor}'; this.style.borderColor='${hoverBackgroundColor}'; this.style.color='#ffffff'; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1.1)'" 
      onmouseout="this.style.backgroundColor='${labelBackgroundColor}'; this.style.borderColor='${labelBorderColor}'; this.style.color='#ffffff'; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1)'"
      onclick="console.log('🖱️ 행정동 상권모드 직접 클릭:', '${dongName}');"

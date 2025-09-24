@@ -91,7 +91,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showClosureMonthTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[600] break-words min-w-max max-w-xs">
                               · 폐업 전 평균 운영 개월 수<br/>
                               · 해당 상권의 생존력 부족 위험도를 나타냅니다.
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
@@ -116,7 +116,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showGaeeopryulTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[600] break-words min-w-max max-w-xs">
                               최신 분기 기준, 해당 상권 내 전체 점포 수 대비 개업한 점포 수
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
@@ -144,7 +144,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showMarketPotentialTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[600] break-words min-w-max max-w-xs">
                               해당 상권 내<br/>
                               카페와 유사한 업종의 점포 수를 통해 도출한 '식음료 시장 규모'와<br/>
                               유사 업종 점포 수 대비 커피-음료 업종 점포 수 비율로 도출한 '커피 전문점 포화도'로<br/>
@@ -171,7 +171,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showSupplyDemandTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[600] break-words min-w-max max-w-xs">
                               해당 상권의 유동인구 대비 점포 수
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
@@ -204,7 +204,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showAttractionFacilityTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[600] break-words min-w-max max-w-xs">
                               집객시설은 사람이나 유동인구를 끌어모으는 역할을 하는 시설을 의미합니다.<br/>
                               주로 영화관, 대형마트, 병원, 학교, 관공서, 백화점 등<br/>
                               다양한 상업·공공시설이 이에 해당합니다.
@@ -243,7 +243,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showSubwayDistanceTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[600] break-words min-w-max max-w-xs">
                               해당 상권과 인접한 상위 3개 역까지의 거리(가중평균)
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
@@ -267,7 +267,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showBusStopDistanceTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[600] break-words min-w-max max-w-xs">
                               해당 상권과 인접한 상위 3개 정류장까지의 거리(가중평균)
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
@@ -295,7 +295,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showPopulationStoreTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[600] break-words min-w-max max-w-xs">
                               해당 상권의 수요부족 위험을 나타냅니다.
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
@@ -319,7 +319,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showClosureMonthTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[600] break-words min-w-max max-w-xs">
                               · 폐업 전 평균 운영 개월 수<br/>
                               · 해당 상권의 생존력 부족 위험도를 나타냅니다.
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
@@ -344,7 +344,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showClosureRateTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[600] break-words min-w-max max-w-xs">
                               · 해당 상권 내 전체 점포 수 대비 폐업 점포 수<br/>
                               · 해당 상권의 시장 불안정 위험을 나타냅니다.
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
@@ -373,7 +373,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showStoreCountTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[600] break-words min-w-max max-w-xs">
                               해당 상권 내 '커피-음료' 업종을 영위하는 점포의 수
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
@@ -397,7 +397,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showDemandDensityTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[600] break-words min-w-max max-w-xs">
                               해당 상권 내 유동인구 대비 '커피-음료' 업종을 영위하는 점포의 수
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
@@ -421,7 +421,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                             <span className="text-white text-xs font-medium">i</span>
                           </button>
                           {showStoreDensityTooltip && (
-                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[9999] break-words min-w-max max-w-xs">
+                            <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[600] break-words min-w-max max-w-xs">
                               해당 상권 내 100m²당 '커피-음료' 업종을 영위하는 점포의 수
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>

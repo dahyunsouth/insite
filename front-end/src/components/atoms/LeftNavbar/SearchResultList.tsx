@@ -95,7 +95,7 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose, onSearchReset }: 
   const displayInfowindow = useCallback((marker: any, title: string) => {
     if (!infowindowRef.current) return;
 
-    const content = `<div style="padding:5px;z-index:1;">${title}</div>`;
+    const content = `<div style="padding:5px;z-index:120;">${title}</div>`;
     infowindowRef.current.setContent(content);
     infowindowRef.current.open(map, marker);
   }, [map]);

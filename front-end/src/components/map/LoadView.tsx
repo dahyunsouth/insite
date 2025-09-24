@@ -588,7 +588,7 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
         top: `${position.y}px`,
         width: `${size.width}px`,
         height: `${size.height}px`,
-        zIndex: 2147483647, // 최대 z-index
+        zIndex: 700, // 오버레이 계층 (LoadView는 특별한 경우이므로 OVERLAY 계층 사용)
         cursor: isFullscreen ? 'default' : isDragging ? 'grabbing' : isResizing ? 'nw-resize' : 'grab',
         display: (overlayOn && !isMinimized) ? 'block' : 'none', // overlayOn이 true이고 최소화되지 않았을 때만 표시
         visibility: (overlayOn && !isMinimized) ? 'visible' : 'hidden', // 추가적인 안전장치
