@@ -19,6 +19,7 @@ type TradeAreaIntroCardProps = {
   onCompare?: () => void;
   isSaved?: boolean;
   isComparing?: boolean;
+  isLoading?: boolean;
   actionButtonsDirection?: 'horizontal' | 'vertical';
 };
 
@@ -38,6 +39,7 @@ export default function TradeAreaIntroCard({
   onCompare,
   isSaved = false,
   isComparing = false,
+  isLoading = false,
   actionButtonsDirection = 'vertical'
 }: TradeAreaIntroCardProps) {
   return (
@@ -86,6 +88,7 @@ export default function TradeAreaIntroCard({
                 onCompare={onCompare}
                 isSaved={isSaved}
                 isComparing={isComparing}
+                isLoading={isLoading}
                 direction={actionButtonsDirection}
               />
             </div>

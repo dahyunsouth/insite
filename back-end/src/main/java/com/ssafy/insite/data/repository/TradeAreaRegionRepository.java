@@ -38,7 +38,7 @@ public class TradeAreaRegionRepository {
     private final String induty = "커피-음료";
 
     private static Integer toInteger(UInteger v) {
-        return v == null ? null : v.intValue();
+        return v == null ? 0 : v.intValue();
     }
 
     // 자치구별 상권 개수 조회
