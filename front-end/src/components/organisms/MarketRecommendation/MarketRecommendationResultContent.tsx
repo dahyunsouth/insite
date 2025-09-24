@@ -401,10 +401,10 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
             <div className='text-2xl font-bold text-gray-800'>🎉{item.areaName || '정보 없음'}</div>
           </div>
            <ScoreSummary item={item} />
-           <div className='mt-3 space-y-3'>
+           <div className='mt-6 space-y-3'>
              <div className='bg-gray-50 border border-gray-200 rounded-lg p-3'>
-               <div className='text-sm font-semibold text-gray-700 mb-2'>💡 AI 추천 이유</div>
-               <div className='text-xs text-gray-600 leading-relaxed text-justify'>
+               <div className='text-md font-semibold text-gray-700 mb-2'>💡 AI 추천 이유</div>
+               <div className='text-sm text-gray-600 leading-relaxed text-justify'>
                  {aiData?.isLoading ? (
                    <div className="flex items-center gap-2">
                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600"></div>
@@ -511,8 +511,8 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
           <ScoreSummary item={item} />
           <div className='mt-3'>
             <div className='bg-gray-50 border border-gray-200 rounded-lg p-3'>
-              <div className='text-sm font-semibold text-gray-700 mb-2'>💡 AI 추천 이유</div>
-              <div className='text-xs text-gray-600 leading-relaxed text-justify'>
+              <div className='text-md font-semibold text-gray-700 mb-1.5'>💡 AI 추천 이유</div>
+              <div className='text-sm text-gray-600 leading-relaxed text-justify'>
                 {aiData?.isLoading ? (
                   <div className="flex items-center gap-2">
                     <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600"></div>
