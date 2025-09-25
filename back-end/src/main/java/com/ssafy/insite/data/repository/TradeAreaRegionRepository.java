@@ -1,6 +1,7 @@
 package com.ssafy.insite.data.repository;
 
 import static com.ssafy.insite.data.jooq.codegen.Tables.TRADE_AREA_REGION;
+import static com.ssafy.insite.data.jooq.codegen.Tables.TRADE_AREA_SALES_CD;
 import static com.ssafy.insite.data.jooq.codegen.Tables.TRADE_AREA_STOR_CD;
 import static org.jooq.impl.DSL.max;
 
@@ -27,6 +28,7 @@ import org.jooq.Record2;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.jooq.types.UInteger;
+import org.jooq.types.ULong;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -39,6 +41,10 @@ public class TradeAreaRegionRepository {
 
     private static Integer toInteger(UInteger v) {
         return v == null ? 0 : v.intValue();
+    }
+
+    private static Long toLong(ULong v) {
+        return v == null ? 0L : v.longValue();
     }
 
     // 자치구별 상권 개수 조회
@@ -123,13 +129,18 @@ public class TradeAreaRegionRepository {
                         TRADE_AREA_REGION.YDNTS_VALUE,
                         TRADE_AREA_REGION.RELM_AR,
                         TRADE_AREA_STOR_CD.STOR_CO,
-                        TRADE_AREA_STOR_CD.SIMILR_INDUTY_STOR_CO
+                        TRADE_AREA_STOR_CD.SIMILR_INDUTY_STOR_CO,
+                        TRADE_AREA_SALES_CD.THSMON_SELNG_AMT
                 )
                 .from(TRADE_AREA_REGION)
                 .leftJoin(TRADE_AREA_STOR_CD)
                 .on(TRADE_AREA_REGION.TRDAR_CD.eq(TRADE_AREA_STOR_CD.TRDAR_CD))
                 .and(TRADE_AREA_STOR_CD.SVC_INDUTY_CD_NM.eq(induty))
                 .and(TRADE_AREA_STOR_CD.STDR_YYQU_CD.eq(latestYyqu)) // 최신 분기만 필터링
+                .leftJoin(TRADE_AREA_SALES_CD)
+                .on(TRADE_AREA_REGION.TRDAR_CD.eq(TRADE_AREA_SALES_CD.TRDAR_CD))
+                .and(TRADE_AREA_SALES_CD.SVC_INDUTY_CD_NM.eq(induty))
+                .and(TRADE_AREA_SALES_CD.STDR_YYQU_CD.eq(latestYyqu)) // 최신 분기만 필터링
                 .where(
                         TRADE_AREA_REGION.SIGNGU_CD_NM.eq(gu)
                                 .and(TRADE_AREA_REGION.ADSTRD_CD_NM.eq(dong))
@@ -143,7 +154,8 @@ public class TradeAreaRegionRepository {
                         rec.get(TRADE_AREA_REGION.YDNTS_VALUE),
                         rec.get(TRADE_AREA_REGION.RELM_AR),
                         toInteger(rec.get(TRADE_AREA_STOR_CD.STOR_CO)),
-                        toInteger(rec.get(TRADE_AREA_STOR_CD.SIMILR_INDUTY_STOR_CO))
+                        toInteger(rec.get(TRADE_AREA_STOR_CD.SIMILR_INDUTY_STOR_CO)),
+                        toLong(rec.get(TRADE_AREA_SALES_CD.THSMON_SELNG_AMT))
                 ));
         
         /*
@@ -162,6 +174,10 @@ public class TradeAreaRegionRepository {
         ON trade_area_stor_cd (
         trdar_cd, svc_induty_cd_nm, stdr_yyqu_cd,
         stor_co, similr_induty_stor_co);
+
+        -- 최신분기 + 업종별 조회
+        CREATE INDEX ix_sales_trdar_svc_qu_cover
+        ON trade_area_sales_cd (trdar_cd, svc_induty_cd_nm, stdr_yyqu_cd, thsmon_selng_amt);
          */
 
         return TradeAreasResponseDto.builder()
@@ -193,5 +209,12 @@ public class TradeAreaRegionRepository {
                 .trdarCd(record.value1())
                 .trdarCdNm(record.value2())
                 .build();
+    }
+    
+    // 상권코드 목록 조회
+    public List<Integer> findAllTrdarCd() {
+        return dsl.select(TRADE_AREA_REGION.TRDAR_CD)
+                .from(TRADE_AREA_REGION)
+                .fetchInto(Integer.class);
     }
 }

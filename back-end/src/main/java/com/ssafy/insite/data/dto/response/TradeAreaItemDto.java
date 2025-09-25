@@ -18,4 +18,5 @@ public class TradeAreaItemDto {
     private BigDecimal relmAr;      // 영역_면적
     private int storCo;             // 점포_수
     private int similrIndutyStorCo; // 유사_업종_점포_수
+    private long thsmonSelngAmt;     // 당월_매출_금액
 }

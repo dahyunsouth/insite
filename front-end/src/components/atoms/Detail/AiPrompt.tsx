@@ -170,7 +170,7 @@ export default function AiPrompt({ areaName, trdarCode, ranking }: AiPromptProps
           </p>
           
           <div className="space-y-2 flex-1">
-            <h5 className="text-sm font-medium text-gray-600 mb-2">주요 특징:</h5>
+            <h5 className="text-sm font-medium text-gray-600 mb-2">📋 주요 특징:</h5>
             <ul className="space-y-1">
               {aiData.isLoading ? (
                 <li className="flex items-center gap-2 text-sm text-gray-500">
