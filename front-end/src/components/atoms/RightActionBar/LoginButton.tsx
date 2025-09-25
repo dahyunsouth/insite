@@ -9,6 +9,7 @@ interface LoginButtonProps {
   onLogoutSuccess?: () => void;  // 로그아웃 성공 콜백
   onUserModalOpen?: () => void;  // 사용자 모달 열기 콜백
   onProfileClick?: () => void;   // 프로필 클릭 콜백
+  onSavedAreasClick?: () => void;  // 저장된 상권 클릭 콜백
   className?: string;
   isLoggedIn?: boolean;
 }
@@ -18,6 +19,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({
   onLogoutSuccess,
   onUserModalOpen,
   onProfileClick,
+  onSavedAreasClick,
   className = '',
   isLoggedIn = false
 }) => {
@@ -111,6 +113,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({
   const handleFavoritesClick = () => {
     console.log('상권 보관함 클릭');
     setIsUserModalOpen(false);
+    onSavedAreasClick?.(); // 저장된 상권 사이드바 열기
   };
 
   // 버튼 클릭 핸들러

@@ -32,7 +32,8 @@ function MapTypeHandler({
   isCafeActive,
   onCafeToggle,
   onCompareClick,
-  onMyPageClick
+  onMyPageClick,
+  onSavedAreasClick
 }: { 
   isLoggedIn: boolean;
   onLogoutSuccess: () => void;
@@ -44,6 +45,7 @@ function MapTypeHandler({
   onCafeToggle: (categoryId: string) => void;
   onCompareClick: () => void;
   onMyPageClick: () => void;
+  onSavedAreasClick: () => void;
 }) {
   const mapContext = useKakaoMapContext();
   
@@ -60,6 +62,7 @@ function MapTypeHandler({
         onLoginSuccess={onLoginSuccess}
         onCompareClick={onCompareClick}
         onProfileClick={onMyPageClick}
+        onSavedAreasClick={onSavedAreasClick}
       />
       
       {/* 우측 하단: 지도 컨트롤 버튼들 */}
@@ -602,6 +605,7 @@ export default function HomePage() {
           onCafeToggle={handleCafeToggle}
           onCompareClick={handleCompareTabClick}
           onMyPageClick={handleMyPageClick}
+          onSavedAreasClick={handleSavedAreasClick}
         />
 
         {/* 로드뷰 컴포넌트 - KakaoMap 내부에 배치하되 DOM 안정성 유지 */}
@@ -727,7 +731,7 @@ export default function HomePage() {
       </div>
 
       {/* 새로운 상권 비교 모달 테스트 버튼 */}
-      <div className="fixed top-4 right-4 z-[500]">
+      <div className="fixed top-20 right-4 z-[500]">
         <button
           onClick={() => setIsNewCompareModalOpen(true)}
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"

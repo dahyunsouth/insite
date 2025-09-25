@@ -13,6 +13,7 @@ interface LoginBarProps {
   onLogoutSuccess?: () => void;       // 로그아웃 성공 콜백
   onCompareClick?: () => void;        // 상권비교 모달 열기 콜백
   onProfileClick?: () => void;        // 프로필 클릭 콜백
+  onSavedAreasClick?: () => void;     // 저장된 상권 클릭 콜백
   isLoggedIn?: boolean;               // 로그인 상태
 }
 
@@ -22,6 +23,7 @@ const LoginBar: React.FC<LoginBarProps> = ({
   onLogoutSuccess,
   onCompareClick,
   onProfileClick,
+  onSavedAreasClick,
   isLoggedIn = false,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -88,6 +90,7 @@ const LoginBar: React.FC<LoginBarProps> = ({
         onLogoutSuccess={handleLogoutSuccess}
         onUserModalOpen={handleUserModalOpen}
         onProfileClick={onProfileClick}
+        onSavedAreasClick={onSavedAreasClick}
         isLoggedIn={isLoggedIn}
       />
 
