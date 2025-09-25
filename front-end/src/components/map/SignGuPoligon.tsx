@@ -4,6 +4,7 @@ import { useEffect, useCallback, useRef } from 'react';
 import { useKakaoMapContext } from './KakaoMap';
 import signGuData from '../../data/SignGuValue.json';
 import signGuPolygonData from '../../data/SignGuPoligon.json';
+import seoulPolygonData from '../../data/SeoulPoligon.json';
 import { tmToWgs84 } from '../../utils/coordinateTransform';
 import { 
   useMarketMode, 
@@ -41,6 +42,7 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
   const isShowingRef = useRef<boolean>(false);
   const polygonMapRef = useRef<Map<string, {polygon: KakaoPolygon, centerLat: number, centerLng: number, guName: string}>>(new Map());
   const globalEventListenerRef = useRef<((e: Event) => void) | null>(null);
+  const backgroundOverlayRef = useRef<KakaoOverlay | null>(null);
   
   // 상권 모드 훅 사용
   const { guCountData, isLoadingData, loadGuCountData } = useMarketMode();
@@ -156,7 +158,66 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
     signGuPolygonsRef.current = [];
     signGuLabelsRef.current = [];
     eventListenersRef.current = [];
+
+    // 배경 오버레이 제거
+    if (backgroundOverlayRef.current) {
+      backgroundOverlayRef.current.setMap(null);
+      backgroundOverlayRef.current = null;
+    }
   }, []);
+
+  // 서울시 외부 영역 도넛 오버레이 표시
+  const showBackgroundOverlay = useCallback(() => {
+    if (!map || backgroundOverlayRef.current) return;
+
+    const bounds = map.getBounds();
+    const sw = bounds.getSouthWest();
+    const ne = bounds.getNorthEast();
+
+    const extendedSw = new (window.kakao.maps as any).LatLng(sw.getLat() - 1.0, sw.getLng() - 1.0);
+    const extendedNe = new (window.kakao.maps as any).LatLng(ne.getLat() + 1.0, ne.getLng() + 1.0);
+
+    const seoulBoundaryCoords: any[] = [];
+    const seoulData = seoulPolygonData as any;
+    if (seoulData && seoulData.geometries && seoulData.geometries.length > 0) {
+      const firstGeometry = seoulData.geometries[0];
+      if (firstGeometry.type === 'Polygon' && firstGeometry.coordinates && firstGeometry.coordinates[0]) {
+        const coords = firstGeometry.coordinates[0];
+        coords.forEach((coord: number[]) => {
+          const { lat, lng } = tmToWgs84(coord[0], coord[1]);
+          seoulBoundaryCoords.push(new (window.kakao.maps as any).LatLng(lat, lng));
+        });
+      }
+    }
+
+    if (seoulBoundaryCoords.length === 0) return;
+
+    const outerPath = [
+      extendedSw,
+      new (window.kakao.maps as any).LatLng(extendedSw.getLat(), extendedNe.getLng()),
+      extendedNe,
+      new (window.kakao.maps as any).LatLng(extendedNe.getLat(), extendedSw.getLng()),
+      extendedSw
+    ];
+
+    const donutPaths = [
+      outerPath,
+      seoulBoundaryCoords.slice().reverse()
+    ];
+
+    const backgroundPolygon = new (window.kakao.maps as any).Polygon({
+      path: donutPaths,
+      strokeWeight: 1,
+      strokeColor: '#3288FF',
+      fillColor: '#000000',
+      fillOpacity: 0.1,
+      clickable: false,
+      zIndex: -1
+    });
+
+    backgroundPolygon.setMap(map);
+    backgroundOverlayRef.current = backgroundPolygon as KakaoOverlay;
+  }, [map]);
 
   // 구별 폴리곤과 라벨 표시 함수 (레벨 7~8)
   const showSignGuPolygons = useCallback(() => {
@@ -180,6 +241,9 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
     setupGlobalEventDelegation();
     
     isShowingRef.current = true;
+
+    // 서울 외부 영역을 회색 처리하는 도넛 오버레이 표시
+    showBackgroundOverlay();
 
     const polygons: KakaoPolygon[] = [];
     const labels: KakaoOverlay[] = [];

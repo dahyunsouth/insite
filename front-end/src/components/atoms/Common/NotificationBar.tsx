@@ -20,13 +20,10 @@ const NotificationBar: React.FC<NotificationBarProps> = ({
   useEffect(() => {
     if (isVisible) {
       setShouldRender(true);
-      
-      // 지정된 시간 후 자동으로 숨기기
       const timer = setTimeout(() => {
         setShouldRender(false);
         onClose?.();
       }, duration);
-
       return () => clearTimeout(timer);
     } else {
       setShouldRender(false);
@@ -36,7 +33,7 @@ const NotificationBar: React.FC<NotificationBarProps> = ({
   if (!shouldRender) return null;
 
   return (
-    <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50">
+    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
       <div className="
         bg-black/70
         text-white
@@ -53,3 +50,5 @@ const NotificationBar: React.FC<NotificationBarProps> = ({
 };
 
 export default NotificationBar;
+
+

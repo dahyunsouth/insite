@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ToolTip from "./ToolTip";
 
 type Props = {
@@ -13,6 +13,10 @@ type Props = {
 export default function FloatingPopulationWeekChart({ labels, values, maxIndex = null, className }: Props) {
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [progress, setProgress] = useState(0);
+  const rafRef = useRef<number | null>(null);
+  const startRef = useRef<number | null>(null);
+  const DURATION_MS = 800;
   const W = 560;
   const H = 260;
   const m = { top: 32, right: 12, bottom: 20, left: 60 };
@@ -27,17 +31,29 @@ export default function FloatingPopulationWeekChart({ labels, values, maxIndex =
   const band = cw / (n * 1.4);
   const gap = band * 0.4;
 
-  // Dynamic colors: highest -> blue, lowest -> red, others -> gray
+  // Dynamic colors: max -> blue, min -> red, ranks 2~6 -> progressively lighter grays
   const BLUE = "#3288FF";
   const RED = "#ef4444";
-  const GRAY = "#9CA3AF";
+  const GRAY = "#9CA3AF"; // fallback
+  const GRAY_2 = "#AEB4BF"; // rank 2 (lighter than before)
+  const GRAY_3 = "#C3CAD4"; // rank 3
+  const GRAY_4 = "#D7DCE3"; // rank 4
+  const GRAY_5 = "#E6E9EE"; // rank 5
+  const GRAY_6 = "#ECEFF2"; // rank 6 (slightly darker than before, still lightest)
   
   const maxValue = Math.max(...values);
   const minValue = Math.min(...values);
   
-  const colorByIndex: string[] = values.map((v) => {
+  const sortedIndices = [...Array(n).keys()].sort((a, b) => values[b] - values[a]);
+  const rankByIndex: number[] = Array(n).fill(0);
+  sortedIndices.forEach((idx, i) => { rankByIndex[idx] = i + 1; });
+  const rankToGray: Record<number, string> = { 2: GRAY_2, 3: GRAY_3, 4: GRAY_4, 5: GRAY_5, 6: GRAY_6 };
+  
+  const colorByIndex: string[] = values.map((v, i) => {
     if (v === maxValue) return BLUE;
     if (v === minValue) return RED;
+    const rank = rankByIndex[i];
+    if (rank >= 2 && rank <= 6) return rankToGray[rank];
     return GRAY;
   });
 
@@ -50,6 +66,24 @@ export default function FloatingPopulationWeekChart({ labels, values, maxIndex =
     minValue + (2 * (maxValue - minValue)) / 3,
     maxValue
   ];
+
+  useEffect(() => {
+    startRef.current = null;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    setProgress(0);
+    const step = (t: number) => {
+      if (startRef.current === null) startRef.current = t;
+      const elapsed = t - startRef.current;
+      const p = Math.min(1, elapsed / DURATION_MS);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setProgress(eased);
+      if (p < 1) rafRef.current = requestAnimationFrame(step);
+    };
+    rafRef.current = requestAnimationFrame(step);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [values.join(",")]);
 
   return (
     <div className={(className ? `flex justify-center ${className}` : "flex justify-center")}>
@@ -94,9 +128,9 @@ export default function FloatingPopulationWeekChart({ labels, values, maxIndex =
             const segmentRatio = (v - (minValue + (2 * (maxValue - minValue)) / 3)) / ((maxValue - minValue) / 3);
             ratio = 0.75 + segmentRatio * 0.25;
           }
-          
-          const barY = m.top + ch - ratio * ch;
-          const barHeight = ratio * ch;
+          const animatedRatio = ratio * progress;
+          const barY = m.top + ch - animatedRatio * ch;
+          const barHeight = animatedRatio * ch;
           
           const isMaxValue = v === maxValue;
           const isMinValue = v === minValue;
@@ -158,15 +192,19 @@ export default function FloatingPopulationWeekChart({ labels, values, maxIndex =
         {labels.map((lb, i) => {
           const x = m.left + i * (band + gap) + band / 2;
           const y = H - m.bottom + 16;
+          const valueAtIndex = values[i];
+          const isMax = valueAtIndex === maxValue;
+          const isMin = valueAtIndex === minValue;
+          const labelColor = isMax ? BLUE : (isMin ? RED : "#6B7280");
           return (
-            <text key={lb} x={x} y={y} textAnchor="middle" fontSize={11} fill="#6B7280">
+            <text key={lb} x={x} y={y} textAnchor="middle" fontSize={11} fill={labelColor} fontWeight={(isMax || isMin) ? "bold" : "normal"}>
               {lb}
             </text>
           );
         })}
 
         {/* max marker */}
-        {maxIndex != null && maxIndex >= 0 && (
+        {maxIndex != null && maxIndex >= 0 && progress >= 0.999 && (
           <g>
             {(() => {
               const x = m.left + maxIndex * (band + gap) + band / 2;

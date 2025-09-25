@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { RecommendationItem } from '@/types/recommendation';
 
 interface MarketRecommendationResultRankProps {
@@ -8,19 +8,14 @@ interface MarketRecommendationResultRankProps {
   onItemClick?: (item: RecommendationItem) => void;
 }
 
-const RankCard: React.FC<RecommendationItem & { onClick?: () => void }> = ({ ranking, areaName, totalScore, onClick }) => {
-  const getRankGradient = (ranking: number) => {
-    switch (ranking) {
-      case 1:
-        return 'bg-gradient-to-r from-orange-600 to-orange-300 text-white';
-      case 2:
-        return 'bg-gradient-to-r from-blue-600 to-blue-300 text-white';
-      case 3:
-        return 'bg-gradient-to-r from-green-600 to-green-300 text-white';
-      default:
-        return 'bg-gradient-to-r from-gray-600 to-gray-300 text-white';
-    }
-  };
+const RankCard: React.FC<RecommendationItem & { onClick?: () => void; isActive?: boolean }> = ({ ranking, areaName, totalScore, onClick, isActive = false }) => {
+  // 기본(비호버) 스타일
+  const baseGradient = 'bg-gradient-to-r from-gray-200 to-gray-50';
+  // 호버/클릭 시
+  const hoverActiveGradient = 'hover:from-blue-500 hover:to-blue-200 active:from-blue-500 active:to-blue-200';
+  const baseBorder = 'border border-transparent';
+  const hoverActiveBorder = 'hover:border-blue-500 active:border-blue-500';
+  const textHoverActive = 'hover:text-white active:text-white';
 
   const formatScore = (value: number | null | undefined): string => {
     if (value === null || value === undefined) {
@@ -38,25 +33,30 @@ const RankCard: React.FC<RecommendationItem & { onClick?: () => void }> = ({ ran
     onClick?.();
   };
 
+  const baseClasses = 'p-4 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] bg-gradient-to-r border';
+  const inactiveClasses = `${baseClasses} from-gray-200 to-gray-50 border-transparent hover:from-blue-500 hover:to-blue-200 hover:border-blue-500 hover:text-white`;
+  const activeClasses = `${baseClasses} from-blue-500 to-blue-200 border-blue-500 text-white`;
+
   return (
     <div 
-      className={`p-4 rounded-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] ${getRankGradient(ranking)}`}
+      className={isActive ? activeClasses : inactiveClasses}
       onClick={handleClick}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center space-x-4 justify-between">
         {/* 왼쪽: 큰 순위 번호 */}
         <div className="flex items-center">
-          <span className="text-3xl font-bold">{ranking}</span>
+          <span className="text-2xl">{ranking}</span>
         </div>
         
         {/* 중앙: 상권명 */}
-        <div className="flex-1 text-center">
-          <div className="text-base font-semibold truncate">{areaName}</div>
+        <div className="flex-1 text-left">
+          <div className="text-base font-semibold">{areaName}</div>
         </div>
         
         {/* 오른쪽: 점수 */}
-        <div className="text-right">
-          <div className="text-xl font-bold">{formatScore(totalScore)}/100</div>
+        <div className="text-right font-normal">
+          <span className="text-xl font-bold">{formatScore(totalScore)}</span>
+          <span className="text-md">/100</span>
         </div>
       </div>
     </div>
@@ -67,6 +67,7 @@ const MarketRecommendationResultRank: React.FC<MarketRecommendationResultRankPro
   results = [],
   onItemClick
 }) => {
+  const [activeRank, setActiveRank] = useState<number | null>(null);
   // 결과가 없으면 빈 상태 표시
   if (!results || results.length === 0) {
     return (
@@ -96,8 +97,9 @@ const MarketRecommendationResultRank: React.FC<MarketRecommendationResultRankPro
           <RankCard
             key={result.ranking}
             {...result}
+            isActive={activeRank === result.ranking}
             onClick={() => {
-              console.log('RankCard onClick triggered:', result);
+              setActiveRank(result.ranking);
               onItemClick?.(result);
             }}
           />

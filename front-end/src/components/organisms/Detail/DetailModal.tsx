@@ -55,7 +55,6 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
   const [selected, setSelected] = useState<{ code: string; name: string } | null>(null);
   const [populationType, setPopulationType] = useState<"유동" | "직장" | "상주">("유동");
   const [isSaved, setIsSaved] = useState(false);
-  const [isComparing, setIsComparing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -81,7 +80,7 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
 
   const computedTitle = useMemo(() => {
     if (selected?.name) {
-      const suffix = " 상권 분석";
+      const suffix = "";
       return `${selected.name}${suffix}`;
     }
     return title;
@@ -93,13 +92,9 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
     console.log("[DetailModal] selection changed:", selected, "computedTitle:", computedTitle);
   }, [selected, computedTitle]);
 
-  // 비교함 상태에 따라 isComparing 동기화
-  useEffect(() => {
-    const currentCode = trdarCode ?? selected?.code ?? null;
-    if (currentCode && isInComparison) {
-      setIsComparing(isInComparison(currentCode));
-    }
-  }, [trdarCode, selected, isInComparison]);
+  // 현재 코드 기준 비교함 포함 여부를 렌더 시 계산
+  const currentCodeForCompare = trdarCode ?? selected?.code ?? null;
+  const isComparingComputed = currentCodeForCompare && isInComparison ? isInComparison(currentCodeForCompare) : false;
 
   // 저장 상태 동기화
   useEffect(() => {
@@ -125,12 +120,10 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
     if (isCurrentlyInComparison) {
       // 비교함에서 제거
       onRemoveFromComparison?.(currentCode);
-      setIsComparing(false);
       console.log("비교함에서 제거:", currentCode);
     } else {
       // 비교함에 추가
       onAddToComparison?.(currentCode, currentTrdarCdNm);
-      setIsComparing(true);
       console.log("비교함에 추가:", currentCode, currentTrdarCdNm);
     }
   };
@@ -195,10 +188,10 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
 
   return createPortal(
     <div className={`fixed top-0 right-0 h-full z-30 flex items-start justify-end ${
-      isNavbarOpen ? 'w-[calc(75vw-1rem)]' : 'w-[calc(100vw-1rem)]'
+      isNavbarOpen ? 'w-[75vw]' : 'w-[100vw]'
     }`}>
       {/* modal */}
-      <div className="relative z-10 w-full h-[calc(100vh-1rem)] mt-2 mr-2" onClick={(e) => e.stopPropagation()}>
+      <div className="relative z-10 w-full h-full" onClick={(e) => e.stopPropagation()}>
         <DetailNavbarTemplate
           title={computedTitle}
           subtitle={subtitle}
@@ -223,7 +216,7 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
               onCompare={handleCompare}
               onSave={handleSave}
               isSaved={isSaved}
-              isComparing={isComparing}
+              isComparing={isComparingComputed}
               isLoading={isLoading}
               trdarCode={trdarCode ?? selected?.code ?? null}
               title={title || selected?.name}

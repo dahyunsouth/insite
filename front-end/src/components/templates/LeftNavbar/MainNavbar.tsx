@@ -34,12 +34,16 @@ interface MainNavbarProps {
   onDetailModalClose?: () => void;
   // 네비게이션 바 상태 전달
   onNavbarStateChange?: (isOpen: boolean) => void;
+  // 비교 모달 열림 여부(열림 시 z-index 상향)
+  isCompareOpen?: boolean;
+  // 브랜드 로고 클릭 시 동작
+  onBrandClick?: () => void;
 }
 
 const MainNavbar: React.FC<MainNavbarProps> = ({ 
-  onMyPageClick, 
+  // onMyPageClick, 
   onLoginModalOpen, 
-  onSavedAreasClick, 
+  // onSavedAreasClick, 
   onCompareClick, 
   // onMarketingAreaChange, 
   // showMarketingArea,
@@ -60,9 +64,11 @@ const MainNavbar: React.FC<MainNavbarProps> = ({
   onTradeAreaSelect,
   selectedTradeArea,
   // DetailModal 관련 props
-  onDetailModalClose,
+  onDetailModalClose, 
   // 네비게이션 바 상태 전달
-  onNavbarStateChange
+  onNavbarStateChange,
+  isCompareOpen,
+  onBrandClick
 }) => {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -73,22 +79,24 @@ const MainNavbar: React.FC<MainNavbarProps> = ({
   };
 
   return (
-    <div className="relative h-full z-[90]">
+    <div className={`relative h-full ${isCompareOpen ? 'z-[500]' : 'z-[300]'}`}>
       {/* 네비게이션 바 */}
       <nav 
         className={`
-          shadow-lg py-2 pl-2 space-y-1 h-full flex flex-col
+          shadow-lg h-full flex flex-col
           transition-all duration-300 ease-in-out
           ${isOpen ? 'translate-x-0 w-auto' : '-translate-x-full w-0'}
           overflow-hidden
         `}
       >
         <div className="flex-shrink-0">
-          <FirstLeftNavbar onSearchResultsShow={onSearchResultsShow} resetTrigger={resetTrigger} />
+          <FirstLeftNavbar onSearchResultsShow={onSearchResultsShow} resetTrigger={resetTrigger} onBrandClick={onBrandClick} />
+        </div>
+        <div className="flex-shrink-0">  
           <SecondLeftNavbar
-            onMyPageClick={onMyPageClick}
+            // onMyPageClick={onMyPageClick}
             onLoginModalOpen={onLoginModalOpen}
-            onSavedAreasClick={onSavedAreasClick}
+            // onSavedAreasClick={onSavedAreasClick}
             onCompareClick={onCompareClick}
             onDetailModalClose={onDetailModalClose}
           />
@@ -99,7 +107,7 @@ const MainNavbar: React.FC<MainNavbarProps> = ({
             showMarketingArea={showMarketingArea}
           /> */}
         {/* </div> */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 border-b border-gray-300">
           <FourthLeftNavbar onAddressClick={onAddressClick} onAddressChange={onAddressChange} />
         </div>
         <div className="flex-1 min-h-0">
@@ -121,7 +129,7 @@ const MainNavbar: React.FC<MainNavbarProps> = ({
       {/* 토글 버튼 - 슬라이딩 애니메이션과 함께 */}
       <div 
         className={`
-          absolute top-1/2 -translate-y-1/2 z-[100]
+          absolute top-1/2 -translate-y-1/2 z-[310]
           transition-all duration-300 ease-in-out
           ${isOpen ? 'left-full' : 'left-0'}
         `}

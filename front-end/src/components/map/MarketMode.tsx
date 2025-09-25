@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { getColorByCount, addOpacityToColor, darkenColor } from '../../utils/marketingAreaColors';
+import { getColorByCount } from '../../utils/marketingAreaColors';
 import { API_ENDPOINTS } from '../../config/api';
 import signGuData from '../../data/SignGuValue.json';
 
@@ -99,7 +99,7 @@ export function useDongMarketMode(): DongMarketModeConfig {
 
   // 행정동명 정규화 (API에서 인식할 수 있는 형태로 변환)
   const normalizeDongName = useCallback((dongName: string): string => {
-    let normalized = dongName;
+    let normalized = dongName.trim();
     
     // 일반적인 변환 시도들
     // 1. 숫자를 한글로 변환 (예: "일원2동" -> "일원이동")
@@ -131,6 +131,13 @@ export function useDongMarketMode(): DongMarketModeConfig {
       normalized = specialCases[dongName];
       console.log(`🔄 행정동명 정규화 (특수케이스): "${dongName}" -> "${normalized}"`);
     }
+
+    // 면목 3·8동 표기 변환: 제, 점/가운뎃점/물음표 등 다양한 표기를 DB 표기 '면목3?8동'으로 통일
+    const noSpace = normalized.replace(/\s+/g, '');
+    if (/^면목(제)?3[\.·ㆍ\?]8동$/.test(noSpace)) {
+      normalized = '면목3?8동';
+      console.log(`🔄 행정동명 정규화 (면목3·8동): "${dongName}" -> "${normalized}"`);
+    }
     
     return normalized;
   }, []);
@@ -147,6 +154,7 @@ export function useDongMarketMode(): DongMarketModeConfig {
     // 행정동명 정규화
     const normalizedDongName = normalizeDongName(dongName);
     
+    setIsLoadingDongData(true);
     try {
       const url = `${API_ENDPOINTS.COUNT_BY_DONG}?district=${encodeURIComponent(guName)}&dong=${encodeURIComponent(normalizedDongName)}`;
       console.log(`🌐 행정동 API 호출: ${url}`);
@@ -209,6 +217,8 @@ export function useDongMarketMode(): DongMarketModeConfig {
     } catch (error) {
       console.error(`💥 행정동 API 에러: ${guName} ${dongName}`, error);
       return 0;
+    } finally {
+      setIsLoadingDongData(false);
     }
   }, [dongCountData, normalizeDongName]);
 
@@ -242,9 +252,8 @@ export function applyMarketModePolygonStyle(
 
 // 상권 모드 라벨 스타일 생성
 export function createMarketModeLabelStyle(
-  guName: string,
-  guCountData: GuCountData,
-  fontSize: number = 14
+  _guName: string,
+  _guCountData: GuCountData
 ): {
   labelBackgroundColor: string;
   labelBorderColor: string;
@@ -252,18 +261,13 @@ export function createMarketModeLabelStyle(
   textColor: string;
   textShadow: string;
 } {
-  const count = guCountData[guName] || 0;
-  const baseColor = getColorByCount(count);
-  const labelBackgroundColor = addOpacityToColor(baseColor, 0.9);
-  const labelBorderColor = addOpacityToColor(baseColor, 0.8);
-  const hoverBackgroundColor = darkenColor(baseColor, 0.2);
-  
+  // 고정 색상 정책: 기본 파란 배경, 호버 흰 배경
   return {
-    labelBackgroundColor,
-    labelBorderColor,
-    hoverBackgroundColor,
+    labelBackgroundColor: '#3288FF',
+    labelBorderColor: '#3288FF',
+    hoverBackgroundColor: '#FFFFFF',
     textColor: '#ffffff',
-    textShadow: '1px 1px 2px rgba(0,0,0,0.7)'
+    textShadow: 'none'
   };
 }
 
@@ -276,7 +280,7 @@ export function createMarketModeLabelContent(
   showCount: boolean = false
 ): string {
   const count = guCountData[guName] || 0;
-  const styles = createMarketModeLabelStyle(guName, guCountData, fontSize);
+  const styles = createMarketModeLabelStyle(guName, guCountData);
   
   const mainText = guName;
   const countText = showCount ? `<div style="font-size: ${fontSize - 2}px; margin-top: 2px; opacity: 0.9;">${count}개</div>` : '';
@@ -296,8 +300,9 @@ export function createMarketModeLabelContent(
     border: 2px solid ${styles.labelBorderColor};
     transition: all 0.2s ease;
     line-height: 1.2;
-  " onmouseover="this.style.backgroundColor='${styles.hoverBackgroundColor}'; this.style.borderColor='${styles.hoverBackgroundColor}'; this.style.color='#ffffff'; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1.1)'" 
+  " onmouseover="this.style.backgroundColor='${styles.hoverBackgroundColor}'; this.style.borderColor='${styles.labelBorderColor}'; this.style.color='#000000'; this.style.textShadow='none'; this.style.transform='scale(1.1)'" 
      onmouseout="this.style.backgroundColor='${styles.labelBackgroundColor}'; this.style.borderColor='${styles.labelBorderColor}'; this.style.color='${styles.textColor}'; this.style.textShadow='${styles.textShadow}'; this.style.transform='scale(1)'"
+     onclick="this.style.backgroundColor='${styles.hoverBackgroundColor}'; this.style.borderColor='${styles.labelBorderColor}'; this.style.color='#000000'; this.style.textShadow='none'; this.style.transform='scale(1.1)'"
   >${mainText}${countText}</div>`;
 }
 
@@ -405,10 +410,13 @@ export function createDongMarketModeLabelContent(
   fontSize: number = 10,
   showCount: boolean = false
 ): string {
-  const baseColor = getColorByCount(count);
-  const labelBackgroundColor = addOpacityToColor(baseColor, 0.9);
-  const labelBorderColor = addOpacityToColor(baseColor, 0.8);
-  const hoverBackgroundColor = darkenColor(baseColor, 0.2);
+  // 행정동 라벨은 고정 색상 정책 적용
+  const defaultBackgroundColor = '#3288FF';
+  const defaultBorderColor = '#3288FF';
+  const defaultTextColor = '#ffffff';
+  const hoverBackgroundColor = '#ffffff';
+  const hoverBorderColor = '#3288FF';
+  const hoverTextColor = '#000000';
   
   const mainText = dongName;
   const countText = showCount ? `<div style="font-size: ${fontSize - 1}px; margin-top: 1px; opacity: 0.9;">${count}개</div>` : '';
@@ -417,21 +425,21 @@ export function createDongMarketModeLabelContent(
     padding: 4px 8px;
     font-size: ${fontSize}px;
     font-weight: bold;
-    color: #ffffff;
+    color: ${defaultTextColor};
     text-align: center;
     white-space: nowrap;
     pointer-events: auto;
     cursor: pointer;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-    background-color: ${labelBackgroundColor};
+    background-color: ${defaultBackgroundColor};
     border-radius: 5px;
-    border: 1px solid ${labelBorderColor};
+    border: 1px solid ${defaultBorderColor};
     transition: all 0.2s ease;
     line-height: 1.2;
-    z-index: 1000;
-  " onmouseover="this.style.backgroundColor='${hoverBackgroundColor}'; this.style.borderColor='${hoverBackgroundColor}'; this.style.color='#ffffff'; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1.1)'" 
-     onmouseout="this.style.backgroundColor='${labelBackgroundColor}'; this.style.borderColor='${labelBorderColor}'; this.style.color='#ffffff'; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1)'"
-     onclick="console.log('🖱️ 행정동 상권모드 직접 클릭:', '${dongName}');"
+    z-index: 120;
+  " onmouseover="this.style.backgroundColor='${hoverBackgroundColor}'; this.style.borderColor='${hoverBorderColor}'; this.style.color='${hoverTextColor}'; this.style.textShadow='none'; this.style.transform='scale(1.1)'" 
+     onmouseout="this.style.backgroundColor='${defaultBackgroundColor}'; this.style.borderColor='${defaultBorderColor}'; this.style.color='${defaultTextColor}'; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1)'"
+     onclick="this.style.backgroundColor='${hoverBackgroundColor}'; this.style.borderColor='${hoverBorderColor}'; this.style.color='${hoverTextColor}'; this.style.textShadow='none'; this.style.transform='scale(1.1)'"
   >${mainText}${countText}</div>`;
 }
 

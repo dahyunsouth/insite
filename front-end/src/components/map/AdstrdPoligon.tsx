@@ -331,7 +331,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
     const eventCleanups: (() => void)[] = [];
     
     // 레벨 6일 때 글자 크기 설정
-    const fontSize = 10; // 행정동은 더 작게
+    const fontSize = 14; // 행정동은 더 작게
 
     // 폴리곤 데이터 처리 - GeometryCollection 형태의 데이터
     const geometryCollection = adstrdAreaData as any;
@@ -534,7 +534,10 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
               const currentLabelId = `adstrd-label-${index}`;
               const labelElement = document.getElementById(currentLabelId);
               if (labelElement) {
-                labelElement.outerHTML = createDongMarketModeLabelContent(dongName, loadedCount, currentLabelId, 10, true);
+                labelElement.outerHTML = createDongMarketModeLabelContent(dongName, loadedCount, currentLabelId, 14, true);
+              }
+              if (labelElement) {
+                labelElement.outerHTML = createDongMarketModeLabelContent(dongName, loadedCount, currentLabelId, 14, true);
               }
               
               // 로딩 완료 체크
@@ -555,7 +558,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
           const currentLabelId = `adstrd-label-${index}`;
           const labelElement = document.getElementById(currentLabelId);
           if (labelElement) {
-            labelElement.outerHTML = createDongMarketModeLabelContent(dongName, count, currentLabelId, 10, true);
+            labelElement.outerHTML = createDongMarketModeLabelContent(dongName, count, currentLabelId, 14, true);
           }
         }
       });

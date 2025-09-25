@@ -145,7 +145,8 @@ export default function AiPrompt({ areaName, trdarCode, ranking }: AiPromptProps
 
   return (
     <div className="w-full h-full">
-      <div className={`bg-gradient-to-r ${style.gradient} rounded-lg p-6 border ${style.border} h-full flex flex-col`}>
+      <div className={`bg-gradient-to-r ${style.gradient} rounded-lg p-6 border ${style.border} h-full flex flex-col relative overflow-hidden`}>
+        
         <div className="flex items-center mb-4">
           <div className={`w-8 h-8 ${style.iconBg} rounded-full flex items-center justify-center mr-3`}>
             <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -155,44 +156,61 @@ export default function AiPrompt({ areaName, trdarCode, ranking }: AiPromptProps
           <h4 className="text-lg font-semibold text-gray-800">{displayData.title}</h4>
         </div>
         
-        <div className="flex-1 flex flex-col">
-          <p className="text-gray-700 mb-4 leading-relaxed">
+        {/* 메인 콘텐츠 - 따옴표와 함께 */}
+        <div className="flex-1 flex flex-col relative">
+          {/* 왼쪽 따옴표 */}
+          <div className="absolute top-0 left-0 text-4xl font-bold text-orange-300 opacity-70">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" transform="rotate(180)">
+              <path d="M6 17h3l2-4V7H5v6h3l-2 4zm8 0h3l2-4V7h-6v6h3l-2 4z"/>
+            </svg>
+          </div>
+          
+          {/* 오른쪽 따옴표 */}
+          <div className="absolute bottom-0 right-0 text-4xl font-bold text-orange-300 opacity-70">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6 17h3l2-4V7H5v6h3l-2 4zm8 0h3l2-4V7h-6v6h3l-2 4z"/>
+            </svg>
+          </div>
+          
+          {/* 텍스트 내용 */}
+          <div className="px-10 py-4 flex-1 flex flex-col">
             {aiData.isLoading ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-gray-700 mb-4 leading-relaxed">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
                 <span>AI 분석 중...</span>
               </div>
             ) : aiData.error ? (
-              <span className="text-red-500">AI 분석 정보를 불러올 수 없습니다.</span>
+              <p className="text-red-500 mb-4 leading-relaxed">AI 분석 정보를 불러올 수 없습니다.</p>
             ) : (
-              displayData.content
+              <p className="text-gray-700 mb-4 leading-relaxed text-justify">{displayData.content}</p>
             )}
-          </p>
-          
-          <div className="space-y-2 flex-1">
-            <h5 className="text-sm font-medium text-gray-600 mb-2">📋 주요 특징:</h5>
-            <ul className="space-y-1">
-              {aiData.isLoading ? (
-                <li className="flex items-center gap-2 text-sm text-gray-500">
-                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600"></div>
-                  <span>특징 분석 중...</span>
-                </li>
-              ) : aiData.error ? (
-                <li className="text-sm text-red-500">특징 정보를 불러올 수 없습니다.</li>
-              ) : (
-                displayData.highlights.map((highlight, index) => (
-                  <li key={index} className="flex items-start text-sm text-gray-600">
-                    <span className={`w-1.5 h-1.5 ${style.dotColor} rounded-full mt-2 mr-2 flex-shrink-0`}></span>
-                    {highlight}
+            
+            <div className="space-y-2 flex-1">
+              <h5 className="text-sm font-bold text-gray-600 mb-2">📋 주요 특징:</h5>
+              <ul className="space-y-1">
+                {aiData.isLoading ? (
+                  <li className="flex items-center gap-2 text-sm text-gray-500">
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600"></div>
+                    <span>특징 분석 중...</span>
                   </li>
-                ))
-              )}
-            </ul>
+                ) : aiData.error ? (
+                  <li className="text-sm text-red-500">특징 정보를 불러올 수 없습니다.</li>
+                ) : (
+                  displayData.highlights.map((highlight, index) => (
+                    <li key={index} className="flex items-start text-sm text-gray-600">
+                      <span className={`w-1.5 h-1.5 ${style.dotColor} rounded-full mt-2 mr-2 flex-shrink-0`}></span>
+                      {highlight}
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
           </div>
         </div>
         
-        <div className={`mt-4 pt-4 border-t ${style.borderColor}`}>
-          <div className={`flex items-center text-xs ${style.textColor}`}>
+        {/* 하단 AI 분석 결과 */}
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <div className="flex items-center text-xs text-gray-500">
             <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>

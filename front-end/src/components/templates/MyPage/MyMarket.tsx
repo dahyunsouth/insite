@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import MyProfileInfo from '@/components/molecules/MyPage/MyProfileInfo';
 import SavedMarketCard from '@/components/atoms/Market/Card/SavedMarketCard';
 import CheckBox from '@/components/atoms/Market/Button/CheckBox';
-import AlleyMarketBadge from '@/components/atoms/Market/Badge/AlleyMarketBadge';
-import DevelopmentMarketBadge from '@/components/atoms/Market/Badge/DevelopedMarketBadge';
+// import AlleyMarketBadge from '@/components/atoms/Market/Badge/AlleyMarketBadge';
+// import DevelopmentMarketBadge from '@/components/atoms/Market/Badge/DevelopedMarketBadge';
 import BtnBack from '@/components/atoms/Common/Button/BtnBack';
 import { fetchTradeAreaDetail, TradeAreaDetail, fetchTradeAreaScore, TradeAreaScore } from '@/lib/api/tradeAreas';
 import { useFavorites } from '@/contexts/FavoritesContext';
@@ -20,13 +20,13 @@ interface MyMarketProps {
 }
 
 // 하드코딩된 상권 데이터
-const HARDCODED_TRADE_AREAS = [
-  { trdarCd: "3110364", trdarCdNm: "미아역 8번" },
-  { trdarCd: "3110365", trdarCdNm: "미아역 5번" },
-  { trdarCd: "3120077", trdarCdNm: "미아역" },
-  { trdarCd: "3120220", trdarCdNm: "대치역" },
-  { trdarCd: "3111090", trdarCdNm: "강일동주민센터" }
-];
+// const HARDCODED_TRADE_AREAS = [
+//   { trdarCd: "3110364", trdarCdNm: "미아역 8번" },
+//   { trdarCd: "3110365", trdarCdNm: "미아역 5번" },
+//   { trdarCd: "3120077", trdarCdNm: "미아역" },
+//   { trdarCd: "3120220", trdarCdNm: "대치역" },
+//   { trdarCd: "3111090", trdarCdNm: "강일동주민센터" }
+// ];
 
 interface TradeAreaData {
   trdarCd: string;
@@ -50,6 +50,9 @@ const MyMarket: React.FC<MyMarketProps> = ({
   
   // Context에서 즐겨찾기 관련 상태와 함수 가져오기
   const { favorites, isLoading, error, removeFavorite } = useFavorites();
+
+  // 비교 버튼 활성화 여부: 정확히 2개 선택 시에만 활성화
+  const isCompareEnabled = selectedCards.size === 2;
 
   // 상권 변화 지표 코드를 한국어로 변환
   const getIndicatorName = (indicator: string) => {
@@ -174,7 +177,8 @@ const MyMarket: React.FC<MyMarketProps> = ({
       <div className="flex-shrink-0 p-4">
         <div className="flex items-center justify-start gap-2">
           <BtnBack onClick={onBack} />
-          <h1 className="text-lg font-semibold text-gray-900">저장된 상권</h1>
+          {/* <h1 className="text-lg font-semibold text-gray-900">저장된 상권</h1> */}
+          <h1 className="text-lg font-semibold text-gray-900">상권 보관함</h1>
         </div>
         <MyProfileInfo />
       </div>
@@ -206,7 +210,7 @@ const MyMarket: React.FC<MyMarketProps> = ({
           </div>
         ) : (
           <div className="space-y-4">
-            {tradeAreas.map((area, index) => {
+            {tradeAreas.map((area) => {
               const isSelected = selectedCards.has(area.trdarCd);
               return (
               <SavedMarketCard
@@ -248,7 +252,7 @@ const MyMarket: React.FC<MyMarketProps> = ({
                              onDetailClick(area.trdarCd, area.trdarCdNm);
                            }
                          }}
-                         className="text-blue-500 hover:text-blue-700 text-xs px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 whitespace-nowrap"
+                        className="text-blue-500 hover:text-blue-700 text-xs px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 whitespace-nowrap cursor-pointer"
                          title="상권 상세보기"
                        >
                          상세보기
@@ -259,7 +263,7 @@ const MyMarket: React.FC<MyMarketProps> = ({
                            e.preventDefault();
                            handleRemoveFavorite(area.trdarCd, area.trdarCdNm);
                          }}
-                         className="text-red-500 hover:text-pink-700 text-xs px-2 py-1 rounded bg-pink-50 hover:bg-pink-100 whitespace-nowrap"
+                        className="text-red-500 hover:text-pink-700 text-xs px-2 py-1 rounded bg-pink-50 hover:bg-pink-100 whitespace-nowrap cursor-pointer"
                          title="저장 해제"
                        >
                          저장 해제
@@ -288,7 +292,7 @@ const MyMarket: React.FC<MyMarketProps> = ({
                          </div>
                          <div className='flex justify-between items-center min-w-0'>
                            <span className='font-bold text-gray-900 flex-shrink-0'>상권변화지표</span>
-                           <span className='text-gray-900 text-right truncate ml-2'>{getIndicatorName(area.detail.chnge?.trdrChngeIx) || '-'}</span>
+                          <span className='text-gray-900 text-right truncate ml-2'>{getIndicatorName(area.detail.chnge?.trdrChngeIx ?? '') || '-'}</span>
                          </div>
                        </>
                      ) : (
@@ -314,8 +318,11 @@ const MyMarket: React.FC<MyMarketProps> = ({
       {/* 비교하기 버튼 - 하단 고정 */}
       <div className="flex-shrink-0 p-4">
         <div 
-          className='cursor-pointer flex justify-center items-center bg-[#3288FF] text-white rounded-lg p-2'
+          className={`${isCompareEnabled ? 'bg-[#3288FF] cursor-pointer' : 'bg-gray-300 cursor-not-allowed opacity-60'} flex justify-center items-center text-white rounded-lg p-2 transition-colors`}
+          role="button"
+          aria-disabled={!isCompareEnabled}
           onClick={() => {
+            if (!isCompareEnabled) return;
             console.log('🔍 MyMarket 비교하기 버튼 클릭됨');
             console.log('🔍 selectedCards:', selectedCards);
             console.log('🔍 tradeAreas:', tradeAreas);
