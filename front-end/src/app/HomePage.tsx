@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import KakaoMap, { useKakaoMapContext } from '@/components/map/KakaoMap';
 import LoadView from '@/components/map/LoadView';
 import RightActionBar from '@/components/organisms/RightActionBar/RightActionBar';
+import LoginBar from '@/components/organisms/RightActionBar/LoginBar';
 import CtaPillButton from '@/components/molecules/Detail/CtaPillButton/CtaPillButton';
 import DetailModal from '@/components/organisms/Detail/DetailModal';
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
@@ -13,6 +14,7 @@ import MyMarket from '@/components/templates/MyPage/MyMarket';
 import NotificationBar from '@/components/atoms/Common/NotificationBar';
 import CompareTradeAreasModal from '@/components/organisms/Compare/CompareTradeAreasModal';
 import ComparisonTray from '@/components/organisms/Compare/ComparisonTray';
+import NewCompareModal from '@/components/organisms/Compare/NewCompareModal';
 import TradeAreaData from '@/data/TradeAreaValue.json';
 import { useNotification } from '@/components/map/useNotification';
 import Notification from '@/components/map/Notification';
@@ -28,7 +30,10 @@ function MapTypeHandler({
   isLoadViewMinimized,
   onLoadViewToggle,
   isCafeActive,
-  onCafeToggle
+  onCafeToggle,
+  onCompareClick,
+  onMyPageClick,
+  onSavedAreasClick
 }: { 
   isLoggedIn: boolean;
   onLogoutSuccess: () => void;
@@ -38,6 +43,9 @@ function MapTypeHandler({
   onLoadViewToggle: (action: boolean | 'minimize' | 'restore') => void;
   isCafeActive: boolean;
   onCafeToggle: (categoryId: string) => void;
+  onCompareClick: () => void;
+  onMyPageClick: () => void;
+  onSavedAreasClick: () => void;
 }) {
   const mapContext = useKakaoMapContext();
   
@@ -46,17 +54,27 @@ function MapTypeHandler({
   };
 
   return (
-    <RightActionBar 
-      onMapTypeChange={handleMapTypeChange} 
-      isLoggedIn={isLoggedIn}
-      onLogoutSuccess={onLogoutSuccess}
-      onLoginSuccess={onLoginSuccess}
-      isLoadViewActive={isLoadViewActive}
-      isLoadViewMinimized={isLoadViewMinimized}
-      onLoadViewToggle={onLoadViewToggle}
-      isCafeActive={isCafeActive}
-      onCafeToggle={onCafeToggle}
-    />
+    <>
+      {/* 우측 상단: 로그인 관련 버튼들 */}
+      <LoginBar 
+        isLoggedIn={isLoggedIn}
+        onLogoutSuccess={onLogoutSuccess}
+        onLoginSuccess={onLoginSuccess}
+        onCompareClick={onCompareClick}
+        onProfileClick={onMyPageClick}
+        onSavedAreasClick={onSavedAreasClick}
+      />
+      
+      {/* 우측 하단: 지도 컨트롤 버튼들 */}
+      <RightActionBar 
+        onMapTypeChange={handleMapTypeChange} 
+        isLoadViewActive={isLoadViewActive}
+        isLoadViewMinimized={isLoadViewMinimized}
+        onLoadViewToggle={onLoadViewToggle}
+        isCafeActive={isCafeActive}
+        onCafeToggle={onCafeToggle}
+      />
+    </>
   );
 }
 
@@ -79,6 +97,9 @@ export default function HomePage() {
   const [isSavedCompareOpen, setIsSavedCompareOpen] = useState(false);
   const [selectedTradeArea1, setSelectedTradeArea1] = useState<{ trdarCd: string; trdarCdNm: string } | null>(null);
   const [selectedTradeArea2, setSelectedTradeArea2] = useState<{ trdarCd: string; trdarCdNm: string } | null>(null);
+  
+  // 새로운 상권 비교 모달 상태
+  const [isNewCompareModalOpen, setIsNewCompareModalOpen] = useState(false);
   
   // Zustand store에서 비교함 상태 관리
   const { 
@@ -513,7 +534,7 @@ export default function HomePage() {
         onShowMarketList={handleShowMarketList}
       >
         {/* 좌측 네비게이션 바 */}
-        <div className={`fixed top-0 left-0 right-0 z-[95] h-screen flex flex-col transition-all duration-300 ease-in-out ${isNavbarOpen ? 'w-1/4' : 'w-0'}`}>
+        <div className={`fixed top-0 left-0 right-0 z-[300] h-screen flex flex-col transition-all duration-300 ease-in-out ${isNavbarOpen ? 'w-1/4' : 'w-0'}`}>
           {showMyPage && (
             <MyPageMenu 
               onClose={handleMyPageClose}
@@ -582,6 +603,9 @@ export default function HomePage() {
           onLoadViewToggle={handleLoadViewToggle}
           isCafeActive={isCafeActive}
           onCafeToggle={handleCafeToggle}
+          onCompareClick={handleCompareTabClick}
+          onMyPageClick={handleMyPageClick}
+          onSavedAreasClick={handleSavedAreasClick}
         />
 
         {/* 로드뷰 컴포넌트 - KakaoMap 내부에 배치하되 DOM 안정성 유지 */}
@@ -638,6 +662,7 @@ export default function HomePage() {
         leftOpen={true}
         selectedTradeArea1={selectedTradeArea1}
         selectedTradeArea2={selectedTradeArea2}
+        navbarOpen={isNavbarOpen}
       />
 
       {/* Saved areas compare modal */}
@@ -656,6 +681,7 @@ export default function HomePage() {
           ...(selectedTradeArea1 ? [selectedTradeArea1] : []),
           ...(selectedTradeArea2 ? [selectedTradeArea2] : [])
         ]}
+        navbarOpen={isNavbarOpen}
       />
 
       {/* 인증 모달 (AuthModalWrapper) - 조건부 렌더 */}
@@ -696,13 +722,30 @@ export default function HomePage() {
       />
 
       {/* 토스트 알림 */}
-      <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[100]">
+      <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[400]">
         <Notification
           message={notification.message}
           isVisible={notification.isVisible}
           onClose={hideNotification}
         />
       </div>
+
+      {/* 새로운 상권 비교 모달 테스트 버튼 */}
+      <div className="fixed top-20 right-4 z-[500]">
+        <button
+          onClick={() => setIsNewCompareModalOpen(true)}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
+        >
+          새 상권 비교 모달 테스트
+        </button>
+      </div>
+
+      {/* 새로운 상권 비교 모달 */}
+      <NewCompareModal 
+        open={isNewCompareModalOpen}
+        onClose={() => setIsNewCompareModalOpen(false)}
+        navbarOpen={isNavbarOpen}
+      />
 
     </div>
   );
