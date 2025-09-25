@@ -25,6 +25,8 @@ interface MarketRecoModalProps {
   isLoggedIn?: boolean;
   onLoginClick?: () => void;
   onCompareClick?: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 const MarketRecoModal: React.FC<MarketRecoModalProps> = ({
@@ -32,7 +34,9 @@ const MarketRecoModal: React.FC<MarketRecoModalProps> = ({
   onClose,
   isLoggedIn = false,
   onLoginClick,
-  onCompareClick
+  onCompareClick,
+  onMouseEnter,
+  onMouseLeave
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -101,6 +105,8 @@ const MarketRecoModal: React.FC<MarketRecoModalProps> = ({
           maxWidth: '200px',
           zIndex: 99999,
         }}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       >
       {/* 메뉴 버튼들 */}
       <div className="py-2">

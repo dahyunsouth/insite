@@ -354,16 +354,15 @@ export default function HomePage() {
     const previousSelected = document.querySelector('.tradearea-label.selected');
     if (previousSelected) {
       previousSelected.classList.remove('selected');
-      
-      // 기본 스타일로 복원
+      // 기본 스타일로 복원 (TradeAreaPoligon.tsx 기본과 동일)
       const prevElement = previousSelected as HTMLElement;
       prevElement.style.zIndex = '100';
       prevElement.style.transform = 'scale(1)';
       prevElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-      prevElement.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-      prevElement.style.color = '#000000';
+      prevElement.style.backgroundColor = '#3288FF';
+      prevElement.style.color = '#ffffff';
       prevElement.style.textShadow = 'none';
-      prevElement.style.padding = '4px 8px';
+      prevElement.style.padding = '6px 12px';
       prevElement.style.fontSize = '12px';
       prevElement.style.fontWeight = 'bold';
       prevElement.style.textAlign = 'center';
@@ -374,6 +373,14 @@ export default function HomePage() {
       prevElement.style.border = '1px solid rgba(50, 136, 255, 0.8)';
       prevElement.style.transition = 'all 0.2s ease';
       prevElement.style.position = 'relative';
+      // 내부 SVG/텍스트 색상도 기본(흰색)으로 복원
+      const prevSvg = prevElement.querySelector('svg') as HTMLElement | null;
+      if (prevSvg) prevSvg.style.color = '#ffffff';
+      const prevTextContainer = prevElement.querySelector('div[style*="flex-direction: column"]');
+      if (prevTextContainer) {
+        const prevTextDivs = prevTextContainer.querySelectorAll('div');
+        prevTextDivs.forEach((el) => ((el as HTMLElement).style.color = '#ffffff'));
+      }
     }
     
     // 새로운 상권 라벨 찾기 및 스타일 적용
@@ -392,15 +399,14 @@ export default function HomePage() {
       
       // 선택된 상태 클래스 추가
       targetLabel.classList.add('selected');
-      
-      // 선택된 상권 스타일 적용 (TradeAreaPoligon.tsx와 동일)
-      targetLabel.style.zIndex = '9999';
+      // 선택된 상권 스타일 적용 (TradeAreaPoligon.tsx 클릭 효과와 동일)
+      targetLabel.style.zIndex = '10000';
       targetLabel.style.transform = 'scale(1.05)';
       targetLabel.style.boxShadow = '0 4px 12px rgba(50, 136, 255, 0.4)';
-      targetLabel.style.backgroundColor = 'rgba(50, 136, 255, 0.9)';
-      targetLabel.style.color = '#ffffff';
-      targetLabel.style.textShadow = '1px 1px 2px rgba(0,0,0,0.7)';
-      targetLabel.style.padding = '4px 8px';
+      targetLabel.style.backgroundColor = '#ffffff';
+      targetLabel.style.color = '#000000';
+      targetLabel.style.textShadow = 'none';
+      targetLabel.style.padding = '6px 12px';
       targetLabel.style.fontSize = '12px';
       targetLabel.style.fontWeight = 'bold';
       targetLabel.style.textAlign = 'center';
@@ -411,6 +417,16 @@ export default function HomePage() {
       targetLabel.style.border = '1px solid rgba(50, 136, 255, 0.8)';
       targetLabel.style.transition = 'all 0.2s ease';
       targetLabel.style.position = 'relative';
+
+      // 내부 요소 색상 동기화 (이름: 검정, 매출/보조: 파랑)
+      const svgElement = targetLabel.querySelector('svg') as HTMLElement | null;
+      if (svgElement) svgElement.style.color = '#000000';
+      const textContainer = targetLabel.querySelector('div[style*="flex-direction: column"]');
+      if (textContainer) {
+        const [nameEl, salesEl] = Array.from(textContainer.querySelectorAll('div')) as HTMLElement[];
+        if (nameEl) nameEl.style.color = '#000000';
+        if (salesEl) salesEl.style.color = '#3288FF';
+      }
       
       console.log('🎨 상권 라벨 스타일 적용 완료');
     } else {

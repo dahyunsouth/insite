@@ -10,6 +10,8 @@ import SignGuPoligon from './SignGuPoligon';
 import AdstrdPoligon from './AdstrdPoligon';
 import TradeAreaPoligon from './TradeAreaPoligon';
 import DetailModal from '../organisms/Detail/DetailModal';
+import tradeAreaData from '../../data/TradeAreaValue.json';
+import { tmToWgs84 } from '../../utils/coordinateTransform';
 
 // KakaoMap Context 생성
 interface KakaoMapContextType {
@@ -76,9 +78,19 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
       (window as any).kakao.maps.load(() => {
         if (!mapContainer.current) return;
 
+        // 초기 중심: 성수동카페거리 좌표로 설정 (Fallback은 기존 좌표)
+        let initialCenter = new (window as any).kakao.maps.LatLng(37.5008, 127.0387);
+        try {
+          const seongsu = (tradeAreaData as any).DATA.find((a: any) => a.trdar_cd_nm === '성수동카페거리');
+          if (seongsu) {
+            const { lat, lng } = tmToWgs84(seongsu.xcnts_value, seongsu.ydnts_value);
+            initialCenter = new (window as any).kakao.maps.LatLng(lat, lng);
+          }
+        } catch {}
+
         const options = {
-          center: new (window as any).kakao.maps.LatLng(37.5008, 127.0387),
-          level: 3
+          center: initialCenter,
+          level: 4
         };
 
         const mapInstance = new (window as any).kakao.maps.Map(mapContainer.current, options);
@@ -116,7 +128,7 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
         map.setCenter(moveLatLon);
         
         // 지도 레벨을 적절하게 설정 (상권 상세 보기)
-        map.setLevel(3);
+        map.setLevel(4);
         
         console.log('지도 중심 이동 완료:', coordinates);
       }
