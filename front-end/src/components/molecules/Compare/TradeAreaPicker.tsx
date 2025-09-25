@@ -382,7 +382,7 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
           (
             <div
               ref={dropdownContainerRef}
-              className="z-[60] max-h-56 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg"
+              className="z-[400] max-h-56 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg"
               style={{
                 position: "absolute",
                 top: dropdownRect.top,

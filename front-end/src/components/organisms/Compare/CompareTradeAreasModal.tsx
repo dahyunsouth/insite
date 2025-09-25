@@ -333,7 +333,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
       className={`fixed z-[320] ${modalType === 'compare' ? 'inset-0' : ''}`}
       style={modalType === 'saved' ? { 
         left: '25%', 
-        right: '80px', 
+        right: 0, 
         top: 0, 
         bottom: 0 
       } : modalType === 'compare' ? {

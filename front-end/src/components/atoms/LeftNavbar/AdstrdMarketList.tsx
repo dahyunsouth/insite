@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { API_ENDPOINTS } from '../../../config/api';
+import seoulDistricts from '@/data/seoulDistricts.json';
 
 // 상권 데이터 캐시 (역삼1동 강남구 초기 데이터) - 실제 데이터 기반
 // 서버에서 요구하는 정확한 행정동명 사용
@@ -112,12 +113,34 @@ export default function AdstrdMarketList({ district, dong, onClose, onTradeAreaS
         return;
       }
 
+      // 서울 자치구 검증: seoulDistricts.json에 없는 구는 서비스 미지원 안내
+      try {
+        const seoulGuSet = new Set<string>((seoulDistricts as any)?.features?.map((f: any) => f?.properties?.name));
+        const isSeoulGu = seoulGuSet.has(district.trim());
+        if (!isSeoulGu) {
+          console.warn(`⚠️ 비서울 자치구 요청 감지: "${district}" "${dong}"`);
+          setTradeAreas([]);
+          setIsLoading(false);
+          setError('현재 서울 시만 서비스를 지원하고 있습니다.');
+          return;
+        }
+      } catch (e) {
+        console.warn('seoulDistricts 검증 중 예외, 기본 로직 진행:', e);
+      }
+
       // 행정동명 정규화 함수 (역삼동 -> 역삼1동)
       const normalizeDongName = (dong: string): string => {
-        if (dong === '역삼동') {
+        const trimmed = dong.trim();
+        let normalized = trimmed.replace(/[\.|·|ㆍ]/g, '?'); // 종로1.2.3.4가동/종로1·2·3·4가동 → 종로1?2?3?4가동
+        if (normalized === '역삼동') {
           return '역삼1동';
         }
-        return dong;
+        // 면목제3.8동, 면목3?8동, 면목3.8동, 면목3ㆍ8동 등 → 면목3?8동으로 통일
+        const noSpace = normalized.replace(/\s+/g, '');
+        if (/^면목(제)?3[\.·ㆍ\?]8동$/.test(noSpace)) {
+          normalized = '면목3?8동';
+        }
+        return normalized;
       };
 
       const normalizedDong = normalizeDongName(dong);
@@ -163,16 +186,24 @@ export default function AdstrdMarketList({ district, dong, onClose, onTradeAreaS
 
     // 행정동명 정규화 함수 (역삼동 -> 역삼1동)
     const normalizeDongName = (dong: string): string => {
+      const trimmed = dong.trim();
+      let normalized = trimmed.replace(/[\.|·|ㆍ]/g, '?'); // 종로1.2.3.4가동/종로1·2·3·4가동 → 종로1?2?3?4가동
       // 역삼동은 역삼1동으로 변환 (서버에서 요구하는 정확한 행정동명)
-      if (dong === '역삼동') {
+      if (normalized === '역삼동') {
         return '역삼1동';
       }
-      return dong;
+      // 면목제3.8동, 면목3?8동, 면목3.8동, 면목3ㆍ8동 등 → 면목3?8동으로 통일
+      const noSpace = normalized.replace(/\s+/g, '');
+      if (/^면목(제)?3[\.·ㆍ\?]8동$/.test(noSpace)) {
+        normalized = '면목3?8동';
+      }
+      return normalized;
     };
 
     const fetchLatestData = async (district: string, dong: string) => {
       try {
         const normalizedDong = normalizeDongName(dong);
+        // 항상 정규화된 행정동명으로만 호출
         const url = `${API_ENDPOINTS.TRADE_AREAS}?district=${encodeURIComponent(district)}&dong=${encodeURIComponent(normalizedDong)}`;
         console.log(`🌐 상권 리스트 API 호출: ${url}`);
         console.log(`📝 요청 파라미터: district="${district}", dong="${dong}" -> "${normalizedDong}"`);
@@ -306,7 +337,8 @@ export default function AdstrdMarketList({ district, dong, onClose, onTradeAreaS
           </div>
         ) : error ? (
           <div className="text-center py-8">
-            <p className="text-red-500 text-sm">{error}</p>
+            <div className="text-3xl mb-2">😢</div>
+            <p className="text-gray-800 text-sm">{error}</p>
           </div>
         ) : tradeAreas.length === 0 ? (
           <div className="text-center py-8">

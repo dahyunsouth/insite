@@ -2,6 +2,23 @@ import { API_BASE_URL } from '@/config/api';
 
 const BASE_URL = API_BASE_URL;
 
+// 동 이름 정규화: 서버 DB 키와 일치하도록 변환
+function normalizeDongName(dongName: string): string {
+  const trimmed = (dongName || '').trim();
+  // 종로1.2.3.4가동/종로1·2·3·4가동 등 구분점들을 '?'로 치환
+  let normalized = trimmed.replace(/[\.|·|ㆍ]/g, '?');
+  // 특수 케이스: 역삼동 → 역삼1동
+  if (normalized === '역삼동') {
+    return '역삼1동';
+  }
+  // 면목 3·8동 표기 통일 (제, 점/가운뎃점/물음표 등)
+  const noSpace = normalized.replace(/\s+/g, '');
+  if (/^면목(제)?3[\.·ㆍ\?]8동$/.test(noSpace)) {
+    normalized = '면목3?8동';
+  }
+  return normalized;
+}
+
 export async function fetchGuList(): Promise<string[]> {
   const response = await fetch(`${BASE_URL}/api/v1/data/list-gu`, {
     method: "GET",
@@ -64,7 +81,7 @@ export async function fetchDongList(guName: string): Promise<string[]> {
 export async function fetchTradeAreas(guName: string, dongName: string): Promise<string[]> {
   const url = new URL(`${BASE_URL}/api/v1/data/trade-areas`);
   url.searchParams.set("district", guName);
-  url.searchParams.set("dong", dongName);
+  url.searchParams.set("dong", normalizeDongName(dongName));
 
   const response = await fetch(url.toString(), {
     method: "GET",
@@ -111,7 +128,7 @@ export async function fetchTradeAreas(guName: string, dongName: string): Promise
 export async function fetchTradeAreasDetail(guName: string, dongName: string) {
   const url = new URL(`${BASE_URL}/api/v1/data/trade-areas`);
   url.searchParams.set("district", guName);
-  url.searchParams.set("dong", dongName);
+  url.searchParams.set("dong", normalizeDongName(dongName));
 
   const response = await fetch(url.toString(), {
     method: "GET",

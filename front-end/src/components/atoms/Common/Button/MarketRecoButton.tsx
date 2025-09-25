@@ -5,19 +5,24 @@ import React, { forwardRef } from 'react';
 interface MarketRecoButtonProps {
   onClick?: () => void;
   className?: string;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+  isActive?: boolean; // 모달 오픈 시 아이콘 계속 회전
 }
 
-const MarketRecoButton = forwardRef<HTMLButtonElement, MarketRecoButtonProps>(({ onClick, className = "" }, ref) => {
+const MarketRecoButton = forwardRef<HTMLButtonElement, MarketRecoButtonProps>(({ onClick, className = "", onMouseEnter, onMouseLeave, isActive = false }, ref) => {
   return (
     <button
       ref={ref}
       onClick={onClick}
-      className={`cursor-pointer h-10 w-10 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-green-500 hover:from-cyan-400 hover:to-purple-600 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl relative overflow-hidden ${className}`}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      className={`group cursor-pointer h-10 w-10 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-green-500 hover:from-cyan-400 hover:to-purple-600 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl relative overflow-hidden ${className}`}
       aria-label="상권 추천 메뉴"
     >
       {/* SVG 아이콘 - 돌아가는 애니메이션 */}
       <svg
-        className="w-5 h-5 hover:animate-spin drop-shadow-lg"
+        className={`w-5 h-5 drop-shadow-lg ${isActive ? 'animate-spin' : ''} group-hover:animate-spin`}
         style={{ animationDuration: '3s' }}
         viewBox="0 0 24 24"
         fill="none"

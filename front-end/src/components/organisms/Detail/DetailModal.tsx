@@ -55,7 +55,6 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
   const [selected, setSelected] = useState<{ code: string; name: string } | null>(null);
   const [populationType, setPopulationType] = useState<"유동" | "직장" | "상주">("유동");
   const [isSaved, setIsSaved] = useState(false);
-  const [isComparing, setIsComparing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -93,13 +92,9 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
     console.log("[DetailModal] selection changed:", selected, "computedTitle:", computedTitle);
   }, [selected, computedTitle]);
 
-  // 비교함 상태에 따라 isComparing 동기화
-  useEffect(() => {
-    const currentCode = trdarCode ?? selected?.code ?? null;
-    if (currentCode && isInComparison) {
-      setIsComparing(isInComparison(currentCode));
-    }
-  }, [trdarCode, selected, isInComparison]);
+  // 현재 코드 기준 비교함 포함 여부를 렌더 시 계산
+  const currentCodeForCompare = trdarCode ?? selected?.code ?? null;
+  const isComparingComputed = currentCodeForCompare && isInComparison ? isInComparison(currentCodeForCompare) : false;
 
   // 저장 상태 동기화
   useEffect(() => {
@@ -125,12 +120,10 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
     if (isCurrentlyInComparison) {
       // 비교함에서 제거
       onRemoveFromComparison?.(currentCode);
-      setIsComparing(false);
       console.log("비교함에서 제거:", currentCode);
     } else {
       // 비교함에 추가
       onAddToComparison?.(currentCode, currentTrdarCdNm);
-      setIsComparing(true);
       console.log("비교함에 추가:", currentCode, currentTrdarCdNm);
     }
   };
@@ -223,7 +216,7 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
               onCompare={handleCompare}
               onSave={handleSave}
               isSaved={isSaved}
-              isComparing={isComparing}
+              isComparing={isComparingComputed}
               isLoading={isLoading}
               trdarCode={trdarCode ?? selected?.code ?? null}
               title={title || selected?.name}

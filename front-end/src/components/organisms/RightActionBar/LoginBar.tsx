@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
 import LoginButton from '@/components/atoms/RightActionBar/LoginButton';
@@ -13,7 +13,7 @@ interface LoginBarProps {
   onLogoutSuccess?: () => void;       // 로그아웃 성공 콜백
   onCompareClick?: () => void;        // 상권비교 모달 열기 콜백
   onProfileClick?: () => void;        // 프로필 클릭 콜백
-  onSavedAreasClick?: () => void;     // 저장된 상권 클릭 콜백
+  onSavedAreasClick?: () => void;     // 상권 보관함 열기 콜백
   isLoggedIn?: boolean;               // 로그인 상태
 }
 
@@ -23,11 +23,13 @@ const LoginBar: React.FC<LoginBarProps> = ({
   onLogoutSuccess,
   onCompareClick,
   onProfileClick,
-  onSavedAreasClick,
   isLoggedIn = false,
+  onSavedAreasClick,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMarketRecoModalOpen, setIsMarketRecoModalOpen] = useState(false);
+  const [isMarketRecoPinned, setIsMarketRecoPinned] = useState(false); // 클릭 고정 상태
+  const [isMarketRecoHover, setIsMarketRecoHover] = useState(false);   // 버튼/모달 hover 상태
 
   const handleLoginClick = () => {
     // 다른 모달이 열려있다면 닫기
@@ -56,12 +58,38 @@ const LoginBar: React.FC<LoginBarProps> = ({
     if (isModalOpen) {
       setIsModalOpen(false);
     }
-    
-    setIsMarketRecoModalOpen(true);
+    // 클릭 시 핀 토글
+    setIsMarketRecoPinned((prev) => {
+      const nextPinned = !prev;
+      if (!nextPinned) {
+        // 핀 해제 시 hover 여부에 따라 닫기
+        if (!isMarketRecoHover) {
+          setIsMarketRecoModalOpen(false);
+        }
+      } else {
+        setIsMarketRecoModalOpen(true);
+      }
+      return nextPinned;
+    });
   };
 
   const handleMarketRecoModalClose = () => {
+    setIsMarketRecoPinned(false);
     setIsMarketRecoModalOpen(false);
+  };
+
+  // 버튼 또는 모달 hover 진입
+  const handleRecoHoverEnter = () => {
+    setIsMarketRecoHover(true);
+    setIsMarketRecoModalOpen(true);
+  };
+
+  // 버튼 또는 모달 hover 이탈
+  const handleRecoHoverLeave = () => {
+    setIsMarketRecoHover(false);
+    if (!isMarketRecoPinned) {
+      setIsMarketRecoModalOpen(false);
+    }
   };
 
   const handleUserModalOpen = () => {
@@ -71,10 +99,20 @@ const LoginBar: React.FC<LoginBarProps> = ({
     }
   };
 
+  // 전역: 다른 모달이 열릴 때 MarketRecoModal 닫기
+  useEffect(() => {
+    const handleGlobalClose = () => {
+      setIsMarketRecoPinned(false);
+      setIsMarketRecoModalOpen(false);
+    };
+    window.addEventListener('marketreco:close', handleGlobalClose);
+    return () => window.removeEventListener('marketreco:close', handleGlobalClose);
+  }, []);
+
   return (
     <div
       className={`
-        fixed right-4 top-4 z-[210]
+        fixed right-4 top-4 z-[20]
         flex flex-row gap-2 items-center
         ${className}
       `}
@@ -82,6 +120,9 @@ const LoginBar: React.FC<LoginBarProps> = ({
       {/* 상권추천 버튼 */}
       <MarketRecoButton 
         onClick={handleMarketRecoModalOpen}
+        onMouseEnter={handleRecoHoverEnter}
+        onMouseLeave={handleRecoHoverLeave}
+        isActive={isMarketRecoModalOpen}
       />
       
       {/* 로그인 버튼 (정사각형 → 호버 시 확장) */}
@@ -101,6 +142,8 @@ const LoginBar: React.FC<LoginBarProps> = ({
         isLoggedIn={isLoggedIn}
         onLoginClick={handleLoginClick}
         onCompareClick={onCompareClick}
+        onMouseEnter={handleRecoHoverEnter}
+        onMouseLeave={handleRecoHoverLeave}
       />
 
       {/* 로그인 모달 렌더링 */}
