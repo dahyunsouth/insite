@@ -58,7 +58,7 @@ const MyPageMenu: React.FC<MyPageMenuProps> = ({
         onClick={onSavedAreas}
         className="cursor-pointer w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors duration-200"
       >
-        <span className="text-gray-900 font-medium">저장된 상권</span>
+        <span className="text-gray-900 font-medium">상권 보관함</span>
         <svg 
           className="w-5 h-5 text-gray-400" 
           fill="none" 
