@@ -174,7 +174,8 @@ const MyMarket: React.FC<MyMarketProps> = ({
       <div className="flex-shrink-0 p-4">
         <div className="flex items-center justify-start gap-2">
           <BtnBack onClick={onBack} />
-          <h1 className="text-lg font-semibold text-gray-900">저장된 상권</h1>
+          {/* <h1 className="text-lg font-semibold text-gray-900">저장된 상권</h1> */}
+          <h1 className="text-lg font-semibold text-gray-900">상권 보관함</h1>
         </div>
         <MyProfileInfo />
       </div>

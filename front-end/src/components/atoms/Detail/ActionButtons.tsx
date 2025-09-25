@@ -80,7 +80,8 @@ export default function ActionButtons({
         }`}
       >
         <HeartIcon className={`h-4 w-4 ${isSaved ? "fill-current text-red-500" : ""}`} />
-        {isLoading ? "처리 중..." : isSaved ? "저장된 상권" : "저장하기"}
+        {/* {isLoading ? "처리 중..." : isSaved ? "저장된 상권" : "저장하기"} */}
+        {isLoading ? "처리 중..." : isSaved ? "보관된 상권" : "보관함 담기"}
       </button>
        <button
          type="button"
