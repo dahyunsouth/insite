@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import MyProfileInfo from '@/components/molecules/MyPage/MyProfileInfo';
 import SavedMarketCard from '@/components/atoms/Market/Card/SavedMarketCard';
 import CheckBox from '@/components/atoms/Market/Button/CheckBox';
-import AlleyMarketBadge from '@/components/atoms/Market/Badge/AlleyMarketBadge';
-import DevelopmentMarketBadge from '@/components/atoms/Market/Badge/DevelopedMarketBadge';
+// import AlleyMarketBadge from '@/components/atoms/Market/Badge/AlleyMarketBadge';
+// import DevelopmentMarketBadge from '@/components/atoms/Market/Badge/DevelopedMarketBadge';
 import BtnBack from '@/components/atoms/Common/Button/BtnBack';
 import { fetchTradeAreaDetail, TradeAreaDetail, fetchTradeAreaScore, TradeAreaScore } from '@/lib/api/tradeAreas';
 import { useFavorites } from '@/contexts/FavoritesContext';
@@ -20,13 +20,13 @@ interface MyMarketProps {
 }
 
 // 하드코딩된 상권 데이터
-const HARDCODED_TRADE_AREAS = [
-  { trdarCd: "3110364", trdarCdNm: "미아역 8번" },
-  { trdarCd: "3110365", trdarCdNm: "미아역 5번" },
-  { trdarCd: "3120077", trdarCdNm: "미아역" },
-  { trdarCd: "3120220", trdarCdNm: "대치역" },
-  { trdarCd: "3111090", trdarCdNm: "강일동주민센터" }
-];
+// const HARDCODED_TRADE_AREAS = [
+//   { trdarCd: "3110364", trdarCdNm: "미아역 8번" },
+//   { trdarCd: "3110365", trdarCdNm: "미아역 5번" },
+//   { trdarCd: "3120077", trdarCdNm: "미아역" },
+//   { trdarCd: "3120220", trdarCdNm: "대치역" },
+//   { trdarCd: "3111090", trdarCdNm: "강일동주민센터" }
+// ];
 
 interface TradeAreaData {
   trdarCd: string;

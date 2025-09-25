@@ -78,8 +78,10 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
       (window as any).kakao.maps.load(() => {
         if (!mapContainer.current) return;
 
-        // 초기 중심: 성수동카페거리 좌표로 설정 (Fallback은 기존 좌표)
-        let initialCenter = new (window as any).kakao.maps.LatLng(37.5008, 127.0387);
+        // 초기 중심: 성수동카페거리 좌표로 설정
+        // Fallback 또한 성수동카페거리의 TM → WGS84 변환값을 사용
+        const SEONGSU_FALLBACK = tmToWgs84(204716, 449234); // TradeAreaValue.json 기준
+        let initialCenter = new (window as any).kakao.maps.LatLng(SEONGSU_FALLBACK.lat, SEONGSU_FALLBACK.lng);
         try {
           const seongsu = (tradeAreaData as any).DATA.find((a: any) => a.trdar_cd_nm === '성수동카페거리');
           if (seongsu) {

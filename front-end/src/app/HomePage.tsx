@@ -31,7 +31,8 @@ function MapTypeHandler({
   isCafeActive,
   onCafeToggle,
   onCompareClick,
-  onMyPageClick
+  onMyPageClick,
+  onSavedAreasClick
 }: { 
   isLoggedIn: boolean;
   onLogoutSuccess: () => void;
@@ -43,6 +44,7 @@ function MapTypeHandler({
   onCafeToggle: (categoryId: string) => void;
   onCompareClick: () => void;
   onMyPageClick: () => void;
+  onSavedAreasClick: () => void;
 }) {
   const mapContext = useKakaoMapContext();
   
@@ -57,6 +59,7 @@ function MapTypeHandler({
         isLoggedIn={isLoggedIn}
         onLogoutSuccess={onLogoutSuccess}
         onLoginSuccess={onLoginSuccess}
+        onSavedAreasClick={onSavedAreasClick}
         onCompareClick={onCompareClick}
         onProfileClick={onMyPageClick}
       />
@@ -71,6 +74,55 @@ function MapTypeHandler({
         onCafeToggle={onCafeToggle}
       />
     </>
+  );
+}
+
+// 지도 줌 레벨이 6 이상일 때는 CTA를 숨기는 가드 컴포넌트
+function CtaVisibilityGuard({ label, ariaLabel, onPress }: { label: string | null; ariaLabel: string; onPress: () => void }) {
+  const mapContext = useKakaoMapContext();
+  const [zoomLevel, setZoomLevel] = React.useState<number>(() => {
+    try {
+      return mapContext?.getZoomLevel() ?? 3;
+    } catch {
+      return 3;
+    }
+  });
+
+  React.useEffect(() => {
+    const map = mapContext?.map as any;
+    if (!map || !(window as any)?.kakao?.maps?.event) return;
+
+    const handler = () => {
+      try {
+        setZoomLevel(mapContext?.getZoomLevel() ?? 3);
+      } catch {
+        // ignore
+      }
+    };
+
+    (window as any).kakao.maps.event.addListener(map, 'zoom_changed', handler);
+    // 초기 동기화
+    handler();
+    return () => {
+      try {
+        (window as any).kakao.maps.event.removeListener(map, 'zoom_changed', handler);
+      } catch {
+        // ignore
+      }
+    };
+  }, [mapContext]);
+
+  if (!label) return null;
+  if (zoomLevel >= 6) return null;
+
+  return (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 px-4 max-w-[calc(100vw-2rem)]">
+      <CtaPillButton
+        label={label}
+        ariaLabel={ariaLabel}
+        onPress={onPress}
+      />
+    </div>
   );
 }
 
@@ -134,9 +186,9 @@ export default function HomePage() {
   const [isLoadViewMinimized, setIsLoadViewMinimized] = useState(false);
   const [isCafeActive, setIsCafeActive] = useState(false);
   const [showMarketingArea, setShowMarketingArea] = useState(false);
-  const [showMarketList, setShowMarketList] = useState(true);
-  const [currentDistrict, setCurrentDistrict] = useState<string>('강남구');
-  const [currentDong, setCurrentDong] = useState<string>('역삼동');
+  const [showMarketList, setShowMarketList] = useState(false);
+  const [currentDistrict, setCurrentDistrict] = useState<string>('');
+  const [currentDong, setCurrentDong] = useState<string>('');
   const [selectedTradeAreaName, setSelectedTradeAreaName] = useState<string | null>(null);
   const [selectedTradeAreaCode, setSelectedTradeAreaCode] = useState<string | null>(null);
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
@@ -543,7 +595,7 @@ export default function HomePage() {
         onShowMarketList={handleShowMarketList}
       >
         {/* 좌측 네비게이션 바 */}
-        <div className={`fixed top-0 left-0 right-0 z-[300] h-screen flex flex-col transition-all duration-300 ease-in-out ${isNavbarOpen ? 'w-1/4' : 'w-0'}`}>
+        <div className={`fixed top-0 left-0 right-0 ${isCompareOpen || isSavedCompareOpen ? 'z-[500]' : 'z-[300]'} h-screen flex flex-col transition-all duration-300 ease-in-out ${isNavbarOpen ? 'w-1/4' : 'w-0'}`}>
           {showMyPage && (
             <MyPageMenu 
               onClose={handleMyPageClose}
@@ -596,6 +648,8 @@ export default function HomePage() {
               selectedTradeArea={selectedTradeArea}
               // DetailModal 관련 props
               onDetailModalClose={() => setIsDetailOpen(false)}
+              // 비교 모달 열림 여부 전달 (열림 시 z-index 상향)
+              isCompareOpen={isCompareOpen || isSavedCompareOpen}
             />
           )}
         </div>
@@ -614,6 +668,7 @@ export default function HomePage() {
           onCafeToggle={handleCafeToggle}
           onCompareClick={handleCompareTabClick}
           onMyPageClick={handleMyPageClick}
+          onSavedAreasClick={handleSavedAreasClick}
         />
 
         {/* 로드뷰 컴포넌트 - KakaoMap 내부에 배치하되 DOM 안정성 유지 */}
@@ -623,18 +678,15 @@ export default function HomePage() {
           onToggle={handleLoadViewToggle}
           onStateChange={handleLoadViewStateChange}
         />
+
+      {/* Bottom-center CTA - 줌 레벨 6 이상이면 숨김 (Provider 내부) */}
+      <CtaVisibilityGuard 
+        label={selectedTradeAreaName ? `${selectedTradeAreaName} 상권 상세보기` : null}
+        ariaLabel={selectedTradeAreaName ? `${selectedTradeAreaName} 상권 상세보기` : '상권 상세보기'}
+        onPress={() => setIsDetailOpen(true)}
+      />
       </KakaoMap>
 
-      {/* Bottom-center CTA preview for verification - 상권 선택 시에만 표시 */}
-      {selectedTradeAreaName && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 px-4 max-w-[calc(100vw-2rem)]">
-          <CtaPillButton
-            label={`${selectedTradeAreaName} 상권 상세보기`}
-            ariaLabel={`${selectedTradeAreaName} 상권 상세보기`}
-            onPress={() => setIsDetailOpen(true)}
-          />
-        </div>
-      )}
 
       {/* 비교함 담기 모달 - 비교함에 상권이 1개 이상일 때만 표시 */}
       {!isCompareOpen && comparisonTray.length > 0 && (

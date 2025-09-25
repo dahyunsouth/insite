@@ -53,6 +53,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
   const globalEventListenerRef = useRef<((e: Event) => void) | null>(null);
   const selectTradeAreaHandlerRef = useRef<((e: Event) => void) | null>(null);
   const selectedTradeAreaRef = useRef<string | null>(null);
+  const persistedSelectedTradeAreaRef = useRef<{ code: string | null; name: string | null }>({ code: null, name: null });
   const didAutoSelectRef = useRef<boolean>(false);
   const backgroundOverlayRef = useRef<KakaoOverlay | null>(null);
   const tradeAreasCacheRef = useRef<Map<string, any>>(new Map());
@@ -208,7 +209,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
 
       const { polygon, centerLat, centerLng, tradeAreaName, district, dong } = polygonData;
 
-      if (e.type === 'mouseenter') {
+      if (e.type === 'mouseover') {
         // 선택된 상권이 아닌 경우에만 호버 효과 적용
         if (selectedTradeAreaRef.current !== labelId) {
           // 폴리곤 호버 효과
@@ -240,7 +241,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
             }
           }
         }
-      } else if (e.type === 'mouseleave') {
+      } else if (e.type === 'mouseout') {
         // 선택된 상권이 아닌 경우에만 호버 효과 제거
         if (selectedTradeAreaRef.current !== labelId) {
           // 폴리곤 호버 효과 제거
@@ -364,20 +365,25 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
         
         // 상권명과 상권코드를 부모 컴포넌트로 전달
         onTradeAreaSelect?.(tradeAreaName, tradeAreaCode);
+
+        // 선택 상태를 영구 저장하여 레벨 전환 후에도 복원
+        persistedSelectedTradeAreaRef.current = { code: tradeAreaCode, name: tradeAreaName };
         
         // 상권리스트 활성화
         onShowMarketList?.(district, dong);
       }
     };
 
-    document.addEventListener('mouseenter', globalEventHandler, true);
-    document.addEventListener('mouseleave', globalEventHandler, true);
+    document.addEventListener('mouseover', globalEventHandler, true);
+    document.addEventListener('mouseout', globalEventHandler, true);
     document.addEventListener('click', globalEventHandler, true);
     
     // selectTradeArea 이벤트 리스너 추가 (AdstrdMarketList에서 상권 선택 시)
     const handleSelectTradeArea = (event: CustomEvent) => {
       const { code, name } = event.detail;
       console.log('🎯 selectTradeArea 이벤트 수신:', { code, name });
+      // 선택 상태 영구 저장
+      persistedSelectedTradeAreaRef.current = { code, name };
       
       // 해당 상권의 폴리곤과 라벨 찾기
       const labelElements = document.querySelectorAll('.tradearea-label');
@@ -444,9 +450,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
     // 즉시 상태 변경으로 중복 실행 방지
     isShowingRef.current = false;
     
-    // 선택 상태 초기화
-    selectedTradeAreaRef.current = null;
-    onTradeAreaSelect?.(null, null);
+    // 선택 상태는 유지하여 레벨 복귀 시 재적용
     
     // 폴리곤 맵 정리
     polygonMapRef.current.clear();
@@ -550,22 +554,45 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
     console.log('🔄 전체 폴리곤 로드');
     showAllPolygons();
 
-    // 초기 자동 선택: 성수동카페거리
-    if (!didAutoSelectRef.current) {
-      didAutoSelectRef.current = true;
-      setTimeout(() => {
+    // 선택 복원: 이전에 선택했던 상권이 있으면 우선 복원 시도
+    const persisted = persistedSelectedTradeAreaRef.current;
+    if (persisted && persisted.name) {
+      let attempts = 0;
+      const tryRestore = () => {
+        attempts += 1;
         try {
           const labels = document.querySelectorAll('.tradearea-label');
           let targetLabel: HTMLElement | null = null;
           labels.forEach((el) => {
             const text = (el as HTMLElement).textContent || '';
-            if (text.includes('성수동카페거리') && !targetLabel) targetLabel = el as HTMLElement;
+            if (text.includes(persisted.name as string) && !targetLabel) targetLabel = el as HTMLElement;
           });
           if (targetLabel) {
             targetLabel.click();
+            return;
           }
         } catch {}
-      }, 200);
+        if (attempts < 15) setTimeout(tryRestore, 120);
+      };
+      setTimeout(tryRestore, 200);
+    } else {
+      // 초기 자동 선택: 성수동카페거리 (처음 진입 시 1회)
+      if (!didAutoSelectRef.current) {
+        didAutoSelectRef.current = true;
+        setTimeout(() => {
+          try {
+            const labels = document.querySelectorAll('.tradearea-label');
+            let targetLabel: HTMLElement | null = null;
+            labels.forEach((el) => {
+              const text = (el as HTMLElement).textContent || '';
+              if (text.includes('성수동카페거리') && !targetLabel) targetLabel = el as HTMLElement;
+            });
+            if (targetLabel) {
+              targetLabel.click();
+            }
+          } catch {}
+        }, 200);
+      }
     }
   }, [map, setupGlobalEventDelegation]);
 
@@ -730,6 +757,23 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
 
       kakaoPolygon.setMap(map);
       polygons.push(kakaoPolygon);
+
+      // 폴리곤에서도 동일한 hover/click 동작이 발생하도록 라벨 이벤트를 위임 호출
+      const labelIdForPolygon = cachedPolygon.id;
+      try {
+        (window as any).kakao.maps.event.addListener(kakaoPolygon, 'mouseover', () => {
+          const labelEl = document.getElementById(labelIdForPolygon);
+          if (labelEl) labelEl.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+        });
+        (window as any).kakao.maps.event.addListener(kakaoPolygon, 'mouseout', () => {
+          const labelEl = document.getElementById(labelIdForPolygon);
+          if (labelEl) labelEl.dispatchEvent(new MouseEvent('mouseout', { bubbles: true }));
+        });
+        (window as any).kakao.maps.event.addListener(kakaoPolygon, 'click', () => {
+          const labelEl = document.getElementById(labelIdForPolygon) as HTMLElement | null;
+          if (labelEl) labelEl.click();
+        });
+      } catch {}
 
       // 라벨 생성
       const position = new (window.kakao.maps as any).LatLng(cachedPolygon.centerLat, cachedPolygon.centerLng);
@@ -989,6 +1033,23 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
         });
 
         labels.push(customOverlay);
+
+        // 폴리곤에서도 동일한 hover/click 동작이 발생하도록 라벨 이벤트를 위임 호출
+        const labelIdForPolygon2 = currentLabelId;
+        try {
+          (window as any).kakao.maps.event.addListener(matchingPolygonData.polygon as any, 'mouseover', () => {
+            const labelEl = document.getElementById(labelIdForPolygon2);
+            if (labelEl) labelEl.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+          });
+          (window as any).kakao.maps.event.addListener(matchingPolygonData.polygon as any, 'mouseout', () => {
+            const labelEl = document.getElementById(labelIdForPolygon2);
+            if (labelEl) labelEl.dispatchEvent(new MouseEvent('mouseout', { bubbles: true }));
+          });
+          (window as any).kakao.maps.event.addListener(matchingPolygonData.polygon as any, 'click', () => {
+            const labelEl = document.getElementById(labelIdForPolygon2) as HTMLElement | null;
+            if (labelEl) labelEl.click();
+          });
+        } catch {}
 
         // 비동기로 매출/점포 데이터를 불러와 평균 매출 표시로 업데이트
         updateTradeAreaLabelSales(currentLabelId, tradeArea.trdar_cd_nm, tradeArea.signgu_cd_nm, tradeArea.adstrd_cd_nm);

@@ -85,9 +85,15 @@ const SecondLeftNavbar: React.FC<SecondLeftNavbarProps> = ({
             type="button"
             aria-pressed={active === "상권비교"}
             onClick={() => {
-              // DetailModal이 열려있다면 먼저 닫기
+            // 로그인 상태 확인
+            if (checkLoginStatus()) {
+              // 로그인된 상태: 비교 기능 실행 전 DetailModal 닫기
               onDetailModalClose?.();
               onCompareClick?.();
+            } else {
+              // 로그인되지 않은 상태: 로그인 모달 열기
+              onLoginModalOpen?.();
+            }
               setActive((prev) => (prev === "상권비교" ? null : "상권비교"));
             }}
             className={getButtonStyle("상권비교", active === "상권비교")}
