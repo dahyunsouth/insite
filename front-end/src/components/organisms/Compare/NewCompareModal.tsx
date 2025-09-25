@@ -12,9 +12,9 @@ interface NewCompareModalProps {
 
 // 상권 선택 타입 정의
 interface TradeAreaSelection {
-  signguCode: string | null;
-  adstrdCode: string | null;
-  tradeAreaCode: string | null;
+  signguCode?: string | null;
+  adstrdCode?: string | null;
+  tradeAreaCode?: string | null;
 }
 
 // 상권 데이터 타입 정의
@@ -218,7 +218,7 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
             {/* 상권 1 선택 */}
             <div className="space-y-4">
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: '#3288FF' }}>
                   <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                   </svg>
@@ -229,15 +229,15 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
                 title="상권 1"
                 value={selectionA}
                 onChange={setSelectionA}
-                accentColor="#ef4444"
-                backgroundColor="#fef2f2"
+                accentColor="#3288FF"
+                backgroundColor="#f0f8ff"
               />
             </div>
 
             {/* 상권 2 선택 */}
             <div className="space-y-4">
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: '#5AB8E2' }}>
                   <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                   </svg>
@@ -248,112 +248,138 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
                 title="상권 2"
                 value={selectionB}
                 onChange={setSelectionB}
-                accentColor="#3b82f6"
-                backgroundColor="#eff6ff"
+                accentColor="#5AB8E2"
+                backgroundColor="#f0fdfa"
               />
             </div>
           </div>
 
-          {/* 옵션 비교 섹션 - 상권이 모두 선택되었을 때만 표시 */}
-          {selectionA.tradeAreaCode && selectionB.tradeAreaCode && comparisonData && (
-            <div className="space-y-6">
-              {options.map((option, index) => {
-                const data1 = comparisonData[option].상권1;
-                const data2 = comparisonData[option].상권2;
-                
-                // 상권변화지표는 막대 그래프 대신 텍스트만 표시
-                if (option === "상권변화지표") {
-                  return (
-                    <div key={option} className="bg-gray-50 rounded-xl p-6">
-                      <div className="grid grid-cols-3 gap-4 items-center">
-                        <div className="space-y-2">
-                          <div className="flex justify-end items-center mb-2">
-                            <span className="text-sm font-medium text-gray-700">
-                              {tradeAreaDataA?.trdarCdNm || '상권 1'}
-                            </span>
-                          </div>
-                          <div className="flex justify-end">
-                            <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-2 min-w-32">
-                              <span className="text-sm font-semibold text-red-700">
-                                {data1.value}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-center">
-                          <h4 className="text-lg font-semibold text-gray-900">{option}</h4>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="flex justify-start items-center mb-2">
-                            <span className="text-sm font-medium text-gray-700">
-                              {tradeAreaDataB?.trdarCdNm || '상권 2'}
-                            </span>
-                          </div>
-                          <div className="flex justify-start">
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 min-w-32">
-                              <span className="text-sm font-semibold text-blue-700">
-                                {data2.value}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
+           {/* 옵션 비교 섹션 - 상권이 모두 선택되었을 때만 표시 */}
+           {selectionA.tradeAreaCode && selectionB.tradeAreaCode && comparisonData && (
+             <div className="relative">
+               {/* 가운데 컬럼 - 세로로 이어지는 배경 */}
+               <div className="absolute left-1/2 transform -translate-x-1/2 w-48 bg-white shadow-lg border-l border-r border-gray-200 h-full z-10">
+                 <div className="py-0">
+                   {options.map((option, index) => (
+                     <div key={option} className="px-4 py-6 border-b border-gray-100 last:border-b-0 h-16 flex items-center">
+                       <h4 className="text-sm font-semibold text-gray-900 text-center w-full">{option}</h4>
+                     </div>
+                   ))}
+                 </div>
+               </div>
+               
+               {/* 비교 데이터 행들 */}
+               <div className="space-y-0">
+                 {options.map((option, index) => {
+                   const data1 = comparisonData[option].상권1;
+                   const data2 = comparisonData[option].상권2;
+                   
+                   // 상권변화지표는 막대 그래프 대신 텍스트만 표시
+                   if (option === "상권변화지표") {
+                     return (
+                       <div key={option} className="relative flex items-center h-16 py-2">
+                         {/* 상권 1 - 왼쪽 */}
+                         <div className="flex-1 flex justify-end">
+                           <div className="rounded-lg px-4 py-2 min-w-32" style={{ backgroundColor: '#f0f8ff', border: '1px solid #3288FF' }}>
+                             <span className="text-sm font-semibold" style={{ color: '#3288FF' }}>
+                               상권 확장
+                             </span>
+                           </div>
+                         </div>
+                         
+                         {/* 가운데 컬럼 공간 - 실제 내용은 위의 절대 위치 요소에 있음 */}
+                         <div className="w-48"></div>
+                         
+                         {/* 상권 2 - 오른쪽 */}
+                         <div className="flex-1 flex justify-start">
+                           <div className="rounded-lg px-4 py-2 min-w-32" style={{ backgroundColor: '#f0fdfa', border: '1px solid #5AB8E2' }}>
+                             <span className="text-sm font-semibold" style={{ color: '#5AB8E2' }}>
+                               다이나믹
+                             </span>
+                           </div>
+                         </div>
+                       </div>
+                     );
+                   }
 
-                // 숫자 데이터는 막대 그래프로 표시
-                const maxValue = Math.max(data1.numValue, data2.numValue);
-                const width1 = maxValue > 0 ? (data1.numValue / maxValue) * 200 : 0;
-                const width2 = maxValue > 0 ? (data2.numValue / maxValue) * 200 : 0;
+                  // 숫자 데이터는 막대 그래프로 표시
+                  const isPopulationData = option === "총 유동인구" || option === "총 상주인구" || option === "총 직장인구";
+                  
+                  let width1, width2;
+                  
+                  if (isPopulationData) {
+                    // 인구 데이터: 통합 데이터셋 기준 정규화 + 최소 길이 보장
+                    const populationOptions = ["총 유동인구", "총 상주인구", "총 직장인구"];
+                    const allPopulationValues: number[] = [];
+                    
+                    // 모든 인구 데이터 수집
+                    populationOptions.forEach(popOption => {
+                      if (comparisonData[popOption]) {
+                        allPopulationValues.push(comparisonData[popOption].상권1.numValue);
+                        allPopulationValues.push(comparisonData[popOption].상권2.numValue);
+                      }
+                    });
+                    
+                    // 통합 최대값 계산
+                    const globalMaxValue = Math.max(...allPopulationValues);
+                    
+                    // 최소 길이 12% 보장
+                    const minWidth = 12;
+                    const availableWidth = 100 - minWidth;
+                    
+                    if (globalMaxValue === 0) {
+                      width1 = width2 = 50;
+                    } else {
+                      // 통합 최대값 기준으로 정규화
+                      const normalized1 = data1.numValue / globalMaxValue;
+                      const normalized2 = data2.numValue / globalMaxValue;
+                      
+                      width1 = minWidth + (normalized1 * availableWidth);
+                      width2 = minWidth + (normalized2 * availableWidth);
+                    }
+                  } else {
+                    // 기존 방식: 선형 스케일
+                    const maxValue = Math.max(data1.numValue, data2.numValue);
+                    width1 = maxValue > 0 ? (data1.numValue / maxValue) * 100 : 0;
+                    width2 = maxValue > 0 ? (data2.numValue / maxValue) * 100 : 0;
+                  }
 
-                return (
-                  <div key={option} className="bg-gray-50 rounded-xl p-6">
-                    <div className="grid grid-cols-3 gap-4 items-center">
-                      {/* 상권 1 - 왼쪽 */}
-                      <div className="space-y-2">
-                        <div className="flex justify-end items-center mb-2">
-                          <span className="text-sm font-medium text-gray-700">
-                            {tradeAreaDataA?.trdarCdNm || '상권 1'}
-                          </span>
-                        </div>
-                        <div className="flex justify-end">
-                          <div 
-                            className="bg-gradient-to-l from-red-400 to-red-600 rounded-full h-8 flex items-center justify-end pr-2 text-white font-bold text-sm transition-all duration-500"
-                            style={{ width: `${width1}px` }}
-                          >
-                            {data1.value}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* 중앙 컬럼 - 옵션명만 */}
-                      <div className="flex items-center justify-center">
-                        <h4 className="text-lg font-semibold text-gray-900">{option}</h4>
-                      </div>
-
-                      {/* 상권 2 - 오른쪽 */}
-                      <div className="space-y-2">
-                        <div className="flex justify-start items-center mb-2">
-                          <span className="text-sm font-medium text-gray-700">
-                            {tradeAreaDataB?.trdarCdNm || '상권 2'}
-                          </span>
-                        </div>
-                        <div className="flex justify-start">
-                          <div 
-                            className="bg-gradient-to-r from-blue-400 to-blue-600 rounded-full h-8 flex items-center justify-start pl-2 text-white font-bold text-sm transition-all duration-500"
-                            style={{ width: `${width2}px` }}
-                          >
-                            {data2.value}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                   return (
+                     <div key={option} className="relative flex items-center h-16 py-2">
+                       {/* 상권 1 - 왼쪽 막대 */}
+                       <div className="flex-1 flex justify-end">
+                         <div 
+                           className="rounded-l-full h-12 flex items-center justify-end pr-2 text-white font-bold text-sm transition-all duration-500"
+                           style={{ 
+                             width: `${width1}%`,
+                             background: 'linear-gradient(to left, #3288FF, #1e6bcc)'
+                           }}
+                         >
+                           {data1.value}
+                         </div>
+                       </div>
+                       
+                       {/* 가운데 컬럼 공간 - 실제 내용은 위의 절대 위치 요소에 있음 */}
+                       <div className="w-48"></div>
+                       
+                       {/* 상권 2 - 오른쪽 막대 */}
+                       <div className="flex-1 flex justify-start">
+                         <div 
+                           className="rounded-r-full h-12 flex items-center justify-start pl-2 text-white font-bold text-sm transition-all duration-500"
+                           style={{ 
+                             width: `${width2}%`,
+                             background: 'linear-gradient(to right, #5AB8E2, #3a9bc1)'
+                           }}
+                         >
+                           {data2.value}
+                         </div>
+                       </div>
+                     </div>
+                   );
+                 })}
+               </div>
+             </div>
+           )}
 
           {/* 로딩 상태 */}
           {loading && (
