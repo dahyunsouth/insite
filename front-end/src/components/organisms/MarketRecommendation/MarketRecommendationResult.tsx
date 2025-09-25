@@ -12,6 +12,9 @@ interface MarketRecommendationResultProps {
   selectedItem?: RecommendationItem | null;
   onItemSelect?: (item: RecommendationItem | null) => void;
   onBack?: () => void;
+  onAddToComparison?: (trdarCd: string, trdarCdNm: string) => void;
+  onRemoveFromComparison?: (trdarCd: string) => void;
+  isInComparison?: (trdarCd: string) => boolean;
 }
 
 type RankStyle = {
@@ -61,7 +64,15 @@ const DEFAULT_STYLE: RankStyle = {
 
 const getStyle = (ranking: number): RankStyle => RANK_STYLES[ranking] || DEFAULT_STYLE;
 
-const MarketRecommendationResult: React.FC<MarketRecommendationResultProps> = ({ result, selectedItem: propSelectedItem, onItemSelect, onBack }) => {
+const MarketRecommendationResult: React.FC<MarketRecommendationResultProps> = ({ 
+  result, 
+  selectedItem: propSelectedItem, 
+  onItemSelect, 
+  onBack,
+  onAddToComparison,
+  onRemoveFromComparison,
+  isInComparison
+}) => {
   const [nickname, setNickname] = useState<string>('');
   const [selectedItem, setSelectedItem] = useState<RecommendationItem | null>(propSelectedItem || null);
   
@@ -143,6 +154,9 @@ const MarketRecommendationResult: React.FC<MarketRecommendationResultProps> = ({
         onBack={onBack} 
         selectedItem={selectedItem}
         onSelectedItemChange={handleSelectedItemChange}
+        onAddToComparison={onAddToComparison}
+        onRemoveFromComparison={onRemoveFromComparison}
+        isInComparison={isInComparison}
       />
     </div>
   );

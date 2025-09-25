@@ -12,7 +12,7 @@ type ComparisonTrayProps = {
 export default function ComparisonTray({ className, comparisonItems, onRemoveItem, onCompareClick }: ComparisonTrayProps) {
 
   return (
-    <div className={`fixed bottom-6 right-20 z-[60] ${className || ""}`}>
+    <div className={`fixed bottom-6 right-20 z-[100] ${className || ""}`}>
       <div className="bg-gray-800 rounded-3xl px-4 py-3 shadow-lg flex items-center gap-3">
         {/* 담긴 상권 카드들 - 2개 슬롯 고정 */}
         <div className="flex items-center gap-2">

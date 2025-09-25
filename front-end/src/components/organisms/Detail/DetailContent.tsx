@@ -24,6 +24,7 @@ type DetailContentProps = {
   onCompare?: () => void;
   isSaved?: boolean;
   isComparing?: boolean;
+  isLoading?: boolean;
   actionButtonsDirection?: 'horizontal' | 'vertical';
 };
 
@@ -45,6 +46,7 @@ export default function DetailContent({
   onCompare,
   isSaved = false,
   isComparing = false,
+  isLoading = false,
   actionButtonsDirection = 'vertical'
 }: DetailContentProps) {
   return (
@@ -63,6 +65,7 @@ export default function DetailContent({
               onCompare={onCompare}
               isSaved={isSaved}
               isComparing={isComparing}
+              isLoading={isLoading}
               actionButtonsDirection={actionButtonsDirection}
             />
           </div>
