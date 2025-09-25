@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import AuthModalWrapper from '@/components/templates/Auth/AuthModalWrapper';
 import LoginButton from '@/components/atoms/RightActionBar/LoginButton';
@@ -13,9 +13,8 @@ interface LoginBarProps {
   onLogoutSuccess?: () => void;       // 로그아웃 성공 콜백
   onCompareClick?: () => void;        // 상권비교 모달 열기 콜백
   onProfileClick?: () => void;        // 프로필 클릭 콜백
-  onSavedAreasClick?: () => void;     // 저장된 상권 클릭 콜백
-  isLoggedIn?: boolean;               // 로그인 상태
   onSavedAreasClick?: () => void;     // 상권 보관함 열기 콜백
+  isLoggedIn?: boolean;               // 로그인 상태
 }
 
 const LoginBar: React.FC<LoginBarProps> = ({
@@ -24,7 +23,6 @@ const LoginBar: React.FC<LoginBarProps> = ({
   onLogoutSuccess,
   onCompareClick,
   onProfileClick,
-  onSavedAreasClick,
   isLoggedIn = false,
   onSavedAreasClick,
 }) => {
@@ -101,6 +99,16 @@ const LoginBar: React.FC<LoginBarProps> = ({
     }
   };
 
+  // 전역: 다른 모달이 열릴 때 MarketRecoModal 닫기
+  useEffect(() => {
+    const handleGlobalClose = () => {
+      setIsMarketRecoPinned(false);
+      setIsMarketRecoModalOpen(false);
+    };
+    window.addEventListener('marketreco:close', handleGlobalClose);
+    return () => window.removeEventListener('marketreco:close', handleGlobalClose);
+  }, []);
+
   return (
     <div
       className={`
@@ -123,11 +131,7 @@ const LoginBar: React.FC<LoginBarProps> = ({
         onLogoutSuccess={handleLogoutSuccess}
         onUserModalOpen={handleUserModalOpen}
         onProfileClick={onProfileClick}
-<<<<<<< HEAD
-        onFavoritesClick={onSavedAreasClick}
-=======
         onSavedAreasClick={onSavedAreasClick}
->>>>>>> 81588b2bf55aed2c5cb4ec31436de2bc4457a0a3
         isLoggedIn={isLoggedIn}
       />
 

@@ -309,8 +309,9 @@ export default function HomePage() {
     console.log('로그아웃 성공 - 상태 업데이트됨');
   };
 
-  // 마이페이지 열기 핸들러
+  // 마이페이지 열기 핸들러 (열 때 보관함 닫기)
   const handleMyPageClick = () => {
+    setShowMyMarket(false);
     setShowMyPage(true);
   };
 
@@ -319,8 +320,9 @@ export default function HomePage() {
     setShowMyPage(false);
   };
 
-  // 저장된 상권 열기 핸들러
+  // 저장된 상권 열기 핸들러 (열 때 마이페이지 닫기)
   const handleSavedAreasClick = () => {
+    setShowMyPage(false);
     setShowMyMarket(true);
   };
 
@@ -339,6 +341,13 @@ export default function HomePage() {
     setSelectedTradeArea1(null);
     setSelectedTradeArea2(null);
   };
+
+  // 다른 모달(비교/저장된 비교)이 열릴 때 상권 추천 드롭다운 닫기
+  useEffect(() => {
+    if (isCompareOpen || isSavedCompareOpen || isDetailOpen || showMyPage || showMyMarket) {
+      window.dispatchEvent(new CustomEvent('marketreco:close'));
+    }
+  }, [isCompareOpen, isSavedCompareOpen, isDetailOpen, showMyPage, showMyMarket]);
 
   // 저장된 상권에서 비교하기 클릭 핸들러
   const handleSavedCompareClick = (selectedTradeAreas: { trdarCd: string; trdarCdNm: string }[]) => {
@@ -796,14 +805,14 @@ export default function HomePage() {
       </div>
 
       {/* 새로운 상권 비교 모달 테스트 버튼 */}
-      <div className="fixed top-20 right-4 z-[500]">
+      {/* <div className="fixed top-20 right-4 z-[500]">
         <button
           onClick={() => setIsNewCompareModalOpen(true)}
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
         >
           새 상권 비교 모달 테스트
         </button>
-      </div>
+      </div> */}
 
       {/* 새로운 상권 비교 모달 */}
       <NewCompareModal 

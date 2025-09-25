@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
+import { Z_INDEX } from '@/config/zIndex';
 
 // CSS 애니메이션 스타일
 const gradientAnimationStyle = `
@@ -103,7 +104,7 @@ const MarketRecoModal: React.FC<MarketRecoModalProps> = ({
           right: '60px',
           minWidth: '160px',
           maxWidth: '200px',
-          zIndex: 99999,
+          zIndex: Z_INDEX.NAV_DROPDOWN,
         }}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}

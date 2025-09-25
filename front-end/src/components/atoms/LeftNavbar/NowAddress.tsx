@@ -8,11 +8,13 @@ interface NowAddressProps {
   onAddressChange?: (district: string, dong: string) => void;
 }
 
-// 초기 주소 캐시 (역삼역 중심) - 정확한 행정동명으로 수정
+// 초기 주소 캐시: 성동구 성수2가1동
 const INITIAL_ADDRESS_CACHE = {
-  gu: '강남구',
-  dong: '역삼1동', // 정확한 행정동명으로 수정
-  coordinates: { lat: 37.5008, lng: 127.0387 }
+  gu: '성동구',
+  dong: '성수2가1동',
+  // 성수동카페거리 중심 좌표(TradeAreaValue.json 기반 TM→WGS84 변환값을 KakaoMap Provider에서 사용 중):
+  // 여기서는 근사 좌표로 빠른 초기 표기를 우선
+  coordinates: { lat: 37.5446, lng: 127.0554 }
 };
 
 export default function NowAddress({ onAddressClick, onAddressChange }: NowAddressProps) {
@@ -191,7 +193,7 @@ export default function NowAddress({ onAddressClick, onAddressChange }: NowAddre
           </div>
         ) : (
           <div 
-            className="flex flex-row items-end gap-2 text-sm cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-all duration-150"
+            className="flex flex-row items-end gap-2 text-sm p-2 rounded-lg transition-all duration-150"
             onClick={() => {
               if (currentAddress.gu && currentAddress.dong && onAddressClick) {
                 console.log('🖱️ 주소 클릭:', currentAddress.gu, currentAddress.dong);
