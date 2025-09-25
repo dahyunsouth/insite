@@ -6,6 +6,7 @@ import com.ssafy.insite.ai.dto.response.TradeAreaSummaryResponseDto;
 import com.ssafy.insite.data.dto.response.TradeAreaDetailResponseDto;
 import com.ssafy.insite.data.repository.TradeAreaDetailRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Primary
 public class TradeAreaSummaryServiceRTImpl implements TradeAreaSummaryService {
     private final GmsClient gmsClient;
     private final TradeAreaDetailRepository tradeAreaDetailRepository;
