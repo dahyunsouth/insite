@@ -52,7 +52,8 @@ public enum BaseResponseStatus {
     INVALID_TRDAR_CD(HttpStatus.BAD_REQUEST, false, 2021, "상권 코드가 유효하지 않습니다."),
     INVALID_TRDAR_CD_NM(HttpStatus.BAD_REQUEST, false, 2022, "상권명이 유효하지 않습니다."),
     DUPLICATE_FAVORITE(HttpStatus.CONFLICT, false, 4885, "이미 추가된 상권입니다."),
-    FAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, false, 4885, "존재하지 않는 상권입니다.")
+    FAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, false, 4885, "존재하지 않는 상권입니다."),
+    SUMMARY_NOT_FOUND(HttpStatus.BAD_REQUEST, false, 4885, "상권 요약 데이터가 갱신되지 않았습니다.")
     ;
 
     private final HttpStatusCode httpStatusCode;
