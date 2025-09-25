@@ -1,5 +1,5 @@
 import TotalSearchBar from '@/components/molecules/LeftNavbar/TotalSearchBar';
-import TotalLiveRankBar from '@/components/molecules/LeftNavbar/TotalLiveRankBar';
+// import TotalLiveRankBar from '@/components/molecules/LeftNavbar/TotalLiveRankBar';
 // import TotalFilterBar from '@/components/molecules/LeftNavbar/TotalFilterBar';
 
 interface FirstLeftNavbarProps {
@@ -10,7 +10,7 @@ interface FirstLeftNavbarProps {
 const FirstLeftNavbar = ({ onSearchResultsShow, resetTrigger }: FirstLeftNavbarProps) => {
   return (
     <div className="w-full bg-white flex flex-col items-center">
-      <div className="w-full">
+      <div className="w-full border-b border-gray-300">
         <TotalSearchBar onSearchResultsShow={onSearchResultsShow} resetTrigger={resetTrigger} />
       </div>
       <div className="w-full">

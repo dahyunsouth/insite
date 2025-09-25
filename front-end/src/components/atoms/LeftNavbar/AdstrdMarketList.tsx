@@ -269,11 +269,11 @@ export default function AdstrdMarketList({ district, dong, onClose, onTradeAreaS
   return (
     <div className="w-full bg-white flex flex-col h-full max-h-screen">
       {/* 헤더 영역 (고정) */}
-      <div className="flex items-center justify-between p-6 pb-4 flex-shrink-0">
+      <div className="flex items-center justify-between px-6 py-4 flex-shrink-0">
         <h3 className="text-lg font-bold">
-          상권 리스트
+          상권 목록
         </h3>
-        <button
+        {/* <button
           onClick={onClose}
           className="cursor-pointer p-1 rounded-full text-gray-400 hover:text-gray-600 active:text-gray-800 hover:bg-gray-100 active:bg-gray-200 transition-all duration-150"
           aria-label="닫기"
@@ -291,11 +291,11 @@ export default function AdstrdMarketList({ district, dong, onClose, onTradeAreaS
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
-        </button>
+        </button> */}
       </div>
 
       {/* 콘텐츠 영역 (스크롤 가능) */}
-      <div className="flex-1 overflow-y-auto px-6 pb-6">
+      <div className="flex-1 overflow-y-auto">
         <div className="space-y-3">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
@@ -319,8 +319,8 @@ export default function AdstrdMarketList({ district, dong, onClose, onTradeAreaS
             return (
               <div 
                 key={`${area.trdarCd}-${index}`} 
-                className={`border-b border-gray-100 pb-3 last:border-b-0 cursor-pointer transition-all duration-200 rounded-lg p-3 hover:bg-blue-50 ${
-                  isSelected ? 'bg-blue-100 border-blue-200' : 'hover:shadow-sm'
+                className={`border-b border-gray-100 px-6 last:border-b-0 cursor-pointer transition-all duration-200 p-3 hover:bg-blue-50 ${
+                  isSelected ? 'bg-gray-200 border-blue-200' : ''
                 }`}
                 onClick={() => {
                   console.log('🏪 상권 카드 클릭됨:', area);
@@ -333,7 +333,7 @@ export default function AdstrdMarketList({ district, dong, onClose, onTradeAreaS
                 }}
               >
                 {/* 상권명 */}
-                <div className="font-medium text-base mb-2" style={{ color: isSelected ? '#1D4ED8' : '#3288FF' }}>
+                <div className="font-medium text-base mb-2" style={{ color: isSelected ? '#000000' : '#3288FF' }}>
                   {area.trdarCdNm}
                   {isSelected && (
                     <span className="ml-2 text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full">

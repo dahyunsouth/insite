@@ -12,11 +12,11 @@ const RankCard: React.FC<RecommendationItem & { onClick?: () => void }> = ({ ran
   const getRankGradient = (ranking: number) => {
     switch (ranking) {
       case 1:
-        return 'bg-gradient-to-r from-orange-600 to-orange-300 text-white';
+        return 'bg-gradient-to-r from-gray-200 to-gray-50';
       case 2:
-        return 'bg-gradient-to-r from-blue-600 to-blue-300 text-white';
+        return 'border border-blue-500 bg-gradient-to-r from-blue-500 to-blue-200 text-white';
       case 3:
-        return 'bg-gradient-to-r from-green-600 to-green-300 text-white';
+        return 'bg-gradient-to-r from-gray-200 to-gray-50';
       default:
         return 'bg-gradient-to-r from-gray-600 to-gray-300 text-white';
     }
@@ -43,20 +43,21 @@ const RankCard: React.FC<RecommendationItem & { onClick?: () => void }> = ({ ran
       className={`p-4 rounded-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] ${getRankGradient(ranking)}`}
       onClick={handleClick}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center space-x-4 justify-between">
         {/* 왼쪽: 큰 순위 번호 */}
         <div className="flex items-center">
-          <span className="text-3xl font-bold">{ranking}</span>
+          <span className="text-2xl">{ranking}</span>
         </div>
         
         {/* 중앙: 상권명 */}
-        <div className="flex-1 text-center">
-          <div className="text-base font-semibold truncate">{areaName}</div>
+        <div className="flex-1 text-left">
+          <div className="text-base font-semibold">{areaName}</div>
         </div>
         
         {/* 오른쪽: 점수 */}
-        <div className="text-right">
-          <div className="text-xl font-bold">{formatScore(totalScore)}/100</div>
+        <div className="text-right font-normal">
+          <span className="text-xl font-bold">{formatScore(totalScore)}</span>
+          <span className="text-md">/100</span>
         </div>
       </div>
     </div>

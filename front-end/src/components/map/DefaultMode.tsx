@@ -133,7 +133,7 @@ export function createDongDefaultModeLabelContent(
     border-radius: 5px;
     border: 1px solid rgba(0, 0, 0, 0.2);
     transition: all 0.2s ease;
-    z-index: 1000;
+    z-index: 120;
   " onmouseover="this.style.backgroundColor='${styles.hoverBackgroundColor}'; this.style.color='#ffffff'; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1.1)'" 
      onmouseout="this.style.backgroundColor='${styles.labelBackgroundColor}'; this.style.color='${styles.textColor}'; this.style.textShadow='${styles.textShadow}'; this.style.transform='scale(1)'"
      onclick="console.log('🖱️ 직접 클릭 이벤트:', '${dongName}');"

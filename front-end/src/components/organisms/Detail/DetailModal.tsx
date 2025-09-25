@@ -81,7 +81,7 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
 
   const computedTitle = useMemo(() => {
     if (selected?.name) {
-      const suffix = " 상권 분석";
+      const suffix = "";
       return `${selected.name}${suffix}`;
     }
     return title;
@@ -195,10 +195,10 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
 
   return createPortal(
     <div className={`fixed top-0 right-0 h-full z-30 flex items-start justify-end ${
-      isNavbarOpen ? 'w-[calc(75vw-1rem)]' : 'w-[calc(100vw-1rem)]'
+      isNavbarOpen ? 'w-[75vw]' : 'w-[100vw]'
     }`}>
       {/* modal */}
-      <div className="relative z-10 w-full h-[calc(100vh-1rem)] mt-2 mr-2" onClick={(e) => e.stopPropagation()}>
+      <div className="relative z-10 w-full h-full" onClick={(e) => e.stopPropagation()}>
         <DetailNavbarTemplate
           title={computedTitle}
           subtitle={subtitle}
