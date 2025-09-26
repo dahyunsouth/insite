@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Primary
+// @Primary
 public class TradeAreaSummaryServiceRTImpl implements TradeAreaSummaryService {
     private final GmsClient gmsClient;
     private final TradeAreaDetailRepository tradeAreaDetailRepository;
