@@ -34,12 +34,12 @@ public class TradeAreaDetailResponseDto {
     @AllArgsConstructor
     public static class TradeAreaSalesDto {
         private String stdrYyquCd;  // 기준 년분기 코드
-        private ULong thsmonSelngAmt;
-        private UInteger thsmonSelngCo;
-        private ULong mdwkSelngAmt;
-        private ULong wkendSelngAmt;
-        private UInteger mdwkSelngCo;
-        private UInteger wkendSelngCo;
+        private long thsmonSelngAmt;
+        private int thsmonSelngCo;
+        private long mdwkSelngAmt;
+        private long wkendSelngAmt;
+        private int mdwkSelngCo;
+        private int wkendSelngCo;
     }
 
     @Getter
@@ -47,20 +47,20 @@ public class TradeAreaDetailResponseDto {
     @AllArgsConstructor
     public static class TradeAreaStorDto {
         private String stdrYyquCd;  // 기준 년분기 코드
-        private UInteger storCo;
-        private UInteger frcStorCo;
+        private int storCo;
+        private int frcStorCo;
         private BigDecimal opbizRt;
-        private UInteger opbizStorCo;
+        private int opbizStorCo;
         private BigDecimal clsbizRt;
-        private UInteger clsbizStorCo;
+        private int clsbizStorCo;
     }
 
     @Getter
     @Builder
     @AllArgsConstructor
     public static class TradeAreaFlpopDto {
-        private UInteger stdrYyquCd;  // 기준 년분기 코드
-        private UInteger totFlpopCo;
+        private String stdrYyquCd;  // 기준 년분기 코드
+        private int totFlpopCo;
     }
 
     @Getter
@@ -68,7 +68,7 @@ public class TradeAreaDetailResponseDto {
     @AllArgsConstructor
     public static class TradeAreaRepopDto {
         private String stdrYyquCd;  // 기준 년분기 코드
-        private UInteger totRepopCo;
+        private int totRepopCo;
     }
 
     @Getter
@@ -76,6 +76,6 @@ public class TradeAreaDetailResponseDto {
     @AllArgsConstructor
     public static class TradeAreaWrcPopltnDto {
         private String stdrYyquCd;  // 기준 년분기 코드
-        private UInteger totWrcPopltnCo;
+        private int totWrcPopltnCo;
     }
 }

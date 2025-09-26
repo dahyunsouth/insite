@@ -61,6 +61,10 @@ dependencies {
 	jooqGenerator "org.jooq:jooq-meta:${jooqVersion}"
 	jooqGenerator "org.jooq:jooq-codegen:${jooqVersion}"
 	jooqGenerator 'com.mysql:mysql-connector-j'
+
+	// Spring Batch
+	implementation 'org.springframework.boot:spring-boot-starter-batch'
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 }
 
 tasks.named('test') {

@@ -9,10 +9,12 @@ import com.ssafy.insite.common.dto.response.BaseResponseStatus;
 import com.ssafy.insite.common.exception.BaseException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Primary
 public class TradeAreaSummaryServiceDBImpl implements TradeAreaSummaryService {
     private final TradeAreaSummaryRepository tradeAreaSummaryRepository;
     private final ObjectMapper objectMapper;
