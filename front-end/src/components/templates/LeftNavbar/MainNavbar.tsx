@@ -34,12 +34,16 @@ interface MainNavbarProps {
   onDetailModalClose?: () => void;
   // 네비게이션 바 상태 전달
   onNavbarStateChange?: (isOpen: boolean) => void;
+  // 비교 모달 열림 여부(열림 시 z-index 상향)
+  isCompareOpen?: boolean;
+  // 브랜드 로고 클릭 시 동작
+  onBrandClick?: () => void;
 }
 
 const MainNavbar: React.FC<MainNavbarProps> = ({ 
-  onMyPageClick, 
+  // onMyPageClick, 
   onLoginModalOpen, 
-  onSavedAreasClick, 
+  // onSavedAreasClick, 
   onCompareClick, 
   // onMarketingAreaChange, 
   // showMarketingArea,
@@ -60,9 +64,11 @@ const MainNavbar: React.FC<MainNavbarProps> = ({
   onTradeAreaSelect,
   selectedTradeArea,
   // DetailModal 관련 props
-  onDetailModalClose,
+  onDetailModalClose, 
   // 네비게이션 바 상태 전달
-  onNavbarStateChange
+  onNavbarStateChange,
+  isCompareOpen,
+  onBrandClick
 }) => {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -73,7 +79,7 @@ const MainNavbar: React.FC<MainNavbarProps> = ({
   };
 
   return (
-    <div className="relative h-full z-[300]">
+    <div className={`relative h-full ${isCompareOpen ? 'z-[500]' : 'z-[300]'}`}>
       {/* 네비게이션 바 */}
       <nav 
         className={`
@@ -84,13 +90,13 @@ const MainNavbar: React.FC<MainNavbarProps> = ({
         `}
       >
         <div className="flex-shrink-0">
-          <FirstLeftNavbar onSearchResultsShow={onSearchResultsShow} resetTrigger={resetTrigger} />
+          <FirstLeftNavbar onSearchResultsShow={onSearchResultsShow} resetTrigger={resetTrigger} onBrandClick={onBrandClick} />
         </div>
         <div className="flex-shrink-0">  
           <SecondLeftNavbar
-            onMyPageClick={onMyPageClick}
+            // onMyPageClick={onMyPageClick}
             onLoginModalOpen={onLoginModalOpen}
-            onSavedAreasClick={onSavedAreasClick}
+            // onSavedAreasClick={onSavedAreasClick}
             onCompareClick={onCompareClick}
             onDetailModalClose={onDetailModalClose}
           />

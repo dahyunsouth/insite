@@ -22,13 +22,10 @@ const Notification: React.FC<NotificationProps> = ({
   useEffect(() => {
     if (isVisible) {
       setShow(true);
-      
-      // 지정된 시간 후 자동으로 숨김
       const timer = setTimeout(() => {
         setShow(false);
         onClose?.();
       }, duration);
-
       return () => clearTimeout(timer);
     } else {
       setShow(false);
@@ -38,7 +35,7 @@ const Notification: React.FC<NotificationProps> = ({
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50">
+    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
       <div 
         className="bg-black/70 bg-opacity-80 text-white px-6 py-3 rounded-full shadow-lg cursor-pointer hover:bg-black/80 transition-colors"
         onClick={onClick}
@@ -54,3 +51,5 @@ const Notification: React.FC<NotificationProps> = ({
 };
 
 export default Notification;
+
+

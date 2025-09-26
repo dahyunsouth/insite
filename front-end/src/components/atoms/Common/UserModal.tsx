@@ -106,10 +106,12 @@ const UserModal: React.FC<UserModalProps> = ({
             />
           </div>
           {/* 인사말 */}
-          <p className="text-gray-800 font-semibold text-base leading-tight text-center">
-            {loading ? '로딩 중...' : `${userInfo?.nickname || nickname}님`},<br />
-            <span className="text-gray-500 font-normal">안녕하세요!</span>
-          </p>
+          <div>
+            <div className="text-gray-800 font-semibold text-base leading-tight text-center">
+              {loading ? '로딩 중...' : `${userInfo?.nickname || nickname}님`},
+            </div>
+            <div className="text-sm text-gray-500 font-normal">안녕하세요!</div>
+          </div>
         </div>
       </div>
 

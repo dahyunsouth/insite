@@ -22,10 +22,10 @@ export function createDefaultModeLabelStyle(): {
   textShadow: string;
 } {
   return {
-    labelBackgroundColor: 'rgba(255, 255, 255, 0.9)',
-    labelBorderColor: 'rgba(50, 136, 255, 0.8)',
-    hoverBackgroundColor: 'rgba(50, 136, 255, 0.9)',
-    textColor: '#000000',
+    labelBackgroundColor: '#3288FF',
+    labelBorderColor: '#3288FF',
+    hoverBackgroundColor: '#FFFFFF',
+    textColor: '#FFFFFF',
     textShadow: 'none'
   };
 }
@@ -52,7 +52,7 @@ export function createDefaultModeLabelContent(
     border-radius: 8px;
     border: 2px solid ${styles.labelBorderColor};
     transition: all 0.2s ease;
-  " onmouseover="this.style.backgroundColor='${styles.hoverBackgroundColor}'; this.style.borderColor='${styles.hoverBackgroundColor}'; this.style.color='#ffffff'; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1.1)'" 
+  " onmouseover="this.style.backgroundColor='${styles.hoverBackgroundColor}'; this.style.borderColor='${styles.labelBorderColor}'; this.style.color='#000000'; this.style.textShadow='none'; this.style.transform='scale(1.1)'" 
      onmouseout="this.style.backgroundColor='${styles.labelBackgroundColor}'; this.style.borderColor='${styles.labelBorderColor}'; this.style.color='${styles.textColor}'; this.style.textShadow='${styles.textShadow}'; this.style.transform='scale(1)'"
   >${guName}</div>`;
 }
@@ -117,26 +117,32 @@ export function createDongDefaultModeLabelContent(
   labelId: string,
   fontSize: number = 10
 ): string {
-  const styles = createDefaultModeLabelStyle();
-  
+  const defaultBackgroundColor = '#3288FF';
+  const defaultBorderColor = '#3288FF';
+  const defaultTextColor = '#ffffff';
+  const hoverBackgroundColor = '#ffffff';
+  const hoverBorderColor = '#3288FF';
+  const hoverTextColor = '#000000';
+  const textShadow = 'none';
+
   return `<div id="${labelId}" class="adstrd-label" style="
     padding: 4px 8px;
     font-size: ${fontSize}px;
     font-weight: bold;
-    color: ${styles.textColor};
+    color: ${defaultTextColor};
     text-align: center;
     white-space: nowrap;
     pointer-events: auto;
     cursor: pointer;
-    text-shadow: ${styles.textShadow};
-    background-color: ${styles.labelBackgroundColor};
+    text-shadow: ${textShadow};
+    background-color: ${defaultBackgroundColor};
     border-radius: 5px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 1px solid ${defaultBorderColor};
     transition: all 0.2s ease;
     z-index: 120;
-  " onmouseover="this.style.backgroundColor='${styles.hoverBackgroundColor}'; this.style.color='#ffffff'; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1.1)'" 
-     onmouseout="this.style.backgroundColor='${styles.labelBackgroundColor}'; this.style.color='${styles.textColor}'; this.style.textShadow='${styles.textShadow}'; this.style.transform='scale(1)'"
-     onclick="console.log('🖱️ 직접 클릭 이벤트:', '${dongName}');"
+  " onmouseover="this.style.backgroundColor='${hoverBackgroundColor}'; this.style.borderColor='${hoverBorderColor}'; this.style.color='${hoverTextColor}'; this.style.textShadow='none'; this.style.transform='scale(1.1)'" 
+     onmouseout="this.style.backgroundColor='${defaultBackgroundColor}'; this.style.borderColor='${defaultBorderColor}'; this.style.color='${defaultTextColor}'; this.style.textShadow='${textShadow}'; this.style.transform='scale(1)'"
+     onclick="this.style.backgroundColor='${hoverBackgroundColor}'; this.style.borderColor='${hoverBorderColor}'; this.style.color='${hoverTextColor}'; this.style.textShadow='none'; this.style.transform='scale(1.1)'"
   >${dongName}</div>`;
 }
 

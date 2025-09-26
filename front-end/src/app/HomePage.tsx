@@ -60,6 +60,7 @@ function MapTypeHandler({
         isLoggedIn={isLoggedIn}
         onLogoutSuccess={onLogoutSuccess}
         onLoginSuccess={onLoginSuccess}
+        onSavedAreasClick={onSavedAreasClick}
         onCompareClick={onCompareClick}
         onProfileClick={onMyPageClick}
         onSavedAreasClick={onSavedAreasClick}
@@ -75,6 +76,55 @@ function MapTypeHandler({
         onCafeToggle={onCafeToggle}
       />
     </>
+  );
+}
+
+// 지도 줌 레벨이 6 이상일 때는 CTA를 숨기는 가드 컴포넌트
+function CtaVisibilityGuard({ label, ariaLabel, onPress }: { label: string | null; ariaLabel: string; onPress: () => void }) {
+  const mapContext = useKakaoMapContext();
+  const [zoomLevel, setZoomLevel] = React.useState<number>(() => {
+    try {
+      return mapContext?.getZoomLevel() ?? 3;
+    } catch {
+      return 3;
+    }
+  });
+
+  React.useEffect(() => {
+    const map = mapContext?.map as any;
+    if (!map || !(window as any)?.kakao?.maps?.event) return;
+
+    const handler = () => {
+      try {
+        setZoomLevel(mapContext?.getZoomLevel() ?? 3);
+      } catch {
+        // ignore
+      }
+    };
+
+    (window as any).kakao.maps.event.addListener(map, 'zoom_changed', handler);
+    // 초기 동기화
+    handler();
+    return () => {
+      try {
+        (window as any).kakao.maps.event.removeListener(map, 'zoom_changed', handler);
+      } catch {
+        // ignore
+      }
+    };
+  }, [mapContext]);
+
+  if (!label) return null;
+  if (zoomLevel >= 6) return null;
+
+  return (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 px-4 max-w-[calc(100vw-2rem)]">
+      <CtaPillButton
+        label={label}
+        ariaLabel={ariaLabel}
+        onPress={onPress}
+      />
+    </div>
   );
 }
 
@@ -141,9 +191,9 @@ export default function HomePage() {
   const [isLoadViewMinimized, setIsLoadViewMinimized] = useState(false);
   const [isCafeActive, setIsCafeActive] = useState(false);
   const [showMarketingArea, setShowMarketingArea] = useState(false);
-  const [showMarketList, setShowMarketList] = useState(true);
-  const [currentDistrict, setCurrentDistrict] = useState<string>('강남구');
-  const [currentDong, setCurrentDong] = useState<string>('역삼동');
+  const [showMarketList, setShowMarketList] = useState(false);
+  const [currentDistrict, setCurrentDistrict] = useState<string>('');
+  const [currentDong, setCurrentDong] = useState<string>('');
   const [selectedTradeAreaName, setSelectedTradeAreaName] = useState<string | null>(null);
   const [selectedTradeAreaCode, setSelectedTradeAreaCode] = useState<string | null>(null);
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
@@ -259,8 +309,9 @@ export default function HomePage() {
     console.log('로그아웃 성공 - 상태 업데이트됨');
   };
 
-  // 마이페이지 열기 핸들러
+  // 마이페이지 열기 핸들러 (열 때 보관함 닫기)
   const handleMyPageClick = () => {
+    setShowMyMarket(false);
     setShowMyPage(true);
   };
 
@@ -269,8 +320,9 @@ export default function HomePage() {
     setShowMyPage(false);
   };
 
-  // 저장된 상권 열기 핸들러
+  // 저장된 상권 열기 핸들러 (열 때 마이페이지 닫기)
   const handleSavedAreasClick = () => {
+    setShowMyPage(false);
     setShowMyMarket(true);
   };
 
@@ -289,6 +341,13 @@ export default function HomePage() {
     setSelectedTradeArea1(null);
     setSelectedTradeArea2(null);
   };
+
+  // 다른 모달(비교/저장된 비교)이 열릴 때 상권 추천 드롭다운 닫기
+  useEffect(() => {
+    if (isCompareOpen || isSavedCompareOpen || isDetailOpen || showMyPage || showMyMarket) {
+      window.dispatchEvent(new CustomEvent('marketreco:close'));
+    }
+  }, [isCompareOpen, isSavedCompareOpen, isDetailOpen, showMyPage, showMyMarket]);
 
   // 저장된 상권에서 비교하기 클릭 핸들러
   const handleSavedCompareClick = (selectedTradeAreas: { trdarCd: string; trdarCdNm: string }[]) => {
@@ -361,16 +420,15 @@ export default function HomePage() {
     const previousSelected = document.querySelector('.tradearea-label.selected');
     if (previousSelected) {
       previousSelected.classList.remove('selected');
-      
-      // 기본 스타일로 복원
+      // 기본 스타일로 복원 (TradeAreaPoligon.tsx 기본과 동일)
       const prevElement = previousSelected as HTMLElement;
       prevElement.style.zIndex = '100';
       prevElement.style.transform = 'scale(1)';
       prevElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-      prevElement.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-      prevElement.style.color = '#000000';
+      prevElement.style.backgroundColor = '#3288FF';
+      prevElement.style.color = '#ffffff';
       prevElement.style.textShadow = 'none';
-      prevElement.style.padding = '4px 8px';
+      prevElement.style.padding = '6px 12px';
       prevElement.style.fontSize = '12px';
       prevElement.style.fontWeight = 'bold';
       prevElement.style.textAlign = 'center';
@@ -381,6 +439,14 @@ export default function HomePage() {
       prevElement.style.border = '1px solid rgba(50, 136, 255, 0.8)';
       prevElement.style.transition = 'all 0.2s ease';
       prevElement.style.position = 'relative';
+      // 내부 SVG/텍스트 색상도 기본(흰색)으로 복원
+      const prevSvg = prevElement.querySelector('svg') as HTMLElement | null;
+      if (prevSvg) prevSvg.style.color = '#ffffff';
+      const prevTextContainer = prevElement.querySelector('div[style*="flex-direction: column"]');
+      if (prevTextContainer) {
+        const prevTextDivs = prevTextContainer.querySelectorAll('div');
+        prevTextDivs.forEach((el) => ((el as HTMLElement).style.color = '#ffffff'));
+      }
     }
     
     // 새로운 상권 라벨 찾기 및 스타일 적용
@@ -399,15 +465,14 @@ export default function HomePage() {
       
       // 선택된 상태 클래스 추가
       targetLabel.classList.add('selected');
-      
-      // 선택된 상권 스타일 적용 (TradeAreaPoligon.tsx와 동일)
-      targetLabel.style.zIndex = '9999';
+      // 선택된 상권 스타일 적용 (TradeAreaPoligon.tsx 클릭 효과와 동일)
+      targetLabel.style.zIndex = '10000';
       targetLabel.style.transform = 'scale(1.05)';
       targetLabel.style.boxShadow = '0 4px 12px rgba(50, 136, 255, 0.4)';
-      targetLabel.style.backgroundColor = 'rgba(50, 136, 255, 0.9)';
-      targetLabel.style.color = '#ffffff';
-      targetLabel.style.textShadow = '1px 1px 2px rgba(0,0,0,0.7)';
-      targetLabel.style.padding = '4px 8px';
+      targetLabel.style.backgroundColor = '#ffffff';
+      targetLabel.style.color = '#000000';
+      targetLabel.style.textShadow = 'none';
+      targetLabel.style.padding = '6px 12px';
       targetLabel.style.fontSize = '12px';
       targetLabel.style.fontWeight = 'bold';
       targetLabel.style.textAlign = 'center';
@@ -418,6 +483,16 @@ export default function HomePage() {
       targetLabel.style.border = '1px solid rgba(50, 136, 255, 0.8)';
       targetLabel.style.transition = 'all 0.2s ease';
       targetLabel.style.position = 'relative';
+
+      // 내부 요소 색상 동기화 (이름: 검정, 매출/보조: 파랑)
+      const svgElement = targetLabel.querySelector('svg') as HTMLElement | null;
+      if (svgElement) svgElement.style.color = '#000000';
+      const textContainer = targetLabel.querySelector('div[style*="flex-direction: column"]');
+      if (textContainer) {
+        const [nameEl, salesEl] = Array.from(textContainer.querySelectorAll('div')) as HTMLElement[];
+        if (nameEl) nameEl.style.color = '#000000';
+        if (salesEl) salesEl.style.color = '#3288FF';
+      }
       
       console.log('🎨 상권 라벨 스타일 적용 완료');
     } else {
@@ -534,7 +609,7 @@ export default function HomePage() {
         onShowMarketList={handleShowMarketList}
       >
         {/* 좌측 네비게이션 바 */}
-        <div className={`fixed top-0 left-0 right-0 z-[300] h-screen flex flex-col transition-all duration-300 ease-in-out ${isNavbarOpen ? 'w-1/4' : 'w-0'}`}>
+        <div className={`fixed top-0 left-0 right-0 ${isCompareOpen || isSavedCompareOpen ? 'z-[500]' : 'z-[300]'} h-screen flex flex-col transition-all duration-300 ease-in-out ${isNavbarOpen ? 'w-1/4' : 'w-0'}`}>
           {showMyPage && (
             <MyPageMenu 
               onClose={handleMyPageClose}
@@ -587,6 +662,8 @@ export default function HomePage() {
               selectedTradeArea={selectedTradeArea}
               // DetailModal 관련 props
               onDetailModalClose={() => setIsDetailOpen(false)}
+              // 비교 모달 열림 여부 전달 (열림 시 z-index 상향)
+              isCompareOpen={isCompareOpen || isSavedCompareOpen}
             />
           )}
         </div>
@@ -615,18 +692,15 @@ export default function HomePage() {
           onToggle={handleLoadViewToggle}
           onStateChange={handleLoadViewStateChange}
         />
+
+      {/* Bottom-center CTA - 줌 레벨 6 이상이면 숨김 (Provider 내부) */}
+      <CtaVisibilityGuard 
+        label={selectedTradeAreaName ? `${selectedTradeAreaName} 상권 상세보기` : null}
+        ariaLabel={selectedTradeAreaName ? `${selectedTradeAreaName} 상권 상세보기` : '상권 상세보기'}
+        onPress={() => setIsDetailOpen(true)}
+      />
       </KakaoMap>
 
-      {/* Bottom-center CTA preview for verification - 상권 선택 시에만 표시 */}
-      {selectedTradeAreaName && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 px-4 max-w-[calc(100vw-2rem)]">
-          <CtaPillButton
-            label={`${selectedTradeAreaName} 상권 상세보기`}
-            ariaLabel={`${selectedTradeAreaName} 상권 상세보기`}
-            onPress={() => setIsDetailOpen(true)}
-          />
-        </div>
-      )}
 
       {/* 비교함 담기 모달 - 비교함에 상권이 1개 이상일 때만 표시 */}
       {!isCompareOpen && comparisonTray.length > 0 && (
@@ -731,14 +805,14 @@ export default function HomePage() {
       </div>
 
       {/* 새로운 상권 비교 모달 테스트 버튼 */}
-      <div className="fixed top-20 right-4 z-[500]">
+      {/* <div className="fixed top-20 right-4 z-[500]">
         <button
           onClick={() => setIsNewCompareModalOpen(true)}
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
         >
           새 상권 비교 모달 테스트
         </button>
-      </div>
+      </div> */}
 
       {/* 새로운 상권 비교 모달 */}
       <NewCompareModal 

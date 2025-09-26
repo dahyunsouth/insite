@@ -174,18 +174,16 @@ export default function AiPrompt({ areaName, trdarCode, ranking }: AiPromptProps
           
           {/* 텍스트 내용 */}
           <div className="px-10 py-4 flex-1 flex flex-col">
-            <p className="text-gray-700 mb-4 leading-relaxed text-justify">
-              {aiData.isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-                  <span>AI 분석 중...</span>
-                </div>
-              ) : aiData.error ? (
-                <span className="text-red-500">AI 분석 정보를 불러올 수 없습니다.</span>
-              ) : (
-                displayData.content
-              )}
-            </p>
+            {aiData.isLoading ? (
+              <div className="flex items-center gap-2 text-gray-700 mb-4 leading-relaxed">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                <span>AI 분석 중...</span>
+              </div>
+            ) : aiData.error ? (
+              <p className="text-red-500 mb-4 leading-relaxed">AI 분석 정보를 불러올 수 없습니다.</p>
+            ) : (
+              <p className="text-gray-700 mb-4 leading-relaxed text-justify">{displayData.content}</p>
+            )}
             
             <div className="space-y-2 flex-1">
               <h5 className="text-sm font-bold text-gray-600 mb-2">📋 주요 특징:</h5>

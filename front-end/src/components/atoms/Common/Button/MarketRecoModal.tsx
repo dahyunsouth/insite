@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
+import { Z_INDEX } from '@/config/zIndex';
 
 // CSS 애니메이션 스타일
 const gradientAnimationStyle = `
@@ -25,6 +26,8 @@ interface MarketRecoModalProps {
   isLoggedIn?: boolean;
   onLoginClick?: () => void;
   onCompareClick?: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 const MarketRecoModal: React.FC<MarketRecoModalProps> = ({
@@ -32,7 +35,9 @@ const MarketRecoModal: React.FC<MarketRecoModalProps> = ({
   onClose,
   isLoggedIn = false,
   onLoginClick,
-  onCompareClick
+  onCompareClick,
+  onMouseEnter,
+  onMouseLeave
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -99,8 +104,10 @@ const MarketRecoModal: React.FC<MarketRecoModalProps> = ({
           right: '60px',
           minWidth: '160px',
           maxWidth: '200px',
-          zIndex: 99999,
+          zIndex: Z_INDEX.NAV_DROPDOWN,
         }}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       >
       {/* 메뉴 버튼들 */}
       <div className="py-2">

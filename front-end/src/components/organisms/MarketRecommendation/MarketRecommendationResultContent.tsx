@@ -401,8 +401,8 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
             <div className='text-2xl font-bold text-gray-800'>🎉{item.areaName || '정보 없음'}</div>
           </div>
            <ScoreSummary item={item} />
-           <div className='mt-6 space-y-3'>
-             <div className='bg-purple-50 border border-purple-100 rounded-lg p-4'>
+           <div className='mt-3 space-y-3'>
+             <div className=''>
                <div className='text-md font-semibold text-gray-700 mb-2'>💡 AI 추천 이유</div>
                <div className='text-sm text-gray-600 leading-relaxed text-justify'>
                  {aiData?.isLoading ? (
@@ -418,7 +418,7 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
                </div>
              </div>
              <div>
-               {/* <div className='text-sm font-semibold text-gray-700 mb-1'>📋 주요 특징</div>
+               <div className='text-sm font-semibold text-gray-700 mb-1'>📋 주요 특징</div>
                <div className='text-xs text-gray-600 leading-relaxed'>
                  {aiData?.isLoading ? (
                    <div className="flex items-center gap-2">
@@ -437,7 +437,7 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
                      ))}
                    </ul>
                  )}
-               </div> */}
+               </div>
              </div>
            </div>
         </div>
@@ -510,7 +510,7 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
           </div>
           <ScoreSummary item={item} />
           <div className='mt-3'>
-            <div className='bg-purple-50 border border-purple-100 rounded-lg p-4'>
+            <div className=''>
               <div className='text-md font-semibold text-gray-700 mb-2'>💡 AI 추천 이유</div>
               <div className='text-sm text-gray-600 leading-relaxed text-justify'>
                 {aiData?.isLoading ? (
