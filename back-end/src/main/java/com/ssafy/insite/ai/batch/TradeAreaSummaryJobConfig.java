@@ -3,8 +3,6 @@ package com.ssafy.insite.ai.batch;
 import com.ssafy.insite.ai.entity.TradeAreaSummary;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
@@ -29,16 +27,6 @@ public class TradeAreaSummaryJobConfig {
     @Bean
     public Job tradeAreaSummaryJob() {
         return new JobBuilder("tradeAreaSummaryJob", jobRepository)
-                .listener(new JobExecutionListener() {
-                    @Override
-                    public void beforeJob(JobExecution jobExecution) {
-                        System.out.println(">>> tradeAreaSummaryJob START");
-                    }
-                    @Override
-                    public void afterJob(JobExecution jobExecution) {
-                        System.out.println(">>> tradeAreaSummaryJob END: " + jobExecution.getStatus());
-                    }
-                })
                 .start(tradeAreaSummaryStep())
                 .build();
     }

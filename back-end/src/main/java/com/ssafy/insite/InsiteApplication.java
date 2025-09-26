@@ -11,26 +11,7 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class InsiteApplication {
-	private final JobLauncher jobLauncher;
-	private final Job tradeAreaSummaryJob;
-
-	public InsiteApplication(JobLauncher jobLauncher, Job tradeAreaSummaryJob) {
-		this.jobLauncher = jobLauncher;
-		this.tradeAreaSummaryJob = tradeAreaSummaryJob;
-	}
-
 	public static void main(String[] args) {
 		SpringApplication.run(InsiteApplication.class, args);
-	}
-
-	@Bean
-	public ApplicationRunner runner() {
-		return args -> {
-			JobParameters params = new JobParametersBuilder()
-					.addLong("time", System.currentTimeMillis()) // 매번 유니크 파라미터 필요
-					.toJobParameters();
-
-			jobLauncher.run(tradeAreaSummaryJob, params);
-		};
 	}
 }
