@@ -1,16 +1,16 @@
-<p align="center">
+<p align="left">
   <picture>
     <!-- Dark mode -->
     <source media="(prefers-color-scheme: dark)" srcset="resources/insite-logo-wh.png" />
     <!-- Light mode -->
     <source media="(prefers-color-scheme: light)" srcset="resources/insite-logo-bl.png" />
     <!-- Fallback -->
-    <img alt="Insite Logo" src="resources/insite-logo-bl.png" width="220" />
+    <img alt="Insite Logo" src="resources/insite-logo-bl.png" width="150" />
   </picture>
 </p>
 
-<h1 align="center">Insite: 상권분석 플랫폼</h1>
-<h3 align="center">FROM INSIGHT TO SITE - POWERED BY DATA.</h3>
+<h1 align="left">Insite: 상권분석 플랫폼</h1>
+<h3 align="left">FROM INSIGHT TO SITE - POWERED BY DATA.</h3>
 
 > 인구와 소비 데이터를 포함한 다양한 도시 데이터와 상권 분석 모델을 기반으로 창업자가 최적의 입지를 찾을 수 있도록 상권추천·비교·분석 서비스를 제공하는 플랫폼 입니다.
 
@@ -29,7 +29,7 @@
       <td width="25%" align="center">
       <img src="resources/profile-천광민.png" alt="천광민" width="125" height="125" /><br/>
       <strong>천광민</strong><br/>
-      <sub><span style="color:gray">팀장<br/></span></sub>
+      <sub><span style="color:gray">Front-end | 팀장<br/></span></sub>
     </td>
     <td width="25%" align="center">
       <img src="resources/profile-남다현.png" alt="남다현" width="125" height="125" /><br/>
@@ -41,7 +41,7 @@
     <td width="25%" align="center">
       <img src="resources/profile-정필교.png" alt="정필교" width="125" height="125" /><br/>
       <strong>정필교</strong><br/>
-      <sub><span style="color:gray">API | DB<br/></span></sub>
+      <sub><span style="color:gray">Back-end | DB<br/></span></sub>
     </td>
     <td width="25%" align="center">
       <img src="resources/profile-홍지훈.png" alt="홍지훈" width="125" height="125" /><br/>
@@ -54,12 +54,12 @@
     <td width="25%" align="center">
       <img src="resources/profile-김범주.png" alt="김범주" width="125" height="125" /><br/>
       <strong>김범주</strong><br/>
-      <sub><span style="color:gray">상권분석 모델<br/></span></sub>
+      <sub><span style="color:gray">상권분석모델<br/></span></sub>
     </td>
         <td width="25%" align="center">
       <img src="resources/profile-김재유.png" alt="김재유" width="125" height="125" /><br/>
       <strong>김재유</strong><br/>
-      <sub><span style="color:gray">상권분석 모델<br/></span></sub>
+      <sub><span style="color:gray">상권분석모델<br/></span></sub>
     </td>
   </tr>
 </table>
@@ -68,74 +68,98 @@
 
 ---
 
-## Key Features
+## Problem Definition
 
-> 본 문단은 Insite 플랫폼의 Minimum Viable Product로 팀 평가를 위해 임의로 작성되었으며, 추후 변경 될 수 있음을 알림
+- 예비 창업자의 70% 이상이 **입지 선정에 어려움**을 겪음  
+- 경험 부족으로 인해 **단순 인기 지역 위주 선택** → 폐업률 증가  
+- 단일 지표 기반이 아닌, **다차원 데이터 분석 기반의 의사결정** 필요
+
+---
+
+## Our Solution
+
+- **맞춤형 상권 추천**  
+  - 사용자가 직접 선택한 `자치구`, `상권 유형(발달/골목)` 등을 반영  
+  - 단순 인기 지역이 아닌, **개인 상황에 최적화된 상권** 제안
+
+- **다차원 분석 점수**  
+  - 인구, 매출, 경쟁, 상권 변화 추세 등 종합 분석 → **100점 만점 종합 점수**  
+  - 단일 지표 의존에서 벗어나 객관적이고 신뢰도 높은 결과 제공
+
+- **설득력 있는 결과 제공**  
+  - 점수만 제시하는 것이 아니라, **상권 분위기 + 추천 이유** 함께 제공  
+  - 사용자가 결과를 이해·납득하고 실제 의사결정에 활용 가능
+
+---
+
+## Deliverables
 
 <ul>
   <li>
+    <a href="project-deliverable/user-manual.pdf" target="_blank">
+      📄 유저 매뉴얼.pdf
+    </a>
+  </li>
+  <li>
+    <a href="project-deliverable/porting-manual.pdf" target="_blank">
+      📄 포팅 매뉴얼.pdf
+    </a>
+  </li>
+  <li>
+    <a href="project-deliverable/final-report.pdf" target="_blank">
+      📄 최종발표 자료.pdf
+    </a>
+  </li>
+  <li>
     <a href="project-deliverable/mid-term-report.pdf" target="_blank">
-      📄 중간발표자료.pdf
-    </a>
-  </li>
-  <li>
-    <a href="https://www.figma.com/design/gq5rM8qe4bREXNcoOEkZiu/S13P21E203?node-id=27-115&t=9PjAI0bDAXV0q7lU-1" target="_blank">
-      📄 Figma 와이어프레임
-    </a>
-  </li>
-  <li>
-    <a href="https://www.notion.so/PJT_Insite-24d5c80a61df80729a14efd760641cfa?source=copy_link" target="_blank">
-      📄 Notion 프로젝트문서
+      📄 중간발표 자료.pdf
     </a>
   </li>
 </ul>
 
+---
+
+## System Architecture
+
+<p align="center">
+  <img src="resources/architecture.png" alt="System Architecture" width="600"/>
+</p>
+
+---
+
+## Key Features
+
 ### 1. 상권 평가 모델
+- 지속성·수익성·접근성·위험도·경쟁강도 등을 정량화하여 **100점 만점 종합 점수** 제공  
+- 주요 지표: 유동인구, 상주인구, 직장인구, 업종분포, 상권 변화지표 등  
 
-상권 데이터를 다양한 지표로 정량화하여 **100점 만점의 종합 점수**로 제공하며, 사용자가 빠르게 상권의 전반적인 상태를 이해할 수 있도록 시각화합니다.
-
-- **주요 지표**:
-  - 유동인구, 상주인구, 직장인구
-  - 유사업종 점포 수, 집객시설
-  - 상권변화지표, 소득 및 소비, 임대료 
+<img src="resources/capture/상권상세-종합추천점수.png" alt="System Architecture" width="600"/>
 
 ### 2. AI 상권 추천
+- 선호 행정구, 상권 유형을 조건으로 입력  
+- 종합점수를 기반으로 **Top 3 상권 추천**
 
-사용자 조건을 기반으로 상권을 자동 추천하는 기능입니다.  
-
-- **입력 조건 예시**:
-  - 업종
-  - 상권 종류 (발달상권/골목상권)
-  - 업장 규모 (평수)
-  - 선호 지역 (행정구)
-  - 임대료 수준 등  
-
-- **추천 방식**:
-  - 키워드 필터링 + 우선순위 반영
-  - 종합 점수 기반 추천
-  - 최종 Top 3 상권 제안
+<img src="resources/capture/상권추천-결과화면.png" alt="System Architecture" width="600"/>
 
 ### 3. 상권 상세 조회
+- 시간대별 인구 변화 및 분포 
+- 상권 유형 및 창업 생애주기 분석  
 
-상권을 클릭하면 상세한 분석 정보를 제공합니다.
+<img src="resources/capture/상권상세-유동인구.png" alt="System Architecture" width="600"/>
 
-- 상권의 시간대별 유동 변화
-- 업종 구성 및 변동
-- 상권 내 경쟁도 및 임대료 수준
-- 상권 유형 분석 (주거/상업/혼합 등)
-- 창업 생애주기 추정 (성장기/성숙기 등)
+### 4. 상권 비교 보드
+- 2개 상권의 핵심 지표를 **한눈에 비교**   
 
-### 4. 후보 상권 비교 보드
+<img src="resources/capture/상권비교-종합.png" alt="System Architecture" width="600"/>
 
-2~3개 상권을 선택하여 핵심 지표를 **한눈에 비교**할 수 있습니다.
+---
 
-- 비교 항목:
-  - 유동인구
-  - 월 임대료
-  - 점포 수 및 밀도
-  - 경쟁 업종 수
-  - 종합 점수 등
+## Expected Impact
 
-- 제공 방식:
-  - 표 + 그래프 + 지도 연동
-  - 모든 정보가 **한 화면**에 집약
+- 예비 창업자가 **데이터 기반 입지 선정** 가능  
+- 실패 확률을 낮추고 창업 성공률 향상에 기여  
+
+---
+
+<span style="color:gray">ⓒ 2025. SAMSUNG SW·AI ACADEMY FOR YOUTH<br/>
+Code Ident: S13P21E203</span>
