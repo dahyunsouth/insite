@@ -40,9 +40,79 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
     map.setMapTypeId(mapTypeId);
   };
 
+  // 성능 모니터링 시스템
+  const performanceMonitor = {
+    frameCount: 0,
+    lastTime: 0,
+    frameTimes: [] as number[],
+    jankCount: 0,
+    startTime: 0,
+    
+    start: () => {
+      performanceMonitor.startTime = performance.now();
+      performanceMonitor.frameCount = 0;
+      performanceMonitor.lastTime = performance.now();
+      performanceMonitor.frameTimes = [];
+      performanceMonitor.jankCount = 0;
+      console.log('🚀 성능 모니터링 시작');
+    },
+    
+    measureFrame: () => {
+      const currentTime = performance.now();
+      const frameTime = currentTime - performanceMonitor.lastTime;
+      
+      performanceMonitor.frameCount++;
+      performanceMonitor.frameTimes.push(frameTime);
+      
+      // 16.67ms 초과하면 Jank로 간주
+      if (frameTime > 16.67) {
+        performanceMonitor.jankCount++;
+      }
+      
+      performanceMonitor.lastTime = currentTime;
+    },
+    
+    stop: () => {
+      const totalTime = performance.now() - performanceMonitor.startTime;
+      const avgFrameTime = performanceMonitor.frameTimes.reduce((a, b) => a + b, 0) / performanceMonitor.frameTimes.length;
+      const fps = (performanceMonitor.frameCount / (totalTime / 1000));
+      const jankPercentage = (performanceMonitor.jankCount / performanceMonitor.frameCount) * 100;
+      
+      // GPU 사용률 (간접 측정 - 렌더링 시간 기반)
+      const renderingTime = performanceMonitor.frameTimes.filter(t => t > 16.67).reduce((a, b) => a + b, 0);
+      const gpuUsage = (renderingTime / totalTime) * 100;
+      
+      // 메모리 사용량 (간접 측정)
+      const memoryInfo = (performance as any).memory;
+      const memoryUsage = memoryInfo ? memoryInfo.usedJSHeapSize / 1024 / 1024 : 0;
+      
+      console.log('[성능 측정 결과]');
+      console.log(`FPS: ${fps.toFixed(1)}`);
+      console.log(`Frame Time: ${avgFrameTime.toFixed(2)}ms`);
+      console.log(`Jank: ${performanceMonitor.jankCount}개 (${jankPercentage.toFixed(1)}%)`);
+      console.log(`GPU Usage: ${gpuUsage.toFixed(1)}%`);
+      console.log(`Memory Usage: ${memoryUsage.toFixed(1)}MB`);
+    }
+  };
+
   const zoomIn = () => {
     if (!map) return;
     const currentLevel = map.getLevel();
+    
+    // 성능 모니터링 시작
+    performanceMonitor.start();
+    
+    // 애니메이션 중 프레임 측정
+    const measureFrames = () => {
+      performanceMonitor.measureFrame();
+      if (performance.now() - performanceMonitor.startTime < 500) {
+        requestAnimationFrame(measureFrames);
+      } else {
+        performanceMonitor.stop();
+      }
+    };
+    requestAnimationFrame(measureFrames);
+    
     // 부드러운 애니메이션과 함께 줌 인 (지속시간 500ms, 이징 적용)
     map.setLevel(currentLevel - 1, { 
       animate: true,
@@ -54,6 +124,21 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
   const zoomOut = () => {
     if (!map) return;
     const currentLevel = map.getLevel();
+    
+    // 성능 모니터링 시작
+    performanceMonitor.start();
+    
+    // 애니메이션 중 프레임 측정
+    const measureFrames = () => {
+      performanceMonitor.measureFrame();
+      if (performance.now() - performanceMonitor.startTime < 500) {
+        requestAnimationFrame(measureFrames);
+      } else {
+        performanceMonitor.stop();
+      }
+    };
+    requestAnimationFrame(measureFrames);
+    
     // 부드러운 애니메이션과 함께 줌 아웃 (지속시간 500ms, 이징 적용)
     map.setLevel(currentLevel + 1, { 
       animate: true,
