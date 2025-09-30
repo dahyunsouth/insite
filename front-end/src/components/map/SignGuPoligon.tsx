@@ -363,9 +363,28 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
     if (!map || !window.kakao) return;
 
     let debounceTimer: NodeJS.Timeout;
+    let isPaused = false;
+
+    // 애니메이션 중 폴리곤 일시정지/재개 이벤트 리스너
+    const handlePausePolygons = () => {
+      isPaused = true;
+      // 모든 폴리곤과 라벨 일시적으로 숨김
+      signGuPolygonsRef.current.forEach(polygon => polygon.setMap(null));
+      signGuLabelsRef.current.forEach(label => label.setMap(null));
+    };
+
+    const handleResumePolygons = () => {
+      isPaused = false;
+      // 폴리곤과 라벨 다시 표시
+      signGuPolygonsRef.current.forEach(polygon => polygon.setMap(map));
+      signGuLabelsRef.current.forEach(label => label.setMap(map));
+    };
 
     // 즉시 차단 시스템 - 레벨 7~8 범위를 벗어나면 바로 데이터 차단
     const zoomChangedListener = () => {
+      // 일시정지 중이면 무시
+      if (isPaused) return;
+      
       const currentLevel = map.getLevel();
       console.log(`🔍 줌 변경 감지: 레벨 ${currentLevel}, 상권모드: ${showMarketingArea}, 현재표시: ${isShowingRef.current}`);
       
@@ -398,6 +417,10 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
     // 이벤트 리스너 등록
     (window as any).kakao.maps.event.addListener(map, 'zoom_changed', zoomChangedListener);
 
+    // 애니메이션 일시정지/재개 이벤트 리스너 등록
+    window.addEventListener('pausePolygons', handlePausePolygons);
+    window.addEventListener('resumePolygons', handleResumePolygons);
+
     // 초기 로드 시에도 엄격한 레벨 7~8 확인
     const initialLevel = map.getLevel();
     if (initialLevel >= 7 && initialLevel <= 8) {
@@ -411,6 +434,10 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
     return () => {
       clearTimeout(debounceTimer);
       hideSignGuPolygons();
+      
+      // 애니메이션 일시정지/재개 이벤트 리스너 제거
+      window.removeEventListener('pausePolygons', handlePausePolygons);
+      window.removeEventListener('resumePolygons', handleResumePolygons);
       
       // 전역 이벤트 리스너 정리
       if (globalEventListenerRef.current) {

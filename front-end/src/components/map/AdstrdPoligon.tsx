@@ -578,9 +578,28 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
     if (!map || !window.kakao) return;
 
     let debounceTimer: NodeJS.Timeout;
+    let isPaused = false;
+
+    // 애니메이션 중 폴리곤 일시정지/재개 이벤트 리스너
+    const handlePausePolygons = () => {
+      isPaused = true;
+      // 모든 폴리곤과 라벨 일시적으로 숨김
+      adstrdPolygonsRef.current.forEach(polygon => polygon.setMap(null));
+      adstrdLabelsRef.current.forEach(label => label.setMap(null));
+    };
+
+    const handleResumePolygons = () => {
+      isPaused = false;
+      // 폴리곤과 라벨 다시 표시
+      adstrdPolygonsRef.current.forEach(polygon => polygon.setMap(map));
+      adstrdLabelsRef.current.forEach(label => label.setMap(map));
+    };
 
     // 즉시 차단 시스템 - 레벨 6 초과 시 바로 데이터 차단
     const zoomChangedListener = () => {
+      // 일시정지 중이면 무시
+      if (isPaused) return;
+      
       const currentLevel = map.getLevel();
       
       // 레벨 6 초과 시 즉시 강제 차단 (렌더링 전에 차단)
@@ -620,6 +639,10 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
     // 이벤트 리스너 등록
     window.kakao.maps.event.addListener(map, 'zoom_changed', zoomChangedListener);
 
+    // 애니메이션 일시정지/재개 이벤트 리스너 등록
+    window.addEventListener('pausePolygons', handlePausePolygons);
+    window.addEventListener('resumePolygons', handleResumePolygons);
+
     // 초기 로드 시에도 엄격한 레벨 6 확인
     const initialLevel = map.getLevel();
     if (initialLevel === 6) {
@@ -634,6 +657,10 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
       clearTimeout(debounceTimer);
       hideAdstrdPolygons();
       hideBackgroundOverlay();
+      
+      // 애니메이션 일시정지/재개 이벤트 리스너 제거
+      window.removeEventListener('pausePolygons', handlePausePolygons);
+      window.removeEventListener('resumePolygons', handleResumePolygons);
       
       // 전역 이벤트 리스너 정리
       if (globalEventListenerRef.current) {

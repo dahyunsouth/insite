@@ -95,9 +95,23 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
     }
   };
 
+  // 애니메이션 중 폴리곤 렌더링 일시정지 함수
+  const pausePolygonsDuringAnimation = () => {
+    // 모든 폴리곤 컴포넌트에 일시정지 신호 전송
+    window.dispatchEvent(new CustomEvent('pausePolygons'));
+    
+    // 애니메이션 완료 후 폴리곤 재개 (500ms + 100ms 여유)
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('resumePolygons'));
+    }, 600);
+  };
+
   const zoomIn = () => {
     if (!map) return;
     const currentLevel = map.getLevel();
+    
+    // 애니메이션 시작 시 폴리곤 일시정지
+    pausePolygonsDuringAnimation();
     
     // 성능 모니터링 시작
     performanceMonitor.start();
@@ -124,6 +138,9 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
   const zoomOut = () => {
     if (!map) return;
     const currentLevel = map.getLevel();
+    
+    // 애니메이션 시작 시 폴리곤 일시정지
+    pausePolygonsDuringAnimation();
     
     // 성능 모니터링 시작
     performanceMonitor.start();

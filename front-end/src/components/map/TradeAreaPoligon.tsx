@@ -1264,9 +1264,28 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
     if (!map || !window.kakao) return;
 
     let debounceTimer: NodeJS.Timeout;
+    let isPaused = false;
+
+    // 애니메이션 중 폴리곤 일시정지/재개 이벤트 리스너
+    const handlePausePolygons = () => {
+      isPaused = true;
+      // 모든 폴리곤과 라벨 일시적으로 숨김
+      tradeAreaPolygonsRef.current.forEach(polygon => polygon.setMap(null));
+      tradeAreaLabelsRef.current.forEach(label => label.setMap(null));
+    };
+
+    const handleResumePolygons = () => {
+      isPaused = false;
+      // 폴리곤과 라벨 다시 표시
+      tradeAreaPolygonsRef.current.forEach(polygon => polygon.setMap(map));
+      tradeAreaLabelsRef.current.forEach(label => label.setMap(map));
+    };
 
     // 지도 이동 및 줌 변경 이벤트 리스너
     const mapChangedListener = () => {
+      // 일시정지 중이면 무시
+      if (isPaused) return;
+      
       const currentLevel = map.getLevel();
       
       // 레벨 1~5 범위를 벗어나면 즉시 강제 차단
@@ -1298,6 +1317,10 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
     (window as any).kakao.maps.event.addListener(map, 'dragend', mapChangedListener);
     (window as any).kakao.maps.event.addListener(map, 'center_changed', mapChangedListener);
 
+    // 애니메이션 일시정지/재개 이벤트 리스너 등록
+    window.addEventListener('pausePolygons', handlePausePolygons);
+    window.addEventListener('resumePolygons', handleResumePolygons);
+
     // 초기 로드 시에도 엄격한 레벨 1~5 확인
     const initialLevel = map.getLevel();
     
@@ -1313,6 +1336,10 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
     return () => {
       clearTimeout(debounceTimer);
       hideTradeAreaPolygons();
+      
+      // 애니메이션 일시정지/재개 이벤트 리스너 제거
+      window.removeEventListener('pausePolygons', handlePausePolygons);
+      window.removeEventListener('resumePolygons', handleResumePolygons);
       
       // 전역 이벤트 리스너 정리
       if (globalEventListenerRef.current) {
