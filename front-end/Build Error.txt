@@ -1,0 +1,32 @@
+Build Error
+
+
+Parsing ecmascript source code failed
+
+./front-end/src/components/map/SignGuPoligon.tsx (388:4)
+
+Parsing ecmascript source code failed
+  386 |   }, [guCountData, showMarketingArea, map, hideSignGuPolygons, showSignGuPolygons]);
+  387 |
+> 388 |   }, [map, hideSignGuPolygons, showSignGuPolygons, showMarketingArea]);
+      |    ^
+  389 |
+  390 |   return (
+  391 |     <>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./front-end/src/components/map/SignGuPoligon.tsx [Client Component Browser]
+    ./front-end/src/components/map/KakaoMap.tsx [Client Component Browser]
+    ./front-end/src/app/HomePage.tsx [Client Component Browser]
+    ./front-end/src/app/HomePage.tsx [Server Component]
+    ./front-end/src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./front-end/src/components/map/SignGuPoligon.tsx [Client Component SSR]
+    ./front-end/src/components/map/KakaoMap.tsx [Client Component SSR]
+    ./front-end/src/app/HomePage.tsx [Client Component SSR]
+    ./front-end/src/app/HomePage.tsx [Server Component]
+    ./front-end/src/app/page.tsx [Server Component]

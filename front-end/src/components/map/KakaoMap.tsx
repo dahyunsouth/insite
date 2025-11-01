@@ -30,6 +30,49 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
   const mapContainer = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<any>(null);
 
+  // 성능 모니터링 시스템
+  const performanceMonitor = {
+    startTime: 0,
+    frameCount: 0,
+    jankCount: 0,
+    label: '',
+
+    start: (label: string) => {
+      performanceMonitor.label = label;
+      performanceMonitor.startTime = performance.now();
+      performanceMonitor.frameCount = 0;
+      performanceMonitor.jankCount = 0;
+      console.log(`🚀 [${label}] 성능 측정 시작`);
+    },
+
+    measureFrame: (lastTime: number) => {
+      const currentTime = performance.now();
+      const frameTime = currentTime - lastTime;
+      performanceMonitor.frameCount++;
+      if (frameTime > 16.67) { // 60FPS 기준 16.67ms 초과 시 Jank
+        performanceMonitor.jankCount++;
+      }
+      return currentTime;
+    },
+
+    stop: () => {
+      const totalTime = performance.now() - performanceMonitor.startTime;
+      if (totalTime <= 0 || performanceMonitor.frameCount <= 0) return;
+
+      const fps = (performanceMonitor.frameCount / (totalTime / 1000));
+      const jankPercentage = (performanceMonitor.jankCount / performanceMonitor.frameCount) * 100;
+      const memoryInfo = (performance as any).memory;
+      const memoryUsage = memoryInfo ? memoryInfo.usedJSHeapSize / 1024 / 1024 : 0;
+
+      console.log(`[${performanceMonitor.label} 성능 측정 결과]`);
+      console.log(`- 총 소요 시간: ${totalTime.toFixed(2)}ms`);
+      console.log(`- 평균 FPS: ${fps.toFixed(1)}`);
+      console.log(`- 버벅임 (Jank): ${performanceMonitor.jankCount}회 (${jankPercentage.toFixed(1)}%)`);
+      console.log(`- 메모리 사용량: ${memoryUsage.toFixed(1)}MB`);
+      console.log('----------------------------------------');
+    }
+  };
+
   const setMapType = (mapType: 'roadmap' | 'skyview') => {
     if (!map) return;
     
@@ -40,115 +83,44 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
     map.setMapTypeId(mapTypeId);
   };
 
-  // 성능 모니터링 시스템
-  const performanceMonitor = {
-    frameCount: 0,
-    lastTime: 0,
-    frameTimes: [] as number[],
-    jankCount: 0,
-    startTime: 0,
-    
-    start: () => {
-      performanceMonitor.startTime = performance.now();
-      performanceMonitor.frameCount = 0;
-      performanceMonitor.lastTime = performance.now();
-      performanceMonitor.frameTimes = [];
-      performanceMonitor.jankCount = 0;
-      console.log('🚀 성능 모니터링 시작');
-    },
-    
-    measureFrame: () => {
-      const currentTime = performance.now();
-      const frameTime = currentTime - performanceMonitor.lastTime;
-      
-      performanceMonitor.frameCount++;
-      performanceMonitor.frameTimes.push(frameTime);
-      
-      // 16.67ms 초과하면 Jank로 간주
-      if (frameTime > 16.67) {
-        performanceMonitor.jankCount++;
-      }
-      
-      performanceMonitor.lastTime = currentTime;
-    },
-    
-    stop: () => {
-      const totalTime = performance.now() - performanceMonitor.startTime;
-      const avgFrameTime = performanceMonitor.frameTimes.reduce((a, b) => a + b, 0) / performanceMonitor.frameTimes.length;
-      const fps = (performanceMonitor.frameCount / (totalTime / 1000));
-      const jankPercentage = (performanceMonitor.jankCount / performanceMonitor.frameCount) * 100;
-      
-      // GPU 사용률 (간접 측정 - 렌더링 시간 기반)
-      const renderingTime = performanceMonitor.frameTimes.filter(t => t > 16.67).reduce((a, b) => a + b, 0);
-      const gpuUsage = (renderingTime / totalTime) * 100;
-      
-      // 메모리 사용량 (간접 측정)
-      const memoryInfo = (performance as any).memory;
-      const memoryUsage = memoryInfo ? memoryInfo.usedJSHeapSize / 1024 / 1024 : 0;
-      
-      console.log('[성능 측정 결과]');
-      console.log(`FPS: ${fps.toFixed(1)}`);
-      console.log(`Frame Time: ${avgFrameTime.toFixed(2)}ms`);
-      console.log(`Jank: ${performanceMonitor.jankCount}개 (${jankPercentage.toFixed(1)}%)`);
-      console.log(`GPU Usage: ${gpuUsage.toFixed(1)}%`);
-      console.log(`Memory Usage: ${memoryUsage.toFixed(1)}MB`);
-    }
-  };
 
-  // 애니메이션 중 폴리곤 렌더링 일시정지 함수
-  const pausePolygonsDuringAnimation = () => {
-    // 모든 폴리곤 컴포넌트에 일시정지 신호 전송
-    window.dispatchEvent(new CustomEvent('pausePolygons'));
-    
-    // 애니메이션 완료 후 폴리곤 재개 (500ms + 100ms 여유)
-    setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('resumePolygons'));
-    }, 600);
-  };
 
   const zoomIn = () => {
     if (!map) return;
+    window.dispatchEvent(new CustomEvent('hideAllLabels')); // 라벨 숨기기 이벤트 발생
+
     const currentLevel = map.getLevel();
-    
-    // 애니메이션 시작 시 폴리곤 일시정지
-    pausePolygonsDuringAnimation();
-    
-    // 성능 모니터링 시작
-    performanceMonitor.start();
-    
-    // 애니메이션 중 프레임 측정
+
+    performanceMonitor.start('Zoom In 애니메이션');
+    let lastTime = performance.now();
     const measureFrames = () => {
-      performanceMonitor.measureFrame();
-      if (performance.now() - performanceMonitor.startTime < 500) {
+      lastTime = performanceMonitor.measureFrame(lastTime);
+      if (performance.now() - performanceMonitor.startTime < 500) { // 500ms 애니메이션 시간
         requestAnimationFrame(measureFrames);
       } else {
         performanceMonitor.stop();
       }
     };
     requestAnimationFrame(measureFrames);
-    
-    // 부드러운 애니메이션과 함께 줌 인 (지속시간 500ms, 이징 적용)
+
     map.setLevel(currentLevel - 1, { 
-      animate: true,
-      duration: 500,
-      easing: 'easeOutCubic'
+      animate: {
+        duration: 500,
+      }
     });
   };
 
   const zoomOut = () => {
     if (!map) return;
+    window.dispatchEvent(new CustomEvent('hideAllLabels')); // 라벨 숨기기 이벤트 발생
+
     const currentLevel = map.getLevel();
-    
-    // 애니메이션 시작 시 폴리곤 일시정지
-    pausePolygonsDuringAnimation();
-    
-    // 성능 모니터링 시작
-    performanceMonitor.start();
-    
-    // 애니메이션 중 프레임 측정
+
+    performanceMonitor.start('Zoom Out 애니메이션');
+    let lastTime = performance.now();
     const measureFrames = () => {
-      performanceMonitor.measureFrame();
-      if (performance.now() - performanceMonitor.startTime < 500) {
+      lastTime = performanceMonitor.measureFrame(lastTime);
+      if (performance.now() - performanceMonitor.startTime < 500) { // 500ms 애니메이션 시간
         requestAnimationFrame(measureFrames);
       } else {
         performanceMonitor.stop();
@@ -156,11 +128,10 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
     };
     requestAnimationFrame(measureFrames);
     
-    // 부드러운 애니메이션과 함께 줌 아웃 (지속시간 500ms, 이징 적용)
     map.setLevel(currentLevel + 1, { 
-      animate: true,
-      duration: 500,
-      easing: 'easeOutCubic'
+      animate: {
+        duration: 500,
+      }
     });
   };
 
