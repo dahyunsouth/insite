@@ -53,7 +53,7 @@ const SecondLeftNavbar: React.FC<SecondLeftNavbarProps> = ({
       <nav className="w-full px-3 py-2">
         {/* <div className="text-lg font-normal text-gray-900 ml-2 mb-3">
           <span className="text-2xl font-bold text-blue-500">Insite</span>에서 지금 <strong className="text-green-700">주목할 서비스!</strong></div> */}
-        <div className="w-full flex items-center justify-between gap-4">
+        <div className="w-full flex justify-between gap-4">
           {/* 상권추천 버튼 */}
           <button
             type="button"
