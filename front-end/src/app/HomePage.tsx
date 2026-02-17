@@ -21,6 +21,19 @@ import { tmToWgs84 } from '@/utils/coordinateTransform';
 import { useComparisonStore } from '@/stores/comparisonStore';
 import { logger } from '@/utils/logger';
 
+// 상권 데이터 타입 정의
+interface TradeArea {
+  trdarSeCd: string;
+  trdarSeCdNm: string;
+  trdarCd: number;
+  trdarCdNm: string;
+  xcntsValue: number;
+  ydntsValue: number;
+  relmAr: number;
+  storCo: number;
+  similrIndutyStorCo: number;
+}
+
 // 지도 타입 변경 핸들러 컴포넌트
 function MapTypeHandler({ 
   isLoggedIn, 
@@ -90,8 +103,8 @@ function CtaVisibilityGuard({ label, ariaLabel, onPress }: { label: string | nul
   });
 
   React.useEffect(() => {
-    const map = mapContext?.map as any;
-    if (!map || !(window as any)?.kakao?.maps?.event) return;
+    const map = mapContext?.map;
+    if (!map || !window?.kakao?.maps?.event) return;
 
     const handler = () => {
       try {
@@ -101,12 +114,12 @@ function CtaVisibilityGuard({ label, ariaLabel, onPress }: { label: string | nul
       }
     };
 
-    (window as any).kakao.maps.event.addListener(map, 'zoom_changed', handler);
+    window.kakao.maps.event.addListener(map, 'zoom_changed', handler);
     // 초기 동기화
     handler();
     return () => {
       try {
-        (window as any).kakao.maps.event.removeListener(map, 'zoom_changed', handler);
+        window.kakao.maps.event.removeListener(map, 'zoom_changed', handler);
       } catch {
         // ignore
       }
@@ -197,7 +210,7 @@ export default function HomePage() {
   const [resetTrigger, setResetTrigger] = useState(0);
   
   // 상권 선택 관련 상태 추가
-  const [selectedTradeArea, setSelectedTradeArea] = useState<any>(null);
+  const [selectedTradeArea, setSelectedTradeArea] = useState<TradeArea | null>(null);
 
   // 최신 상태를 참조하기 위한 ref
   const showMarketListRef = useRef(showMarketList);
@@ -489,7 +502,7 @@ export default function HomePage() {
   }, []);
 
   // 상권 선택 핸들러
-  const handleTradeAreaSelect = useCallback((tradeArea: any) => {
+  const handleTradeAreaSelect = useCallback((tradeArea: TradeArea) => {
     logger.info('🏪 상권 선택됨:', tradeArea);
     
     // 선택된 상권 상태 업데이트
@@ -497,7 +510,7 @@ export default function HomePage() {
     
     // 상세보기 안내바를 위한 상태 업데이트
     setSelectedTradeAreaName(tradeArea.trdarCdNm);
-    setSelectedTradeAreaCode(tradeArea.trdarCd);
+    setSelectedTradeAreaCode(String(tradeArea.trdarCd));
     
     // TM 좌표를 WGS84로 변환
     const wgs84Coords = tmToWgs84(tradeArea.xcntsValue, tradeArea.ydntsValue);
@@ -527,7 +540,7 @@ export default function HomePage() {
     
     // 상권 폴리곤과 라벨 스타일 변경
     setTimeout(() => {
-      updateTradeAreaStyle(tradeArea.trdarCd, tradeArea.trdarCdNm);
+      updateTradeAreaStyle(String(tradeArea.trdarCd), tradeArea.trdarCdNm);
       
       // 폴리곤 스타일 변경을 위한 커스텀 이벤트 발생
       const styleEvent = new CustomEvent('selectTradeArea', {

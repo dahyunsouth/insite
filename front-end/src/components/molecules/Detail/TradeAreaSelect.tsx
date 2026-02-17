@@ -86,8 +86,8 @@ export default function TradeAreaSelect({ className, onChange }: Props) {
       // Load only first 10 items once (no infinite scroll)
       await loadRange(q, 1, 10);
       setHasMore(false);
-    } catch (e: any) {
-      setError(e?.message ?? "load failed");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "load failed");
     } finally {
       setLoading(false);
     }
@@ -117,7 +117,7 @@ export default function TradeAreaSelect({ className, onChange }: Props) {
             onChange={(e) => setQuery(e.target.value)}
           />
           <Combobox.Options
-            ref={listRef as any}
+            ref={listRef as React.Ref<HTMLElement>}
             className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-xl border border-gray-200 bg-white p-1 shadow-lg"
           >
               {error && (

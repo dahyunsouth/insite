@@ -103,8 +103,8 @@ export default function SalesCard({ trdarCode }: Props) {
         const payload = (await res.json()) as SalesApiResponse;
         if (aborted) return;
         setData(payload);
-      } catch (e: any) {
-        if (!aborted) setError(e?.message ?? "load failed");
+      } catch (e: unknown) {
+        if (!aborted) setError(e instanceof Error ? e.message : "load failed");
       } finally {
         if (!aborted) setLoading(false);
       }

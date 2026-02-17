@@ -9,6 +9,14 @@ interface NowAddressProps {
   onAddressChange?: (district: string, dong: string) => void;
 }
 
+interface RegionResult {
+  region_type: string;
+  address_name: string;
+  region_1depth_name: string;
+  region_2depth_name: string;
+  region_3depth_name: string;
+}
+
 // 초기 주소 캐시: 성동구 성수2가1동
 const INITIAL_ADDRESS_CACHE = {
   gu: '성동구',
@@ -27,24 +35,28 @@ export default function NowAddress({ onAddressClick, onAddressChange }: NowAddre
   const [isLoading, setIsLoading] = useState<boolean>(false); // 초기 로딩 상태를 false로 변경
 
   // 좌표로 주소 검색하는 함수 (카카오맵 가이드 코드 기반)
-  const searchAddrFromCoords = (coords: any, callback: (result: any[], status: any) => void) => {
-    if (!window.kakao || !(window as any).kakao?.maps?.services) {
+  const searchAddrFromCoords = (coords: kakao.maps.LatLng, callback: (result: RegionResult[], status: string) => void) => {
+    if (!window.kakao || !window.kakao?.maps?.services) {
       logger.info('❌ 카카오맵 services가 로드되지 않음');
       setIsLoading(false);
       return;
     }
 
-    const geocoder = new (window as any).kakao.maps.services.Geocoder();
+    const geocoder = new window.kakao.maps.services.Geocoder();
     
     // 좌표로 행정동 주소 정보를 요청합니다 (가이드 코드와 동일)
-    geocoder.coord2RegionCode(coords.getLng(), coords.getLat(), callback);
+    geocoder.coord2RegionCode(
+      coords.getLng(),
+      coords.getLat(),
+      callback as unknown as (result: kakao.maps.services.GeocoderResult[], status: kakao.maps.services.Status) => void,
+    );
   };
 
   // 지도 중심좌표에 대한 주소정보를 표출하는 함수 (가이드 코드 기반)
-  const displayCenterInfo = (result: any[], status: any) => {
+  const displayCenterInfo = (result: RegionResult[], status: string) => {
     logger.info('🌍 Geocoder 호출 결과:', { result, status });
     
-    if (status === (window as any).kakao.maps.services.Status.OK) {
+    if (status === window.kakao.maps.services.Status.OK) {
       logger.info('✅ Geocoder 성공, 결과 개수:', result.length);
       
       let gu = '';
@@ -129,7 +141,7 @@ export default function NowAddress({ onAddressClick, onAddressChange }: NowAddre
 
     // services가 로드될 때까지 대기
     const checkServicesAndStart = () => {
-      if (!(window as any).kakao?.maps?.services) {
+      if (!window.kakao?.maps?.services) {
         logger.info('⏳ 카카오맵 services 로딩 대기 중...');
         setTimeout(checkServicesAndStart, 100);
         return;
@@ -163,12 +175,12 @@ export default function NowAddress({ onAddressClick, onAddressChange }: NowAddre
         searchAddrFromCoords(center, displayCenterInfo);
       };
 
-      (window as any).kakao.maps.event.addListener(map, 'idle', idleListener);
+      window.kakao.maps.event.addListener(map, 'idle', idleListener);
 
       // cleanup 함수에서 이벤트 리스너 제거
       return () => {
-        if ((window as any).kakao?.maps?.event) {
-          (window as any).kakao.maps.event.removeListener(map, 'idle', idleListener);
+        if (window.kakao?.maps?.event) {
+          window.kakao.maps.event.removeListener(map, 'idle', idleListener);
         }
       };
     };

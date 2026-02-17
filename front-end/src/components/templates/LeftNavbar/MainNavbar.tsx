@@ -7,6 +7,18 @@ import FifthLeftNavbar from '@/components/organisms/LeftNavbar/FifthLeftNavbar';
 import OpenButton from '@/components/atoms/Common/Button/OpenButton';
 import CloseButton from '@/components/atoms/Common/Button/CloseButton';
 
+interface TradeArea {
+  trdarSeCd: string;
+  trdarSeCdNm: string;
+  trdarCd: number;
+  trdarCdNm: string;
+  xcntsValue: number;
+  ydntsValue: number;
+  relmAr: number;
+  storCo: number;
+  similrIndutyStorCo: number;
+}
+
 interface MainNavbarProps {
   onMyPageClick?: () => void;
   onLoginModalOpen?: () => void;
@@ -28,8 +40,8 @@ interface MainNavbarProps {
   onSearchResultsShow?: (show: boolean, keyword: string) => void;
   resetTrigger?: number;
   // 상권 선택 관련 props
-  onTradeAreaSelect?: (tradeArea: any) => void;
-  selectedTradeArea?: any;
+  onTradeAreaSelect?: (tradeArea: TradeArea) => void;
+  selectedTradeArea?: TradeArea | null;
   // DetailModal 관련 props
   onDetailModalClose?: () => void;
   // 네비게이션 바 상태 전달

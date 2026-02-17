@@ -9,23 +9,23 @@ import seoulDistricts from '../../data/seoulDistricts.json';
 export default function ZoomBlock() {
   const { map } = useKakaoMapContext();
   const [showZoomLimitMessage, setShowZoomLimitMessage] = useState(false);
-  const seoulBoundariesRef = useRef<unknown[]>([]);
+  const seoulBoundariesRef = useRef<kakao.maps.Polygon[]>([]);
 
   // 서울시 경계선 표시 함수
   const showSeoulBoundaries = useCallback(() => {
     if (!map || !window.kakao || seoulBoundariesRef.current.length > 0) return;
 
-    const polygons: unknown[] = [];
+    const polygons: kakao.maps.Polygon[] = [];
 
     seoulDistricts.features.forEach((feature) => {
       if (feature.geometry.type === 'Polygon') {
         // GeoJSON 좌표를 카카오맵 좌표로 변환 (매우 미세하게 위로 조정)
         const coordinates = feature.geometry.coordinates[0].map(([lng, lat]) => 
-          new (window.kakao.maps as any).LatLng(lat + 0.0025, lng - 0.001) // 위도에 0.00005도 추가 (약 5.5미터, 매우 미세한 조정)
+          new window.kakao.maps.LatLng(lat + 0.0025, lng - 0.001) // 위도에 0.00005도 추가 (약 5.5미터, 매우 미세한 조정)
         );
 
         // 폴리곤 생성
-        const polygon = new (window.kakao.maps as any).Polygon({
+        const polygon = new window.kakao.maps.Polygon({
           path: coordinates,
           strokeWeight: 2,
           strokeColor: '#3288FF',
@@ -46,7 +46,7 @@ export default function ZoomBlock() {
 
   // 서울시 경계선 숨김 함수
   const hideSeoulBoundaries = useCallback(() => {
-    seoulBoundariesRef.current.forEach((polygon: any) => {
+    (seoulBoundariesRef.current as kakao.maps.Polygon[]).forEach((polygon) => {
       polygon.setMap(null);
     });
     seoulBoundariesRef.current = [];
@@ -69,7 +69,7 @@ export default function ZoomBlock() {
         showSeoulBoundaries();
         
         // 화면 정중앙을 지정된 좌표로 설정
-        const seoulCenter = new (window.kakao.maps as any).LatLng(37.5662952, 126.9779451);
+        const seoulCenter = new window.kakao.maps.LatLng(37.5662952, 126.9779451);
         map.setCenter(seoulCenter);
       } else {
         // 레벨 9 미만일 때 경계선 숨김

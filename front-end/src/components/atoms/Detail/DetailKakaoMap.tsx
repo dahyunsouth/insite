@@ -23,7 +23,7 @@ export default function DetailKakaoMap({
   height = "300px"
 }: DetailKakaoMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
+  const mapInstanceRef = useRef<kakao.maps.Map | null>(null);
 
   useEffect(() => {
     logger.info('DetailKakaoMap useEffect 실행:', { coordinates, areaName });
@@ -52,18 +52,18 @@ export default function DetailKakaoMap({
 
       const container = mapRef.current;
       const options = {
-        center: new (window as any).kakao.maps.LatLng(coordsToUse.lat, coordsToUse.lng),
+        center: new window.kakao.maps.LatLng(coordsToUse.lat, coordsToUse.lng),
         level: 3, // 지도 확대 레벨
       };
 
       logger.info('DetailKakaoMap 지도 생성 시도:', options);
 
-      const map = new (window as any).kakao.maps.Map(container, options);
+      const map = new window.kakao.maps.Map(container, options);
       mapInstanceRef.current = map;
 
       // 마커 생성
-      const markerPosition = new (window as any).kakao.maps.LatLng(coordsToUse.lat, coordsToUse.lng);
-      const marker = new (window as any).kakao.maps.Marker({
+      const markerPosition = new window.kakao.maps.LatLng(coordsToUse.lat, coordsToUse.lng);
+      const marker = new window.kakao.maps.Marker({
         position: markerPosition,
       });
 
@@ -71,7 +71,7 @@ export default function DetailKakaoMap({
 
       // 인포윈도우 생성
       if (areaName) {
-        const infowindow = new (window as any).kakao.maps.InfoWindow({
+        const infowindow = new window.kakao.maps.InfoWindow({
           content: `<div style="padding:5px; font-size:12px;">${areaName}</div>`,
         });
         infowindow.open(map, marker);
@@ -81,7 +81,7 @@ export default function DetailKakaoMap({
     }
 
     // 카카오맵 API가 이미 로드되어 있는지 확인
-    if (typeof window !== 'undefined' && (window as any).kakao && (window as any).kakao.maps) {
+    if (typeof window !== 'undefined' && window.kakao && window.kakao.maps) {
       logger.info('DetailKakaoMap: 카카오맵 API 이미 로드됨, 바로 초기화');
       // API가 이미 로드되어 있으면 바로 초기화
       initializeMap();
@@ -89,7 +89,7 @@ export default function DetailKakaoMap({
       logger.info('DetailKakaoMap: 카카오맵 API 로드 대기 중...');
       // API가 로드되지 않은 경우 로드 완료를 기다림
       const checkKakao = () => {
-        if ((window as any).kakao && (window as any).kakao.maps) {
+        if (window.kakao && window.kakao.maps) {
           logger.info('DetailKakaoMap: 카카오맵 API 로드 완료, 초기화 시작');
           initializeMap();
         } else {

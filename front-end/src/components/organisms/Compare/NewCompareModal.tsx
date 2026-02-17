@@ -25,6 +25,9 @@ interface TradeAreaData {
   trdarSeCdNm: string;
 }
 
+// 상권 상세 메트릭 타입 (mapTradeAreaDetailToMetrics 반환값)
+type TradeAreaMetrics = ReturnType<typeof mapTradeAreaDetailToMetrics>;
+
 // 비교 데이터 타입 정의
 interface ComparisonData {
   [key: string]: {
@@ -43,8 +46,8 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
   const [_tradeAreaDataB, setTradeAreaDataB] = useState<TradeAreaData | null>(null);
   
   // 상권 상세 데이터 상태
-  const [tradeAreaDetailA, setTradeAreaDetailA] = useState<any>(null);
-  const [tradeAreaDetailB, setTradeAreaDetailB] = useState<any>(null);
+  const [tradeAreaDetailA, setTradeAreaDetailA] = useState<TradeAreaMetrics | null>(null);
+  const [tradeAreaDetailB, setTradeAreaDetailB] = useState<TradeAreaMetrics | null>(null);
   
   // 비교 데이터 상태
   const [comparisonData, setComparisonData] = useState<ComparisonData | null>(null);

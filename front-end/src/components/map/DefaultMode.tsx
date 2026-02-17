@@ -88,7 +88,7 @@ export function handleDefaultModeHover(
 // 기본 모드 폴리곤 배치 업데이트
 export function updatePolygonsToDefaultMode(
   polygons: KakaoPolygon[],
-  labels: any[]
+  labels: unknown[]
 ): void {
   logger.info('🔄 기본 모드 활성화 - 기본 상태로 복원');
   
@@ -177,7 +177,7 @@ export function handleDongDefaultModeHover(
 // 행정동용 기본 모드 폴리곤 배치 업데이트
 export function updateDongPolygonsToDefaultMode(
   polygons: KakaoPolygon[],
-  labels: any[]
+  labels: unknown[]
 ): void {
   logger.info('🔄 행정동 기본 모드 활성화 - 기본 상태로 복원');
   

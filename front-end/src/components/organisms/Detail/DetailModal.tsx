@@ -14,7 +14,7 @@ import { logger } from '@/utils/logger';
 // 상권 코드로부터 좌표를 가져오는 함수 (실제 JSON 데이터 사용)
 const getCoordinatesFromTrdarCode = (trdarCode: string): { lat: number; lng: number } | undefined => {
   try {
-    const tradeArea = TradeAreaRawData.DATA.find((item: any) => item.trdar_cd === trdarCode);
+    const tradeArea = TradeAreaRawData.DATA.find((item) => item.trdar_cd === trdarCode);
     if (!tradeArea) {
       logger.warn('Trade area not found for code:', trdarCode);
       return undefined;

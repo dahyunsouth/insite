@@ -8,9 +8,9 @@ import signGuData from '../../data/SignGuValue.json';
 
 // 타입 정의
 export interface KakaoPolygon {
-  setMap: (map: any) => void;
-  setOptions: (options: any) => void;
-  getOptions?: () => any;
+  setMap: (map: kakao.maps.Map | null) => void;
+  setOptions: (options: Partial<kakao.maps.PolygonOptions>) => void;
+  getOptions?: () => Partial<kakao.maps.PolygonOptions>;
 }
 
 export interface GuCountData {
@@ -47,7 +47,7 @@ export function useMarketMode(): MarketModeConfig {
     
     try {
       // 모든 자치구에 대해 병렬로 API 호출
-      const promises = signGuData.DATA.map(async (district: any) => {
+      const promises = signGuData.DATA.map(async (district) => {
         try {
           const url = `${API_ENDPOINTS.COUNT_BY_GU}?district=${encodeURIComponent(district.signgu_nm)}`;
           logger.info(`🌐 API 호출: ${url}`);
@@ -343,7 +343,7 @@ export function handleMarketModeHover(
 // 상권 모드 폴리곤 배치 업데이트
 export function updatePolygonsToMarketMode(
   polygons: KakaoPolygon[],
-  labels: any[],
+  labels: unknown[],
   guCountData: GuCountData
 ): void {
   logger.info('🎯 상권 모드 활성화 - 폴리곤 색상 업데이트');

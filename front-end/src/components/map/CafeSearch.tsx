@@ -20,10 +20,10 @@ interface CafeSearchProps {
 
 export default function CafeSearch({ isActive }: CafeSearchProps) {
   const { map, showNotification } = useKakaoMapContext();
-  const [_markers, setMarkers] = useState<any[]>([]);
-  const placeOverlayRef = useRef<any>(null);
+  const [_markers, setMarkers] = useState<kakao.maps.Marker[]>([]);
+  const placeOverlayRef = useRef<kakao.maps.CustomOverlay | null>(null);
   const contentNodeRef = useRef<HTMLDivElement | null>(null);
-  const psRef = useRef<any>(null);
+  const psRef = useRef<kakao.maps.services.Places | null>(null);
   const currCategoryRef = useRef<string>('');
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -31,17 +31,17 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
 
   // 초기화
   useEffect(() => {
-    logger.info('CafeSearch 초기화 시작:', { 
-      map: !!map, 
+    logger.info('CafeSearch 초기화 시작:', {
+      map: !!map,
       kakao: typeof window !== 'undefined' ? !!window.kakao : false,
-      services: typeof window !== 'undefined' ? !!(window as any).kakao?.maps?.services : false
+      services: typeof window !== 'undefined' ? !!window.kakao?.maps?.services : false
     });
-    
-    if (!map || !window.kakao || !(window.kakao as any).maps.services) {
-      logger.info('초기화 조건 불만족:', { 
-        map: !!map, 
-        kakao: !!window.kakao, 
-        services: !!(window as any).kakao?.maps?.services 
+
+    if (!map || !window.kakao || !window.kakao.maps.services) {
+      logger.info('초기화 조건 불만족:', {
+        map: !!map,
+        kakao: !!window.kakao,
+        services: !!window.kakao?.maps?.services
       });
       return;
     }
@@ -49,20 +49,18 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
     logger.info('카페 검색 초기화 진행');
 
     // 장소 검색 객체 생성
-    psRef.current = new (window as any).kakao.maps.services.Places(map);
+    psRef.current = new window.kakao.maps.services.Places(map);
     logger.info('Places 객체 생성 완료');
 
     // 커스텀 오버레이 생성 (앵커 설정 포함, 높은 z-index로 상권명 박스보다 위에 표시)
-    const overlay = new (window as any).kakao.maps.CustomOverlay({ 
+    const overlay = new window.kakao.maps.CustomOverlay({
       zIndex: 140,  // MAP_CUSTOM_OVERLAY 계층 사용
-      xAnchor: 0.5,   // 가로 중앙
-      yAnchor: 1.1    // 세로 하단 (마커 위쪽에 표시)
     });
     const content = document.createElement('div');
     content.className = 'placeinfo_wrap';
 
     // 이벤트 핸들러 등록 (공식 코드와 동일)
-    const preventMap = () => (window as any).kakao.maps.event.preventMap();
+    const preventMap = () => window.kakao.maps.event.preventMap();
     content.addEventListener('mousedown', preventMap);
     content.addEventListener('touchstart', preventMap);
 
@@ -94,11 +92,11 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
   // isActive 변경 시 검색 실행
   useEffect(() => {
     logger.info('CafeSearch isActive 변경:', { isActive, psRef: !!psRef.current, placeOverlay: !!placeOverlayRef.current });
-    
+
     if (isActive) {
       logger.info('카페 검색 활성화');
       currCategoryRef.current = 'CE7'; // 카페 카테고리 ID 설정
-      
+
       // 초기화가 완료되지 않았다면 잠시 후 다시 시도
       if (!psRef.current || !placeOverlayRef.current) {
         logger.info('초기화 대기 중, 200ms 후 재시도');
@@ -132,12 +130,12 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
     const handleMapIdle = () => {
       if (currCategoryRef.current === 'CE7') {
         logger.info('지도 이동 완료, 카페 재탐색 예약');
-        
+
         // 기존 타이머가 있다면 취소
         if (searchTimeoutRef.current) {
           clearTimeout(searchTimeoutRef.current);
         }
-        
+
         // 500ms 후에 재탐색 실행 (디바운싱)
         searchTimeoutRef.current = setTimeout(() => {
           logger.info('디바운싱 완료, 카페 재탐색 시작');
@@ -147,12 +145,12 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
     };
 
     // 지도 이동 완료 이벤트 리스너 등록
-    (window as any).kakao.maps.event.addListener(map, 'idle', handleMapIdle);
+    window.kakao.maps.event.addListener(map, 'idle', handleMapIdle);
 
     // cleanup 함수에서 이벤트 리스너 제거
     return () => {
-      if ((window as any).kakao?.maps?.event) {
-        (window as any).kakao.maps.event.removeListener(map, 'idle', handleMapIdle);
+      if (window.kakao?.maps?.event) {
+        window.kakao.maps.event.removeListener(map, 'idle', handleMapIdle);
       }
       // 타이머 정리
       if (searchTimeoutRef.current) {
@@ -169,8 +167,8 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
       return;
     }
 
-    if (!psRef.current || !placeOverlayRef.current || !(window as any).kakao?.maps?.services) {
-      logger.info('searchPlaces 조건 불만족:', { psRef: !!psRef.current, placeOverlay: !!placeOverlayRef.current, services: !!(window as any).kakao?.maps?.services });
+    if (!psRef.current || !placeOverlayRef.current || !window.kakao?.maps?.services) {
+      logger.info('searchPlaces 조건 불만족:', { psRef: !!psRef.current, placeOverlay: !!placeOverlayRef.current, services: !!window.kakao?.maps?.services });
       return;
     }
 
@@ -187,20 +185,20 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
   };
 
   // 장소검색이 완료됐을 때 호출되는 콜백함수 (공식 코드와 동일)
-  const placesSearchCB = (data: Place[], status: any) => {
-    if (!(window as any).kakao?.maps?.services) return;
-    
+  const placesSearchCB = (data: Place[], status: string) => {
+    if (!window.kakao?.maps?.services) return;
+
     logger.info('검색 결과:', { data: data?.length, status });
-    
-    if (status === (window as any).kakao.maps.services.Status.OK) {
+
+    if (status === window.kakao.maps.services.Status.OK) {
       // 정상적으로 검색이 완료됐으면 지도에 마커를 표출합니다
       logger.info('검색 성공, 마커 표시 시작:', data.length);
       displayPlaces(data);
       showNotification(`최대 15개의 카페를 조회할 수 있습니다.`);
-    } else if (status === (window as any).kakao.maps.services.Status.ZERO_RESULT) {
+    } else if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
       logger.info('검색 결과 없음');
       showNotification('검색 결과가 없습니다.');
-    } else if (status === (window as any).kakao.maps.services.Status.ERROR) {
+    } else if (status === window.kakao.maps.services.Status.ERROR) {
       logger.info('검색 오류');
       showNotification('검색 중 오류가 발생했습니다.');
     }
@@ -208,26 +206,26 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
 
   // 지도에 마커를 표출하는 함수 (공식 코드와 동일)
   const displayPlaces = (places: Place[]) => {
-    if (!map || !(window as any).kakao?.maps) {
+    if (!map || !window.kakao?.maps) {
       logger.info('displayPlaces 조건 불만족:', { map: !!map, kakao: !!window.kakao?.maps });
       return;
     }
 
     logger.info('마커 표시 시작:', { places: places.length, mapCenter: map.getCenter() });
 
-    const newMarkers: any[] = [];
+    const newMarkers: kakao.maps.Marker[] = [];
 
     for (let i = 0; i < places.length; i++) {
       logger.info(`마커 ${i} 생성 시도:`, places[i].place_name, places[i].y, places[i].x);
-      
+
       // 마커를 생성하고 지도에 표시합니다 (CE7 카페 카테고리 - 5번째 행이므로 order = 4)
-      const marker = addMarker(new (window as any).kakao.maps.LatLng(places[i].y, places[i].x), 4);
+      const marker = addMarker(new window.kakao.maps.LatLng(Number(places[i].y), Number(places[i].x)), 4);
 
       if (marker) {
         logger.info('마커 생성 성공:', i, places[i].place_name);
         // 마커와 검색결과 항목을 클릭 했을 때 장소정보를 표출하도록 클릭 이벤트를 등록합니다
-        (function(marker: any, place: Place) {
-          (window as any).kakao.maps.event.addListener(marker, 'click', function() {
+        (function(marker: kakao.maps.Marker, place: Place) {
+          window.kakao.maps.event.addListener(marker, 'click', function() {
             displayPlaceInfo(place);
           });
         })(marker, places[i]);
@@ -240,7 +238,7 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
 
     logger.info('생성된 마커 개수:', newMarkers.length);
     setMarkers(newMarkers);
-    
+
     // 마커가 지도에 표시되었는지 확인
     setTimeout(() => {
       logger.info('마커 표시 확인:', newMarkers.length, '개 마커가 지도에 표시됨');
@@ -248,24 +246,24 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
   };
 
   // 마커를 생성하고 지도 위에 마커를 표시하는 함수 (커피컵 아이콘 사용)
-  const addMarker = (position: any, order: number) => {
-    if (!(window as any).kakao?.maps || !map) {
-      logger.info('addMarker 조건 불만족:', { kakao: !!(window as any).kakao?.maps, map: !!map });
+  const addMarker = (position: kakao.maps.LatLng, order: number) => {
+    if (!window.kakao?.maps || !map) {
+      logger.info('addMarker 조건 불만족:', { kakao: !!window.kakao?.maps, map: !!map });
       return null;
     }
-    
+
     try {
       // 카카오맵 공식 스프라이트 이미지 사용 (커피컵 아이콘)
       const imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/places_category.png';
-      const imageSize = new (window as any).kakao.maps.Size(27, 28);
+      const imageSize = new window.kakao.maps.Size(27, 28);
       const imgOptions = {
-        spriteSize: new (window as any).kakao.maps.Size(72, 208),
-        spriteOrigin: new (window as any).kakao.maps.Point(10, (order * 36)), // 카테고리별 order 값 사용
-        offset: new (window as any).kakao.maps.Point(11, 28)
+        spriteSize: new window.kakao.maps.Size(72, 208),
+        spriteOrigin: new window.kakao.maps.Point(10, (order * 36)), // 카테고리별 order 값 사용
+        offset: new window.kakao.maps.Point(11, 28)
       };
-      const markerImage = new (window as any).kakao.maps.MarkerImage(imageSrc, imageSize, imgOptions);
-      
-      const marker = new (window as any).kakao.maps.Marker({
+      const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize, imgOptions);
+
+      const marker = new window.kakao.maps.Marker({
         position: position,
         image: markerImage,
         draggable: false
@@ -292,7 +290,7 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
 
   // 클릭한 마커에 대한 장소 상세정보를 커스텀 오버레이로 표시하는 함수 (카카오맵 스타일)
   const displayPlaceInfo = (place: Place) => {
-    if (!contentNodeRef.current || !placeOverlayRef.current || !(window as any).kakao?.maps) return;
+    if (!contentNodeRef.current || !placeOverlayRef.current || !window.kakao?.maps) return;
 
     // 카카오맵 스타일의 커스텀 오버레이 HTML 생성
     let content = '<div class="overlay_info" style="' +
@@ -305,7 +303,7 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
       'position: relative; ' +
       'font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif;' +
       '">';
-    
+
     // 헤더 부분 (가게명 + 닫기 버튼)
     content += '<div style="' +
       'background: #E53935; ' +
@@ -324,7 +322,7 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
       'font-size: 16px; ' +
       'flex: 1;' +
       '" title="' + place.place_name + '">' + place.place_name + '</a>';
-    
+
     // 닫기 버튼 추가
     content += '<button style="' +
       'background: none; ' +
@@ -346,12 +344,12 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
       'onmouseover="this.style.fontWeight=\'bold\'" ' +
       'onmouseout="this.style.fontWeight=\'normal\'" ' +
       'title="닫기">×</button>';
-    
+
     content += '</div>';
-    
+
     // 내용 부분
     content += '<div style="padding: 16px;">';
-    
+
     // 주소 정보
     content += '<div style="margin-bottom: 8px;">';
     content += '<div style="' +
@@ -367,7 +365,7 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
       'min-width: 32px; ' +
       'margin-top: 2px;' +
       '">주소</span>';
-    
+
     if (place.road_address_name) {
       content += '<div>';
       content += '<div style="' +
@@ -391,7 +389,7 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
     }
     content += '</div>';
     content += '</div>';
-    
+
     // 전화번호 (있는 경우만)
     if (place.phone) {
       content += '<div style="' +
@@ -414,9 +412,9 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
         '">' + place.phone + '</a>';
       content += '</div>';
     }
-    
+
     content += '</div>';
-    
+
     // 하단 화살표
     content += '<div style="' +
       'position: absolute; ' +
@@ -429,11 +427,11 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
       'border-right: 8px solid transparent; ' +
       'border-top: 8px solid #E53935;' +
       '"></div>';
-    
+
     content += '</div>';
 
     contentNodeRef.current.innerHTML = content;
-    
+
     // 닫기 버튼 이벤트 리스너 등록
     const closeButton = contentNodeRef.current.querySelector('button');
     if (closeButton) {
@@ -443,9 +441,9 @@ export default function CafeSearch({ isActive }: CafeSearchProps) {
         }
       });
     }
-    
+
     // 오버레이 위치 설정 (마커 위쪽에 표시)
-    placeOverlayRef.current.setPosition(new (window as any).kakao.maps.LatLng(place.y, place.x));
+    placeOverlayRef.current.setPosition(new window.kakao.maps.LatLng(Number(place.y), Number(place.x)));
     placeOverlayRef.current.setMap(map);
   };
 

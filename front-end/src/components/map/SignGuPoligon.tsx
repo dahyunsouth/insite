@@ -24,9 +24,7 @@ import {
 import { logger } from '@/utils/logger';
 
 // 타입 정의
-interface KakaoOverlay {
-  setMap: (map: any) => void;
-}
+type KakaoOverlay = { setMap(map: kakao.maps.Map | null): void };
 
 interface SignGuPolygonProps {
   showMarketingArea?: boolean;
@@ -94,8 +92,8 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
           handleDefaultModeHover(polygon, guName, false);
         }
       } else if (e.type === 'click') {
-        map.setCenter(new (window.kakao.maps as any).LatLng(centerLat, centerLng));
-        map.setLevel(6);
+        map?.setCenter(new window.kakao.maps.LatLng(centerLat, centerLng));
+        map?.setLevel(6);
       }
     };
 
@@ -172,18 +170,18 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
 
-    const extendedSw = new (window.kakao.maps as any).LatLng(sw.getLat() - 1.0, sw.getLng() - 1.0);
-    const extendedNe = new (window.kakao.maps as any).LatLng(ne.getLat() + 1.0, ne.getLng() + 1.0);
+    const extendedSw = new window.kakao.maps.LatLng(sw.getLat() - 1.0, sw.getLng() - 1.0);
+    const extendedNe = new window.kakao.maps.LatLng(ne.getLat() + 1.0, ne.getLng() + 1.0);
 
-    const seoulBoundaryCoords: any[] = [];
-    const seoulData = seoulPolygonData as any;
+    const seoulBoundaryCoords: kakao.maps.LatLng[] = [];
+    const seoulData = seoulPolygonData as unknown as { geometries: { type: string; coordinates: number[][][] }[] };
     if (seoulData && seoulData.geometries && seoulData.geometries.length > 0) {
       const firstGeometry = seoulData.geometries[0];
       if (firstGeometry.type === 'Polygon' && firstGeometry.coordinates && firstGeometry.coordinates[0]) {
         const coords = firstGeometry.coordinates[0];
         coords.forEach((coord: number[]) => {
           const { lat, lng } = tmToWgs84(coord[0], coord[1]);
-          seoulBoundaryCoords.push(new (window.kakao.maps as any).LatLng(lat, lng));
+          seoulBoundaryCoords.push(new window.kakao.maps.LatLng(lat, lng));
         });
       }
     }
@@ -192,9 +190,9 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
 
     const outerPath = [
       extendedSw,
-      new (window.kakao.maps as any).LatLng(extendedSw.getLat(), extendedNe.getLng()),
+      new window.kakao.maps.LatLng(extendedSw.getLat(), extendedNe.getLng()),
       extendedNe,
-      new (window.kakao.maps as any).LatLng(extendedNe.getLat(), extendedSw.getLng()),
+      new window.kakao.maps.LatLng(extendedNe.getLat(), extendedSw.getLng()),
       extendedSw
     ];
 
@@ -203,7 +201,7 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
       seoulBoundaryCoords.slice().reverse()
     ];
 
-    const backgroundPolygon = new (window.kakao.maps as any).Polygon({
+    const backgroundPolygon = new window.kakao.maps.Polygon({
       path: donutPaths,
       strokeWeight: 1,
       strokeColor: '#3288FF',
@@ -259,22 +257,22 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
     if (!geometries || geometries.length === 0) return;
 
     // 각 구별로 폴리곤과 라벨 생성
-    geometries.forEach((geometry: any, index: number) => {
+    geometries.forEach((geometry, index) => {
       if (geometry.type === 'Polygon' && geometry.coordinates) {
         // 폴리곤 좌표 변환
-        const polygonPaths: any[] = [];
+        const polygonPaths: kakao.maps.LatLng[][] = [];
         
         geometry.coordinates.forEach((ring: number[][]) => {
           const path = ring.map((coord: number[]) => {
             // TM 좌표계를 WGS84로 정확한 변환
             const { lat, lng } = tmToWgs84(coord[0], coord[1]);
-            return new (window.kakao.maps as any).LatLng(lat, lng);
+            return new window.kakao.maps.LatLng(lat, lng);
           });
           polygonPaths.push(path);
         });
 
         // 카카오맵 Polygon 생성 (최적화된 설정)
-        const kakaoPolygon = new (window.kakao.maps as any).Polygon({
+        const kakaoPolygon = new window.kakao.maps.Polygon({
           path: polygonPaths,
           strokeWeight: 1,
           strokeColor: '#3288FF',
@@ -304,7 +302,7 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
 
           // 구 중심 좌표로 라벨 위치 설정 (정확한 TM->WGS84 변환)
           const { lat: centerLat, lng: centerLng } = tmToWgs84(district.xcnts_value, district.ydnts_value);
-          const position = new (window.kakao.maps as any).LatLng(centerLat, centerLng);
+          const position = new window.kakao.maps.LatLng(centerLat, centerLng);
 
           // 구 이름 라벨 생성
           const currentLabelId = `signgu-label-${index}`;
@@ -314,7 +312,7 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
             ? createMarketModeLabelContent(guName, guCountData, currentLabelId, fontSize, showCount)
             : createDefaultModeLabelContent(guName, currentLabelId, fontSize);
 
-          const customOverlay = new (window.kakao.maps as any).CustomOverlay({
+          const customOverlay = new window.kakao.maps.CustomOverlay({
             map: map,
             position: position,
             content: content,
@@ -349,7 +347,7 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
       
       // 약간의 지연 후 다시 생성하여 상권 모드가 적용된 폴리곤 표시
       setTimeout(() => {
-        const currentLevel = map.getLevel();
+        const currentLevel = map?.getLevel() ?? 3;
         if (currentLevel >= 7 && currentLevel <= 8) {
           showSignGuPolygons();
         }
@@ -394,7 +392,7 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
     };
 
     // 이벤트 리스너 등록
-    (window as any).kakao.maps.event.addListener(map, 'zoom_changed', zoomChangedListener);
+    window.kakao.maps.event.addListener(map, 'zoom_changed', zoomChangedListener);
 
     // 초기 로드 시에도 엄격한 레벨 7~8 확인
     const initialLevel = map.getLevel();

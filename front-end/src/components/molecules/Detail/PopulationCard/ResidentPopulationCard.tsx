@@ -76,8 +76,8 @@ export default function ResidentPopulationCard({ trdarCode, populationType, onPo
         } else {
           throw new Error(response.message || "데이터를 불러오는데 실패했습니다.");
         }
-      } catch (e: any) {
-        if (!aborted) setError(e?.message ?? "load failed");
+      } catch (e: unknown) {
+        if (!aborted) setError(e instanceof Error ? e.message : "load failed");
       } finally {
         if (!aborted) setLoading(false);
       }

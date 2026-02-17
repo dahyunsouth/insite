@@ -5,39 +5,7 @@ import { createPortal } from 'react-dom';
 import { useKakaoMapContext } from './KakaoMap';
 import { logger } from '@/utils/logger';
 
-declare global {
-  interface Window {
-    kakao: {
-      maps: {
-        Roadview: new (container: HTMLElement) => {
-          setPanoId: (panoId: string, position: { getLat: () => number; getLng: () => number }) => void;
-          getPosition: () => { getLat: () => number; getLng: () => number };
-        };
-        RoadviewClient: new () => {
-          getNearestPanoId: (position: { getLat: () => number; getLng: () => number }, radius: number, callback: (panoId: string | null) => void) => void;
-        };
-        Marker: new (options: {
-          image: any;
-          position: { getLat: () => number; getLng: () => number };
-          draggable: boolean;
-        }) => {
-          setMap: (map: any) => void;
-          setPosition: (position: { getLat: () => number; getLng: () => number }) => void;
-          getPosition: () => { getLat: () => number; getLng: () => number };
-        };
-        MarkerImage: new (src: string, size: any, options?: any) => any;
-        Size: new (width: number, height: number) => any;
-        Point: new (x: number, y: number) => any;
-        MapTypeId: {
-          ROADVIEW: any;
-        };
-        event: {
-          addListener: (target: any, event: string, handler: (...args: any[]) => void) => void;
-        };
-      };
-    };
-  }
-}
+// Kakao Maps 타입은 src/types/kakao.d.ts에서 전역으로 정의됨
 
 interface LoadViewProps {
   isActive: boolean;
@@ -49,9 +17,9 @@ interface LoadViewProps {
 export default function LoadView({ isActive, isMinimized: externalIsMinimized, onToggle }: LoadViewProps) {
   const { map } = useKakaoMapContext();
   const rvContainer = useRef<HTMLDivElement>(null);
-  const rv = useRef<any>(null);
-  const rvClient = useRef<any>(null);
-  const marker = useRef<any>(null);
+  const rv = useRef<kakao.maps.Roadview | null>(null);
+  const rvClient = useRef<kakao.maps.RoadviewClient | null>(null);
+  const marker = useRef<kakao.maps.Marker | null>(null);
   
   // SSR 안전성을 위한 클라이언트 전용 렌더링
   const [isClient, setIsClient] = useState(false);
@@ -113,7 +81,7 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
         // panoId로 로드뷰를 설정합니다 (공식 코드와 동일)
         // eslint-disable-next-line no-console
         logger.info('로드뷰 파노라마 ID 설정:', panoId, '위치:', position);
-        rv.current.setPanoId(panoId, position);
+        rv.current?.setPanoId(panoId, position);
       }
     });
   }, []);
@@ -422,10 +390,7 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
       // 로드뷰 오버레이 제거
       if (map && typeof window !== 'undefined' && window.kakao) {
         try {
-          const overlayTypes = map.getOverlayMapTypes();
-          if (overlayTypes && overlayTypes.length > 0) {
-            map.removeOverlayMapTypeId(window.kakao.maps.MapTypeId.ROADVIEW);
-          }
+          map.removeOverlayMapTypeId(window.kakao.maps.MapTypeId.ROADVIEW);
         } catch (error) {
           // eslint-disable-next-line no-console
           logger.warn('로드뷰 오버레이 제거 중 오류:', error);

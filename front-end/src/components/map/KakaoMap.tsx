@@ -16,7 +16,7 @@ import { logger } from '@/utils/logger';
 
 // KakaoMap Context 생성
 interface KakaoMapContextType {
-  map: any;
+  map: kakao.maps.Map | null;
   setMapType: (mapType: 'roadmap' | 'skyview') => void;
   zoomIn: () => void;
   zoomOut: () => void;
@@ -29,14 +29,14 @@ const KakaoMapContext = createContext<KakaoMapContextType | null>(null);
 // KakaoMap Provider 컴포넌트
 export function KakaoMapProvider({ children, showNotification, cafeActive: _cafeActive = false }: { children: ReactNode; showNotification: (message: string) => void; cafeActive?: boolean }) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<any>(null);
+  const [map, setMap] = useState<kakao.maps.Map | null>(null);
 
   const setMapType = (mapType: 'roadmap' | 'skyview') => {
     if (!map) return;
     
-    const mapTypeId = mapType === 'skyview' 
-      ? (window as any).kakao.maps.MapTypeId.HYBRID 
-      : (window as any).kakao.maps.MapTypeId.ROADMAP;
+    const mapTypeId = mapType === 'skyview'
+      ? window.kakao.maps.MapTypeId.HYBRID
+      : window.kakao.maps.MapTypeId.ROADMAP;
     
     map.setMapTypeId(mapTypeId);
   };
@@ -76,18 +76,18 @@ export function KakaoMapProvider({ children, showNotification, cafeActive: _cafe
     document.head.appendChild(script);
 
     script.onload = () => {
-      (window as any).kakao.maps.load(() => {
+      window.kakao.maps.load(() => {
         if (!mapContainer.current) return;
 
         // 초기 중심: 성수동카페거리 좌표로 설정
         // Fallback 또한 성수동카페거리의 TM → WGS84 변환값을 사용
         const SEONGSU_FALLBACK = tmToWgs84(204716, 449234); // TradeAreaValue.json 기준
-        let initialCenter = new (window as any).kakao.maps.LatLng(SEONGSU_FALLBACK.lat, SEONGSU_FALLBACK.lng);
+        let initialCenter = new window.kakao.maps.LatLng(SEONGSU_FALLBACK.lat, SEONGSU_FALLBACK.lng);
         try {
-          const seongsu = (tradeAreaData as any).DATA.find((a: any) => a.trdar_cd_nm === '성수동카페거리');
+          const seongsu = tradeAreaData.DATA.find((a) => a.trdar_cd_nm === '성수동카페거리');
           if (seongsu) {
             const { lat, lng } = tmToWgs84(seongsu.xcnts_value, seongsu.ydnts_value);
-            initialCenter = new (window as any).kakao.maps.LatLng(lat, lng);
+            initialCenter = new window.kakao.maps.LatLng(lat, lng);
           }
         } catch {}
 
@@ -96,10 +96,10 @@ export function KakaoMapProvider({ children, showNotification, cafeActive: _cafe
           level: 4
         };
 
-        const mapInstance = new (window as any).kakao.maps.Map(mapContainer.current, options);
+        const mapInstance = new window.kakao.maps.Map(mapContainer.current, options);
         
         // 지도가 확대 또는 축소되면 이벤트를 등록합니다
-        (window as any).kakao.maps.event.addListener(mapInstance, 'zoom_changed', function() {
+        window.kakao.maps.event.addListener(mapInstance, 'zoom_changed', function() {
           // 지도의 현재 레벨을 얻어옵니다
           const _level = mapInstance.getLevel();
           // 필요시 줌 레벨 변경에 따른 추가 로직을 여기에 구현
@@ -127,7 +127,7 @@ export function KakaoMapProvider({ children, showNotification, cafeActive: _cafe
       
       if (map && coordinates) {
         // 지도 중심을 해당 상권 좌표로 이동
-        const moveLatLon = new (window as any).kakao.maps.LatLng(coordinates.lat, coordinates.lng);
+        const moveLatLon = new window.kakao.maps.LatLng(coordinates.lat, coordinates.lng);
         map.setCenter(moveLatLon);
         
         // 지도 레벨을 적절하게 설정 (상권 상세 보기)

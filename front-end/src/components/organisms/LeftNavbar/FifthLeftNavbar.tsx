@@ -6,6 +6,18 @@ import SearchResultList from '@/components/atoms/LeftNavbar/SearchResultList';
 import { useKakaoMapContext } from '@/components/map/KakaoMap';
 import { logger } from '@/utils/logger';
 
+interface TradeArea {
+  trdarSeCd: string;
+  trdarSeCdNm: string;
+  trdarCd: number;
+  trdarCdNm: string;
+  xcntsValue: number;
+  ydntsValue: number;
+  relmAr: number;
+  storCo: number;
+  similrIndutyStorCo: number;
+}
+
 interface FifthLeftNavbarProps {
   isVisible: boolean;
   district: string;
@@ -15,8 +27,8 @@ interface FifthLeftNavbarProps {
   searchKeyword?: string;
   onSearchClose?: () => void;
   onSearchReset?: () => void;
-  onTradeAreaSelect?: (tradeArea: any) => void;
-  selectedTradeArea?: any;
+  onTradeAreaSelect?: (tradeArea: TradeArea) => void;
+  selectedTradeArea?: TradeArea | null;
 }
 
 const FifthLeftNavbar: React.FC<FifthLeftNavbarProps> = ({ 
@@ -56,8 +68,7 @@ const FifthLeftNavbar: React.FC<FifthLeftNavbarProps> = ({
         
         // 지도 새로고침
         setTimeout(() => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (map as any).relayout();
+          map.relayout();
         }, 100);
       } catch (error) {
         logger.error('마커 제거 중 오류:', error);

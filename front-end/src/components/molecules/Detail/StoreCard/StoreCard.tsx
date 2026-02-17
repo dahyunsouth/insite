@@ -69,8 +69,8 @@ export default function StoreCard({ trdarCode }: Props) {
         if (aborted) return;
         setData(json.result);
         setQuarter(json.result.stdrYyquCd);
-      } catch (e: any) {
-        if (!aborted) setError(e?.message ?? "load failed");
+      } catch (e: unknown) {
+        if (!aborted) setError(e instanceof Error ? e.message : "load failed");
       } finally {
         if (!aborted) setLoading(false);
       }

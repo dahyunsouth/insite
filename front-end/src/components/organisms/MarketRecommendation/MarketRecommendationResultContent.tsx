@@ -72,8 +72,8 @@ const getStyle = (ranking: number): RankStyle => RANK_STYLES[ranking] || DEFAULT
 // 상권명으로 상권코드를 찾는 함수
 const getTradeAreaCodeByName = (areaName: string): string | null => {
   try {
-    const tradeArea = TradeAreaRawData.DATA.find((item: any) => 
-      item.trdar_cd_nm === areaName || 
+    const tradeArea = TradeAreaRawData.DATA.find((item) =>
+      item.trdar_cd_nm === areaName ||
       item.trdar_cd_nm === `${areaName} 상권` ||
       areaName === `${item.trdar_cd_nm} 상권`
     );
@@ -87,7 +87,7 @@ const getTradeAreaCodeByName = (areaName: string): string | null => {
 // 상권코드로 좌표를 찾는 함수 (TM 좌표를 위도/경도로 변환)
 const getCoordinatesFromTrdarCode = (trdarCode: string): { lat: number; lng: number } | undefined => {
   try {
-    const tradeArea = TradeAreaRawData.DATA.find((item: any) => item.trdar_cd === trdarCode);
+    const tradeArea = TradeAreaRawData.DATA.find((item) => item.trdar_cd === trdarCode);
     if (!tradeArea) {
       logger.warn('Trade area not found for code:', trdarCode);
       return undefined;

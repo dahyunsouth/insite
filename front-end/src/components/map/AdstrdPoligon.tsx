@@ -23,10 +23,8 @@ import {
 } from './DefaultMode';
 import { logger } from '@/utils/logger';
 
-// 타입 정의
-interface KakaoOverlay {
-  setMap: (map: any) => void;
-}
+// 타입 정의 - setMap을 공유하는 Polygon | CustomOverlay 유니온
+type KakaoOverlay = { setMap(map: kakao.maps.Map | null): void };
 
 interface AdstrdPolygonProps {
   showMarketingArea?: boolean;
@@ -57,15 +55,14 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
 
   // 좌표를 이용해서 가장 가까운 행정동 이름 찾기
   const findNearestAdstrdName = useCallback((centerLat: number, centerLng: number): string => {
-    const nameData = adstrdNameData as any;
-    if (!nameData.DATA || !Array.isArray(nameData.DATA)) {
+    if (!adstrdNameData.DATA || !Array.isArray(adstrdNameData.DATA)) {
       return '알 수 없음';
     }
 
     let minDistance = Infinity;
     let nearestName = '알 수 없음';
 
-    nameData.DATA.forEach((district: any) => {
+    adstrdNameData.DATA.forEach((district) => {
       // TM 좌표를 위경도로 정확한 변환
       const { lat: districtLat, lng: districtLng } = tmToWgs84(district.xcnts_value, district.ydnts_value);
 
@@ -89,8 +86,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
     const guCode = dongCode.substring(0, 5);
     
     // SignGuValue.json에서 해당 자치구 찾기
-    const signGuDataTyped = signGuData as any;
-    const guData = signGuDataTyped.DATA.find((gu: any) => gu.signgu_cd === guCode);
+    const guData = signGuData.DATA.find((gu) => gu.signgu_cd === guCode);
     
     logger.info(`🔍 행정동 코드 "${dongCode}" -> 자치구 코드 "${guCode}" -> 자치구명 "${guData?.signgu_nm || '알 수 없음'}"`);
     
@@ -99,15 +95,14 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
 
   // 좌표를 이용해서 가장 가까운 자치구명 찾기 (행정동 코드 기반)
   const findNearestGuName = useCallback((centerLat: number, centerLng: number): string => {
-    const nameData = adstrdNameData as any;
-    if (!nameData.DATA || !Array.isArray(nameData.DATA)) {
+    if (!adstrdNameData.DATA || !Array.isArray(adstrdNameData.DATA)) {
       return '알 수 없음';
     }
 
     let minDistance = Infinity;
     let nearestDongCode = '';
 
-    nameData.DATA.forEach((district: any) => {
+    adstrdNameData.DATA.forEach((district) => {
       // TM 좌표를 위경도로 정확한 변환
       const { lat: districtLat, lng: districtLng } = tmToWgs84(district.xcnts_value, district.ydnts_value);
 
@@ -136,20 +131,20 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
     const ne = bounds.getNorthEast();
     
     // 지도 영역보다 훨씬 넓게 설정
-    const extendedSw = new (window.kakao.maps as any).LatLng(
+    const extendedSw = new window.kakao.maps.LatLng(
       sw.getLat() - 1.0, 
       sw.getLng() - 1.0
     );
-    const extendedNe = new (window.kakao.maps as any).LatLng(
+    const extendedNe = new window.kakao.maps.LatLng(
       ne.getLat() + 1.0, 
       ne.getLng() + 1.0
     );
 
     // SeoulPoligon.json에서 서울시 정확한 경계 좌표 추출
-    const seoulBoundaryCoords: any[] = [];
-    
+    const seoulBoundaryCoords: kakao.maps.LatLng[] = [];
+
     // GeometryCollection 구조에서 서울시 경계 좌표를 위경도로 변환
-    const seoulData = seoulPolygonData as any;
+    const seoulData = seoulPolygonData as unknown as { geometries: { type: string; coordinates: number[][][] }[] };
     if (seoulData && seoulData.geometries && seoulData.geometries.length > 0) {
       const firstGeometry = seoulData.geometries[0];
       if (firstGeometry.type === 'Polygon' && firstGeometry.coordinates && firstGeometry.coordinates[0]) {
@@ -157,7 +152,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
         coords.forEach((coord: number[]) => {
           // TM 좌표를 위경도로 정확한 변환
           const { lat, lng } = tmToWgs84(coord[0], coord[1]);
-          seoulBoundaryCoords.push(new (window.kakao.maps as any).LatLng(lat, lng));
+          seoulBoundaryCoords.push(new window.kakao.maps.LatLng(lat, lng));
         });
       }
     }
@@ -165,9 +160,9 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
     // 외부 사각형 좌표 (시계방향)
     const outerPath = [
       extendedSw,
-      new (window.kakao.maps as any).LatLng(extendedSw.getLat(), extendedNe.getLng()),
+      new window.kakao.maps.LatLng(extendedSw.getLat(), extendedNe.getLng()),
       extendedNe,
-      new (window.kakao.maps as any).LatLng(extendedNe.getLat(), extendedSw.getLng()),
+      new window.kakao.maps.LatLng(extendedNe.getLat(), extendedSw.getLng()),
       extendedSw
     ];
 
@@ -185,7 +180,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
       seoulBoundaryCoords.slice().reverse() // 서울시 경계 (반시계방향으로 홀 생성)
     ];
 
-    const backgroundPolygon = new (window.kakao.maps as any).Polygon({
+    const backgroundPolygon = new window.kakao.maps.Polygon({
       path: donutPaths,
       strokeWeight: 1,
       strokeColor: '#3288FF', // 디버깅용 빨간 선
@@ -259,8 +254,8 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
         logger.info(`🎯 행정동 클릭: ${dongName}`);
         
         // 지도 중심 이동 및 확대
-        map.setCenter(new (window.kakao.maps as any).LatLng(centerLat, centerLng));
-        map.setLevel(5);
+        map?.setCenter(new window.kakao.maps.LatLng(centerLat, centerLng));
+        map?.setLevel(5);
       }
     };
 
@@ -335,9 +330,9 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
     const fontSize = 14; // 행정동은 더 작게
 
     // 폴리곤 데이터 처리 - GeometryCollection 형태의 데이터
-    const geometryCollection = adstrdAreaData as any;
+    const geometryCollection = adstrdAreaData as unknown as { geometries: { type: string; coordinates: number[][][] }[] };
     if (geometryCollection.geometries && Array.isArray(geometryCollection.geometries)) {
-      
+
       // 상권 모드일 때 총 행정동 개수 설정 및 로딩 시작
       if (showMarketingArea) {
         const totalCount = geometryCollection.geometries.length;
@@ -345,17 +340,17 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
         setIsLoadingAllDongs(true);
         logger.info(`📊 총 행정동 개수: ${totalCount}개 - 로딩 시작`);
       }
-      geometryCollection.geometries.forEach((polygon: any, index: number) => {
+      geometryCollection.geometries.forEach((polygon, index) => {
       if (polygon.type === 'Polygon' && polygon.coordinates && polygon.coordinates.length > 0) {
         // 좌표 변환: TM 좌표계를 WGS84로 변환
         const coordinates = polygon.coordinates[0].map((coord: number[]) => {
           // TM 좌표를 위경도로 정확한 변환
           const { lat, lng } = tmToWgs84(coord[0], coord[1]);
-          return new (window.kakao.maps as any).LatLng(lat, lng);
+          return new window.kakao.maps.LatLng(lat, lng);
         });
 
         // 카카오맵 Polygon API를 사용하여 폴리곤 생성 (최적화된 설정)
-        const kakaoPolygon = new (window.kakao.maps as any).Polygon({
+        const kakaoPolygon = new window.kakao.maps.Polygon({
           path: coordinates,
           strokeWeight: 1,
           strokeColor: '#3288FF',
@@ -374,13 +369,13 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
         // 폴리곤의 중심점 계산 (라벨 위치용)
         let centerLat = 0;
         let centerLng = 0;
-        coordinates.forEach((coord: any) => {
+        coordinates.forEach((coord) => {
           centerLat += coord.getLat();
           centerLng += coord.getLng();
         });
         centerLat = centerLat / coordinates.length;
         centerLng = centerLng / coordinates.length;
-        const center = new (window.kakao.maps as any).LatLng(centerLat, centerLng);
+        const center = new window.kakao.maps.LatLng(centerLat, centerLng);
 
         // 행정동 이름과 자치구명 찾기
         const dongName = findNearestAdstrdName(centerLat, centerLng);
@@ -443,7 +438,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
           applyDefaultModePolygonStyle(kakaoPolygon);
         }
 
-        const customOverlay = new (window.kakao.maps as any).CustomOverlay({
+        const customOverlay = new window.kakao.maps.CustomOverlay({
           map: map,
           position: center,
           content: content,
@@ -500,7 +495,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
       
       // 각 폴리곤을 상권 모드 스타일로 업데이트
       adstrdPolygonsRef.current.forEach((polygon, index) => {
-        const geometryCollection = adstrdAreaData as any;
+        const geometryCollection = adstrdAreaData as unknown as { geometries: { type: string; coordinates: number[][][] }[] };
         if (geometryCollection.geometries && geometryCollection.geometries[index]) {
           // 중심점 재계산
           const coords = geometryCollection.geometries[index].coordinates[0];

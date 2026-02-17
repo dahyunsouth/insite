@@ -110,7 +110,7 @@ export default function AdstrdMarketList({ district, dong, onClose: _onClose, on
 
       // 서울 자치구 검증: seoulDistricts.json에 없는 구는 서비스 미지원 안내
       try {
-        const seoulGuSet = new Set<string>((seoulDistricts as any)?.features?.map((f: any) => f?.properties?.name));
+        const seoulGuSet = new Set<string>(seoulDistricts.features.map((f) => f.properties.name));
         const isSeoulGu = seoulGuSet.has(district.trim());
         if (!isSeoulGu) {
           logger.warn(`⚠️ 비서울 자치구 요청 감지: "${district}" "${dong}"`);
