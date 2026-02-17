@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import UserDeleteModal from '../../atoms/Auth/UserDeleteModal';
 import { useUser } from '../../../contexts/UserContext';
+import { logger } from '@/utils/logger';
 
 interface MyPageMenuProps {
   onEditInfo?: () => void;
@@ -39,10 +40,10 @@ const MyPageMenu: React.FC<MyPageMenuProps> = ({
         router.push('/');
       } else {
         // 실패 시 모달은 유지하고 에러 메시지는 UserContext에서 처리
-        console.error('회원탈퇴 실패');
+        logger.error('회원탈퇴 실패');
       }
     } catch (error) {
-      console.error('회원탈퇴 중 오류 발생:', error);
+      logger.error('회원탈퇴 중 오류 발생:', error);
     } finally {
       setIsDeleting(false);
     }

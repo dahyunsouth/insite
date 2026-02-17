@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { API_ENDPOINTS } from '../../../config/api';
+import { logger } from '@/utils/logger';
 import seoulDistricts from '@/data/seoulDistricts.json';
 
 // 상권 데이터 캐시 (역삼1동 강남구 초기 데이터) - 실제 데이터 기반
@@ -94,16 +95,16 @@ export default function AdstrdMarketList({ district, dong, onClose: _onClose, on
 
   // Props 변화 디버깅
   useEffect(() => {
-    console.log('🔍 AdstrdMarketList props 변화:', { district, dong });
+    logger.info('🔍 AdstrdMarketList props 변화:', { district, dong });
   }, [district, dong]);
 
   // 상권 데이터 로드 (캐시 우선)
   useEffect(() => {
-    console.log('🔄 AdstrdMarketList useEffect 트리거:', district, dong);
+    logger.info('🔄 AdstrdMarketList useEffect 트리거:', district, dong);
     
     const loadTradeAreas = async () => {
       if (!district || !dong) {
-        console.log('❌ district 또는 dong이 없음:', { district, dong });
+        logger.info('❌ district 또는 dong이 없음:', { district, dong });
         return;
       }
 
@@ -112,14 +113,14 @@ export default function AdstrdMarketList({ district, dong, onClose: _onClose, on
         const seoulGuSet = new Set<string>((seoulDistricts as any)?.features?.map((f: any) => f?.properties?.name));
         const isSeoulGu = seoulGuSet.has(district.trim());
         if (!isSeoulGu) {
-          console.warn(`⚠️ 비서울 자치구 요청 감지: "${district}" "${dong}"`);
+          logger.warn(`⚠️ 비서울 자치구 요청 감지: "${district}" "${dong}"`);
           setTradeAreas([]);
           setIsLoading(false);
           setError('현재 서울 시만 서비스를 지원하고 있습니다.');
           return;
         }
       } catch (e) {
-        console.warn('seoulDistricts 검증 중 예외, 기본 로직 진행:', e);
+        logger.warn('seoulDistricts 검증 중 예외, 기본 로직 진행:', e);
       }
 
       // 행정동명 정규화 함수 (역삼동 -> 역삼1동)
@@ -143,7 +144,7 @@ export default function AdstrdMarketList({ district, dong, onClose: _onClose, on
        // 캐시된 데이터 확인 (정확한 키 매칭)
        const cachedData = INITIAL_TRADE_AREA_CACHE[cacheKey as keyof typeof INITIAL_TRADE_AREA_CACHE];
        if (cachedData) {
-         console.log('🚀 캐시된 상권 데이터 사용:', cacheKey);
+         logger.info('🚀 캐시된 상권 데이터 사용:', cacheKey);
          setTradeAreas(cachedData);
          setIsLoading(false);
          setError('');
@@ -154,24 +155,24 @@ export default function AdstrdMarketList({ district, dong, onClose: _onClose, on
          }, 1000);
          return;
        } else {
-         console.log('📝 캐시에 없는 지역:', cacheKey, '사용 가능한 캐시 키들:', Object.keys(INITIAL_TRADE_AREA_CACHE));
+         logger.info('📝 캐시에 없는 지역:', cacheKey, '사용 가능한 캐시 키들:', Object.keys(INITIAL_TRADE_AREA_CACHE));
        }
 
-      console.log('🚀 상권 데이터 로드 시작:', district, dong);
+      logger.info('🚀 상권 데이터 로드 시작:', district, dong);
       setIsLoading(true);
       setError('');
 
       try {
         // 파라미터 검증 강화
         if (!district.trim() || !dong.trim()) {
-          console.error('❌ district 또는 dong이 비어있음:', { district, dong });
+          logger.error('❌ district 또는 dong이 비어있음:', { district, dong });
           setError('지역 정보가 올바르지 않습니다.');
           return;
         }
 
         await fetchLatestData(district, dong);
       } catch (error) {
-        console.error('❌ 상권 데이터 로드 실패:', error);
+        logger.error('❌ 상권 데이터 로드 실패:', error);
         setError('상권 데이터를 불러오는데 실패했습니다.');
       } finally {
         setIsLoading(false);
@@ -199,8 +200,8 @@ export default function AdstrdMarketList({ district, dong, onClose: _onClose, on
         const normalizedDong = normalizeDongName(dong);
         // 항상 정규화된 행정동명으로만 호출
         const url = `${API_ENDPOINTS.TRADE_AREAS}?district=${encodeURIComponent(district)}&dong=${encodeURIComponent(normalizedDong)}`;
-        console.log(`🌐 상권 리스트 API 호출: ${url}`);
-        console.log(`📝 요청 파라미터: district="${district}", dong="${dong}" -> "${normalizedDong}"`);
+        logger.info(`🌐 상권 리스트 API 호출: ${url}`);
+        logger.info(`📝 요청 파라미터: district="${district}", dong="${dong}" -> "${normalizedDong}"`);
 
         const response = await fetch(url, {
           method: 'GET',
@@ -209,31 +210,31 @@ export default function AdstrdMarketList({ district, dong, onClose: _onClose, on
             'Accept': 'application/json',
           },
         });
-        console.log(`📡 상권 리스트 응답: ${response.status} ${response.statusText}`);
-        console.log(`🔍 응답 URL: ${response.url}`);
+        logger.info(`📡 상권 리스트 응답: ${response.status} ${response.statusText}`);
+        logger.info(`🔍 응답 URL: ${response.url}`);
 
         if (response.ok) {
           const data = await response.json();
-          console.log('📊 상권 리스트 데이터:', data);
+          logger.info('📊 상권 리스트 데이터:', data);
 
           // API 응답 형식에 맞게 데이터 처리
           if (data.isSuccess && data.result && data.result.areas) {
             setTradeAreas(data.result.areas);
-            console.log(`✅ 상권 리스트 로드 완료: ${data.result.areas.length}개`);
-            console.log(`📍 지역: ${data.result.districtNameKor} ${data.result.dongNameKor}`);
+            logger.info(`✅ 상권 리스트 로드 완료: ${data.result.areas.length}개`);
+            logger.info(`📍 지역: ${data.result.districtNameKor} ${data.result.dongNameKor}`);
           } else {
-            console.warn('⚠️ API 응답에 상권 데이터가 없음:', data);
+            logger.warn('⚠️ API 응답에 상권 데이터가 없음:', data);
             setError('해당 지역에 상권 정보가 없습니다.');
           }
         } else {
           // 응답 상태코드와 상태 텍스트 로그
-          console.error(`❌ 상권 리스트 API 실패 - 상태: ${response.status} ${response.statusText}`);
-          console.error(`❌ 요청 URL: ${url}`);
-          console.error(`❌ 요청 파라미터: district="${district}", dong="${dong}"`);
+          logger.error(`❌ 상권 리스트 API 실패 - 상태: ${response.status} ${response.statusText}`);
+          logger.error(`❌ 요청 URL: ${url}`);
+          logger.error(`❌ 요청 파라미터: district="${district}", dong="${dong}"`);
           
           // 400 오류의 경우 더 자세한 정보 제공
           if (response.status === 400) {
-            console.error('❌ 400 Bad Request - 요청 파라미터를 확인해주세요');
+            logger.error('❌ 400 Bad Request - 요청 파라미터를 확인해주세요');
             setError(`잘못된 요청입니다. 지역 정보를 확인해주세요. (${district}, ${dong})`);
           } else {
             setError(`서버 오류가 발생했습니다. (${response.status})`);
@@ -242,17 +243,17 @@ export default function AdstrdMarketList({ district, dong, onClose: _onClose, on
           // 응답 본문 읽기 시도
           try {
             const errorText = await response.text();
-            console.error('❌ 에러 응답 본문:', errorText);
+            logger.error('❌ 에러 응답 본문:', errorText);
             
             // JSON 파싱 시도
             try {
               const errorData = JSON.parse(errorText);
-              console.error('❌ 에러 데이터 (JSON):', errorData);
+              logger.error('❌ 에러 데이터 (JSON):', errorData);
             } catch (_jsonError) {
-              console.error('❌ JSON 파싱 실패, 원본 텍스트:', errorText);
+              logger.error('❌ JSON 파싱 실패, 원본 텍스트:', errorText);
             }
           } catch (textError) {
-            console.error('❌ 응답 본문 읽기 실패:', textError);
+            logger.error('❌ 응답 본문 읽기 실패:', textError);
           }
           
           // 서버 에러 응답 처리
@@ -267,7 +268,7 @@ export default function AdstrdMarketList({ district, dong, onClose: _onClose, on
               }
             }
           } catch (parseError) {
-            console.error('에러 응답 파싱 실패:', parseError);
+            logger.error('에러 응답 파싱 실패:', parseError);
           }
           
           if (response.status === 500) {
@@ -281,7 +282,7 @@ export default function AdstrdMarketList({ district, dong, onClose: _onClose, on
           }
         }
       } catch (error) {
-        console.error('💥 상권 리스트 API 에러:', error);
+        logger.error('💥 상권 리스트 API 에러:', error);
         setError('네트워크 오류가 발생했습니다.');
       } finally {
         setIsLoading(false);
@@ -349,12 +350,12 @@ export default function AdstrdMarketList({ district, dong, onClose: _onClose, on
                   isSelected ? 'bg-gray-200 border-blue-200' : ''
                 }`}
                 onClick={() => {
-                  console.log('🏪 상권 카드 클릭됨:', area);
+                  logger.info('🏪 상권 카드 클릭됨:', area);
                   if (onTradeAreaSelect) {
-                    console.log('✅ onTradeAreaSelect 콜백 호출');
+                    logger.info('✅ onTradeAreaSelect 콜백 호출');
                     onTradeAreaSelect(area);
                   } else {
-                    console.log('❌ onTradeAreaSelect 콜백이 없음');
+                    logger.info('❌ onTradeAreaSelect 콜백이 없음');
                   }
                 }}
               >

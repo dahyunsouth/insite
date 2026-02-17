@@ -8,6 +8,7 @@ import TradeAreaPicker, { TradeAreaSelection } from "@/components/molecules/Comp
 import { fetchTradeAreaDetail, mapTradeAreaDetailToMetrics, TradeAreaDetail, fetchTradeAreaScore, TradeAreaScore, getTradeAreaNameByCode } from "@/lib/api/tradeAreas";
 import TradeAreaRawData from "@/data/TradeAreaValue.json";
 import MarketChangeIndicatorInfoModal from "@/components/molecules/Detail/MarketChangeIndicator/MarketChangeIndicatorInfoModal";
+import { logger } from '@/utils/logger';
 
 // TradeAreaRawData 타입 정의
 interface TradeAreaFileShape {
@@ -217,7 +218,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
           throw new Error("상권명을 찾을 수 없습니다.");
         }
         const data = await fetchTradeAreaScore(tradeAreaName);
-        console.log('상권 A 종합 분석 점수:', data);
+        logger.info('상권 A 종합 분석 점수:', data);
         setScoreA(data);
       } catch (err) {
         setErrorScoreA(err instanceof Error ? err.message : "점수 데이터를 불러올 수 없습니다.");
@@ -245,7 +246,7 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
           throw new Error("상권명을 찾을 수 없습니다.");
         }
         const data = await fetchTradeAreaScore(tradeAreaName);
-        console.log('상권 B 종합 분석 점수:', data);
+        logger.info('상권 B 종합 분석 점수:', data);
         setScoreB(data);
       } catch (err) {
         setErrorScoreB(err instanceof Error ? err.message : "점수 데이터를 불러올 수 없습니다.");

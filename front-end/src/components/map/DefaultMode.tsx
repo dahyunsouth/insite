@@ -1,6 +1,7 @@
 'use client';
 
 import { KakaoPolygon } from './MarketMode';
+import { logger } from '@/utils/logger';
 
 // 기본 모드 폴리곤 스타일 적용
 export function applyDefaultModePolygonStyle(polygon: KakaoPolygon): void {
@@ -65,7 +66,7 @@ export function handleDefaultModeHover(
 ): void {
   if (isEnter) {
     // hover 시작: 파란색 hover 효과
-    console.log(`🎯 ${guName} hover 시작: 일반모드`);
+    logger.info(`🎯 ${guName} hover 시작: 일반모드`);
     polygon.setOptions({
       fillOpacity: 0.5,
       strokeWeight: 2,
@@ -73,7 +74,7 @@ export function handleDefaultModeHover(
     });
   } else {
     // hover 해제: 기본 파란색으로 복원
-    console.log(`🔄 ${guName} hover 해제: 일반모드`);
+    logger.info(`🔄 ${guName} hover 해제: 일반모드`);
     polygon.setOptions({
       strokeColor: '#3288FF',
       fillColor: '#3288FF',
@@ -89,7 +90,7 @@ export function updatePolygonsToDefaultMode(
   polygons: KakaoPolygon[],
   labels: any[]
 ): void {
-  console.log('🔄 기본 모드 활성화 - 기본 상태로 복원');
+  logger.info('🔄 기본 모드 활성화 - 기본 상태로 복원');
   
   polygons.forEach((polygon) => {
     applyDefaultModePolygonStyle(polygon);
@@ -103,7 +104,7 @@ export function updatePolygonsToDefaultMode(
       // 라벨 내용에서 구 이름만 추출 (상권 개수 제거)
       const guName = labelElement.textContent?.split('\n')[0] || labelElement.textContent || '알 수 없음';
       
-      console.log(`🔄 자치구 라벨 기본 모드 복원: ${guName}`);
+      logger.info(`🔄 자치구 라벨 기본 모드 복원: ${guName}`);
       
       // 라벨 전체를 기본 모드 콘텐츠로 교체
       labelElement.outerHTML = createDefaultModeLabelContent(guName, currentLabelId, 14);
@@ -154,7 +155,7 @@ export function handleDongDefaultModeHover(
 ): void {
   if (isEnter) {
     // hover 시작: 파란색 hover 효과
-    console.log(`🎯 ${dongName} hover 시작: 행정동 일반모드`);
+    logger.info(`🎯 ${dongName} hover 시작: 행정동 일반모드`);
     polygon.setOptions({
       fillOpacity: 0.3,
       strokeWeight: 2,
@@ -162,7 +163,7 @@ export function handleDongDefaultModeHover(
     });
   } else {
     // hover 해제: 기본 파란색으로 복원
-    console.log(`🔄 ${dongName} hover 해제: 행정동 일반모드`);
+    logger.info(`🔄 ${dongName} hover 해제: 행정동 일반모드`);
     polygon.setOptions({
       strokeColor: '#3288FF',
       fillColor: '#3288FF',
@@ -178,7 +179,7 @@ export function updateDongPolygonsToDefaultMode(
   polygons: KakaoPolygon[],
   labels: any[]
 ): void {
-  console.log('🔄 행정동 기본 모드 활성화 - 기본 상태로 복원');
+  logger.info('🔄 행정동 기본 모드 활성화 - 기본 상태로 복원');
   
   polygons.forEach((polygon) => {
     applyDefaultModePolygonStyle(polygon);
@@ -192,7 +193,7 @@ export function updateDongPolygonsToDefaultMode(
       // 라벨 내용에서 행정동 이름만 추출 (상권 개수 제거)
       const dongName = labelElement.textContent?.split('\n')[0] || labelElement.textContent || '알 수 없음';
       
-      console.log(`🔄 행정동 라벨 기본 모드 복원: ${dongName}`);
+      logger.info(`🔄 행정동 라벨 기본 모드 복원: ${dongName}`);
       
       // 라벨 전체를 기본 모드 콘텐츠로 교체
       labelElement.outerHTML = createDongDefaultModeLabelContent(dongName, currentLabelId, 10);

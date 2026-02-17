@@ -6,6 +6,7 @@ import { RecommendationItem, RecommendationResponse } from '@/types/recommendati
 import { API_ENDPOINTS } from '@/config/api';
 import { authManager } from '@/utils/auth';
 import MarketRecommendationResultContent from './MarketRecommendationResultContent';
+import { logger } from '@/utils/logger';
 
 interface MarketRecommendationResultProps {
   result: RecommendationResponse;
@@ -90,7 +91,7 @@ const MarketRecommendationResult: React.FC<MarketRecommendationResultProps> = ({
           }
         }
       } catch (error) {
-        console.error('사용자 정보 가져오기 실패:', error);
+        logger.error('사용자 정보 가져오기 실패:', error);
       }
     };
     

@@ -6,6 +6,7 @@ import MarketRecommendationLoding from './MarketRecommendationLoding';
 import MarketRecommendationResult from './MarketRecommendationResult';
 import { API_ENDPOINTS } from '@/config/api';
 import { BaseApiResponse, RecommendationResponse, RecommendationItem } from '@/types/recommendation';
+import { logger } from '@/utils/logger';
 
 interface MarketTypeStoreProps {
   selectedDistrictName: string | null;
@@ -112,7 +113,7 @@ const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({
       // 부모 컴포넌트에 추천 결과 전달
       onRecommendationResultsChange?.(data.result.items);
     } catch (error) {
-      console.error('Failed to fetch recommendation result:', error);
+      logger.error('Failed to fetch recommendation result:', error);
       setErrorMessage('추천 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
     } finally {
       setIsLoading(false);

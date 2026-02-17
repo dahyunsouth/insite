@@ -8,6 +8,7 @@ import AuthenticationInputBox from '@/components/atoms/Auth/InputBox/InputBox';
 import SubmitButton from '@/components/atoms/Auth/Button/Submit';
 import { API_ENDPOINTS } from '@/config/api';
 import { authManager } from '@/utils/auth';
+import { logger } from '@/utils/logger';
 
 interface MyInfoUpdateProps {
   onBack?: () => void;
@@ -72,11 +73,11 @@ const MyInfoUpdate: React.FC<MyInfoUpdateProps> = ({
         setSelectedProfile(userProfile);
         setOriginalProfile(userProfile);
       } else {
-        console.error('사용자 정보 가져오기 실패:', response.status);
+        logger.error('사용자 정보 가져오기 실패:', response.status);
         setUserInfo({ nickname: null, profile: null, isLoading: false });
       }
     } catch (error) {
-      console.error('사용자 정보 가져오기 에러:', error);
+      logger.error('사용자 정보 가져오기 에러:', error);
       setUserInfo({ nickname: null, profile: null, isLoading: false });
     }
   };
@@ -117,7 +118,7 @@ const MyInfoUpdate: React.FC<MyInfoUpdateProps> = ({
         });
       }
     } catch (error) {
-      console.error('닉네임 중복확인 에러:', error);
+      logger.error('닉네임 중복확인 에러:', error);
       setNicknameDuplicateCheck({ 
         isChecking: false, 
         isAvailable: null, 
@@ -135,7 +136,7 @@ const MyInfoUpdate: React.FC<MyInfoUpdateProps> = ({
         profile: selectedProfile
       };
 
-      console.log('정보 변경 요청 데이터:', requestBody);
+      logger.info('정보 변경 요청 데이터:', requestBody);
 
       const response = await authManager.authenticatedRequest(API_ENDPOINTS.USER_UPDATE, {
         method: 'PUT',
@@ -143,16 +144,16 @@ const MyInfoUpdate: React.FC<MyInfoUpdateProps> = ({
       });
 
       if (response.ok) {
-        console.log('정보 변경 성공');
+        logger.info('정보 변경 성공');
         onInfoUpdateSuccess?.('정상적으로 내 정보가 수정되었습니다.');
         onBack?.();
       } else {
         const errorData = await response.json().catch(() => null);
-        console.error('정보 변경 실패:', errorData);
+        logger.error('정보 변경 실패:', errorData);
         alert(`정보 변경에 실패했습니다: ${errorData?.message || '다시 시도해주세요.'}`);
       }
     } catch (error) {
-      console.error('정보 변경 에러:', error);
+      logger.error('정보 변경 에러:', error);
       if (error instanceof Error && error.message.includes('Authentication failed')) {
         alert('인증이 만료되었습니다. 다시 로그인해주세요.');
       } else {

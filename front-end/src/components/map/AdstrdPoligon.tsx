@@ -15,12 +15,13 @@ import {
   KakaoPolygon
 } from './MarketMode';
 import MarketModeModal from './MarketModeModal';
-import { 
+import {
   applyDefaultModePolygonStyle,
   createDongDefaultModeLabelContent,
   handleDongDefaultModeHover,
   updateDongPolygonsToDefaultMode
 } from './DefaultMode';
+import { logger } from '@/utils/logger';
 
 // 타입 정의
 interface KakaoOverlay {
@@ -50,7 +51,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
 
   // 상권 모드 상태 변화 디버깅
   useEffect(() => {
-    console.log('🔍 AdstrdPoligon - showMarketingArea 상태 변화:', showMarketingArea);
+    logger.info('🔍 AdstrdPoligon - showMarketingArea 상태 변화:', showMarketingArea);
   }, [showMarketingArea]);
 
 
@@ -91,7 +92,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
     const signGuDataTyped = signGuData as any;
     const guData = signGuDataTyped.DATA.find((gu: any) => gu.signgu_cd === guCode);
     
-    console.log(`🔍 행정동 코드 "${dongCode}" -> 자치구 코드 "${guCode}" -> 자치구명 "${guData?.signgu_nm || '알 수 없음'}"`);
+    logger.info(`🔍 행정동 코드 "${dongCode}" -> 자치구 코드 "${guCode}" -> 자치구명 "${guData?.signgu_nm || '알 수 없음'}"`);
     
     return guData?.signgu_nm || '알 수 없음';
   }, []);
@@ -172,11 +173,11 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
 
     // 서울시 경계 좌표가 있는지 확인
     if (seoulBoundaryCoords.length === 0) {
-      console.warn('서울시 경계 좌표를 찾을 수 없습니다.');
+      logger.warn('서울시 경계 좌표를 찾을 수 없습니다.');
       return;
     }
 
-    console.log('서울시 경계 좌표 개수:', seoulBoundaryCoords.length);
+    logger.info('서울시 경계 좌표 개수:', seoulBoundaryCoords.length);
 
     // 카카오맵 도넛 폴리곤: 외부 사각형에서 서울시 경계를 홀로 뚫기
     const donutPaths = [
@@ -196,7 +197,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
 
     backgroundPolygon.setMap(map);
     backgroundOverlayRef.current = backgroundPolygon as KakaoOverlay;
-    console.log('도넛 폴리곤 생성 완료');
+    logger.info('도넛 폴리곤 생성 완료');
   }, [map]);
 
   // 배경 오버레이 숨김 함수
@@ -213,24 +214,24 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
 
     const globalEventHandler = (e: Event) => {
       const target = e.target as HTMLElement;
-      console.log(`🖱️ 이벤트 감지: ${e.type}, 타겟:`, target, `클래스:`, target?.classList);
+      logger.info(`🖱️ 이벤트 감지: ${e.type}, 타겟:`, target, `클래스:`, target?.classList);
       
       if (!target || !target.classList || !target.classList.contains('adstrd-label')) {
-        console.log(`❌ 행정동 라벨이 아님: ${target?.className}`);
+        logger.info(`❌ 행정동 라벨이 아님: ${target?.className}`);
         return;
       }
 
       const labelId = target.id;
-      console.log(`🎯 행정동 라벨 이벤트: ${e.type}, ID: ${labelId}`);
+      logger.info(`🎯 행정동 라벨 이벤트: ${e.type}, ID: ${labelId}`);
       
       const polygonData = polygonMapRef.current.get(labelId);
       if (!polygonData) {
-        console.log(`❌ 폴리곤 데이터 없음: ${labelId}`);
+        logger.info(`❌ 폴리곤 데이터 없음: ${labelId}`);
         return;
       }
 
       const { polygon, centerLat, centerLng, dongName, guName } = polygonData;
-      console.log(`📍 폴리곤 데이터: ${dongName} (${guName}), 좌표: ${centerLat}, ${centerLng}`);
+      logger.info(`📍 폴리곤 데이터: ${dongName} (${guName}), 좌표: ${centerLat}, ${centerLng}`);
 
       if (e.type === 'mouseenter') {
         // 현재 상권 모드 상태를 실시간으로 확인
@@ -255,7 +256,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
           handleDongDefaultModeHover(polygon, dongName, false);
         }
       } else if (e.type === 'click') {
-        console.log(`🎯 행정동 클릭: ${dongName}`);
+        logger.info(`🎯 행정동 클릭: ${dongName}`);
         
         // 지도 중심 이동 및 확대
         map.setCenter(new (window.kakao.maps as any).LatLng(centerLat, centerLng));
@@ -274,7 +275,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
   const hideAdstrdPolygons = useCallback(() => {
     if (!isShowingRef.current) return;
 
-    console.log(`🗑️ 행정동 폴리곤 정리 시작 - 현재 폴리곤: ${adstrdPolygonsRef.current.length}개, 라벨: ${adstrdLabelsRef.current.length}개`);
+    logger.info(`🗑️ 행정동 폴리곤 정리 시작 - 현재 폴리곤: ${adstrdPolygonsRef.current.length}개, 라벨: ${adstrdLabelsRef.current.length}개`);
 
     // 즉시 상태 변경으로 중복 실행 방지
     isShowingRef.current = false;
@@ -306,17 +307,17 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
     adstrdLabelsRef.current = [];
     eventListenersRef.current = [];
     
-    console.log(`✅ 행정동 폴리곤 정리 완료`);
+    logger.info(`✅ 행정동 폴리곤 정리 완료`);
   }, [hideBackgroundOverlay]);
 
   // 행정동별 폴리곤과 라벨 표시 함수 (레벨 6)
   const showAdstrdPolygons = useCallback(() => {
     if (!map || !window.kakao || isShowingRef.current) {
-      console.log(`⚠️ showAdstrdPolygons 중단: map=${!!map}, kakao=${!!window.kakao}, isShowing=${isShowingRef.current}`);
+      logger.info(`⚠️ showAdstrdPolygons 중단: map=${!!map}, kakao=${!!window.kakao}, isShowing=${isShowingRef.current}`);
       return;
     }
 
-    console.log(`🎨 행정동 폴리곤 생성 시작 - 상권모드: ${showMarketingArea}`);
+    logger.info(`🎨 행정동 폴리곤 생성 시작 - 상권모드: ${showMarketingArea}`);
 
     // 전역 이벤트 위임 설정
     setupGlobalEventDelegation();
@@ -342,7 +343,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
         const totalCount = geometryCollection.geometries.length;
         setTotalDogsCount(totalCount);
         setIsLoadingAllDongs(true);
-        console.log(`📊 총 행정동 개수: ${totalCount}개 - 로딩 시작`);
+        logger.info(`📊 총 행정동 개수: ${totalCount}개 - 로딩 시작`);
       }
       geometryCollection.geometries.forEach((polygon: any, index: number) => {
       if (polygon.type === 'Polygon' && polygon.coordinates && polygon.coordinates.length > 0) {
@@ -386,18 +387,18 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
         const guName = findNearestGuName(centerLat, centerLng);
         const currentLabelId = `adstrd-label-${index}`;
         
-        console.log(`📍 좌표 (${centerLat.toFixed(6)}, ${centerLng.toFixed(6)}) -> 자치구: "${guName}", 행정동: "${dongName}"`);
+        logger.info(`📍 좌표 (${centerLat.toFixed(6)}, ${centerLng.toFixed(6)}) -> 자치구: "${guName}", 행정동: "${dongName}"`);
         
         // 상권 모드에서 상권 개수 로드 및 캐시
         let content = '';
         if (showMarketingArea) {
-          console.log(`🎯 행정동 상권모드 처리: "${guName}" "${dongName}"`);
+          logger.info(`🎯 행정동 상권모드 처리: "${guName}" "${dongName}"`);
           // 상권 개수 비동기 로드
           const dongKey = `${guName}-${dongName}`;
           let count = dongCountCache[dongKey];
           
           if (count === undefined) {
-            console.log(`🔄 행정동 데이터 로드 필요: ${dongKey}`);
+            logger.info(`🔄 행정동 데이터 로드 필요: ${dongKey}`);
             
             // 로딩 카운터 증가
             setLoadingDogsCount(prev => prev + 1);
@@ -405,7 +406,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
             
             // 아직 로드되지 않은 경우 비동기 로드
             loadDongCountData(guName, dongName).then((loadedCount) => {
-              console.log(`✅ 행정동 데이터 로드 완료: ${dongKey} = ${loadedCount}개`);
+              logger.info(`✅ 행정동 데이터 로드 완료: ${dongKey} = ${loadedCount}개`);
               setDongCountCache(prev => ({
                 ...prev,
                 [dongKey]: loadedCount
@@ -431,13 +432,13 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
             });
             count = 0; // 로딩 중에는 0으로 표시
           } else {
-            console.log(`💾 행정동 캐시된 데이터 사용: ${dongKey} = ${count}개`);
+            logger.info(`💾 행정동 캐시된 데이터 사용: ${dongKey} = ${count}개`);
           }
           
           content = createDongMarketModeLabelContent(dongName, count, currentLabelId, fontSize, true);
           applyDongMarketModePolygonStyle(kakaoPolygon, count);
         } else {
-          console.log(`🔵 행정동 기본모드 처리: ${dongName}`);
+          logger.info(`🔵 행정동 기본모드 처리: ${dongName}`);
           content = createDongDefaultModeLabelContent(dongName, currentLabelId, fontSize);
           applyDefaultModePolygonStyle(kakaoPolygon);
         }
@@ -467,7 +468,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
     adstrdLabelsRef.current = labels;
     eventListenersRef.current = eventCleanups;
     
-    console.log(`✅ 행정동 폴리곤 생성 완료 - 폴리곤: ${polygons.length}개, 라벨: ${labels.length}개`);
+    logger.info(`✅ 행정동 폴리곤 생성 완료 - 폴리곤: ${polygons.length}개, 라벨: ${labels.length}개`);
     
     // 기본 모드일 때는 로딩 즉시 완료
     if (!showMarketingArea) {
@@ -479,7 +480,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
   useEffect(() => {
     if (!isShowingRef.current) return;
 
-    console.log(`🔄 AdstrdPoligon 모드 변경 - 상권모드: ${showMarketingArea}`);
+    logger.info(`🔄 AdstrdPoligon 모드 변경 - 상권모드: ${showMarketingArea}`);
     
     // 상권 모드 변경 시 이벤트 핸들러만 재설정 (폴리곤 재생성 없이)
     if (globalEventListenerRef.current) {
@@ -492,7 +493,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
 
     // 기존 폴리곤들의 스타일만 업데이트 (재생성하지 않음)
     if (showMarketingArea) {
-      console.log('🎯 기존 행정동 폴리곤들을 상권 모드로 업데이트');
+      logger.info('🎯 기존 행정동 폴리곤들을 상권 모드로 업데이트');
       setIsLoadingAllDongs(true); // 로딩 시작
       
       let pendingLoads = 0;
@@ -568,7 +569,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
         setIsLoadingAllDongs(false);
       }
     } else {
-      console.log('🔵 기존 행정동 폴리곤들을 기본 모드로 업데이트');
+      logger.info('🔵 기존 행정동 폴리곤들을 기본 모드로 업데이트');
       // 행정동용 기본 모드 업데이트 함수 사용
       updateDongPolygonsToDefaultMode(adstrdPolygonsRef.current, adstrdLabelsRef.current);
     }
@@ -609,7 +610,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
       
       // 정확히 레벨 6일 때만 표시
       if (currentLevel === 6 && !isShowingRef.current) {
-        console.log(`✅ 레벨 6 - 행정동 폴리곤 표시 준비`);
+        logger.info(`✅ 레벨 6 - 행정동 폴리곤 표시 준비`);
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
           showAdstrdPolygons();

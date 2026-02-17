@@ -21,6 +21,7 @@ import {
   handleDefaultModeHover,
   updatePolygonsToDefaultMode
 } from './DefaultMode';
+import { logger } from '@/utils/logger';
 
 // 타입 정의
 interface KakaoOverlay {
@@ -46,15 +47,15 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
 
   // 상권 모드 상태 변화 디버깅
   useEffect(() => {
-    console.log('🔍 SignGuPoligon - showMarketingArea 상태 변화:', showMarketingArea);
+    logger.info('🔍 SignGuPoligon - showMarketingArea 상태 변화:', showMarketingArea);
   }, [showMarketingArea]);
 
 
   // showMarketingArea가 true일 때 데이터 로드
   useEffect(() => {
-    console.log(`🎯 SignGuPoligon useEffect - showMarketingArea: ${showMarketingArea}, 데이터 개수: ${Object.keys(guCountData).length}`);
+    logger.info(`🎯 SignGuPoligon useEffect - showMarketingArea: ${showMarketingArea}, 데이터 개수: ${Object.keys(guCountData).length}`);
     if (showMarketingArea && Object.keys(guCountData).length === 0) {
-      console.log('📞 자치구별 상권 데이터 로드 시작...');
+      logger.info('📞 자치구별 상권 데이터 로드 시작...');
       loadGuCountData();
     }
   }, [showMarketingArea, guCountData, loadGuCountData]);
@@ -121,12 +122,12 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
     if (showMarketingArea) {
       // 상권 모드 ON: 상권 개수에 따른 색상 적용
       if (Object.keys(guCountData).length > 0) {
-        console.log('🎯 자치구 폴리곤을 상권 모드로 업데이트');
+        logger.info('🎯 자치구 폴리곤을 상권 모드로 업데이트');
         updatePolygonsToMarketMode(signGuPolygonsRef.current, signGuLabelsRef.current, guCountData);
       }
     } else {
       // 상권 모드 OFF: 기본 상태로 복원
-      console.log('🔵 자치구 폴리곤을 기본 모드로 복원');
+      logger.info('🔵 자치구 폴리곤을 기본 모드로 복원');
       updatePolygonsToDefaultMode(signGuPolygonsRef.current, signGuLabelsRef.current);
     }
   }, [showMarketingArea, guCountData, setupGlobalEventDelegation]);
@@ -220,11 +221,11 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
   const showSignGuPolygons = useCallback(() => {
     if (!map || !window.kakao || isShowingRef.current) return;
 
-    console.log(`🎨 showSignGuPolygons 호출 - 상권모드: ${showMarketingArea}, 데이터개수: ${Object.keys(guCountData).length}`);
+    logger.info(`🎨 showSignGuPolygons 호출 - 상권모드: ${showMarketingArea}, 데이터개수: ${Object.keys(guCountData).length}`);
 
     // 상권 모드일 때 데이터가 로드되지 않았다면 로드 후 재시도
     if (showMarketingArea && Object.keys(guCountData).length === 0 && !isLoadingData) {
-      console.log('🔄 상권 모드 활성화 상태에서 데이터 로드 필요');
+      logger.info('🔄 상권 모드 활성화 상태에서 데이터 로드 필요');
       loadGuCountData().then(() => {
         // 데이터 로드 완료 후 다시 폴리곤 표시 시도
         if (!isShowingRef.current) {
@@ -292,7 +293,7 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
         const district = signGuData.DATA[index];
         if (district) {
           const guName = district.signgu_nm;
-          console.log(`🎨 폴리곤 생성: ${guName}, 상권모드=${showMarketingArea}`);
+          logger.info(`🎨 폴리곤 생성: ${guName}, 상권모드=${showMarketingArea}`);
 
           // 모드에 따른 폴리곤 스타일 적용
           if (showMarketingArea) {
@@ -341,7 +342,7 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
   // 상권 데이터가 로드된 후 이미 표시된 폴리곤들을 업데이트
   useEffect(() => {
     if (showMarketingArea && Object.keys(guCountData).length > 0 && isShowingRef.current) {
-      console.log('📊 상권 데이터 로드 완료 - 기존 폴리곤 업데이트');
+      logger.info('📊 상권 데이터 로드 완료 - 기존 폴리곤 업데이트');
       
       // 기존 폴리곤들을 제거하고 새로 생성
       hideSignGuPolygons();
@@ -364,12 +365,12 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
     // 즉시 차단 시스템 - 레벨 7~8 범위를 벗어나면 바로 데이터 차단
     const zoomChangedListener = () => {
       const currentLevel = map.getLevel();
-      console.log(`🔍 줌 변경 감지: 레벨 ${currentLevel}, 상권모드: ${showMarketingArea}, 현재표시: ${isShowingRef.current}`);
+      logger.info(`🔍 줌 변경 감지: 레벨 ${currentLevel}, 상권모드: ${showMarketingArea}, 현재표시: ${isShowingRef.current}`);
       
       // 레벨 7~8 범위를 벗어나면 즉시 강제 차단 (렌더링 전에 차단)
       if (currentLevel < 7 || currentLevel > 8) {
         if (isShowingRef.current) {
-          console.log(`❌ 레벨 ${currentLevel} - 폴리곤 숨김`);
+          logger.info(`❌ 레벨 ${currentLevel} - 폴리곤 숨김`);
           // 즉시 모든 폴리곤 제거 (애니메이션 없이)
           signGuPolygonsRef.current.forEach(polygon => polygon.setMap(null));
           signGuLabelsRef.current.forEach(label => label.setMap(null));
@@ -384,7 +385,7 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
       
       // 레벨 7~8 범위에 있을 때만 표시
       if ((currentLevel >= 7 && currentLevel <= 8) && !isShowingRef.current) {
-        console.log(`✅ 레벨 ${currentLevel} - 폴리곤 표시 준비, 상권모드: ${showMarketingArea}`);
+        logger.info(`✅ 레벨 ${currentLevel} - 폴리곤 표시 준비, 상권모드: ${showMarketingArea}`);
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
           showSignGuPolygons();

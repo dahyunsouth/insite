@@ -12,6 +12,7 @@ import TradeAreaPoligon from './TradeAreaPoligon';
 import DetailModal from '../organisms/Detail/DetailModal';
 import tradeAreaData from '../../data/TradeAreaValue.json';
 import { tmToWgs84 } from '../../utils/coordinateTransform';
+import { logger } from '@/utils/logger';
 
 // KakaoMap Context 생성
 interface KakaoMapContextType {
@@ -102,7 +103,7 @@ export function KakaoMapProvider({ children, showNotification, cafeActive: _cafe
           // 지도의 현재 레벨을 얻어옵니다
           const _level = mapInstance.getLevel();
           // 필요시 줌 레벨 변경에 따른 추가 로직을 여기에 구현
-          // console.log('현재 지도 레벨은', level, '입니다');
+          // logger.info('현재 지도 레벨은', level, '입니다');
         });
         
         setMap(mapInstance);
@@ -122,7 +123,7 @@ export function KakaoMapProvider({ children, showNotification, cafeActive: _cafe
 
     const handleFocusTradeArea = (event: CustomEvent) => {
       const { code, name, coordinates } = event.detail;
-      console.log('focusTradeArea 이벤트 수신:', { code, name, coordinates });
+      logger.info('focusTradeArea 이벤트 수신:', { code, name, coordinates });
       
       if (map && coordinates) {
         // 지도 중심을 해당 상권 좌표로 이동
@@ -132,7 +133,7 @@ export function KakaoMapProvider({ children, showNotification, cafeActive: _cafe
         // 지도 레벨을 적절하게 설정 (상권 상세 보기)
         map.setLevel(4);
         
-        console.log('지도 중심 이동 완료:', coordinates);
+        logger.info('지도 중심 이동 완료:', coordinates);
       }
     };
 
@@ -193,7 +194,7 @@ export default function FullScreenKakaoMap({
     code: string | null;
   }>({ name: null, code: null });
 
-  console.log('FullScreenKakaoMap 렌더링:', { cafeActive });
+  logger.info('FullScreenKakaoMap 렌더링:', { cafeActive });
 
   // 상권 선택 핸들러
   const handleTradeAreaSelect = (tradeAreaName: string | null, tradeAreaCode: string | null) => {

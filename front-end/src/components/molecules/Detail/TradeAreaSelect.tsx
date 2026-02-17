@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Combobox } from "@headlessui/react";
+import { logger } from '@/utils/logger';
 
 type Option = { code: string; name: string };
 
@@ -101,7 +102,7 @@ export default function TradeAreaSelect({ className, onChange }: Props) {
   useEffect(() => {
     // Debug log: selection propagated to parent
     // eslint-disable-next-line no-console
-    console.log("[TradeAreaSelect] onChange selected:", selected);
+    logger.info("[TradeAreaSelect] onChange selected:", selected);
     if (onChange) onChange(selected);
   }, [selected, onChange]);
 

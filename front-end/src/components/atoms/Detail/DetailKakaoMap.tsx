@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { logger } from '@/utils/logger';
 
 type DetailKakaoMapProps = {
   coordinates?: {
@@ -25,18 +26,18 @@ export default function DetailKakaoMap({
   const mapInstanceRef = useRef<any>(null);
 
   useEffect(() => {
-    console.log('DetailKakaoMap useEffect 실행:', { coordinates, areaName });
-    console.log('DetailKakaoMap coordinates 타입:', typeof coordinates, coordinates);
+    logger.info('DetailKakaoMap useEffect 실행:', { coordinates, areaName });
+    logger.info('DetailKakaoMap coordinates 타입:', typeof coordinates, coordinates);
     
     if (!mapRef.current) {
-      console.log('DetailKakaoMap: mapRef가 없음');
+      logger.info('DetailKakaoMap: mapRef가 없음');
       return;
     }
 
     // 좌표가 없으면 기본 좌표 사용
     const coordsToUse = coordinates || { lat: 37.501309, lng: 127.039599 };
-    console.log('DetailKakaoMap 사용할 좌표:', coordsToUse);
-    console.log('DetailKakaoMap 좌표 유효성 검사:', {
+    logger.info('DetailKakaoMap 사용할 좌표:', coordsToUse);
+    logger.info('DetailKakaoMap 좌표 유효성 검사:', {
       hasCoordinates: !!coordinates,
       lat: coordsToUse.lat,
       lng: coordsToUse.lng,
@@ -45,7 +46,7 @@ export default function DetailKakaoMap({
     });
 
     function initializeMap() {
-      console.log('DetailKakaoMap initializeMap 실행:', { coordsToUse, areaName });
+      logger.info('DetailKakaoMap initializeMap 실행:', { coordsToUse, areaName });
       
       if (!mapRef.current) return;
 
@@ -55,7 +56,7 @@ export default function DetailKakaoMap({
         level: 3, // 지도 확대 레벨
       };
 
-      console.log('DetailKakaoMap 지도 생성 시도:', options);
+      logger.info('DetailKakaoMap 지도 생성 시도:', options);
 
       const map = new (window as any).kakao.maps.Map(container, options);
       mapInstanceRef.current = map;
@@ -76,20 +77,20 @@ export default function DetailKakaoMap({
         infowindow.open(map, marker);
       }
 
-      console.log('DetailKakaoMap 지도 생성 완료');
+      logger.info('DetailKakaoMap 지도 생성 완료');
     }
 
     // 카카오맵 API가 이미 로드되어 있는지 확인
     if (typeof window !== 'undefined' && (window as any).kakao && (window as any).kakao.maps) {
-      console.log('DetailKakaoMap: 카카오맵 API 이미 로드됨, 바로 초기화');
+      logger.info('DetailKakaoMap: 카카오맵 API 이미 로드됨, 바로 초기화');
       // API가 이미 로드되어 있으면 바로 초기화
       initializeMap();
     } else {
-      console.log('DetailKakaoMap: 카카오맵 API 로드 대기 중...');
+      logger.info('DetailKakaoMap: 카카오맵 API 로드 대기 중...');
       // API가 로드되지 않은 경우 로드 완료를 기다림
       const checkKakao = () => {
         if ((window as any).kakao && (window as any).kakao.maps) {
-          console.log('DetailKakaoMap: 카카오맵 API 로드 완료, 초기화 시작');
+          logger.info('DetailKakaoMap: 카카오맵 API 로드 완료, 초기화 시작');
           initializeMap();
         } else {
           setTimeout(checkKakao, 100);

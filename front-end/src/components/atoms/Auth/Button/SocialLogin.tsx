@@ -1,4 +1,5 @@
 import React from 'react';
+import { logger } from '@/utils/logger';
 
 interface SocialLoginProps {
   provider: 'google' | 'kakao' | 'naver' | 'ssafy';
@@ -29,7 +30,7 @@ const SocialLogin: React.FC<SocialLoginProps> = ({
   const config = socialConfigs[provider];
 
   const handleClick = () => {
-    console.log(`${provider} 로그인 클릭됨`);
+    logger.info(`${provider} 로그인 클릭됨`);
     onClick(provider);
   };
 

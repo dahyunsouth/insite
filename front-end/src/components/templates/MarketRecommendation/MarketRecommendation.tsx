@@ -6,6 +6,7 @@ import MarketRecommendationMap from '@/components/atoms/MarketRecommendation/Mar
 import LeftMarketRecommendationBar from '@/components/organisms/MarketRecommendation/LeftMarketRecommendationBar';
 import MarketTypeStore from '@/components/organisms/MarketRecommendation/MarketTypeStore';
 import { RecommendationItem } from '@/types/recommendation';
+import { logger } from '@/utils/logger';
 
 interface MarketRecommendationProps {
   onClose: () => void;
@@ -73,7 +74,7 @@ export default function MarketRecommendation({
   };
 
   const handleItemSelect = (item: RecommendationItem | null) => {
-    console.log('Item selected in MarketRecommendation:', item);
+    logger.info('Item selected in MarketRecommendation:', item);
     setSelectedItem(item);
   };
 

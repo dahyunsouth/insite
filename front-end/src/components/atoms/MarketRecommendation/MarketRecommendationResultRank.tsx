@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { RecommendationItem } from '@/types/recommendation';
+import { logger } from '@/utils/logger';
 
 interface MarketRecommendationResultRankProps {
   results?: RecommendationItem[];
@@ -21,7 +22,7 @@ const RankCard: React.FC<RecommendationItem & { onClick?: () => void; isActive?:
   };
 
   const handleClick = () => {
-    console.log('RankCard clicked:', { ranking, areaName, totalScore });
+    logger.info('RankCard clicked:', { ranking, areaName, totalScore });
     onClick?.();
   };
 

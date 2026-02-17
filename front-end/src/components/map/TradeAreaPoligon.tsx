@@ -9,6 +9,7 @@ import { tmToWgs84 } from '../../utils/coordinateTransform';
 import { API_ENDPOINTS } from '../../config/api';
 import { fetchTradeAreaDetail } from '@/lib/api/tradeAreas';
 import { isPointInPolygon, convertKakaoLatLngsToPoints, Point, PolygonPath } from '../../utils/pointInPolygon';
+import { logger } from '@/utils/logger';
 
 // 동적 캐시 시스템 - 지도 이동에 따라 확장되는 캐시
 const DYNAMIC_POLYGON_CACHE = {
@@ -681,7 +682,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
         
         // 상권명으로 상권코드 찾기
         const tradeAreaCode = tradeAreaData.DATA.find(area => area.trdar_cd_nm === tradeAreaName)?.trdar_cd || null;
-        console.log("🔍 상권 클릭:", { tradeAreaName, tradeAreaCode });
+        logger.info("🔍 상권 클릭:", { tradeAreaName, tradeAreaCode });
         
         // 상권명과 상권코드를 부모 컴포넌트로 전달
         onTradeAreaSelect?.(tradeAreaName, tradeAreaCode);
@@ -701,7 +702,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
     // selectTradeArea 이벤트 리스너 추가 (AdstrdMarketList에서 상권 선택 시)
     const handleSelectTradeArea = (event: CustomEvent) => {
       const { code, name } = event.detail;
-      console.log('🎯 selectTradeArea 이벤트 수신:', { code, name });
+      logger.info('🎯 selectTradeArea 이벤트 수신:', { code, name });
       // 선택 상태 영구 저장
       persistedSelectedTradeAreaRef.current = { code, name };
       
@@ -752,7 +753,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
             zIndex: 1000
           });
           
-          console.log('✅ 상권 폴리곤 스타일 적용 완료:', name);
+          logger.info('✅ 상권 폴리곤 스타일 적용 완료:', name);
         }
       }
     };
@@ -868,10 +869,10 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
     const currentLat = currentCenter.getLat();
     const currentLng = currentCenter.getLng();
 
-    console.log('🔍 폴리곤 표시 시작:', { currentLat, currentLng, currentLevel });
+    logger.info('🔍 폴리곤 표시 시작:', { currentLat, currentLng, currentLevel });
 
     // 초기에는 현재 뷰포트(레벨 4 기준) 내 폴리곤/라벨만 표시
-    console.log('🔄 현재 뷰포트 우선 로드');
+    logger.info('🔄 현재 뷰포트 우선 로드');
     loadPolygonsForCurrentArea(currentLat, currentLng, currentLevel);
     showDynamicCachedPolygons();
 
@@ -974,7 +975,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
 
   // 현재 영역에 대한 폴리곤 로드 함수
   const loadPolygonsForCurrentArea = useCallback((centerLat: number, centerLng: number, level: number) => {
-    console.log('🔧 현재 영역 폴리곤 로드 중...', { centerLat, centerLng, level });
+    logger.info('🔧 현재 영역 폴리곤 로드 중...', { centerLat, centerLng, level });
     
     const geometries = (tradeAreaPolygonData as any).geometries;
     if (!geometries || geometries.length === 0) return;
@@ -995,7 +996,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
              areaLng >= visibleRange.minLng && areaLng <= visibleRange.maxLng;
     });
 
-    console.log(`📍 현재 영역 내 상권 ${filteredTradeAreas.length}개 발견`);
+    logger.info(`📍 현재 영역 내 상권 ${filteredTradeAreas.length}개 발견`);
 
     // 폴리곤과 상권 데이터 매칭
     const polygonDataArray: {
@@ -1086,7 +1087,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
       DYNAMIC_POLYGON_CACHE.visiblePolygons.splice(0, removeCount);
     }
 
-    console.log(`✅ 동적 캐시 업데이트: ${newPolygons.length}개 상권 추가, 총 ${DYNAMIC_POLYGON_CACHE.visiblePolygons.length}개`);
+    logger.info(`✅ 동적 캐시 업데이트: ${newPolygons.length}개 상권 추가, 총 ${DYNAMIC_POLYGON_CACHE.visiblePolygons.length}개`);
     
     // 새로 로드된 폴리곤들 표시
     showDynamicCachedPolygons();
@@ -1111,7 +1112,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
     const labels: KakaoOverlay[] = [];
     const fontSize = 12;
 
-    console.log('🔍 동적 캐시 폴리곤 표시 시작:', DYNAMIC_POLYGON_CACHE.visiblePolygons.length);
+    logger.info('🔍 동적 캐시 폴리곤 표시 시작:', DYNAMIC_POLYGON_CACHE.visiblePolygons.length);
 
     DYNAMIC_POLYGON_CACHE.visiblePolygons.forEach((cachedPolygon) => {
       // 캐시된 폴리곤 경로를 카카오맵 좌표로 변환
@@ -1234,7 +1235,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
     tradeAreaPolygonsRef.current = polygons;
     tradeAreaLabelsRef.current = labels;
     
-    console.log(`✅ 동적 캐시 폴리곤 ${polygons.length}개 표시 완료`);
+    logger.info(`✅ 동적 캐시 폴리곤 ${polygons.length}개 표시 완료`);
     // 초기 배치가 끝난 뒤, 아직 스케줄되지 않았다면 백그라운드 큐 처리 시작
     if (!hasScheduledBackgroundFetchRef.current && pendingLabelUpdatesRef.current.length > 0) {
       hasScheduledBackgroundFetchRef.current = true;
@@ -1249,7 +1250,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
     // 동적 캐시 초기화
     const initializeDynamicCache = () => {
       if (window.kakao && window.kakao.maps) {
-        console.log('🚀 동적 캐시 시스템 초기화');
+        logger.info('🚀 동적 캐시 시스템 초기화');
         DYNAMIC_POLYGON_CACHE.loadedAreas.clear();
         DYNAMIC_POLYGON_CACHE.visiblePolygons = [];
       } else {

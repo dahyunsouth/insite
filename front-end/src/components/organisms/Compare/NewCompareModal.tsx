@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import TradeAreaPicker from '@/components/molecules/Compare/TradeAreaPicker';
 import { fetchTradeAreasDetail, fetchTradeAreaDetail, mapTradeAreaDetailToMetrics } from '@/lib/api/tradeAreas';
+import { logger } from '@/utils/logger';
 
 interface NewCompareModalProps {
   open: boolean;
@@ -99,7 +100,7 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
         }
       }
     } catch (error) {
-      console.error('상권 데이터 로드 실패:', error);
+      logger.error('상권 데이터 로드 실패:', error);
     } finally {
       setLoading(false);
     }
@@ -118,7 +119,7 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
         setTradeAreaDetailB(metrics);
       }
     } catch (error) {
-      console.error('상권 상세 데이터 로드 실패:', error);
+      logger.error('상권 상세 데이터 로드 실패:', error);
     } finally {
       setLoading(false);
     }

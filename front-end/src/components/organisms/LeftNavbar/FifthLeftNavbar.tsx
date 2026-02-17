@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import AdstrdMarketList from '@/components/atoms/LeftNavbar/AdstrdMarketList';
 import SearchResultList from '@/components/atoms/LeftNavbar/SearchResultList';
 import { useKakaoMapContext } from '@/components/map/KakaoMap';
+import { logger } from '@/utils/logger';
 
 interface FifthLeftNavbarProps {
   isVisible: boolean;
@@ -59,7 +60,7 @@ const FifthLeftNavbar: React.FC<FifthLeftNavbarProps> = ({
           (map as any).relayout();
         }, 100);
       } catch (error) {
-        console.error('마커 제거 중 오류:', error);
+        logger.error('마커 제거 중 오류:', error);
       }
     }
   }, [showSearchResults, map]);

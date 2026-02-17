@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useKakaoMapContext } from "@/components/map/KakaoMap";
+import { logger } from '@/utils/logger';
 
 // 검색 결과 타입 정의
 interface SearchPlace {
@@ -46,7 +47,7 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose, onSearchReset }: 
             (marker as any).setMap(null);
           }
         } catch (error) {
-          console.error('마커 제거 중 오류:', error);
+          logger.error('마커 제거 중 오류:', error);
         }
       });
       return [];
@@ -57,7 +58,7 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose, onSearchReset }: 
       try {
         infowindowRef.current.close();
       } catch (error) {
-        console.error('인포윈도우 닫기 중 오류:', error);
+        logger.error('인포윈도우 닫기 중 오류:', error);
       }
     }
     
@@ -132,7 +133,7 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose, onSearchReset }: 
       return marker;
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('마커 생성 중 오류:', error);
+      logger.error('마커 생성 중 오류:', error);
       return null;
     }
   }, [map]);
@@ -150,7 +151,7 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose, onSearchReset }: 
             (marker as any).setMap(null);
           }
         } catch (error) {
-          console.error('기존 마커 제거 중 오류:', error);
+          logger.error('기존 마커 제거 중 오류:', error);
         }
       });
       return [];

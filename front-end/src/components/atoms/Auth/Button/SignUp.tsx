@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { logger } from '@/utils/logger';
 
 interface SignUpProps {
   className?: string;
@@ -21,7 +22,7 @@ const SignUp: React.FC<SignUpProps> = ({
       <button
         type="button"
         // onClick={onClick}
-        onClick={() => { console.log('signup click'); onClick?.(); }}
+        onClick={() => { logger.info('signup click'); onClick?.(); }}
         className={`text-[14px] font-normal text-[#3288FF] cursor-pointer hover:underline ${className}`}
         {...props}
       >
