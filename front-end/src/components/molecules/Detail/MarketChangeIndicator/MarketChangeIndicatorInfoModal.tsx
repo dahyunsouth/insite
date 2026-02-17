@@ -15,7 +15,7 @@ export default function MarketChangeIndicatorInfoModal({ isOpen, onClose, positi
     <div className="fixed inset-0 z-50" onClick={onClose}>
       {/* Modal */}
       <div 
-        className="absolute z-10 w-[640px] rounded-2xl border border-gray-200 bg-white p-6 shadow-xl"
+        className="absolute z-10 w-full max-w-[640px] rounded-2xl border border-gray-200 bg-white p-6 shadow-xl"
         style={{
           top: `${position.top}px`,
           left: `${position.left}px`

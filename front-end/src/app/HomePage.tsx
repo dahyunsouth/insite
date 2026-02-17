@@ -283,6 +283,7 @@ export default function HomePage() {
     } else {
       logger.info('❌ 상권 리스트가 닫혀있어서 업데이트 안함 (ref 기반)');
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 의존성 배열을 빈 배열로 하여 함수 재생성 방지
 
   // 페이지 로드 시 로그인 상태 확인
@@ -551,6 +552,7 @@ export default function HomePage() {
       });
       window.dispatchEvent(styleEvent);
     }, 100); // 지도 이동 후 스타일 변경
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 로드뷰 토글 핸들러
@@ -610,7 +612,7 @@ export default function HomePage() {
         onShowMarketList={handleShowMarketList}
       >
         {/* 좌측 네비게이션 바 */}
-        <div className={`fixed top-0 left-0 right-0 ${isCompareOpen || isSavedCompareOpen ? 'z-[500]' : 'z-[300]'} h-screen flex flex-col transition-all duration-300 ease-in-out ${isNavbarOpen ? 'w-1/4' : 'w-0'}`}>
+        <div className={`fixed top-0 left-0 right-0 ${isCompareOpen || isSavedCompareOpen ? 'z-[500]' : 'z-[300]'} h-screen flex flex-col overflow-hidden transition-all duration-300 ease-in-out ${isNavbarOpen ? 'w-1/4' : 'w-0'}`}>
           {showMyPage && (
             <MyPageMenu 
               onClose={handleMyPageClose}

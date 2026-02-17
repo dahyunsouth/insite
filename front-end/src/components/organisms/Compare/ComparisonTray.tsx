@@ -20,7 +20,7 @@ export default function ComparisonTray({ className, comparisonItems, onRemoveIte
           <div className="relative">
             {comparisonItems[0] ? (
               <>
-                <div className="bg-white rounded-xl p-2 min-w-[80px] max-w-[100px] shadow-md">
+                <div className="bg-white rounded-xl p-2 min-w-0 max-w-[100px] shadow-md">
                   <div className="text-center text-xs font-medium text-gray-900 truncate">
                     {comparisonItems[0].trdarCdNm}
                   </div>
@@ -35,7 +35,7 @@ export default function ComparisonTray({ className, comparisonItems, onRemoveIte
                 </button>
               </>
             ) : (
-              <div className="bg-transparent rounded-xl p-2 min-w-[80px] max-w-[100px] h-[32px] border-2 border-dashed border-gray-400 flex items-center justify-center">
+              <div className="bg-transparent rounded-xl p-2 min-w-0 max-w-[100px] h-[32px] w-[80px] border-2 border-dashed border-gray-400 flex items-center justify-center">
               </div>
             )}
           </div>
@@ -44,7 +44,7 @@ export default function ComparisonTray({ className, comparisonItems, onRemoveIte
           <div className="relative">
             {comparisonItems[1] ? (
               <>
-                <div className="bg-white rounded-xl p-2 min-w-[80px] max-w-[100px] shadow-md">
+                <div className="bg-white rounded-xl p-2 min-w-0 max-w-[100px] shadow-md">
                   <div className="text-center text-xs font-medium text-gray-900 truncate">
                     {comparisonItems[1].trdarCdNm}
                   </div>
@@ -61,7 +61,7 @@ export default function ComparisonTray({ className, comparisonItems, onRemoveIte
             ) : (
               // 비교 상권 추가
               <button
-                className="cursor-pointer bg-transparent rounded-xl p-2 min-w-[80px] max-w-[100px] h-[32px] border-2 border-dashed border-gray-400 flex text-white items-center justify-center"
+                className="cursor-pointer bg-transparent rounded-xl p-2 min-w-0 max-w-[100px] h-[32px] w-[80px] border-2 border-dashed border-gray-400 flex text-white items-center justify-center"
                 onClick={() => {
                   if (comparisonItems.length >= 1) {
                     // 첫 번째 상권은 있으면 사용, 없으면 빈 객체
