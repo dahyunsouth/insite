@@ -1,11 +1,15 @@
 import React from 'react';
 
-const BusinessTypeButton = ({ 
+const BusinessTypeButton = ({
   children = '카페',
   isSelected = false,
   onClick = () => {},
-  ...props 
-}) => {
+  ...props
+}: {
+  children?: React.ReactNode;
+  isSelected?: boolean;
+  onClick?: () => void;
+} & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'>) => {
   return (
     <button
       onClick={onClick}

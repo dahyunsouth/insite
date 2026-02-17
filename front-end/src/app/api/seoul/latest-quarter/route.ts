@@ -1,5 +1,3 @@
-import { NextRequest } from "next/server";
-
 const SEOUL_BASE = "http://openapi.seoul.go.kr:8088";
 // Correct service name per official spec/sample
 const SERVICE = "VwsmTrdarFlpopQq";
@@ -8,13 +6,6 @@ function getApiKey() {
   const key = process.env.SEOUL_OPENAPI_KEY;
   if (!key) throw new Error("SEOUL_OPENAPI_KEY is not set");
   return key;
-}
-
-function quarterCodeForDate(d: Date) {
-  const month = d.getMonth(); // 0-11
-  const q = Math.floor(month / 3) + 1; // 1-4
-  const year = d.getFullYear();
-  return `${year}${q}`;
 }
 
 function generateQuarterCandidates(limit = 12): string[] {
@@ -58,7 +49,7 @@ async function probeQuarter(quarter: string) {
   return { ok: false as const, status: 400, code };
 }
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     // Fail fast when key missing (avoid 404)
     getApiKey();

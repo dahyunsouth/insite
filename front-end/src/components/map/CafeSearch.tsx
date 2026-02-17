@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -20,7 +19,7 @@ interface CafeSearchProps {
 
 export default function CafeSearch({ isActive }: CafeSearchProps) {
   const { map, showNotification } = useKakaoMapContext();
-  const [markers, setMarkers] = useState<any[]>([]);
+  const [_markers, setMarkers] = useState<any[]>([]);
   const placeOverlayRef = useRef<any>(null);
   const contentNodeRef = useRef<HTMLDivElement | null>(null);
   const psRef = useRef<any>(null);

@@ -24,7 +24,6 @@ export default function FloatingPopulationWeekChart({ labels, values, maxIndex =
   const ch = H - m.top - m.bottom;
 
   const n = values.length;
-  const dataMin = Math.min(...values);
   const dataMax = Math.max(...values);
   const maxVal = Math.max(dataMax, 1); // Ensure we have at least 1 for scaling
   const scaleY = (v: number) => ch - (v / maxVal) * ch;

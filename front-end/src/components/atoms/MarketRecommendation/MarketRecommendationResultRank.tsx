@@ -9,14 +9,6 @@ interface MarketRecommendationResultRankProps {
 }
 
 const RankCard: React.FC<RecommendationItem & { onClick?: () => void; isActive?: boolean }> = ({ ranking, areaName, totalScore, onClick, isActive = false }) => {
-  // 기본(비호버) 스타일
-  const baseGradient = 'bg-gradient-to-r from-gray-200 to-gray-50';
-  // 호버/클릭 시
-  const hoverActiveGradient = 'hover:from-blue-500 hover:to-blue-200 active:from-blue-500 active:to-blue-200';
-  const baseBorder = 'border border-transparent';
-  const hoverActiveBorder = 'hover:border-blue-500 active:border-blue-500';
-  const textHoverActive = 'hover:text-white active:text-white';
-
   const formatScore = (value: number | null | undefined): string => {
     if (value === null || value === undefined) {
       return '-';

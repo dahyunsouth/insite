@@ -152,10 +152,10 @@ const ScoreSummary: React.FC<{ item: RecommendationItem; className?: string }> =
   );
 };
 
-const MarketRecommendationResultContent: React.FC<MarketRecommendationResultContentProps> = ({ 
-  result, 
-  onBack, 
-  selectedItem, 
+const MarketRecommendationResultContent: React.FC<MarketRecommendationResultContentProps> = ({
+  result,
+  onBack: _onBack,
+  selectedItem,
   onSelectedItemChange,
   onAddToComparison,
   onRemoveFromComparison,
@@ -165,7 +165,7 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
   const [isSaved, setIsSaved] = useState(false);
   const [isComparing, setIsComparing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
   const detailContainerRef = useRef<HTMLDivElement>(null);
   
   // FavoritesContext 사용
@@ -487,11 +487,10 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
     
     const fallbackContent = getFallbackContent(item.ranking, item.areaName || '');
     const displaySummary = aiData?.summary || fallbackContent.summary;
-    const displayFeatures = aiData?.features.length ? aiData.features : fallbackContent.features;
 
     return (
-      <div 
-        key={item.ranking} 
+      <div
+        key={item.ranking}
         className={'flex flex-1 rounded-xl py-1 px-6 h-full cursor-pointer hover:shadow-lg transition-shadow ' + style.container}
         onClick={() => handleCardClick(item)}
       >

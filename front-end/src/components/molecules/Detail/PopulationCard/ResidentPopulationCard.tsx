@@ -216,7 +216,4 @@ function formatFixed(v: number, d = 1) {
   return Number.isFinite(v) ? v.toFixed(d) : "—";
 }
 
-function clamp01(v: number) {
-  return Math.max(0, Math.min(1, v));
-}
 

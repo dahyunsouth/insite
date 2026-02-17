@@ -17,10 +17,10 @@ export default function MapTypeControl({
     if (!map) return;
 
     // 지도 타입 컨트롤 생성
-    const mapTypeControl = new window.kakao.maps.MapTypeControl();
+    const mapTypeControl = new (window.kakao.maps as any).MapTypeControl();
     
     // 지도에 컨트롤 추가
-    const controlPosition = window.kakao.maps.ControlPosition[position];
+    const controlPosition = (window.kakao.maps as any).ControlPosition[position];
     map.addControl(mapTypeControl, controlPosition);
     
     controlRef.current = mapTypeControl;

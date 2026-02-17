@@ -26,7 +26,7 @@ interface KakaoMapContextType {
 const KakaoMapContext = createContext<KakaoMapContextType | null>(null);
 
 // KakaoMap Provider 컴포넌트
-export function KakaoMapProvider({ children, showNotification, cafeActive = false }: { children: ReactNode; showNotification: (message: string) => void; cafeActive?: boolean }) {
+export function KakaoMapProvider({ children, showNotification, cafeActive: _cafeActive = false }: { children: ReactNode; showNotification: (message: string) => void; cafeActive?: boolean }) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<any>(null);
 
@@ -100,7 +100,7 @@ export function KakaoMapProvider({ children, showNotification, cafeActive = fals
         // 지도가 확대 또는 축소되면 이벤트를 등록합니다
         (window as any).kakao.maps.event.addListener(mapInstance, 'zoom_changed', function() {
           // 지도의 현재 레벨을 얻어옵니다
-          const level = mapInstance.getLevel();
+          const _level = mapInstance.getLevel();
           // 필요시 줌 레벨 변경에 따른 추가 로직을 여기에 구현
           // console.log('현재 지도 레벨은', level, '입니다');
         });

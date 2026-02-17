@@ -79,12 +79,6 @@ interface TradeArea {
   similrIndutyStorCo: number;
 }
 
-interface TradeAreasResponse {
-  districtNameKor: string;
-  dongNameKor: string;
-  areas: TradeArea[];
-}
-
 interface AdstrdMarketListProps {
   district: string;
   dong: string;
@@ -93,7 +87,7 @@ interface AdstrdMarketListProps {
   selectedTradeArea?: TradeArea | null;
 }
 
-export default function AdstrdMarketList({ district, dong, onClose, onTradeAreaSelect, selectedTradeArea }: AdstrdMarketListProps) {
+export default function AdstrdMarketList({ district, dong, onClose: _onClose, onTradeAreaSelect, selectedTradeArea }: AdstrdMarketListProps) {
   const [tradeAreas, setTradeAreas] = useState<TradeArea[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false); // 초기 로딩 상태를 false로 변경
   const [error, setError] = useState<string>('');
@@ -254,7 +248,7 @@ export default function AdstrdMarketList({ district, dong, onClose, onTradeAreaS
             try {
               const errorData = JSON.parse(errorText);
               console.error('❌ 에러 데이터 (JSON):', errorData);
-            } catch (jsonError) {
+            } catch (_jsonError) {
               console.error('❌ JSON 파싱 실패, 원본 텍스트:', errorText);
             }
           } catch (textError) {

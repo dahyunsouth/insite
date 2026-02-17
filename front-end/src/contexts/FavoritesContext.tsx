@@ -6,14 +6,6 @@ import { authManager } from '@/utils/auth';
 import { getTradeAreaNameByCode } from '@/lib/api/tradeAreas';
 
 // 타입 정의
-interface FavoriteItem {
-  id: number;
-  userUuid: string;
-  trdarCd: number;
-  createdAt: string;
-  trdarCdNm?: string; // 상권명 (로컬에서 조회)
-}
-
 interface TradeAreaData {
   trdarCd: string;
   trdarCdNm: string;

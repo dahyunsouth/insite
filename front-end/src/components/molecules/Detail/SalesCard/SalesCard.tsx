@@ -373,21 +373,6 @@ export default function SalesCard({ trdarCode }: Props) {
   );
 }
 
-function KpiTile({ title, primary, secondary, primaryClass = "" }: { title: string; primary: string; secondary: string; primaryClass?: string }) {
-  return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-4">
-      <div className="text-sm font-semibold text-gray-700">{title}</div>
-      <div className={`mt-2 text-[22px] font-bold text-gray-900 ${primaryClass}`}>{primary}</div>
-      <div className="mt-1 text-xs text-gray-500">{secondary}</div>
-    </div>
-  );
-}
-
-
-function Placeholder() {
-  return <div className="h-3 w-full rounded-full bg-gray-100" />;
-}
-
 function formatCurrency(v: number) {
   if (v >= 100000000) {
     return `${Math.round(v / 100000000)}억원`;
@@ -400,11 +385,3 @@ function formatCurrency(v: number) {
 }
 
 
-function formatPercent(v: number) {
-  const digits = Math.abs(v) < 10 ? 1 : 0;
-  return `${v.toFixed(digits)}%`;
-}
-
-function clamp01(v: number) {
-  return Math.max(0, Math.min(1, v));
-}

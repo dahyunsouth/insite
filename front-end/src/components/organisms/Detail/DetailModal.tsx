@@ -51,15 +51,18 @@ type DetailModalProps = {
  * - Uses the Detail template for visuals (container/header/section-nav)
  * - Manages the overall modal state and layout
  */
-export default function DetailModal({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea, onAddToComparison, onRemoveFromComparison, isInComparison, isNavbarOpen = true }: DetailModalProps) {
+export default function DetailModal({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea: _onSelectTradeArea, onAddToComparison, onRemoveFromComparison, isInComparison, isNavbarOpen = true }: DetailModalProps) {
   const [selected, setSelected] = useState<{ code: string; name: string } | null>(null);
   const [populationType, setPopulationType] = useState<"유동" | "직장" | "상주">("유동");
   const [isSaved, setIsSaved] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [_isLoading, setIsLoading] = useState(false);
+  const [_error, setError] = useState<string | null>(null);
 
   // FavoritesContext 사용
-  const { addFavorite, removeFavorite, isFavorite } = useContext(FavoritesContext);
+  const favoritesContext = useContext(FavoritesContext);
+  const addFavorite = favoritesContext?.addFavorite;
+  const removeFavorite = favoritesContext?.removeFavorite;
+  const isFavorite = favoritesContext?.isFavorite;
 
   // trdarCode가 전달되면 selected 상태 업데이트
   useEffect(() => {
@@ -100,7 +103,7 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
   useEffect(() => {
     const currentCode = trdarCode ?? selected?.code ?? null;
     if (currentCode) {
-      const saved = isFavorite(parseInt(currentCode));
+      const saved = isFavorite?.(parseInt(currentCode)) ?? false;
       console.log('💾 [DetailModal] 저장 상태 동기화:', { currentCode, saved });
       setIsSaved(saved);
     }
@@ -154,7 +157,7 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
     setError(null);
 
     try {
-      const currentIsSaved = isFavorite(parseInt(currentCode));
+      const currentIsSaved = isFavorite?.(parseInt(currentCode)) ?? false;
       const currentTrdarCdNm = selected?.name || title || '상권';
       
       console.log('💾 [DetailModal] 현재 저장 상태:', currentIsSaved);
@@ -163,13 +166,13 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
       if (currentIsSaved) {
         // 저장 해제
         console.log('💾 [DetailModal] 저장 해제 API 호출 시작');
-        await removeFavorite(parseInt(currentCode));
+        await removeFavorite?.(parseInt(currentCode));
         setIsSaved(false);
         console.log('✅ [DetailModal] 상권 저장 해제 성공:', currentCode);
       } else {
         // 저장
         console.log('💾 [DetailModal] 저장 API 호출 시작');
-        await addFavorite(parseInt(currentCode), currentTrdarCdNm);
+        await addFavorite?.(parseInt(currentCode), currentTrdarCdNm);
         setIsSaved(true);
         console.log('✅ [DetailModal] 상권 저장 성공:', currentCode);
       }
@@ -210,21 +213,13 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
             null
           }
           sectionAside={
-            <DetailSidebar 
-              populationType={populationType} 
+            <DetailSidebar
+              populationType={populationType}
               onPopulationTypeChange={setPopulationType}
               onCompare={handleCompare}
               onSave={handleSave}
               isSaved={isSaved}
               isComparing={isComparingComputed}
-              isLoading={isLoading}
-              trdarCode={trdarCode ?? selected?.code ?? null}
-              title={title || selected?.name}
-              subtitle={subtitle}
-              onSelectTradeArea={onSelectTradeArea}
-              onAddToComparison={onAddToComparison}
-              onRemoveFromComparison={onRemoveFromComparison}
-              isInComparison={isInComparison}
             />
           }
         >

@@ -91,7 +91,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
   const [isOtpExpired, setIsOtpExpired] = useState(false);
 
   // 닉네임 중복확인 상태
-  const [isNicknameChecked, setIsNicknameChecked] = useState(false);
+  const [_isNicknameChecked, setIsNicknameChecked] = useState(false);
 
   // 이메일 유효성 검사 상태
   const [emailValidation, setEmailValidation] = useState<{
@@ -520,7 +520,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
     
     setPasswordValidation({
       isValid: password.length >= 8 && password.length <= 15,
-      strength: strengthResult.strength,
+      strength: strengthResult.strength as 'weak' | 'medium' | 'strong' | null,
       message: strengthResult.message
     });
   };
@@ -775,7 +775,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
                     ? '!border-red-500 focus:!border-red-500'
                     : emailSendStatus.isSuccess === false
                     ? '!border-red-500 focus:!border-red-500'
-                    : emailDuplicateCheck.isAvailable === true && emailSendStatus.isSuccess !== false
+                    : emailDuplicateCheck.isAvailable === true && emailSendStatus.isSuccess !== null
                     ? '!border-[#3288FF] focus:!border-[#3288FF]'
                     : emailValidation.isValid === true 
                     ? '!border-[#3288FF] focus:!border-[#3288FF]' 
@@ -795,7 +795,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
                     ? 'text-red-500'
                     : emailSendStatus.isSuccess === false
                     ? 'text-red-500'
-                    : emailDuplicateCheck.isAvailable === true && emailSendStatus.isSuccess !== false
+                    : emailDuplicateCheck.isAvailable === true && emailSendStatus.isSuccess !== null
                     ? 'text-[#3288FF]'
                     : emailValidation.isValid 
                     ? 'text-[#3288FF]' 

@@ -27,7 +27,7 @@ interface LeftMarketRecommendationBarProps {
   onStepClick?: (step: number) => void;
 }
 
-const LeftMarketRecommendationBar: React.FC<LeftMarketRecommendationBarProps> = ({ selectedDistrict, selections, recommendationResults, selectedItem, onItemSelect, onReset, onStepClick }) => {
+const LeftMarketRecommendationBar: React.FC<LeftMarketRecommendationBarProps> = ({ selectedDistrict, selections, recommendationResults, selectedItem: _selectedItem, onItemSelect, onReset, onStepClick }) => {
   const [filters, setFilters] = useState<FilterItem[]>([
     {
       id: 1,

@@ -42,11 +42,11 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
   const backgroundOverlayRef = useRef<KakaoOverlay | null>(null);
   
   // 행정동별 상권 모드 훅 사용
-  const { dongCountData, loadDongCountData } = useDongMarketMode();
+  const { loadDongCountData } = useDongMarketMode();
   const [dongCountCache, setDongCountCache] = useState<{[key: string]: number}>({});
   const [isLoadingAllDongs, setIsLoadingAllDongs] = useState<boolean>(false);
-  const [loadingDogsCount, setLoadingDogsCount] = useState<number>(0);
-  const [totalDogsCount, setTotalDogsCount] = useState<number>(0);
+  const [_loadingDogsCount, setLoadingDogsCount] = useState<number>(0);
+  const [_totalDogsCount, setTotalDogsCount] = useState<number>(0);
 
   // 상권 모드 상태 변화 디버깅
   useEffect(() => {

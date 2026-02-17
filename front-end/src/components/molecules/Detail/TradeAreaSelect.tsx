@@ -22,9 +22,9 @@ function useDebounced<T>(value: T, delay = 300) {
 export default function TradeAreaSelect({ className, onChange }: Props) {
   const [quarter, setQuarter] = useState<string | null>(null);
   const [items, setItems] = useState<Map<string, Option>>(new Map());
-  const [total, setTotal] = useState<number | null>(null);
-  const [nextStart, setNextStart] = useState<number>(1);
-  const [hasMore, setHasMore] = useState<boolean>(false);
+  const [_total, setTotal] = useState<number | null>(null);
+  const [_nextStart, setNextStart] = useState<number>(1);
+  const [_hasMore, setHasMore] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -97,8 +97,6 @@ export default function TradeAreaSelect({ className, onChange }: Props) {
   }, [init]);
 
   const listRef = useRef<HTMLDivElement>(null);
-  // Disable infinite scroll: keep a no-op handler
-  const onScroll = useCallback(() => {}, []);
 
   useEffect(() => {
     // Debug log: selection propagated to parent

@@ -6,7 +6,7 @@ interface SocialLoginProps {
   disabled?: boolean;
 }
 
-const socialConfigs = {
+const socialConfigs: Record<string, { backgroundColor: string; textColor: string; logo: string; text: string }> = {
   google: {
     backgroundColor: '#FFFFFF',
     textColor: '#000000',

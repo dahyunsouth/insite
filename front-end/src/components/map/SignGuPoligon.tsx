@@ -6,21 +6,18 @@ import signGuData from '../../data/SignGuValue.json';
 import signGuPolygonData from '../../data/SignGuPoligon.json';
 import seoulPolygonData from '../../data/SeoulPoligon.json';
 import { tmToWgs84 } from '../../utils/coordinateTransform';
-import { 
-  useMarketMode, 
-  applyMarketModePolygonStyle, 
-  createMarketModeLabelStyle,
-  createMarketModeLabelContent, 
+import {
+  useMarketMode,
+  applyMarketModePolygonStyle,
+  createMarketModeLabelContent,
   handleMarketModeHover,
   updatePolygonsToMarketMode,
-  KakaoPolygon,
-  GuCountData
+  KakaoPolygon
 } from './MarketMode';
 import MarketModeModal from './MarketModeModal';
-import { 
-  applyDefaultModePolygonStyle, 
-  createDefaultModeLabelStyle,
-  createDefaultModeLabelContent, 
+import {
+  applyDefaultModePolygonStyle,
+  createDefaultModeLabelContent,
   handleDefaultModeHover,
   updatePolygonsToDefaultMode
 } from './DefaultMode';

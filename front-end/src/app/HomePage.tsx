@@ -15,7 +15,6 @@ import NotificationBar from '@/components/atoms/Common/NotificationBar';
 import CompareTradeAreasModal from '@/components/organisms/Compare/CompareTradeAreasModal';
 import ComparisonTray from '@/components/organisms/Compare/ComparisonTray';
 import NewCompareModal from '@/components/organisms/Compare/NewCompareModal';
-import TradeAreaData from '@/data/TradeAreaValue.json';
 import { useNotification } from '@/components/map/useNotification';
 import Notification from '@/components/map/Notification';
 import { tmToWgs84 } from '@/utils/coordinateTransform';
@@ -63,7 +62,6 @@ function MapTypeHandler({
         onSavedAreasClick={onSavedAreasClick}
         onCompareClick={onCompareClick}
         onProfileClick={onMyPageClick}
-        onSavedAreasClick={onSavedAreasClick}
       />
       
       {/* 우측 하단: 지도 컨트롤 버튼들 */}
@@ -127,12 +125,6 @@ function CtaVisibilityGuard({ label, ariaLabel, onPress }: { label: string | nul
     </div>
   );
 }
-
-// 상권코드로 상권명을 찾는 함수
-const getTradeAreaNameByCode = (trdarCode: string): string | null => {
-  const tradeArea = TradeAreaData.DATA.find(area => area.trdar_cd === trdarCode);
-  return tradeArea ? tradeArea.trdar_cd_nm : null;
-};
 
 export default function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -451,15 +443,10 @@ export default function HomePage() {
     
     // 새로운 상권 라벨 찾기 및 스타일 적용
     const labelElements = document.querySelectorAll('.tradearea-label');
-    let targetLabel: HTMLElement | null = null;
-    
-    labelElements.forEach((label) => {
-      const labelElement = label as HTMLElement;
-      if (labelElement.textContent?.includes(trdarName)) {
-        targetLabel = labelElement;
-      }
-    });
-    
+    const targetLabel = Array.from(labelElements).find(
+      (label) => label.textContent?.includes(trdarName)
+    ) as HTMLElement | undefined;
+
     if (targetLabel) {
       console.log('✅ 상권 라벨 찾음, 스타일 적용:', targetLabel);
       

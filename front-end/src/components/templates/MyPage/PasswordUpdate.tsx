@@ -108,7 +108,7 @@ const PasswordUpdate: React.FC<PasswordUpdateProps> = ({
     
     setPasswordValidation({
       isValid: password.length >= 8 && password.length <= 15,
-      strength: strengthResult.strength,
+      strength: strengthResult.strength as 'weak' | 'medium' | 'strong' | null,
       message: strengthResult.message
     });
   };

@@ -11,7 +11,7 @@ export const useNotification = () => {
     isVisible: false,
   });
 
-  const showNotification = useCallback((message: string, duration?: number) => {
+  const showNotification = useCallback((message: string, _duration?: number) => {
     setNotification({
       message,
       isVisible: true,

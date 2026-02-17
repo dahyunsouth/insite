@@ -2,26 +2,8 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import SignGuRawData from "@/data/SignGuValue.json";
-import AdstrdRawData from "@/data/AdstrdValue.json";
 import TradeAreaRawData from "@/data/TradeAreaValue.json";
-import { fetchGuList, fetchDongList, fetchTradeAreas, fetchTradeAreasDetail } from "@/lib/api/tradeAreas";
-
-interface SignGuFileShape {
-  DESCRIPTION: Record<string, unknown>;
-  DATA: Array<{
-    signgu_cd: string;
-    signgu_nm: string;
-  }>;
-}
-
-interface AdstrdFileShape {
-  DESCRIPTION: Record<string, unknown>;
-  DATA: Array<{
-    adstrd_cd: string;
-    adstrd_nm: string;
-  }>;
-}
+import { fetchGuList, fetchDongList, fetchTradeAreasDetail } from "@/lib/api/tradeAreas";
 
 interface TradeAreaFileShape {
   DESCRIPTION: Record<string, unknown>;
@@ -65,25 +47,6 @@ export type TradeAreaPickerProps = {
   backgroundColor?: string;
 };
 
-const SIGNGU_OPTIONS: Option[] = (() => {
-  const json = SignGuRawData as unknown as SignGuFileShape;
-  const unique = new Map<string, string>();
-  json.DATA.forEach((item) => {
-    unique.set(item.signgu_cd, item.signgu_nm);
-  });
-  return Array.from(unique.entries())
-    .map(([code, name]) => ({ code, name }))
-    .sort((a, b) => a.name.localeCompare(b.name, "ko"));
-})();
-
-const ADSTRD_OPTIONS: Array<Option & { signguCode: string }> = (() => {
-  const json = AdstrdRawData as unknown as AdstrdFileShape;
-  return json.DATA.map((item) => ({
-    code: item.adstrd_cd,
-    name: item.adstrd_nm,
-    signguCode: item.adstrd_cd.slice(0, 5),
-  })).sort((a, b) => a.name.localeCompare(b.name, "ko"));
-})();
 
 const TRADE_AREA_OPTIONS: TradeAreaOption[] = (() => {
   const json = TradeAreaRawData as unknown as TradeAreaFileShape;
@@ -99,8 +62,6 @@ const TRADE_AREA_OPTIONS: TradeAreaOption[] = (() => {
   })).sort((a, b) => a.name.localeCompare(b.name, "ko"));
 })();
 
-const SIGNGU_NAME_BY_CODE = new Map(SIGNGU_OPTIONS.map((item) => [item.code, item.name]));
-const ADSTRD_NAME_BY_CODE = new Map(ADSTRD_OPTIONS.map((item) => [item.code, item.name]));
 const TRADE_AREA_BY_CODE = new Map(TRADE_AREA_OPTIONS.map((item) => [item.code, item]));
 
 // TradeAreaRawData에서 상권 코드로 자치구/행정동 정보를 매핑하는 Map 생성
@@ -146,17 +107,17 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
   // 동적 구 목록 상태
   const [guList, setGuList] = useState<string[]>([]);
   const [loadingGuList, setLoadingGuList] = useState(false);
-  const [guListError, setGuListError] = useState<string | null>(null);
+  const [_guListError, setGuListError] = useState<string | null>(null);
   
   // 동적 동 목록 상태
   const [dongList, setDongList] = useState<string[]>([]);
   const [loadingDongList, setLoadingDongList] = useState(false);
-  const [dongListError, setDongListError] = useState<string | null>(null);
+  const [_dongListError, setDongListError] = useState<string | null>(null);
   
   // 동적 상권 목록 상태
   const [tradeAreaList, setTradeAreaList] = useState<Array<{code: string, name: string, typeName: string}>>([]);
   const [loadingTradeAreaList, setLoadingTradeAreaList] = useState(false);
-  const [tradeAreaListError, setTradeAreaListError] = useState<string | null>(null);
+  const [_tradeAreaListError, setTradeAreaListError] = useState<string | null>(null);
 
 
   const cardStyle = useMemo<React.CSSProperties>(() => {

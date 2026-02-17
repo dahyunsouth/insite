@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '@/config/api';
+import TradeAreaValueData from '@/data/TradeAreaValue.json';
 
 const BASE_URL = API_BASE_URL;
 
@@ -332,7 +333,7 @@ interface TradeAreaScoreResponse {
 export function getTradeAreaNameByCode(tradeAreaCode: string): string {
   // TradeAreaPicker에서 사용하는 데이터와 동일한 방식으로 불러오기
   try {
-    const TradeAreaRawData = require("@/data/TradeAreaValue.json");
+    const TradeAreaRawData = TradeAreaValueData;
     const tradeArea = TradeAreaRawData.DATA.find((item: any) => item.trdar_cd === tradeAreaCode);
     return tradeArea?.trdar_cd_nm || "상권명 없음";
   } catch (error) {

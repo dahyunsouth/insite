@@ -25,7 +25,7 @@ export default function MarketRecommendation({
     id: string | null;
     name: string | null;
   }>({ id: null, name: null });
-  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [_currentStep, setCurrentStep] = useState<number>(1);
   const [showMap, setShowMap] = useState<boolean>(true);
   const [selections, setSelections] = useState<{
     marketType: string | null;

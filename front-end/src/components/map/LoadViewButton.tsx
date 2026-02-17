@@ -9,11 +9,11 @@ interface LoadViewButtonProps {
   className?: string;
 }
 
-const LoadViewButton: React.FC<LoadViewButtonProps> = ({ 
+const LoadViewButton: React.FC<LoadViewButtonProps> = ({
   isActive = false,
-  isMinimized = false,
+  isMinimized: _isMinimized = false,
   onToggle,
-  className = '' 
+  className = ''
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);

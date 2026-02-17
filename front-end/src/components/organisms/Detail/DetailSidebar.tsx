@@ -42,8 +42,8 @@ type DetailSidebarProps = {
  * - Renders portal + backdrop + ESC close
  * - Uses the Detail template for visuals (container/header/section-nav)
  */
-export function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea, onAddToComparison, onRemoveFromComparison, isInComparison, populationType, onPopulationTypeChange }: DetailNavbarProps) {
-  const [selected, setSelected] = useState<{ code: string; name: string } | null>(null);
+export function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea: _onSelectTradeArea, onAddToComparison, onRemoveFromComparison, isInComparison, populationType, onPopulationTypeChange }: DetailNavbarProps) {
+  const [selected, _setSelected] = useState<{ code: string; name: string } | null>(null);
   const [isComparing, setIsComparing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -207,7 +207,7 @@ export function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSele
           sectionAside={
             <DetailAsideNav 
               populationType={populationType} 
-              onPopulationTypeChange={setPopulationType}
+              onPopulationTypeChange={onPopulationTypeChange}
               onCompare={handleCompare}
               onSave={handleSave}
               isSaved={getCurrentIsSaved()}

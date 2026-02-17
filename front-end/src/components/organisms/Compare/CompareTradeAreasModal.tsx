@@ -66,16 +66,16 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
   const [detailB, setDetailB] = useState<TradeAreaDetail | null>(null);
   const [loadingA, setLoadingA] = useState<boolean>(false);
   const [loadingB, setLoadingB] = useState<boolean>(false);
-  const [errorA, setErrorA] = useState<string | null>(null);
-  const [errorB, setErrorB] = useState<string | null>(null);
+  const [_errorA, setErrorA] = useState<string | null>(null);
+  const [_errorB, setErrorB] = useState<string | null>(null);
 
   // 종합 분석 점수 API 상태 (종합 탭용)
   const [scoreA, setScoreA] = useState<TradeAreaScore | null>(null);
   const [scoreB, setScoreB] = useState<TradeAreaScore | null>(null);
-  const [loadingScoreA, setLoadingScoreA] = useState<boolean>(false);
-  const [loadingScoreB, setLoadingScoreB] = useState<boolean>(false);
-  const [errorScoreA, setErrorScoreA] = useState<string | null>(null);
-  const [errorScoreB, setErrorScoreB] = useState<string | null>(null);
+  const [_loadingScoreA, setLoadingScoreA] = useState<boolean>(false);
+  const [_loadingScoreB, setLoadingScoreB] = useState<boolean>(false);
+  const [_errorScoreA, setErrorScoreA] = useState<string | null>(null);
+  const [_errorScoreB, setErrorScoreB] = useState<string | null>(null);
   
   // 상권 변화 지표 툴팁 상태
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
@@ -487,8 +487,6 @@ export default function CompareTradeAreasModal({ open, onClose, leftOpen = true,
                     { id:4, code:"위험도", name:"사업 위험 요소 (벌점 방식)", features:["점포_수_대비_유동인구","폐업_개월","폐업률"], meaning:"상권의 위험도를 나타냅니다.", highText:"유동인구 10만명/점포 이상, 폐업 24개월 이상, 폐업률 2% 이하의 위험이 낮은 안정적 상권", lowText:"유동인구 2만명/점포 미만, 폐업 6개월 미만, 폐업률 20% 초과의 위험이 높은 불안정 상권" },
                     { id:5, code:"경쟁강도", name:"경쟁 상황", features:["점포_수","수요_밀도","점포_밀도"], meaning:"상권의 경쟁 강도를 나타냅니다.", highText:"점포 5개 이하, 유동인구 10만명 이상, 점포밀도 0.5개/100㎡ 이하의 경쟁이 약한 상권", lowText:"점포 30개 초과, 유동인구 3만명 미만, 점포밀도 3.0개/100㎡ 초과의 경쟁이 치열한 상권" },
                   ];
-                  const labels = pcs.map((p) => p.code);
-                  
                   // API 데이터에서 점수 추출 (원본 값 그대로 사용: 지속성, 수익성, 접근성, 위험도, 경쟁강도)
                   const aValues = scoreA ? [
                     scoreA.sustainabilityScore,

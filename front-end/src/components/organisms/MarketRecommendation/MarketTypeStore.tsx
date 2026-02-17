@@ -2,8 +2,6 @@
 
 import React, { useState } from 'react';
 import MarketType from '@/components/atoms/MarketRecommendation/MarketType';
-import StoreSize from '@/components/atoms/MarketRecommendation/StoreSize';
-import StoreRentalFee from '@/components/atoms/MarketRecommendation/StoreRentalFee';
 import MarketRecommendationLoding from './MarketRecommendationLoding';
 import MarketRecommendationResult from './MarketRecommendationResult';
 import { API_ENDPOINTS } from '@/config/api';
@@ -58,10 +56,10 @@ const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({
   isInComparison,
 }) => {
   const [marketType, setMarketType] = useState<string | null>(initialSelections?.marketType || null);
-  const [storeSize, setStoreSize] = useState<string | null>(initialSelections?.storeSize || null);
-  const [minFee, setMinFee] = useState<number>(initialSelections?.minFee ?? 0);
-  const [maxFee, setMaxFee] = useState<number>(initialSelections?.maxFee ?? 100000000);
-  const [hasInteracted, setHasInteracted] = useState<boolean>(initialSelections?.hasInteracted || false);
+  const [storeSize, _setStoreSize] = useState<string | null>(initialSelections?.storeSize || null);
+  const [minFee, _setMinFee] = useState<number>(initialSelections?.minFee ?? 0);
+  const [maxFee, _setMaxFee] = useState<number>(initialSelections?.maxFee ?? 100000000);
+  const [hasInteracted, _setHasInteracted] = useState<boolean>(initialSelections?.hasInteracted || false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [recommendation, setRecommendation] = useState<RecommendationResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -82,30 +80,6 @@ const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({
       minFee,
       maxFee,
       hasInteracted,
-    });
-  };
-
-  const handleStoreSizeChange = (size: string | null) => {
-    setStoreSize(size);
-    onSelectionsChange?.({
-      marketType,
-      storeSize: size,
-      minFee,
-      maxFee,
-      hasInteracted,
-    });
-  };
-
-  const handleFeeChange = (newMinFee: number, newMaxFee: number) => {
-    setMinFee(newMinFee);
-    setMaxFee(newMaxFee);
-    setHasInteracted(true);
-    onSelectionsChange?.({
-      marketType,
-      storeSize,
-      minFee: newMinFee,
-      maxFee: newMaxFee,
-      hasInteracted: true,
     });
   };
 

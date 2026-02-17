@@ -110,7 +110,7 @@ class AuthManager {
 
   // 인증된 요청 보내기 (자동 토큰 재발급 포함)
   async authenticatedRequest(url: string, options: RequestInit = {}): Promise<Response> {
-    let accessToken = this.getAccessToken();
+    const accessToken = this.getAccessToken();
     
     if (!accessToken) {
       throw new Error('No access token available');

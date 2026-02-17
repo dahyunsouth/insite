@@ -27,7 +27,6 @@ export default function SalesTimeChart({ labels, values, counts, maxIndex = null
 
   const n = values.length;
   const maxVal = Math.max(1, ...values);
-  const maxCount = Math.max(1, ...counts);
   const scaleY = (v: number) => ch - (v / maxVal) * ch;
   
   // Right Y-axis scaling - same logic as left axis

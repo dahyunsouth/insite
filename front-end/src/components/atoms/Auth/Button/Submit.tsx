@@ -2,12 +2,16 @@
 
 import React from 'react';
 
-const SubmitButton = ({ 
+const SubmitButton = ({
  children,
  onClick = () => {},
  className = "",
- ...props 
-}) => {
+ ...props
+}: {
+ children?: React.ReactNode;
+ onClick?: () => void;
+ className?: string;
+} & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'>) => {
  return (
    <button
      onClick={onClick}

@@ -17,7 +17,7 @@ const MyPageMenu: React.FC<MyPageMenuProps> = ({
   onEditInfo,
   onSavedAreas,
   onPasswordUpdate,
-  onUserDelete,
+  onUserDelete: _onUserDelete,
   className = ''
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

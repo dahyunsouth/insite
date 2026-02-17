@@ -31,7 +31,7 @@ const MyInfoUpdate: React.FC<MyInfoUpdateProps> = ({
   ];
 
   // 상태 관리
-  const [userInfo, setUserInfo] = useState<{
+  const [_userInfo, setUserInfo] = useState<{
     nickname: string | null;
     profile: string | null;
     isLoading: boolean;
