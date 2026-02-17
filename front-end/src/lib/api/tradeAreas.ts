@@ -1,5 +1,6 @@
 import { API_BASE_URL } from '@/config/api';
 import TradeAreaValueData from '@/data/TradeAreaValue.json';
+import { logger } from '@/utils/logger';
 
 const BASE_URL = API_BASE_URL;
 
@@ -337,7 +338,7 @@ export function getTradeAreaNameByCode(tradeAreaCode: string): string {
     const tradeArea = TradeAreaRawData.DATA.find((item: any) => item.trdar_cd === tradeAreaCode);
     return tradeArea?.trdar_cd_nm || "상권명 없음";
   } catch (error) {
-    console.warn('Trade area data not found:', error);
+    logger.warn('Trade area data not found:', error);
     return "상권명 없음";
   }
 }
@@ -364,7 +365,7 @@ export async function fetchTradeAreaScore(tradeAreaName: string): Promise<TradeA
 
     return data.result;
   } catch (error) {
-    console.error('Error fetching trade area score:', error);
+    logger.error('Error fetching trade area score:', error);
     throw error;
   }
 }

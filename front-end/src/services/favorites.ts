@@ -1,5 +1,6 @@
 import { authManager } from '@/utils/auth';
 import { API_BASE_URL } from '@/config/api';
+import { logger } from '@/utils/logger';
 
 // API 응답 타입 정의
 interface ApiResponse<T = any> {
@@ -42,16 +43,16 @@ class FavoritesService {
       const data: ApiResponse<FavoritesResult> = await response.json();
       return data;
     } catch (error) {
-      console.error('저장된 상권 목록 조회 실패:', error);
+      logger.error('저장된 상권 목록 조회 실패:', error);
       throw error;
     }
   }
 
   // 상권 저장
   async saveFavorite(trdarCd: number): Promise<ApiResponse<null>> {
-    console.log('🌐 [FavoritesService] saveFavorite API 호출 시작');
-    console.log('🌐 [FavoritesService] 상권 코드:', trdarCd);
-    console.log('🌐 [FavoritesService] API URL:', `${API_BASE_URL}/api/v1/favorites?trdarCd=${trdarCd}`);
+    logger.info('🌐 [FavoritesService] saveFavorite API 호출 시작');
+    logger.info('🌐 [FavoritesService] 상권 코드:', trdarCd);
+    logger.info('🌐 [FavoritesService] API URL:', `${API_BASE_URL}/api/v1/favorites?trdarCd=${trdarCd}`);
     
     try {
       const response = await authManager.authenticatedRequest(
@@ -64,28 +65,28 @@ class FavoritesService {
         }
       );
 
-      console.log('🌐 [FavoritesService] API 응답 상태:', response.status);
-      console.log('🌐 [FavoritesService] API 응답 OK:', response.ok);
+      logger.info('🌐 [FavoritesService] API 응답 상태:', response.status);
+      logger.info('🌐 [FavoritesService] API 응답 OK:', response.ok);
 
       if (!response.ok) {
-        console.error('❌ [FavoritesService] API 응답 실패:', response.status);
+        logger.error('❌ [FavoritesService] API 응답 실패:', response.status);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data: ApiResponse<null> = await response.json();
-      console.log('✅ [FavoritesService] API 응답 데이터:', data);
+      logger.info('✅ [FavoritesService] API 응답 데이터:', data);
       return data;
     } catch (error) {
-      console.error('❌ [FavoritesService] 상권 저장 실패:', error);
+      logger.error('❌ [FavoritesService] 상권 저장 실패:', error);
       throw error;
     }
   }
 
   // 상권 저장 해제
   async removeFavorite(trdarCd: number): Promise<ApiResponse<null>> {
-    console.log('🌐 [FavoritesService] removeFavorite API 호출 시작');
-    console.log('🌐 [FavoritesService] 상권 코드:', trdarCd);
-    console.log('🌐 [FavoritesService] API URL:', `${API_BASE_URL}/api/v1/favorites/${trdarCd}`);
+    logger.info('🌐 [FavoritesService] removeFavorite API 호출 시작');
+    logger.info('🌐 [FavoritesService] 상권 코드:', trdarCd);
+    logger.info('🌐 [FavoritesService] API URL:', `${API_BASE_URL}/api/v1/favorites/${trdarCd}`);
     
     try {
       const response = await authManager.authenticatedRequest(
@@ -98,19 +99,19 @@ class FavoritesService {
         }
       );
 
-      console.log('🌐 [FavoritesService] API 응답 상태:', response.status);
-      console.log('🌐 [FavoritesService] API 응답 OK:', response.ok);
+      logger.info('🌐 [FavoritesService] API 응답 상태:', response.status);
+      logger.info('🌐 [FavoritesService] API 응답 OK:', response.ok);
 
       if (!response.ok) {
-        console.error('❌ [FavoritesService] API 응답 실패:', response.status);
+        logger.error('❌ [FavoritesService] API 응답 실패:', response.status);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data: ApiResponse<null> = await response.json();
-      console.log('✅ [FavoritesService] API 응답 데이터:', data);
+      logger.info('✅ [FavoritesService] API 응답 데이터:', data);
       return data;
     } catch (error) {
-      console.error('❌ [FavoritesService] 상권 저장 해제 실패:', error);
+      logger.error('❌ [FavoritesService] 상권 저장 해제 실패:', error);
       throw error;
     }
   }
@@ -124,7 +125,7 @@ class FavoritesService {
       }
       return false;
     } catch (error) {
-      console.error('상권 저장 상태 확인 실패:', error);
+      logger.error('상권 저장 상태 확인 실패:', error);
       return false;
     }
   }

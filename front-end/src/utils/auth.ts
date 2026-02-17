@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from '../config/api';
+import { logger } from '@/utils/logger';
 
 interface RefreshResponse {
   httpStatus: {
@@ -102,7 +103,7 @@ class AuthManager {
         throw new Error(data.message || 'Token refresh failed');
       }
     } catch (error) {
-      console.error('Token refresh error:', error);
+      logger.error('Token refresh error:', error);
       this.clearTokens();
       return null;
     }
