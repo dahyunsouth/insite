@@ -4,6 +4,7 @@ import React, { createContext, useContext, useReducer, useEffect, ReactNode } fr
 import { favoritesService } from '@/services/favorites';
 import { authManager } from '@/utils/auth';
 import { getTradeAreaNameByCode } from '@/lib/api/tradeAreas';
+import { logger } from '@/utils/logger';
 
 // 타입 정의
 interface TradeAreaData {
@@ -126,7 +127,7 @@ export function FavoritesProvider({ children }: FavoritesProviderProps) {
 
       dispatch({ type: 'SET_FAVORITES', payload: tradeAreasWithNames });
     } catch (error) {
-      console.error('저장된 상권 목록 조회 실패:', error);
+      logger.error('저장된 상권 목록 조회 실패:', error);
       dispatch({ 
         type: 'SET_ERROR', 
         payload: '저장된 상권 목록을 불러올 수 없습니다.' 
@@ -136,27 +137,27 @@ export function FavoritesProvider({ children }: FavoritesProviderProps) {
 
   // 상권 저장
   const addFavorite = async (trdarCd: number, trdarCdNm: string) => {
-    console.log('💾 [FavoritesContext] addFavorite 시작');
-    console.log('💾 [FavoritesContext] 상권 코드:', trdarCd);
-    console.log('💾 [FavoritesContext] 상권명:', trdarCdNm);
+    logger.info('💾 [FavoritesContext] addFavorite 시작');
+    logger.info('💾 [FavoritesContext] 상권 코드:', trdarCd);
+    logger.info('💾 [FavoritesContext] 상권명:', trdarCdNm);
     
     try {
       dispatch({ type: 'SET_ERROR', payload: null });
 
       // API 호출
-      console.log('💾 [FavoritesContext] API 호출 시작 - saveFavorite');
+      logger.info('💾 [FavoritesContext] API 호출 시작 - saveFavorite');
       await favoritesService.saveFavorite(trdarCd);
-      console.log('✅ [FavoritesContext] API 호출 성공');
+      logger.info('✅ [FavoritesContext] API 호출 성공');
       
       // 로컬 상태 업데이트
-      console.log('💾 [FavoritesContext] 로컬 상태 업데이트');
+      logger.info('💾 [FavoritesContext] 로컬 상태 업데이트');
       dispatch({ 
         type: 'ADD_FAVORITE', 
         payload: { trdarCd: trdarCd.toString(), trdarCdNm } 
       });
-      console.log('✅ [FavoritesContext] addFavorite 완료');
+      logger.info('✅ [FavoritesContext] addFavorite 완료');
     } catch (error) {
-      console.error('❌ [FavoritesContext] 상권 저장 실패:', error);
+      logger.error('❌ [FavoritesContext] 상권 저장 실패:', error);
       dispatch({ 
         type: 'SET_ERROR', 
         payload: error instanceof Error ? error.message : '상권 저장에 실패했습니다.' 
@@ -167,26 +168,26 @@ export function FavoritesProvider({ children }: FavoritesProviderProps) {
 
   // 상권 저장 해제
   const removeFavorite = async (trdarCd: number) => {
-    console.log('💾 [FavoritesContext] removeFavorite 시작');
-    console.log('💾 [FavoritesContext] 상권 코드:', trdarCd);
+    logger.info('💾 [FavoritesContext] removeFavorite 시작');
+    logger.info('💾 [FavoritesContext] 상권 코드:', trdarCd);
     
     try {
       dispatch({ type: 'SET_ERROR', payload: null });
 
       // API 호출
-      console.log('💾 [FavoritesContext] API 호출 시작 - removeFavorite');
+      logger.info('💾 [FavoritesContext] API 호출 시작 - removeFavorite');
       await favoritesService.removeFavorite(trdarCd);
-      console.log('✅ [FavoritesContext] API 호출 성공');
+      logger.info('✅ [FavoritesContext] API 호출 성공');
       
       // 로컬 상태 업데이트
-      console.log('💾 [FavoritesContext] 로컬 상태 업데이트');
+      logger.info('💾 [FavoritesContext] 로컬 상태 업데이트');
       dispatch({ 
         type: 'REMOVE_FAVORITE', 
         payload: trdarCd.toString() 
       });
-      console.log('✅ [FavoritesContext] removeFavorite 완료');
+      logger.info('✅ [FavoritesContext] removeFavorite 완료');
     } catch (error) {
-      console.error('❌ [FavoritesContext] 상권 저장 해제 실패:', error);
+      logger.error('❌ [FavoritesContext] 상권 저장 해제 실패:', error);
       dispatch({ 
         type: 'SET_ERROR', 
         payload: error instanceof Error ? error.message : '상권 저장 해제에 실패했습니다.' 
