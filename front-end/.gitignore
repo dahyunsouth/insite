@@ -41,3 +41,4 @@ yarn-error.log*
 next-env.d.ts
 
 MOCK_API_PLAN.md
+REFACTORING_GUIDE.md
