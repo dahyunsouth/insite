@@ -1,10 +1,11 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { authManager } from '../utils/auth';
 import { extractUserInfoFromToken, isTokenValid } from '../utils/jwt';
 import { API_ENDPOINTS } from '../config/api';
 import { logger } from '@/utils/logger';
+import { getErrorMessage } from '@/types/api';
 
 interface UserInfo {
   uuid: string;
@@ -114,7 +115,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         throw new Error(data.message || '사용자 정보를 가져오는데 실패했습니다.');
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.';
+      const errorMessage = getErrorMessage(err);
       logger.error('❌ [UserContext] API 호출 에러:', errorMessage);
       setError(errorMessage);
       
@@ -130,7 +131,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   };
 
   // 사용자 정보 새로고침
-  const refreshUserInfo = async (): Promise<void> => {
+  const refreshUserInfo = useCallback(async (): Promise<void> => {
     logger.info('🔄 [UserContext] refreshUserInfo 시작');
     logger.info('🔄 [UserContext] 로그인 상태:', authManager.isLoggedIn());
     
@@ -190,19 +191,20 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
     
     setLoading(false);
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 사용자 정보 초기화
-  const clearUserInfo = (): void => {
+  const clearUserInfo = useCallback((): void => {
     setUserInfo(null);
     setError(null);
     setLoading(false);
     // 캐시된 사용자 정보도 삭제
     localStorage.removeItem('userInfo');
-  };
+  }, []);
 
   // 회원탈퇴
-  const deleteUser = async (): Promise<boolean> => {
+  const deleteUser = useCallback(async (): Promise<boolean> => {
     try {
       const response = await authManager.authenticatedRequest(API_ENDPOINTS.USER_DELETE, {
         method: 'DELETE',
@@ -213,7 +215,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       }
 
       const data = await response.json();
-      
+
       if (data.isSuccess) {
         // 성공 시 모든 인증 정보 삭제
         authManager.clearTokens();
@@ -223,26 +225,26 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         throw new Error(data.message || '회원탈퇴에 실패했습니다.');
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.';
+      const errorMessage = getErrorMessage(err);
       setError(errorMessage);
       logger.error('회원탈퇴 오류:', err);
       return false;
     }
-  };
+  }, [clearUserInfo]);
 
   // 컴포넌트 마운트 시 사용자 정보 로드
   useEffect(() => {
     refreshUserInfo();
-  }, []);
+  }, [refreshUserInfo]);
 
-  const value: UserContextType = {
+  const value = useMemo<UserContextType>(() => ({
     userInfo,
     loading,
     error,
     refreshUserInfo,
     clearUserInfo,
     deleteUser,
-  };
+  }), [userInfo, loading, error, refreshUserInfo, clearUserInfo, deleteUser]);
 
   return (
     <UserContext.Provider value={value}>
