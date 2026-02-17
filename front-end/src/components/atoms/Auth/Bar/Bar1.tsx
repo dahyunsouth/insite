@@ -10,7 +10,7 @@ const Bar1 = ({
   return (
     <div
       className={`
-        w-[376px] h-[50px]
+        w-full max-w-[376px] h-[50px]
         p-[10px]
         border-b border-[#E9ECEF]
         ${className}

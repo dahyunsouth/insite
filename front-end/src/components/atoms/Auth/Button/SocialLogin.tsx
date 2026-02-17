@@ -36,7 +36,7 @@ const SocialLogin: React.FC<SocialLoginProps> = ({
 
   return (
     <button 
-      className="w-[320px] h-[60px] px-[20px] py-0 rounded-[15px] border border-[#D9D9D9] flex items-center justify-center gap-[12px] text-[20px] font-normal cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"
+      className="w-full h-[60px] px-[20px] py-0 rounded-[15px] border border-[#D9D9D9] flex items-center justify-center gap-[12px] text-[20px] font-normal cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"
       style={{ 
         backgroundColor: disabled ? '#f5f5f5' : config.backgroundColor,
         color: disabled ? '#999' : config.textColor
@@ -44,9 +44,10 @@ const SocialLogin: React.FC<SocialLoginProps> = ({
       onClick={handleClick}
       disabled={disabled}
     >
-      <img 
-        src={config.logo} 
-        alt={`${provider} logo`} 
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={config.logo}
+        alt={`${provider} logo`}
         className="w-[20px] h-[20px]"
         style={{ opacity: disabled ? 0.5 : 1 }}
       />
