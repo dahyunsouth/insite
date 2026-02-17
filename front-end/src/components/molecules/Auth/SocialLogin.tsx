@@ -2,6 +2,7 @@
 
 import React from 'react';
 import SocialLoginButton from '../../atoms/Auth/Button/SocialLogin';
+import { logger } from '@/utils/logger';
 
 interface SocialLoginProps {
   className?: string;
@@ -11,11 +12,11 @@ const SocialLogin: React.FC<SocialLoginProps> = ({
   className = "" 
 }) => {
   const handleGoogleLogin = () => {
-    console.log('Google 로그인 클릭됨');
+    logger.info('Google 로그인 클릭됨');
   };
 
   const handleSSAFYLogin = () => {
-    console.log('SSAFY 로그인 클릭됨');
+    logger.info('SSAFY 로그인 클릭됨');
   };
 
   return (

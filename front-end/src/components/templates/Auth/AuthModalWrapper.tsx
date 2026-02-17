@@ -3,6 +3,7 @@
 
 import React, { useReducer, useState, useEffect, useRef } from 'react';
 import { API_ENDPOINTS } from '@/config/api';
+import { logger } from '@/utils/logger';
 
 // 로그인 모달 (내부에서 SignUpPrompt 렌더)
 // ⛳️ LoginOrganism 에 onSignUpClick?: () => void; prop 을 추가해
@@ -91,7 +92,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
   const [isOtpExpired, setIsOtpExpired] = useState(false);
 
   // 닉네임 중복확인 상태
-  const [isNicknameChecked, setIsNicknameChecked] = useState(false);
+  const [_isNicknameChecked, setIsNicknameChecked] = useState(false);
 
   // 이메일 유효성 검사 상태
   const [emailValidation, setEmailValidation] = useState<{
@@ -307,13 +308,13 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
       } else if (response.status === 400 || response.status === 409) {
         // 이메일 중복 (400 Bad Request 또는 409 Conflict)
         const errorData = await response.json().catch(() => null);
-        console.log(`이메일 중복 확인 - ${response.status} 응답:`, errorData);
+        logger.info(`이메일 중복 확인 - ${response.status} 응답:`, errorData);
         setEmailDuplicateCheck({ 
           isChecking: false, 
           isAvailable: false, 
           message: errorData?.message || '이미 사용 중인 이메일입니다. 다시 입력하세요.' 
         });
-        console.log('이메일 중복 상태 설정됨:', { isAvailable: false, message: errorData?.message });
+        logger.info('이메일 중복 상태 설정됨:', { isAvailable: false, message: errorData?.message });
       } else {
         // 기타 에러
         const errorData = await response.json().catch(() => null);
@@ -324,7 +325,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
         });
       }
     } catch (error) {
-      console.error('이메일 중복확인 에러:', error);
+      logger.error('이메일 중복확인 에러:', error);
       setEmailDuplicateCheck({ 
         isChecking: false, 
         isAvailable: null, 
@@ -364,7 +365,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
         });
       }
     } catch (error) {
-      console.error('이메일 인증코드 발송 에러:', error);
+      logger.error('이메일 인증코드 발송 에러:', error);
       setEmailSendStatus({ 
         isSending: false, 
         isSuccess: false, 
@@ -404,7 +405,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
         });
       }
     } catch (error) {
-      console.error('OTP 인증 에러:', error);
+      logger.error('OTP 인증 에러:', error);
       setOtpVerificationStatus({ 
         isVerifying: false, 
         isSuccess: false, 
@@ -450,7 +451,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
         });
       }
     } catch (error) {
-      console.error('닉네임 중복확인 에러:', error);
+      logger.error('닉네임 중복확인 에러:', error);
       setNicknameDuplicateCheck({ 
         isChecking: false, 
         isAvailable: null, 
@@ -520,7 +521,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
     
     setPasswordValidation({
       isValid: password.length >= 8 && password.length <= 15,
-      strength: strengthResult.strength,
+      strength: strengthResult.strength as 'weak' | 'medium' | 'strong' | null,
       message: strengthResult.message
     });
   };
@@ -547,7 +548,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
     setSignupStatus({ isSigningUp: true, isSuccess: null, message: '' });
 
     try {
-      console.log('회원가입 요청 데이터:', {
+      logger.info('회원가입 요청 데이터:', {
         email: state.form.email,
         nickname: state.form.nickname,
         password: state.form.password,
@@ -567,13 +568,13 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
         }),
       });
 
-      console.log('회원가입 응답 상태:', response.status);
-      console.log('회원가입 응답 헤더:', response.headers);
+      logger.info('회원가입 응답 상태:', response.status);
+      logger.info('회원가입 응답 헤더:', response.headers);
 
       if (response.ok) {
         // 회원가입 성공 (200 OK)
         const responseData = await response.json();
-        console.log('회원가입 성공 응답:', responseData);
+        logger.info('회원가입 성공 응답:', responseData);
         
         // JWT 토큰이 있다면 저장 (일반적으로 Authorization 헤더나 응답 body에 포함)
         const authToken = response.headers.get('Authorization') || 
@@ -583,7 +584,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
         
         if (authToken) {
           localStorage.setItem('authToken', authToken);
-          console.log('JWT 토큰 저장됨:', authToken);
+          logger.info('JWT 토큰 저장됨:', authToken);
         }
         
         setSignupStatus({ 
@@ -596,7 +597,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
       } else {
         // 회원가입 실패
         const errorData = await response.json().catch(() => null);
-        console.log('회원가입 실패 응답:', errorData);
+        logger.info('회원가입 실패 응답:', errorData);
         
         setSignupStatus({ 
           isSigningUp: false, 
@@ -605,7 +606,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
         });
       }
     } catch (error) {
-      console.error('회원가입 에러:', error);
+      logger.error('회원가입 에러:', error);
       setSignupStatus({ 
         isSigningUp: false, 
         isSuccess: false, 
@@ -619,11 +620,11 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
     setUserInfo({ isLoading: true, nickname: null, error: null });
 
     try {
-      console.log('사용자 정보 요청 시작...');
+      logger.info('사용자 정보 요청 시작...');
       
       // localStorage에서 JWT 토큰 가져오기
       const authToken = localStorage.getItem('authToken');
-      console.log('저장된 토큰:', authToken);
+      logger.info('저장된 토큰:', authToken);
       
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -639,12 +640,12 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
         headers,
       });
 
-      console.log('사용자 정보 응답 상태:', response.status);
-      console.log('사용자 정보 응답 헤더:', response.headers);
+      logger.info('사용자 정보 응답 상태:', response.status);
+      logger.info('사용자 정보 응답 헤더:', response.headers);
 
       if (response.ok) {
         const data = await response.json();
-        console.log('사용자 정보 응답 데이터:', data);
+        logger.info('사용자 정보 응답 데이터:', data);
         
         // 응답 구조에 따라 nickname 추출
         const nickname = data.result?.nickname || data.nickname || null;
@@ -659,7 +660,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
         // 여기서는 간단히 로그인 성공 상태로 처리
       } else {
         const errorData = await response.json().catch(() => null);
-        console.log('사용자 정보 실패 응답:', errorData);
+        logger.info('사용자 정보 실패 응답:', errorData);
         
         setUserInfo({ 
           isLoading: false, 
@@ -668,7 +669,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
         });
       }
     } catch (error) {
-      console.error('사용자 정보 가져오기 에러:', error);
+      logger.error('사용자 정보 가져오기 에러:', error);
       setUserInfo({ 
         isLoading: false, 
         nickname: null, 
@@ -723,7 +724,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
   // -------------------------------
   if (state.mode === 'signup_email') {
     // 디버깅용 로그
-    console.log('이메일 입력 단계 렌더링:', {
+    logger.info('이메일 입력 단계 렌더링:', {
       emailDuplicateCheck,
       emailValidation,
       emailSendStatus
@@ -775,7 +776,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
                     ? '!border-red-500 focus:!border-red-500'
                     : emailSendStatus.isSuccess === false
                     ? '!border-red-500 focus:!border-red-500'
-                    : emailDuplicateCheck.isAvailable === true && emailSendStatus.isSuccess !== false
+                    : emailDuplicateCheck.isAvailable === true && emailSendStatus.isSuccess !== null
                     ? '!border-[#3288FF] focus:!border-[#3288FF]'
                     : emailValidation.isValid === true 
                     ? '!border-[#3288FF] focus:!border-[#3288FF]' 
@@ -795,7 +796,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
                     ? 'text-red-500'
                     : emailSendStatus.isSuccess === false
                     ? 'text-red-500'
-                    : emailDuplicateCheck.isAvailable === true && emailSendStatus.isSuccess !== false
+                    : emailDuplicateCheck.isAvailable === true && emailSendStatus.isSuccess !== null
                     ? 'text-[#3288FF]'
                     : emailValidation.isValid 
                     ? 'text-[#3288FF]' 

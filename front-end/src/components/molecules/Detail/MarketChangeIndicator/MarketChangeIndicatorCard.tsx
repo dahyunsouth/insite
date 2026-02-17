@@ -65,8 +65,8 @@ export default function MarketChangeIndicatorCard({ trdarCode }: Props) {
         }
         if (aborted) return;
         setData(json.result);
-      } catch (e: any) {
-        if (!aborted) setError(e?.message ?? "load failed");
+      } catch (e: unknown) {
+        if (!aborted) setError(e instanceof Error ? e.message : "load failed");
       } finally {
         if (!aborted) setLoading(false);
       }
@@ -181,16 +181,6 @@ export default function MarketChangeIndicatorCard({ trdarCode }: Props) {
         onClose={() => setIsInfoModalOpen(false)}
         position={modalPosition}
       />
-    </div>
-  );
-}
-
-function KpiTile({ title, primary, secondary }: { title: string; primary: string; secondary: string }) {
-  return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-4">
-      <div className="text-sm font-semibold text-gray-700">{title}</div>
-      <div className="mt-2 text-[22px] font-bold text-gray-900">{primary}</div>
-      <div className="mt-1 text-xs text-gray-500">{secondary}</div>
     </div>
   );
 }

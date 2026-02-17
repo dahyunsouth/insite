@@ -2,26 +2,9 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import SignGuRawData from "@/data/SignGuValue.json";
-import AdstrdRawData from "@/data/AdstrdValue.json";
 import TradeAreaRawData from "@/data/TradeAreaValue.json";
-import { fetchGuList, fetchDongList, fetchTradeAreas, fetchTradeAreasDetail } from "@/lib/api/tradeAreas";
-
-interface SignGuFileShape {
-  DESCRIPTION: Record<string, unknown>;
-  DATA: Array<{
-    signgu_cd: string;
-    signgu_nm: string;
-  }>;
-}
-
-interface AdstrdFileShape {
-  DESCRIPTION: Record<string, unknown>;
-  DATA: Array<{
-    adstrd_cd: string;
-    adstrd_nm: string;
-  }>;
-}
+import { fetchGuList, fetchDongList, fetchTradeAreasDetail } from "@/lib/api/tradeAreas";
+import { logger } from '@/utils/logger';
 
 interface TradeAreaFileShape {
   DESCRIPTION: Record<string, unknown>;
@@ -65,25 +48,6 @@ export type TradeAreaPickerProps = {
   backgroundColor?: string;
 };
 
-const SIGNGU_OPTIONS: Option[] = (() => {
-  const json = SignGuRawData as unknown as SignGuFileShape;
-  const unique = new Map<string, string>();
-  json.DATA.forEach((item) => {
-    unique.set(item.signgu_cd, item.signgu_nm);
-  });
-  return Array.from(unique.entries())
-    .map(([code, name]) => ({ code, name }))
-    .sort((a, b) => a.name.localeCompare(b.name, "ko"));
-})();
-
-const ADSTRD_OPTIONS: Array<Option & { signguCode: string }> = (() => {
-  const json = AdstrdRawData as unknown as AdstrdFileShape;
-  return json.DATA.map((item) => ({
-    code: item.adstrd_cd,
-    name: item.adstrd_nm,
-    signguCode: item.adstrd_cd.slice(0, 5),
-  })).sort((a, b) => a.name.localeCompare(b.name, "ko"));
-})();
 
 const TRADE_AREA_OPTIONS: TradeAreaOption[] = (() => {
   const json = TradeAreaRawData as unknown as TradeAreaFileShape;
@@ -99,8 +63,6 @@ const TRADE_AREA_OPTIONS: TradeAreaOption[] = (() => {
   })).sort((a, b) => a.name.localeCompare(b.name, "ko"));
 })();
 
-const SIGNGU_NAME_BY_CODE = new Map(SIGNGU_OPTIONS.map((item) => [item.code, item.name]));
-const ADSTRD_NAME_BY_CODE = new Map(ADSTRD_OPTIONS.map((item) => [item.code, item.name]));
 const TRADE_AREA_BY_CODE = new Map(TRADE_AREA_OPTIONS.map((item) => [item.code, item]));
 
 // TradeAreaRawData에서 상권 코드로 자치구/행정동 정보를 매핑하는 Map 생성
@@ -146,17 +108,17 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
   // 동적 구 목록 상태
   const [guList, setGuList] = useState<string[]>([]);
   const [loadingGuList, setLoadingGuList] = useState(false);
-  const [guListError, setGuListError] = useState<string | null>(null);
+  const [_guListError, setGuListError] = useState<string | null>(null);
   
   // 동적 동 목록 상태
   const [dongList, setDongList] = useState<string[]>([]);
   const [loadingDongList, setLoadingDongList] = useState(false);
-  const [dongListError, setDongListError] = useState<string | null>(null);
+  const [_dongListError, setDongListError] = useState<string | null>(null);
   
   // 동적 상권 목록 상태
   const [tradeAreaList, setTradeAreaList] = useState<Array<{code: string, name: string, typeName: string}>>([]);
   const [loadingTradeAreaList, setLoadingTradeAreaList] = useState(false);
-  const [tradeAreaListError, setTradeAreaListError] = useState<string | null>(null);
+  const [_tradeAreaListError, setTradeAreaListError] = useState<string | null>(null);
 
 
   const cardStyle = useMemo<React.CSSProperties>(() => {
@@ -174,11 +136,11 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
   useEffect(() => {
     const loadGuList = async () => {
       setLoadingGuList(true);
-      console.log("구 목록 로드 시작...");
+      logger.info("구 목록 로드 시작...");
       setGuListError(null);
       try {
         const data = await fetchGuList();
-        console.log("구 목록 API 응답:", data);
+        logger.info("구 목록 API 응답:", data);
         setGuList(data);
       } catch (err) {
         setGuListError(err instanceof Error ? err.message : "구 목록을 불러올 수 없습니다.");
@@ -202,7 +164,7 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
       setDongListError(null);
       try {
         const data = await fetchDongList(value.signguCode!);
-        console.log("동 목록 API 응답:", data);
+        logger.info("동 목록 API 응답:", data);
         setDongList(data);
       } catch (err) {
         setDongListError(err instanceof Error ? err.message : "동 목록을 불러올 수 없습니다.");
@@ -226,7 +188,7 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
       setTradeAreaListError(null);
       try {
         const data = await fetchTradeAreasDetail(value.signguCode!, value.adstrdCode!);
-        console.log("상권 목록 API 응답:", data);
+        logger.info("상권 목록 API 응답:", data);
         // areas 배열에서 trdarSeCdNm을 사용하여 목록 생성
         const areas = data.areas.map(area => ({
           code: area.trdarCd.toString(),
@@ -280,7 +242,7 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
     if (step === 1) {
       // API에서 가져온 구 목록 사용
       if (loadingGuList) return []; // 로딩 중일 때는 빈 배열
-      console.log("Step 1 - guList:", guList, "options:", guList.map(name => ({ code: name, name })));
+      logger.info("Step 1 - guList:", guList, "options:", guList.map(name => ({ code: name, name })));
       const options = guList.map((name) => ({ code: name, name }));
       const filtered = keyword
         ? options.filter((item) => normalize(item.name).includes(keyword))
@@ -291,7 +253,7 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
     if (step === 2 && value.signguCode) {
       if (loadingDongList) return []; // 로딩 중일 때는 빈 배열
       // API에서 가져온 동 목록 사용
-      console.log("Step 2 - dongList:", dongList); // Debug log
+      logger.info("Step 2 - dongList:", dongList); // Debug log
       const options = dongList.map((name) => ({ code: name, name }));
       const filtered = keyword
         ? options.filter((item) => normalize(item.name).includes(keyword))
@@ -302,7 +264,7 @@ export default function TradeAreaPicker({ title, value, onChange, accentColor, b
     if (step === 3 && value.signguCode && value.adstrdCode) {
       if (loadingTradeAreaList) return []; // 로딩 중일 때는 빈 배열
       // API에서 가져온 상권 목록 사용
-      console.log("Step 3 - tradeAreaList:", tradeAreaList); // Debug log
+      logger.info("Step 3 - tradeAreaList:", tradeAreaList); // Debug log
       const filtered = keyword
         ? tradeAreaList.filter((item) => normalize(`${item.name} ${item.typeName}`).includes(keyword))
         : tradeAreaList;

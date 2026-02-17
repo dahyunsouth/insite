@@ -2,11 +2,14 @@
 
 import React from 'react';
 
-const AuthenticationCard = ({ 
+const AuthenticationCard = ({
   children,
   className = '',
-  ...props 
-}) => {
+  ...props
+}: {
+  children?: React.ReactNode;
+  className?: string;
+} & React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
       className={`

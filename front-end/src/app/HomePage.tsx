@@ -15,11 +15,24 @@ import NotificationBar from '@/components/atoms/Common/NotificationBar';
 import CompareTradeAreasModal from '@/components/organisms/Compare/CompareTradeAreasModal';
 import ComparisonTray from '@/components/organisms/Compare/ComparisonTray';
 import NewCompareModal from '@/components/organisms/Compare/NewCompareModal';
-import TradeAreaData from '@/data/TradeAreaValue.json';
 import { useNotification } from '@/components/map/useNotification';
 import Notification from '@/components/map/Notification';
 import { tmToWgs84 } from '@/utils/coordinateTransform';
 import { useComparisonStore } from '@/stores/comparisonStore';
+import { logger } from '@/utils/logger';
+
+// 상권 데이터 타입 정의
+interface TradeArea {
+  trdarSeCd: string;
+  trdarSeCdNm: string;
+  trdarCd: number;
+  trdarCdNm: string;
+  xcntsValue: number;
+  ydntsValue: number;
+  relmAr: number;
+  storCo: number;
+  similrIndutyStorCo: number;
+}
 
 // 지도 타입 변경 핸들러 컴포넌트
 function MapTypeHandler({ 
@@ -63,7 +76,6 @@ function MapTypeHandler({
         onSavedAreasClick={onSavedAreasClick}
         onCompareClick={onCompareClick}
         onProfileClick={onMyPageClick}
-        onSavedAreasClick={onSavedAreasClick}
       />
       
       {/* 우측 하단: 지도 컨트롤 버튼들 */}
@@ -91,8 +103,8 @@ function CtaVisibilityGuard({ label, ariaLabel, onPress }: { label: string | nul
   });
 
   React.useEffect(() => {
-    const map = mapContext?.map as any;
-    if (!map || !(window as any)?.kakao?.maps?.event) return;
+    const map = mapContext?.map;
+    if (!map || !window?.kakao?.maps?.event) return;
 
     const handler = () => {
       try {
@@ -102,12 +114,12 @@ function CtaVisibilityGuard({ label, ariaLabel, onPress }: { label: string | nul
       }
     };
 
-    (window as any).kakao.maps.event.addListener(map, 'zoom_changed', handler);
+    window.kakao.maps.event.addListener(map, 'zoom_changed', handler);
     // 초기 동기화
     handler();
     return () => {
       try {
-        (window as any).kakao.maps.event.removeListener(map, 'zoom_changed', handler);
+        window.kakao.maps.event.removeListener(map, 'zoom_changed', handler);
       } catch {
         // ignore
       }
@@ -127,12 +139,6 @@ function CtaVisibilityGuard({ label, ariaLabel, onPress }: { label: string | nul
     </div>
   );
 }
-
-// 상권코드로 상권명을 찾는 함수
-const getTradeAreaNameByCode = (trdarCode: string): string | null => {
-  const tradeArea = TradeAreaData.DATA.find(area => area.trdar_cd === trdarCode);
-  return tradeArea ? tradeArea.trdar_cd_nm : null;
-};
 
 export default function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -185,7 +191,7 @@ export default function HomePage() {
 
   // 디버깅용 useEffect
   useEffect(() => {
-    console.log('🔍 isSavedCompareOpen 상태 변화:', isSavedCompareOpen);
+    logger.info('🔍 isSavedCompareOpen 상태 변화:', isSavedCompareOpen);
   }, [isSavedCompareOpen]);
   const [isLoadViewActive, setIsLoadViewActive] = useState(false);
   const [isLoadViewMinimized, setIsLoadViewMinimized] = useState(false);
@@ -204,7 +210,7 @@ export default function HomePage() {
   const [resetTrigger, setResetTrigger] = useState(0);
   
   // 상권 선택 관련 상태 추가
-  const [selectedTradeArea, setSelectedTradeArea] = useState<any>(null);
+  const [selectedTradeArea, setSelectedTradeArea] = useState<TradeArea | null>(null);
 
   // 최신 상태를 참조하기 위한 ref
   const showMarketListRef = useRef(showMarketList);
@@ -226,22 +232,22 @@ export default function HomePage() {
 
   // 상권 모드 상태 변화 디버깅
   useEffect(() => {
-    console.log('🏠 HomePage - showMarketingArea 상태 변화:', showMarketingArea);
+    logger.info('🏠 HomePage - showMarketingArea 상태 변화:', showMarketingArea);
   }, [showMarketingArea]);
 
   // 상권 리스트 상태 변화 디버깅
   useEffect(() => {
-    console.log('🏠 HomePage - showMarketList 상태 변화:', showMarketList);
+    logger.info('🏠 HomePage - showMarketList 상태 변화:', showMarketList);
   }, [showMarketList]);
 
   // 현재 주소 상태 변화 디버깅
   useEffect(() => {
-    console.log('🏠 HomePage - currentDistrict/currentDong 상태 변화:', currentDistrict, currentDong);
+    logger.info('🏠 HomePage - currentDistrict/currentDong 상태 변화:', currentDistrict, currentDong);
   }, [currentDistrict, currentDong]);
 
   // 상권 리스트 표시 핸들러
   const handleShowMarketList = (district: string, dong: string) => {
-    console.log('📋 상권 리스트 표시:', district, dong);
+    logger.info('📋 상권 리스트 표시:', district, dong);
     setCurrentDistrict(district);
     setCurrentDong(dong);
     setShowMarketList(true);
@@ -249,7 +255,7 @@ export default function HomePage() {
 
   // 상권 리스트 닫기 핸들러
   const handleMarketListClose = () => {
-    console.log('🔄 상권 리스트 닫기');
+    logger.info('🔄 상권 리스트 닫기');
     setShowMarketList(false);
     setCurrentDistrict('');
     setCurrentDong('');
@@ -262,20 +268,20 @@ export default function HomePage() {
 
   // 주소 변경 핸들러 (지도 이동 시 자동 호출) - ref로 최신 상태 참조
   const handleAddressChange = useCallback((district: string, dong: string) => {
-    console.log('🔄 주소 변경 감지:', district, dong);
-    console.log('📊 현재 상권 리스트 상태 (state):', showMarketList);
-    console.log('📊 현재 상권 리스트 상태 (ref):', showMarketListRef.current);
-    console.log('📍 현재 저장된 주소 (state):', currentDistrict, currentDong);
-    console.log('📍 현재 저장된 주소 (ref):', currentDistrictRef.current, currentDongRef.current);
+    logger.info('🔄 주소 변경 감지:', district, dong);
+    logger.info('📊 현재 상권 리스트 상태 (state):', showMarketList);
+    logger.info('📊 현재 상권 리스트 상태 (ref):', showMarketListRef.current);
+    logger.info('📍 현재 저장된 주소 (state):', currentDistrict, currentDong);
+    logger.info('📍 현재 저장된 주소 (ref):', currentDistrictRef.current, currentDongRef.current);
     
     // ref를 사용해서 최신 상태 확인
     if (showMarketListRef.current) {
-      console.log('📋 상권 리스트 자동 업데이트 실행 (ref 기반)');
+      logger.info('📋 상권 리스트 자동 업데이트 실행 (ref 기반)');
       setCurrentDistrict(district);
       setCurrentDong(dong);
-      console.log('✅ 새 주소로 상태 업데이트 완료:', district, dong);
+      logger.info('✅ 새 주소로 상태 업데이트 완료:', district, dong);
     } else {
-      console.log('❌ 상권 리스트가 닫혀있어서 업데이트 안함 (ref 기반)');
+      logger.info('❌ 상권 리스트가 닫혀있어서 업데이트 안함 (ref 기반)');
     }
   }, []); // 의존성 배열을 빈 배열로 하여 함수 재생성 방지
 
@@ -285,10 +291,10 @@ export default function HomePage() {
       const authToken = localStorage.getItem('authToken');
       if (authToken) {
         setIsLoggedIn(true);
-        console.log('저장된 토큰으로 로그인 상태 확인됨');
+        logger.info('저장된 토큰으로 로그인 상태 확인됨');
       } else {
         setIsLoggedIn(false);
-        console.log('토큰이 없어 로그아웃 상태로 설정됨');
+        logger.info('토큰이 없어 로그아웃 상태로 설정됨');
       }
     };
     
@@ -306,7 +312,7 @@ export default function HomePage() {
   const handleLogoutSuccess = () => {
     setIsLoggedIn(false);
     setShowLogoutNotification(true); // 안내바 표시
-    console.log('로그아웃 성공 - 상태 업데이트됨');
+    logger.info('로그아웃 성공 - 상태 업데이트됨');
   };
 
   // 마이페이지 열기 핸들러 (열 때 보관함 닫기)
@@ -351,9 +357,9 @@ export default function HomePage() {
 
   // 저장된 상권에서 비교하기 클릭 핸들러
   const handleSavedCompareClick = (selectedTradeAreas: { trdarCd: string; trdarCdNm: string }[]) => {
-    console.log('🔍 handleSavedCompareClick 호출됨:', selectedTradeAreas);
+    logger.info('🔍 handleSavedCompareClick 호출됨:', selectedTradeAreas);
     if (selectedTradeAreas.length === 0) {
-      console.log('❌ 선택된 상권이 없음');
+      logger.info('❌ 선택된 상권이 없음');
       return; // 선택된 상권이 없으면 아무것도 하지 않음
     }
 
@@ -380,13 +386,13 @@ export default function HomePage() {
     }
 
     // 저장된 상권 모달 열기
-    console.log('✅ 저장된 상권 모달 열기 시도');
+    logger.info('✅ 저장된 상권 모달 열기 시도');
     setIsSavedCompareOpen(true);
   };
 
   // 검색 결과 관련 핸들러들
   const handleSearchResultsShow = useCallback((show: boolean, keyword: string) => {
-    console.log('🔍 검색 결과 상태 변경:', { show, keyword });
+    logger.info('🔍 검색 결과 상태 변경:', { show, keyword });
     setShowSearchResults(show);
     setSearchKeyword(keyword);
     
@@ -400,7 +406,7 @@ export default function HomePage() {
   }, []);
 
   const handleSearchClose = useCallback(() => {
-    console.log('🔍 검색 결과 닫기');
+    logger.info('🔍 검색 결과 닫기');
     setShowSearchResults(false);
     setSearchKeyword('');
     // 검색 결과 닫을 때 시장 목록 다시 표시
@@ -408,13 +414,13 @@ export default function HomePage() {
   }, []);
 
   const handleSearchReset = useCallback(() => {
-    console.log('🔍 검색창 초기화');
+    logger.info('🔍 검색창 초기화');
     setResetTrigger(prev => prev + 1);
   }, []);
 
   // 상권 폴리곤과 라벨 스타일 업데이트 함수
   const updateTradeAreaStyle = useCallback((trdarCode: string, trdarName: string) => {
-    console.log('🎨 상권 스타일 업데이트:', { trdarCode, trdarName });
+    logger.info('🎨 상권 스타일 업데이트:', { trdarCode, trdarName });
     
     // 이전에 선택된 상권 스타일 초기화
     const previousSelected = document.querySelector('.tradearea-label.selected');
@@ -451,17 +457,12 @@ export default function HomePage() {
     
     // 새로운 상권 라벨 찾기 및 스타일 적용
     const labelElements = document.querySelectorAll('.tradearea-label');
-    let targetLabel: HTMLElement | null = null;
-    
-    labelElements.forEach((label) => {
-      const labelElement = label as HTMLElement;
-      if (labelElement.textContent?.includes(trdarName)) {
-        targetLabel = labelElement;
-      }
-    });
-    
+    const targetLabel = Array.from(labelElements).find(
+      (label) => label.textContent?.includes(trdarName)
+    ) as HTMLElement | undefined;
+
     if (targetLabel) {
-      console.log('✅ 상권 라벨 찾음, 스타일 적용:', targetLabel);
+      logger.info('✅ 상권 라벨 찾음, 스타일 적용:', targetLabel);
       
       // 선택된 상태 클래스 추가
       targetLabel.classList.add('selected');
@@ -494,26 +495,26 @@ export default function HomePage() {
         if (salesEl) salesEl.style.color = '#3288FF';
       }
       
-      console.log('🎨 상권 라벨 스타일 적용 완료');
+      logger.info('🎨 상권 라벨 스타일 적용 완료');
     } else {
-      console.log('❌ 상권 라벨을 찾을 수 없음:', trdarName);
+      logger.info('❌ 상권 라벨을 찾을 수 없음:', trdarName);
     }
   }, []);
 
   // 상권 선택 핸들러
-  const handleTradeAreaSelect = useCallback((tradeArea: any) => {
-    console.log('🏪 상권 선택됨:', tradeArea);
+  const handleTradeAreaSelect = useCallback((tradeArea: TradeArea) => {
+    logger.info('🏪 상권 선택됨:', tradeArea);
     
     // 선택된 상권 상태 업데이트
     setSelectedTradeArea(tradeArea);
     
     // 상세보기 안내바를 위한 상태 업데이트
     setSelectedTradeAreaName(tradeArea.trdarCdNm);
-    setSelectedTradeAreaCode(tradeArea.trdarCd);
+    setSelectedTradeAreaCode(String(tradeArea.trdarCd));
     
     // TM 좌표를 WGS84로 변환
     const wgs84Coords = tmToWgs84(tradeArea.xcntsValue, tradeArea.ydntsValue);
-    console.log('📍 좌표 변환 완료:', {
+    logger.info('📍 좌표 변환 완료:', {
       tm: { x: tradeArea.xcntsValue, y: tradeArea.ydntsValue },
       wgs84: wgs84Coords
     });
@@ -531,7 +532,7 @@ export default function HomePage() {
     });
     
     window.dispatchEvent(focusEvent);
-    console.log('🗺️ 지도 이동 이벤트 발생:', {
+    logger.info('🗺️ 지도 이동 이벤트 발생:', {
       code: tradeArea.trdarCd,
       name: tradeArea.trdarCdNm,
       coordinates: wgs84Coords
@@ -539,7 +540,7 @@ export default function HomePage() {
     
     // 상권 폴리곤과 라벨 스타일 변경
     setTimeout(() => {
-      updateTradeAreaStyle(tradeArea.trdarCd, tradeArea.trdarCdNm);
+      updateTradeAreaStyle(String(tradeArea.trdarCd), tradeArea.trdarCdNm);
       
       // 폴리곤 스타일 변경을 위한 커스텀 이벤트 발생
       const styleEvent = new CustomEvent('selectTradeArea', {
@@ -578,22 +579,22 @@ export default function HomePage() {
 
   // 카페 토글 핸들러
   const handleCafeToggle = (categoryId: string) => {
-    console.log('카페 토글:', categoryId, '현재 상태:', isCafeActive);
+    logger.info('카페 토글:', categoryId, '현재 상태:', isCafeActive);
     // 카테고리 ID가 'CE7'이면 카페 검색 토글
     if (categoryId === 'CE7') {
       const newState = !isCafeActive;
-      console.log('카페 상태 변경:', isCafeActive, '->', newState);
+      logger.info('카페 상태 변경:', isCafeActive, '->', newState);
       setIsCafeActive(newState);
     }
   };
 
   // 카페 상태 변경 감지
   useEffect(() => {
-    console.log('HomePage isCafeActive 변경됨:', isCafeActive);
+    logger.info('HomePage isCafeActive 변경됨:', isCafeActive);
   }, [isCafeActive]);
 
 
-  console.log('HomePage 렌더링 - isCafeActive:', isCafeActive);
+  logger.info('HomePage 렌더링 - isCafeActive:', isCafeActive);
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
@@ -602,7 +603,7 @@ export default function HomePage() {
         cafeActive={isCafeActive} 
         showMarketingArea={showMarketingArea}
         onTradeAreaSelect={(name, code) => {
-          console.log("🔍 상권 선택:", { name, code });
+          logger.info("🔍 상권 선택:", { name, code });
           setSelectedTradeAreaName(name);
           setSelectedTradeAreaCode(code);
         }}
@@ -743,7 +744,7 @@ export default function HomePage() {
       <CompareTradeAreasModal 
         open={isSavedCompareOpen} 
         onClose={() => {
-          console.log('🔍 저장된 상권 모달 닫기');
+          logger.info('🔍 저장된 상권 모달 닫기');
           setIsSavedCompareOpen(false);
           // 저장된 상권 모달이 닫힐 때 선택 상태 초기화
           setSelectedTradeArea1(null);

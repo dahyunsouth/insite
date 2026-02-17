@@ -1,3 +1,5 @@
+import { logger } from '@/utils/logger';
+
 // JWT 토큰 관련 유틸리티 함수들
 
 interface JwtPayload {
@@ -30,7 +32,7 @@ export function decodeJwtToken(token: string): JwtPayload | null {
     
     return JSON.parse(decodedPayload) as JwtPayload;
   } catch (error) {
-    console.error('JWT 토큰 디코딩 실패:', error);
+    logger.error('JWT 토큰 디코딩 실패:', error);
     return null;
   }
 }

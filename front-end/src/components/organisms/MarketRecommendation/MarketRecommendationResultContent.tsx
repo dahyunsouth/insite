@@ -10,6 +10,7 @@ import { getAiSummary } from '@/lib/api/aiSummary';
 import { AiSummaryData } from '@/types/aiSummary';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { authManager } from '@/utils/auth';
+import { logger } from '@/utils/logger';
 
 interface MarketRecommendationResultContentProps {
   result: RecommendationResponse;
@@ -71,14 +72,14 @@ const getStyle = (ranking: number): RankStyle => RANK_STYLES[ranking] || DEFAULT
 // 상권명으로 상권코드를 찾는 함수
 const getTradeAreaCodeByName = (areaName: string): string | null => {
   try {
-    const tradeArea = TradeAreaRawData.DATA.find((item: any) => 
-      item.trdar_cd_nm === areaName || 
+    const tradeArea = TradeAreaRawData.DATA.find((item) =>
+      item.trdar_cd_nm === areaName ||
       item.trdar_cd_nm === `${areaName} 상권` ||
       areaName === `${item.trdar_cd_nm} 상권`
     );
     return tradeArea?.trdar_cd || null;
   } catch (error) {
-    console.warn('Trade area data not found:', error);
+    logger.warn('Trade area data not found:', error);
     return null;
   }
 };
@@ -86,9 +87,9 @@ const getTradeAreaCodeByName = (areaName: string): string | null => {
 // 상권코드로 좌표를 찾는 함수 (TM 좌표를 위도/경도로 변환)
 const getCoordinatesFromTrdarCode = (trdarCode: string): { lat: number; lng: number } | undefined => {
   try {
-    const tradeArea = TradeAreaRawData.DATA.find((item: any) => item.trdar_cd === trdarCode);
+    const tradeArea = TradeAreaRawData.DATA.find((item) => item.trdar_cd === trdarCode);
     if (!tradeArea) {
-      console.warn('Trade area not found for code:', trdarCode);
+      logger.warn('Trade area not found for code:', trdarCode);
       return undefined;
     }
 
@@ -97,10 +98,10 @@ const getCoordinatesFromTrdarCode = (trdarCode: string): { lat: number; lng: num
     const y = tradeArea.ydnts_value;
     
     const converted = tmToWgs84(x, y);
-    console.log('좌표 변환 결과:', { trdarCode, x, y, converted });
+    logger.info('좌표 변환 결과:', { trdarCode, x, y, converted });
     return converted;
   } catch (error) {
-    console.warn('좌표 변환 실패:', error);
+    logger.warn('좌표 변환 실패:', error);
     return undefined;
   }
 };
@@ -152,10 +153,10 @@ const ScoreSummary: React.FC<{ item: RecommendationItem; className?: string }> =
   );
 };
 
-const MarketRecommendationResultContent: React.FC<MarketRecommendationResultContentProps> = ({ 
-  result, 
-  onBack, 
-  selectedItem, 
+const MarketRecommendationResultContent: React.FC<MarketRecommendationResultContentProps> = ({
+  result,
+  onBack: _onBack,
+  selectedItem,
   onSelectedItemChange,
   onAddToComparison,
   onRemoveFromComparison,
@@ -165,7 +166,7 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
   const [isSaved, setIsSaved] = useState(false);
   const [isComparing, setIsComparing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
   const detailContainerRef = useRef<HTMLDivElement>(null);
   
   // FavoritesContext 사용
@@ -178,32 +179,32 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
   const secondaryItems = topThree.slice(1).filter((item): item is RecommendationItem => Boolean(item));
 
   const handleSave = async () => {
-    console.log('💾 [MarketRecommendationResultContent] handleSave 함수 시작');
+    logger.info('💾 [MarketRecommendationResultContent] handleSave 함수 시작');
     
     if (!selectedItem) {
-      console.error('💾 [MarketRecommendationResultContent] 선택된 상권이 없음');
+      logger.error('💾 [MarketRecommendationResultContent] 선택된 상권이 없음');
       setError('상권 정보를 찾을 수 없습니다.');
       return;
     }
 
     const trdarCode = selectedItem.trdarCode || getTradeAreaCodeByName(selectedItem.areaName);
     if (!trdarCode) {
-      console.error('💾 [MarketRecommendationResultContent] 상권 코드가 없음');
+      logger.error('💾 [MarketRecommendationResultContent] 상권 코드가 없음');
       setError('상권 코드를 찾을 수 없습니다.');
       return;
     }
 
     // 로그인 확인
     const isLoggedIn = authManager.isLoggedIn();
-    console.log('💾 [MarketRecommendationResultContent] 로그인 상태:', isLoggedIn);
+    logger.info('💾 [MarketRecommendationResultContent] 로그인 상태:', isLoggedIn);
     
     if (!isLoggedIn) {
-      console.log('💾 [MarketRecommendationResultContent] 로그인 필요');
+      logger.info('💾 [MarketRecommendationResultContent] 로그인 필요');
       setError('로그인이 필요합니다.');
       return;
     }
 
-    console.log('💾 [MarketRecommendationResultContent] 로딩 시작');
+    logger.info('💾 [MarketRecommendationResultContent] 로딩 시작');
     setIsLoading(true);
     setError(null);
 
@@ -211,62 +212,62 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
       const currentIsSaved = isFavorite(parseInt(trdarCode));
       const currentTrdarCdNm = selectedItem.areaName || '상권';
       
-      console.log('💾 [MarketRecommendationResultContent] 현재 저장 상태:', currentIsSaved);
-      console.log('💾 [MarketRecommendationResultContent] 상권명:', currentTrdarCdNm);
+      logger.info('💾 [MarketRecommendationResultContent] 현재 저장 상태:', currentIsSaved);
+      logger.info('💾 [MarketRecommendationResultContent] 상권명:', currentTrdarCdNm);
       
       if (currentIsSaved) {
         // 저장 해제
-        console.log('💾 [MarketRecommendationResultContent] 저장 해제 API 호출 시작');
+        logger.info('💾 [MarketRecommendationResultContent] 저장 해제 API 호출 시작');
         await removeFavorite(parseInt(trdarCode));
         setIsSaved(false);
-        console.log('✅ [MarketRecommendationResultContent] 상권 저장 해제 성공:', trdarCode);
+        logger.info('✅ [MarketRecommendationResultContent] 상권 저장 해제 성공:', trdarCode);
       } else {
         // 저장
-        console.log('💾 [MarketRecommendationResultContent] 저장 API 호출 시작');
+        logger.info('💾 [MarketRecommendationResultContent] 저장 API 호출 시작');
         await addFavorite(parseInt(trdarCode), currentTrdarCdNm);
         setIsSaved(true);
-        console.log('✅ [MarketRecommendationResultContent] 상권 저장 성공:', trdarCode);
+        logger.info('✅ [MarketRecommendationResultContent] 상권 저장 성공:', trdarCode);
       }
       setError(null); // 성공 시 에러 메시지 제거
     } catch (error) {
-      console.error('❌ [MarketRecommendationResultContent] 상권 저장/해제 실패:', error);
+      logger.error('❌ [MarketRecommendationResultContent] 상권 저장/해제 실패:', error);
       const errorMessage = error instanceof Error ? error.message : '저장 처리 중 오류가 발생했습니다.';
       setError(errorMessage);
     } finally {
-      console.log('💾 [MarketRecommendationResultContent] 로딩 종료');
+      logger.info('💾 [MarketRecommendationResultContent] 로딩 종료');
       setIsLoading(false);
     }
   };
 
   const handleCompare = () => {
-    console.log('🔍 [MarketRecommendationResultContent] handleCompare 함수 시작');
+    logger.info('🔍 [MarketRecommendationResultContent] handleCompare 함수 시작');
     
     if (!selectedItem) {
-      console.error('🔍 [MarketRecommendationResultContent] 선택된 상권이 없음');
+      logger.error('🔍 [MarketRecommendationResultContent] 선택된 상권이 없음');
       return;
     }
 
     const trdarCode = selectedItem.trdarCode || getTradeAreaCodeByName(selectedItem.areaName);
     if (!trdarCode) {
-      console.error('🔍 [MarketRecommendationResultContent] 상권 코드가 없음');
+      logger.error('🔍 [MarketRecommendationResultContent] 상권 코드가 없음');
       return;
     }
 
     const currentTrdarCdNm = selectedItem.areaName || '상권';
     const isCurrentlyInComparison = isInComparison ? isInComparison(trdarCode) : false;
     
-    console.log('🔍 [MarketRecommendationResultContent] 현재 비교 상태:', isCurrentlyInComparison);
-    console.log('🔍 [MarketRecommendationResultContent] 상권 코드:', trdarCode);
-    console.log('🔍 [MarketRecommendationResultContent] 상권명:', currentTrdarCdNm);
+    logger.info('🔍 [MarketRecommendationResultContent] 현재 비교 상태:', isCurrentlyInComparison);
+    logger.info('🔍 [MarketRecommendationResultContent] 상권 코드:', trdarCode);
+    logger.info('🔍 [MarketRecommendationResultContent] 상권명:', currentTrdarCdNm);
     
     if (isCurrentlyInComparison) {
       // 비교함에서 제거
-      console.log('🔍 [MarketRecommendationResultContent] 비교함에서 제거');
+      logger.info('🔍 [MarketRecommendationResultContent] 비교함에서 제거');
       onRemoveFromComparison?.(trdarCode);
       setIsComparing(false);
     } else {
       // 비교함에 추가
-      console.log('🔍 [MarketRecommendationResultContent] 비교함에 추가');
+      logger.info('🔍 [MarketRecommendationResultContent] 비교함에 추가');
       onAddToComparison?.(trdarCode, currentTrdarCdNm);
       setIsComparing(true);
     }
@@ -289,12 +290,12 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
         // 저장 상태 확인
         const currentIsSaved = isFavorite(parseInt(trdarCode));
         setIsSaved(currentIsSaved);
-        console.log('💾 [MarketRecommendationResultContent] 저장 상태 업데이트:', currentIsSaved, trdarCode);
+        logger.info('💾 [MarketRecommendationResultContent] 저장 상태 업데이트:', currentIsSaved, trdarCode);
         
         // 비교 상태 확인
         const currentIsComparing = isInComparison ? isInComparison(trdarCode) : false;
         setIsComparing(currentIsComparing);
-        console.log('🔍 [MarketRecommendationResultContent] 비교 상태 업데이트:', currentIsComparing, trdarCode);
+        logger.info('🔍 [MarketRecommendationResultContent] 비교 상태 업데이트:', currentIsComparing, trdarCode);
       } else {
         setIsSaved(false);
         setIsComparing(false);
@@ -487,11 +488,10 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
     
     const fallbackContent = getFallbackContent(item.ranking, item.areaName || '');
     const displaySummary = aiData?.summary || fallbackContent.summary;
-    const displayFeatures = aiData?.features.length ? aiData.features : fallbackContent.features;
 
     return (
-      <div 
-        key={item.ranking} 
+      <div
+        key={item.ranking}
         className={'flex flex-1 rounded-xl py-1 px-6 h-full cursor-pointer hover:shadow-lg transition-shadow ' + style.container}
         onClick={() => handleCardClick(item)}
       >
@@ -539,7 +539,7 @@ const MarketRecommendationResultContent: React.FC<MarketRecommendationResultCont
     // 좌표 가져오기 (selectedItem에 coordinates가 없으면 trdarCode로 찾기)
     const coordinates = selectedItem.coordinates || (trdarCode ? getCoordinatesFromTrdarCode(trdarCode) : undefined);
     
-    console.log('상세페이지 좌표 정보:', { 
+    logger.info('상세페이지 좌표 정보:', { 
       selectedItem: selectedItem.areaName, 
       trdarCode, 
       selectedCoordinates: selectedItem.coordinates,

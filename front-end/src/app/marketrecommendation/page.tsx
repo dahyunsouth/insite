@@ -21,7 +21,7 @@ export default function MarketRecommendationPage() {
     router.push('/');
   };
 
-  const handleCompareClick = (area1: { trdarCd: string; trdarCdNm: string }, area2: { trdarCd: string; trdarCdNm: string }) => {
+  const handleCompareClick = (_area1: { trdarCd: string; trdarCdNm: string }, _area2: { trdarCd: string; trdarCdNm: string }) => {
     // 비교 모달로 이동 (HomePage로 이동하여 비교 모달 열기)
     router.push('/?compare=true');
   };

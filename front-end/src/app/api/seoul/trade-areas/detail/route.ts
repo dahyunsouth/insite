@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { SeoulApiRoot, SeoulApiRow, isSeoulApiRoot } from '@/types/seoul-api';
 
 const SEOUL_BASE = "http://openapi.seoul.go.kr:8088";
 const SERVICE = "VwsmTrdarFlpopQq"; // confirmed correct service name
@@ -11,7 +12,7 @@ function getApiKey() {
 
 type Slot = { key: string; label: string; value: number };
 
-function mapSlots(row: any): Slot[] {
+function mapSlots(row: SeoulApiRow): Slot[] {
   const items: Array<[string, string]> = [
     ["TMZON_00_06_FLPOP_CO", "00–06시"],
     ["TMZON_06_11_FLPOP_CO", "06–11시"],
@@ -23,7 +24,7 @@ function mapSlots(row: any): Slot[] {
   return items.map(([key, label]) => ({ key, label, value: Number(row?.[key] ?? 0) }));
 }
 
-function mapDays(row: any): Slot[] {
+function mapDays(row: SeoulApiRow): Slot[] {
   const candidates: Array<{ keys: string[]; label: string }> = [
     { keys: ["MON_FLPOP_CO", "MONDAY_FLPOP_CO", "DY_MON_FLPOP_CO"], label: "월요일" },
     { keys: ["TUE_FLPOP_CO", "TUES_FLPOP_CO", "DY_TUE_FLPOP_CO"], label: "화요일" },
@@ -33,7 +34,7 @@ function mapDays(row: any): Slot[] {
     { keys: ["SAT_FLPOP_CO", "SATURDAY_FLPOP_CO", "DY_SAT_FLPOP_CO"], label: "토요일" },
     { keys: ["SUN_FLPOP_CO", "SUNDAY_FLPOP_CO", "DY_SUN_FLPOP_CO"], label: "일요일" },
   ];
-  function readNum(row: any, keys: string[]) {
+  function readNum(row: SeoulApiRow, keys: string[]) {
     for (const k of keys) {
       const v = row?.[k];
       if (v !== undefined && v !== null && v !== "") return Number(v);
@@ -48,15 +49,13 @@ async function fetchPage(key: string, quarter: string, start: number, end: numbe
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) return { ok: false as const, status: res.status };
   const data = await res.json().catch(() => ({}));
-  const root = Object.values(data).find(
-    (v: any) => v && typeof v === "object" && "RESULT" in v
-  ) as any;
+  const root = Object.values(data).find(isSeoulApiRoot) as SeoulApiRoot | undefined;
   const code = root?.RESULT?.CODE as string | undefined;
   if (code !== "INFO-000") {
     return { ok: false as const, status: code?.startsWith("ERROR-5") ? 502 : 400, code, message: root?.RESULT?.MESSAGE };
   }
   const total = Number(root?.list_total_count ?? 0);
-  const rows: any[] = Array.isArray(root?.row) ? root.row : [];
+  const rows: SeoulApiRow[] = Array.isArray(root?.row) ? root.row : [];
   return { ok: true as const, total, rows };
 }
 
@@ -118,8 +117,8 @@ export async function GET(req: NextRequest) {
     }
 
     return new Response(JSON.stringify({ error: "Trade area not found in quarter", quarter, trdar }), { status: 404 });
-  } catch (e: any) {
-    return new Response(JSON.stringify({ error: e?.message ?? "Server error" }), { status: 500 });
+  } catch (e: unknown) {
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Server error" }), { status: 500 });
   }
 }
 

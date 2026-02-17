@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { SeoulApiRoot, SeoulApiRow, isSeoulApiRoot } from '@/types/seoul-api';
 
 const SEOUL_BASE = "http://openapi.seoul.go.kr:8088";
 // Correct service name per official spec/sample
@@ -33,9 +34,7 @@ export async function GET(req: NextRequest) {
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) return new Response(JSON.stringify({ error: `Upstream ${res.status}` }), { status: 502 });
     const data = await res.json().catch(() => ({}));
-    const root = Object.values(data).find(
-      (v: any) => v && typeof v === "object" && "RESULT" in v
-    ) as any;
+    const root = Object.values(data).find(isSeoulApiRoot) as SeoulApiRoot | undefined;
     const code = root?.RESULT?.CODE as string | undefined;
     if (code === "INFO-200") {
       return new Response(JSON.stringify({ quarter, total: 0, items: [], hasMore: false }), {
@@ -50,7 +49,7 @@ export async function GET(req: NextRequest) {
     }
 
     const total = Number(root?.list_total_count ?? 0);
-    const rows: any[] = Array.isArray(root?.row) ? root.row : [];
+    const rows: SeoulApiRow[] = Array.isArray(root?.row) ? root.row : [];
     const map = new Map<string, { code: string; name: string }>();
     for (const r of rows) {
       const codeVal = String(r?.TRDAR_CD ?? "");
@@ -70,7 +69,7 @@ export async function GET(req: NextRequest) {
         },
       }
     );
-  } catch (e: any) {
-    return new Response(JSON.stringify({ error: e?.message ?? "Server error" }), { status: 500 });
+  } catch (e: unknown) {
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Server error" }), { status: 500 });
   }
 }

@@ -4,14 +4,14 @@ import { useEffect, useRef } from 'react';
 import { useKakaoMap } from './KakaoMap';
 
 type MapTypeControlProps = {
-  position?: any; // kakao.maps.ControlPosition
+  position?: string;
 };
 
 export default function MapTypeControl({ 
   position = 'TOPRIGHT' 
 }: MapTypeControlProps) {
   const map = useKakaoMap();
-  const controlRef = useRef<any>(null);
+  const controlRef = useRef<kakao.maps.MapTypeControl | null>(null);
 
   useEffect(() => {
     if (!map) return;
@@ -20,7 +20,7 @@ export default function MapTypeControl({
     const mapTypeControl = new window.kakao.maps.MapTypeControl();
     
     // 지도에 컨트롤 추가
-    const controlPosition = window.kakao.maps.ControlPosition[position];
+    const controlPosition = window.kakao.maps.ControlPosition[position as keyof typeof kakao.maps.ControlPosition];
     map.addControl(mapTypeControl, controlPosition);
     
     controlRef.current = mapTypeControl;

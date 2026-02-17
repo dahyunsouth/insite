@@ -80,8 +80,8 @@ export default function WorkPopulationCard({ trdarCode, populationType, onPopula
         const payload = (await res.json()) as WorkResponse;
         if (aborted) return;
         setData(payload);
-      } catch (e: any) {
-        if (!aborted) setError(e?.message ?? "load failed");
+      } catch (e: unknown) {
+        if (!aborted) setError(e instanceof Error ? e.message : "load failed");
       } finally {
         if (!aborted) setLoading(false);
       }

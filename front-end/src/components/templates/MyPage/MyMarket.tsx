@@ -11,6 +11,7 @@ import { fetchTradeAreaDetail, TradeAreaDetail, fetchTradeAreaScore, TradeAreaSc
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useNotification } from '@/components/map/useNotification';
 import Notification from '@/components/map/Notification';
+import { logger } from '@/utils/logger';
 
 interface MyMarketProps {
   onBack?: () => void;
@@ -115,7 +116,7 @@ const MyMarket: React.FC<MyMarketProps> = ({
       
       showNotification(`${trdarCdNm}이 저장 목록에서 제거되었습니다.`);
     } catch (error) {
-      console.error('저장 해제 실패:', error);
+      logger.error('저장 해제 실패:', error);
       showNotification('저장 해제 중 오류가 발생했습니다.');
     }
   };
@@ -147,7 +148,7 @@ const MyMarket: React.FC<MyMarketProps> = ({
               error: undefined
             };
           } catch (error) {
-            console.error(`Error fetching data for ${area.trdarCdNm}:`, error);
+            logger.error(`Error fetching data for ${area.trdarCdNm}:`, error);
             return {
               ...area,
               detail: undefined,
@@ -161,7 +162,7 @@ const MyMarket: React.FC<MyMarketProps> = ({
         const results = await Promise.all(promises);
         setTradeAreas(results);
       } catch (error) {
-        console.error('상권 상세 데이터 로딩 실패:', error);
+        logger.error('상권 상세 데이터 로딩 실패:', error);
         setTradeAreas([]);
       } finally {
         setIsLoadingDetails(false);
@@ -323,9 +324,9 @@ const MyMarket: React.FC<MyMarketProps> = ({
           aria-disabled={!isCompareEnabled}
           onClick={() => {
             if (!isCompareEnabled) return;
-            console.log('🔍 MyMarket 비교하기 버튼 클릭됨');
-            console.log('🔍 selectedCards:', selectedCards);
-            console.log('🔍 tradeAreas:', tradeAreas);
+            logger.info('🔍 MyMarket 비교하기 버튼 클릭됨');
+            logger.info('🔍 selectedCards:', selectedCards);
+            logger.info('🔍 tradeAreas:', tradeAreas);
             if (onCompareClick) {
               const selectedTradeAreas = tradeAreas
                 .filter(area => selectedCards.has(area.trdarCd))
@@ -333,10 +334,10 @@ const MyMarket: React.FC<MyMarketProps> = ({
                   trdarCd: area.trdarCd,
                   trdarCdNm: area.trdarCdNm
                 }));
-              console.log('🔍 선택된 상권들:', selectedTradeAreas);
+              logger.info('🔍 선택된 상권들:', selectedTradeAreas);
               onCompareClick(selectedTradeAreas);
             } else {
-              console.log('❌ onCompareClick이 없음');
+              logger.info('❌ onCompareClick이 없음');
             }
           }}
         >

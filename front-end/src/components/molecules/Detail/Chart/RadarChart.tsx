@@ -49,7 +49,6 @@ export default function RadarChart({
   onSelectAxis,
 }: RadarChartProps) {
   const N = labels.length;
-  if (N === 0) return null;
 
   const flatValues = series.flatMap((s) => s.values);
   const computedMax = Math.max(1, ...(flatValues.length ? flatValues : [1]));
@@ -82,6 +81,8 @@ export default function RadarChart({
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
   }, [animate, duration, delay, easingFn]);
+
+  if (N === 0) return null;
 
   // Layout constants within a 300x300 viewbox
   const size = 300; // math space

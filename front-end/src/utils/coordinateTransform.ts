@@ -12,7 +12,7 @@ export function tmToWgs84(tmX: number, tmY: number): { lat: number; lng: number 
   const a = 6378137.0; // 장반경 (WGS84)
   const f = 1 / 298.257223563; // 편평률
   const e2 = 2 * f - f * f; // 제1이심률의 제곱
-  const e = Math.sqrt(e2);
+  const _e = Math.sqrt(e2);
   
   // 중부원점 기준
   const lon0 = 127.0 * Math.PI / 180; // 중앙경선 (127도)

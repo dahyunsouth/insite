@@ -7,6 +7,7 @@ import PopulationToggle from "@/components/molecules/Detail/PopulationCard/Popul
 import WorkPopulationCard from "@/components/molecules/Detail/PopulationCard/WorkPopulationCard";
 import ResidentPopulationCard from "@/components/molecules/Detail/PopulationCard/ResidentPopulationCard";
 import FloatingPopulationInfoModal from "@/components/molecules/Detail/PopulationCard/InfoModal/FloatingPopulationInfoModal";
+import { logger } from '@/utils/logger';
 
 type Props = { 
   trdarCode: string | null;
@@ -89,11 +90,11 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
       setError(null);
       try {
         // 새로운 유동인구 API 호출
-        console.log("🔍 유동인구 API 호출 시작:", trdarCode);
+        logger.info("🔍 유동인구 API 호출 시작:", trdarCode);
         const dRes = await fetch(`/api/v1/data/info/flpop?trdarCd=${trdarCode}`, { cache: "no-store" });
         if (!dRes.ok) throw new Error("flpop API failed");
         const apiResponse = (await dRes.json()) as FlpopApiResponse;
-        console.log("🔍 유동인구 API 응답:", apiResponse);
+        logger.info("🔍 유동인구 API 응답:", apiResponse);
         if (aborted) return;
 
         if (!apiResponse.isSuccess) {
@@ -161,7 +162,7 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
           d.dayMin = { index: dayMinIndex, label: d.days[dayMinIndex].label, value: dayMinValue };
         }
 
-        console.log("🔍 변환된 데이터:", d);
+        logger.info("🔍 변환된 데이터:", d);
         setData(d);
       } catch (e: unknown) {
         if (!aborted) setError(e instanceof Error ? e.message : "load failed");

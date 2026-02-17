@@ -1,6 +1,6 @@
 import Image from 'next/image';
 
-const RealtimeBadge = ({ text = '실시간' }) => {
+const RealtimeBadge = ({ text = '실시간' }: { text?: string }) => {
   return (
     <div className="inline-flex items-center justify-center w-[95px] h-[32px] px-[10px] py-[5px] rounded-[5px] border-[0.5px] bg-gradient-to-r from-[#EE69FF] to-[#6AABFF] text-white text-sm font-normal gap-[10px]">
       <Image 

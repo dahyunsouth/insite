@@ -1,4 +1,7 @@
 import { API_BASE_URL } from '@/config/api';
+import TradeAreaValueData from '@/data/TradeAreaValue.json';
+import { logger } from '@/utils/logger';
+import type { ApiResponse } from '@/types/api';
 
 const BASE_URL = API_BASE_URL;
 
@@ -32,13 +35,7 @@ export async function fetchGuList(): Promise<string[]> {
     throw new Error(`Failed to fetch district list: ${response.status}`);
   }
 
-  const data: {
-    httpStatus: string;
-    isSuccess: boolean;
-    message: string;
-    code: number;
-    result: string[];
-  } = await response.json();
+  const data: ApiResponse<string[]> = await response.json();
 
   if (!data.isSuccess || !Array.isArray(data.result)) {
     throw new Error("District API returned an unexpected shape");
@@ -63,13 +60,7 @@ export async function fetchDongList(guName: string): Promise<string[]> {
     throw new Error(`Failed to fetch dong list: ${response.status}`);
   }
 
-  const data: {
-    httpStatus: string;
-    isSuccess: boolean;
-    message: string;
-    code: number;
-    result: string[];
-  } = await response.json();
+  const data: ApiResponse<string[]> = await response.json();
 
   if (!data.isSuccess || !Array.isArray(data.result)) {
     throw new Error("Dong API returned an unexpected shape");
@@ -95,22 +86,16 @@ export async function fetchTradeAreas(guName: string, dongName: string): Promise
     throw new Error(`Failed to fetch trade areas: ${response.status}`);
   }
 
-  const data: {
-    httpStatus: string;
-    isSuccess: boolean;
-    message: string;
-    code: number;
-    result: {
-      districtNameKor: string;
-      dongNameKor: string;
-      areas: Array<{
-        trdarSeCd: string;
-        trdarSeCdNm: string;
-        trdarCd: number;
-        trdarCdNm: string;
-      }>;
-    } | null;
-  } = await response.json();
+  const data: ApiResponse<{
+    districtNameKor: string;
+    dongNameKor: string;
+    areas: Array<{
+      trdarSeCd: string;
+      trdarSeCdNm: string;
+      trdarCd: number;
+      trdarCdNm: string;
+    }>;
+  } | null> = await response.json();
 
   if (!data.isSuccess) {
     throw new Error("Trade area API returned unsuccessful status");
@@ -142,27 +127,21 @@ export async function fetchTradeAreasDetail(guName: string, dongName: string) {
     throw new Error(`Failed to fetch trade areas: ${response.status}`);
   }
 
-  const data: {
-    httpStatus: string;
-    isSuccess: boolean;
-    message: string;
-    code: number;
-    result: {
-      districtNameKor: string;
-      dongNameKor: string;
-      areas: Array<{
-        trdarSeCd: string;
-        trdarSeCdNm: string;
-        trdarCd: number;
-        trdarCdNm: string;
-        xcntsValue: number;
-        ydntsValue: number;
-        relmAr: number;
-        storCo: number;
-        similrIndutyStorCo: number;
-      }>;
-    };
-  } = await response.json();
+  const data: ApiResponse<{
+    districtNameKor: string;
+    dongNameKor: string;
+    areas: Array<{
+      trdarSeCd: string;
+      trdarSeCdNm: string;
+      trdarCd: number;
+      trdarCdNm: string;
+      xcntsValue: number;
+      ydntsValue: number;
+      relmAr: number;
+      storCo: number;
+      similrIndutyStorCo: number;
+    }>;
+  }> = await response.json();
 
   if (!data.isSuccess || !data.result) {
     throw new Error("Trade area API returned unsuccessful status");
@@ -227,13 +206,7 @@ export async function fetchTradeAreaDetail(tradeAreaCode: number | string): Prom
     throw new Error(`Failed to fetch trade area detail: ${response.status}`);
   }
 
-  const data: {
-    httpStatus: string;
-    isSuccess: boolean;
-    message: string;
-    code: number;
-    result: TradeAreaDetail | null;
-  } = await response.json();
+  const data: ApiResponse<TradeAreaDetail | null> = await response.json();
 
   if (!data.isSuccess || !data.result) {
     throw new Error("Trade area detail API returned an unexpected shape");
@@ -319,24 +292,17 @@ export interface TradeAreaScore {
   competitionScore: number;
 }
 
-// 종합 분석 점수 API 응답 타입
-interface TradeAreaScoreResponse {
-  httpStatus: string;
-  isSuccess: boolean;
-  message: string;
-  code: number;
-  result: TradeAreaScore;
-}
+// 종합 분석 점수 API 응답 타입 (ApiResponse<TradeAreaScore>와 동일)
 
 // 상권 코드로 상권명을 찾는 유틸 함수
 export function getTradeAreaNameByCode(tradeAreaCode: string): string {
   // TradeAreaPicker에서 사용하는 데이터와 동일한 방식으로 불러오기
   try {
-    const TradeAreaRawData = require("@/data/TradeAreaValue.json");
-    const tradeArea = TradeAreaRawData.DATA.find((item: any) => item.trdar_cd === tradeAreaCode);
+    const TradeAreaRawData = TradeAreaValueData;
+    const tradeArea = TradeAreaRawData.DATA.find((item: Record<string, string | number>) => item.trdar_cd === tradeAreaCode);
     return tradeArea?.trdar_cd_nm || "상권명 없음";
   } catch (error) {
-    console.warn('Trade area data not found:', error);
+    logger.warn('Trade area data not found:', error);
     return "상권명 없음";
   }
 }
@@ -355,7 +321,7 @@ export async function fetchTradeAreaScore(tradeAreaName: string): Promise<TradeA
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data: TradeAreaScoreResponse = await response.json();
+    const data: ApiResponse<TradeAreaScore> = await response.json();
     
     if (!data.isSuccess) {
       throw new Error(data.message || '점수 조회에 실패했습니다.');
@@ -363,7 +329,7 @@ export async function fetchTradeAreaScore(tradeAreaName: string): Promise<TradeA
 
     return data.result;
   } catch (error) {
-    console.error('Error fetching trade area score:', error);
+    logger.error('Error fetching trade area score:', error);
     throw error;
   }
 }

@@ -6,6 +6,7 @@ import ActionButtons from "@/components/atoms/Detail/ActionButtons";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { authManager } from "@/utils/auth";
 import { useNotification } from "@/components/map/useNotification";
+import { logger } from '@/utils/logger';
 import Notification from "@/components/map/Notification";
 import DetailNavbarTemplate from "@/components/templates/Detail/AreaDetailModalTemplate";
 import ScoreCard from "@/components/molecules/Detail/ScoreCard/ScoreCard";
@@ -42,8 +43,8 @@ type DetailSidebarProps = {
  * - Renders portal + backdrop + ESC close
  * - Uses the Detail template for visuals (container/header/section-nav)
  */
-export function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea, onAddToComparison, onRemoveFromComparison, isInComparison, populationType, onPopulationTypeChange }: DetailNavbarProps) {
-  const [selected, setSelected] = useState<{ code: string; name: string } | null>(null);
+export function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea: _onSelectTradeArea, onAddToComparison, onRemoveFromComparison, isInComparison, populationType, onPopulationTypeChange }: DetailNavbarProps) {
+  const [selected, _setSelected] = useState<{ code: string; name: string } | null>(null);
   const [isComparing, setIsComparing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,7 +81,7 @@ export function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSele
   useEffect(() => {
     // Debug log: verify selected and computed title changes
     // eslint-disable-next-line no-console
-    console.log("[DetailNavbar] selection changed:", selected, "computedTitle:", computedTitle);
+    logger.info("[DetailNavbar] selection changed:", selected, "computedTitle:", computedTitle);
   }, [selected, computedTitle]);
 
   // 현재 상권 코드 가져오기
@@ -100,7 +101,7 @@ export function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSele
     const currentTrdarCdNm = selected?.name || title || '상권';
     
     if (!currentCode) {
-      console.error('상권 코드가 없습니다.');
+      logger.error('상권 코드가 없습니다.');
       return;
     }
 
@@ -118,31 +119,31 @@ export function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSele
       // showNotification('비교함에 추가되었습니다.'); // 제거 - HomePage에서 처리
     }
     
-    console.log("비교하기 클릭:", currentCode, "비교 상태:", !isCurrentlyInComparison);
+    logger.info("비교하기 클릭:", currentCode, "비교 상태:", !isCurrentlyInComparison);
   };
 
   const handleSave = async () => {
-    console.log('💾 [DetailSidebar] handleSave 함수 시작');
+    logger.info('💾 [DetailSidebar] handleSave 함수 시작');
     const currentCode = getCurrentTrdarCode();
-    console.log('💾 [DetailSidebar] 현재 상권 코드:', currentCode);
+    logger.info('💾 [DetailSidebar] 현재 상권 코드:', currentCode);
     
     if (!currentCode) {
-      console.error('💾 [DetailSidebar] 상권 코드가 없음');
+      logger.error('💾 [DetailSidebar] 상권 코드가 없음');
       setError('상권 정보를 찾을 수 없습니다.');
       return;
     }
 
     // 로그인 확인
     const isLoggedIn = authManager.isLoggedIn();
-    console.log('💾 [DetailSidebar] 로그인 상태:', isLoggedIn);
+    logger.info('💾 [DetailSidebar] 로그인 상태:', isLoggedIn);
     
     if (!isLoggedIn) {
-      console.log('💾 [DetailSidebar] 로그인 필요 - 에러 설정');
+      logger.info('💾 [DetailSidebar] 로그인 필요 - 에러 설정');
       setError('로그인이 필요합니다.');
       return;
     }
 
-    console.log('💾 [DetailSidebar] 로딩 시작');
+    logger.info('💾 [DetailSidebar] 로딩 시작');
     setIsLoading(true);
     setError(null);
 
@@ -150,30 +151,30 @@ export function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSele
       const currentIsSaved = getCurrentIsSaved();
       const currentTrdarCdNm = selected?.name || title || '상권';
       
-      console.log('💾 [DetailSidebar] 현재 저장 상태:', currentIsSaved);
-      console.log('💾 [DetailSidebar] 상권명:', currentTrdarCdNm);
+      logger.info('💾 [DetailSidebar] 현재 저장 상태:', currentIsSaved);
+      logger.info('💾 [DetailSidebar] 상권명:', currentTrdarCdNm);
       
       if (currentIsSaved) {
         // 저장 해제
-        console.log('💾 [DetailSidebar] 저장 해제 API 호출 시작');
+        logger.info('💾 [DetailSidebar] 저장 해제 API 호출 시작');
         await removeFavorite(parseInt(currentCode));
         showNotification('상권이 저장 목록에서 제거되었습니다.');
-        console.log('✅ [DetailSidebar] 상권 저장 해제 성공:', currentCode);
+        logger.info('✅ [DetailSidebar] 상권 저장 해제 성공:', currentCode);
       } else {
         // 저장
-        console.log('💾 [DetailSidebar] 저장 API 호출 시작');
+        logger.info('💾 [DetailSidebar] 저장 API 호출 시작');
         await addFavorite(parseInt(currentCode), currentTrdarCdNm);
         showNotification('상권이 저장되었습니다.');
-        console.log('✅ [DetailSidebar] 상권 저장 성공:', currentCode);
+        logger.info('✅ [DetailSidebar] 상권 저장 성공:', currentCode);
       }
       setError(null); // 성공 시 에러 메시지 제거
     } catch (error) {
-      console.error('❌ [DetailSidebar] 상권 저장/해제 실패:', error);
+      logger.error('❌ [DetailSidebar] 상권 저장/해제 실패:', error);
       const errorMessage = error instanceof Error ? error.message : '저장 처리 중 오류가 발생했습니다.';
       setError(errorMessage);
       showNotification(errorMessage);
     } finally {
-      console.log('💾 [DetailSidebar] 로딩 종료');
+      logger.info('💾 [DetailSidebar] 로딩 종료');
       setIsLoading(false);
     }
   };
@@ -197,7 +198,7 @@ export function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSele
             //   onChange={(opt) => {
             //     // Debug log: dropdown change event
             //     // eslint-disable-next-line no-console
-            //     console.log("[DetailNavbar] dropdown onChange:", opt);
+            //     logger.info("[DetailNavbar] dropdown onChange:", opt);
             //     setSelected(opt);
             //     onSelectTradeArea?.(opt);
             //   }}
@@ -207,7 +208,7 @@ export function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSele
           sectionAside={
             <DetailAsideNav 
               populationType={populationType} 
-              onPopulationTypeChange={setPopulationType}
+              onPopulationTypeChange={onPopulationTypeChange}
               onCompare={handleCompare}
               onSave={handleSave}
               isSaved={getCurrentIsSaved()}
@@ -316,7 +317,7 @@ function DetailAsideNav({
     }
     
     if (!modalContainer) {
-      console.warn('Modal container not found for scroll highlighting');
+      logger.warn('Modal container not found for scroll highlighting');
       return;
     }
     

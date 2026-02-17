@@ -3,11 +3,14 @@
 
 import React from 'react';
 
-const Bar3 = ({ 
+const Bar3 = ({
   children,
   className = '',
-  ...props 
-}) => {
+  ...props
+}: {
+  children?: React.ReactNode;
+  className?: string;
+} & React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
       className={`

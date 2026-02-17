@@ -3,13 +3,14 @@
 import { useCallback, useState } from 'react';
 import { getColorByCount } from '../../utils/marketingAreaColors';
 import { API_ENDPOINTS } from '../../config/api';
+import { logger } from '@/utils/logger';
 import signGuData from '../../data/SignGuValue.json';
 
 // 타입 정의
 export interface KakaoPolygon {
-  setMap: (map: any) => void;
-  setOptions: (options: any) => void;
-  getOptions?: () => any;
+  setMap: (map: kakao.maps.Map | null) => void;
+  setOptions: (options: Partial<kakao.maps.PolygonOptions>) => void;
+  getOptions?: () => Partial<kakao.maps.PolygonOptions>;
 }
 
 export interface GuCountData {
@@ -46,24 +47,24 @@ export function useMarketMode(): MarketModeConfig {
     
     try {
       // 모든 자치구에 대해 병렬로 API 호출
-      const promises = signGuData.DATA.map(async (district: any) => {
+      const promises = signGuData.DATA.map(async (district) => {
         try {
           const url = `${API_ENDPOINTS.COUNT_BY_GU}?district=${encodeURIComponent(district.signgu_nm)}`;
-          console.log(`🌐 API 호출: ${url}`);
+          logger.info(`🌐 API 호출: ${url}`);
           
           const response = await fetch(url);
-          console.log(`📡 응답 상태: ${district.signgu_nm} - ${response.status} ${response.statusText}`);
+          logger.info(`📡 응답 상태: ${district.signgu_nm} - ${response.status} ${response.statusText}`);
           
           if (response.ok) {
             const data = await response.json();
-            console.log(`📊 응답 데이터: ${district.signgu_nm}`, data);
+            logger.info(`📊 응답 데이터: ${district.signgu_nm}`, data);
             return { guName: district.signgu_nm, count: data.result?.count || 0 };
           } else {
-            console.warn(`❌ API 실패: ${district.signgu_nm} - ${response.status} ${response.statusText}`);
+            logger.warn(`❌ API 실패: ${district.signgu_nm} - ${response.status} ${response.statusText}`);
             return { guName: district.signgu_nm, count: 0 };
           }
         } catch (error) {
-          console.error(`💥 API 에러: ${district.signgu_nm}`, error);
+          logger.error(`💥 API 에러: ${district.signgu_nm}`, error);
           return { guName: district.signgu_nm, count: 0 };
         }
       });
@@ -76,10 +77,10 @@ export function useMarketMode(): MarketModeConfig {
       });
       
       setGuCountData(countData);
-      console.log('구별 상권 개수 데이터 로드 완료:', countData);
+      logger.info('구별 상권 개수 데이터 로드 완료:', countData);
       
     } catch (error) {
-      console.error('Error loading gu count data:', error);
+      logger.error('Error loading gu count data:', error);
     } finally {
       setIsLoadingData(false);
     }
@@ -115,7 +116,7 @@ export function useDongMarketMode(): DongMarketModeConfig {
         koreanVersion = koreanVersion.replace(new RegExp(num, 'g'), korean);
       }
       
-      console.log(`🔄 행정동명 정규화 (숫자->한글): "${dongName}" -> "${koreanVersion}"`);
+      logger.info(`🔄 행정동명 정규화 (숫자->한글): "${dongName}" -> "${koreanVersion}"`);
       
       // 일단 원본을 사용하되, 필요시 한글 버전도 시도할 수 있도록 준비
       normalized = dongName; // 먼저 원본으로 시도
@@ -129,14 +130,14 @@ export function useDongMarketMode(): DongMarketModeConfig {
     
     if (specialCases[dongName]) {
       normalized = specialCases[dongName];
-      console.log(`🔄 행정동명 정규화 (특수케이스): "${dongName}" -> "${normalized}"`);
+      logger.info(`🔄 행정동명 정규화 (특수케이스): "${dongName}" -> "${normalized}"`);
     }
 
     // 면목 3·8동 표기 변환: 제, 점/가운뎃점/물음표 등 다양한 표기를 DB 표기 '면목3?8동'으로 통일
     const noSpace = normalized.replace(/\s+/g, '');
     if (/^면목(제)?3[\.·ㆍ\?]8동$/.test(noSpace)) {
       normalized = '면목3?8동';
-      console.log(`🔄 행정동명 정규화 (면목3·8동): "${dongName}" -> "${normalized}"`);
+      logger.info(`🔄 행정동명 정규화 (면목3·8동): "${dongName}" -> "${normalized}"`);
     }
     
     return normalized;
@@ -157,16 +158,16 @@ export function useDongMarketMode(): DongMarketModeConfig {
     setIsLoadingDongData(true);
     try {
       const url = `${API_ENDPOINTS.COUNT_BY_DONG}?district=${encodeURIComponent(guName)}&dong=${encodeURIComponent(normalizedDongName)}`;
-      console.log(`🌐 행정동 API 호출: ${url}`);
-      console.log(`📝 전달 파라미터: district="${guName}", dong="${normalizedDongName}" (원본: "${dongName}")`);
-      console.log(`🔗 인코딩된 파라미터: district="${encodeURIComponent(guName)}", dong="${encodeURIComponent(normalizedDongName)}"`);
+      logger.info(`🌐 행정동 API 호출: ${url}`);
+      logger.info(`📝 전달 파라미터: district="${guName}", dong="${normalizedDongName}" (원본: "${dongName}")`);
+      logger.info(`🔗 인코딩된 파라미터: district="${encodeURIComponent(guName)}", dong="${encodeURIComponent(normalizedDongName)}"`);
       
       const response = await fetch(url);
-      console.log(`📡 행정동 응답 상태: ${guName} ${normalizedDongName} - ${response.status} ${response.statusText}`);
+      logger.info(`📡 행정동 응답 상태: ${guName} ${normalizedDongName} - ${response.status} ${response.statusText}`);
       
       if (response.ok) {
         const data = await response.json();
-        console.log(`📊 행정동 응답 데이터: ${guName} ${dongName}`, data);
+        logger.info(`📊 행정동 응답 데이터: ${guName} ${dongName}`, data);
         const count = data.result?.count || 0;
         
         // 캐시에 저장
@@ -175,25 +176,25 @@ export function useDongMarketMode(): DongMarketModeConfig {
           [dongKey]: count
         }));
         
-        console.log(`✅ 행정동 상권 개수 로드 완료: ${guName} ${dongName} = ${count}개`);
+        logger.info(`✅ 행정동 상권 개수 로드 완료: ${guName} ${dongName} = ${count}개`);
         return count;
       } else {
         // 에러 응답도 JSON으로 파싱해서 확인
         const errorData = await response.json().catch(() => ({}));
-        console.error(`❌ 행정동 API 실패: ${guName} ${dongName} - ${response.status} ${response.statusText}`);
-        console.error(`💥 에러 응답 데이터:`, errorData);
+        logger.error(`❌ 행정동 API 실패: ${guName} ${dongName} - ${response.status} ${response.statusText}`);
+        logger.error(`💥 에러 응답 데이터:`, errorData);
         
         // 400 에러인 경우 파라미터 문제일 가능성이 높음
         if (response.status === 400) {
-          console.error(`🔍 400 에러 분석:`);
-          console.error(`  - 자치구명: "${guName}" (길이: ${guName.length})`);
-          console.error(`  - 행정동명: "${normalizedDongName}" (길이: ${normalizedDongName.length})`);
-          console.error(`  - 원본 행정동명: "${dongName}"`);
-          console.error(`  - URL: ${url}`);
+          logger.error(`🔍 400 에러 분석:`);
+          logger.error(`  - 자치구명: "${guName}" (길이: ${guName.length})`);
+          logger.error(`  - 행정동명: "${normalizedDongName}" (길이: ${normalizedDongName.length})`);
+          logger.error(`  - 원본 행정동명: "${dongName}"`);
+          logger.error(`  - URL: ${url}`);
           
           // 숫자가 포함된 경우 한글로 변환해서 재시도
           if (/\d/.test(dongName) && normalizedDongName === dongName) {
-            console.log(`🔄 400 에러 재시도: 숫자를 한글로 변환`);
+            logger.info(`🔄 400 에러 재시도: 숫자를 한글로 변환`);
             const numberToKorean: {[key: string]: string} = {
               '1': '일', '2': '이', '3': '삼', '4': '사', '5': '오',
               '6': '육', '7': '칠', '8': '팔', '9': '구', '0': '영'
@@ -205,7 +206,7 @@ export function useDongMarketMode(): DongMarketModeConfig {
             }
             
             if (koreanVersion !== dongName) {
-              console.log(`🔄 한글 버전으로 재시도: "${dongName}" -> "${koreanVersion}"`);
+              logger.info(`🔄 한글 버전으로 재시도: "${dongName}" -> "${koreanVersion}"`);
               // 재귀 호출로 한글 버전 시도
               return await loadDongCountData(guName, koreanVersion);
             }
@@ -215,7 +216,7 @@ export function useDongMarketMode(): DongMarketModeConfig {
         return 0;
       }
     } catch (error) {
-      console.error(`💥 행정동 API 에러: ${guName} ${dongName}`, error);
+      logger.error(`💥 행정동 API 에러: ${guName} ${dongName}`, error);
       return 0;
     } finally {
       setIsLoadingDongData(false);
@@ -239,7 +240,7 @@ export function applyMarketModePolygonStyle(
   const baseColor = getColorByCount(count);
   const fillOpacity = count > 0 ? 0.1 : 0; // 상권이 1개 이상 있으면 배경 표시
   
-  console.log(`🎨 상권모드 폴리곤: ${guName}, count=${count}, color=${baseColor}, opacity=${fillOpacity}`);
+  logger.info(`🎨 상권모드 폴리곤: ${guName}, count=${count}, color=${baseColor}, opacity=${fillOpacity}`);
   
   polygon.setOptions({
     strokeColor: baseColor,
@@ -315,7 +316,7 @@ export function handleMarketModeHover(
 ): void {
   if (isEnter) {
     // hover 시작: 배경 불투명도만 20%로 증가, 색상은 유지
-    console.log(`🎯 ${guName} hover 시작: 상권모드`);
+    logger.info(`🎯 ${guName} hover 시작: 상권모드`);
     polygon.setOptions({
       fillOpacity: 0.2,
       strokeWeight: 2,
@@ -327,7 +328,7 @@ export function handleMarketModeHover(
     const baseColor = getColorByCount(count);
     const fillOpacity = count > 0 ? 0.1 : 0; // 상권이 1개 이상 있으면 배경 표시
     
-    console.log(`🔄 ${guName} hover 해제: 상권모드, count=${count}, color=${baseColor}, opacity=${fillOpacity}`);
+    logger.info(`🔄 ${guName} hover 해제: 상권모드, count=${count}, color=${baseColor}, opacity=${fillOpacity}`);
     
     polygon.setOptions({
       strokeColor: baseColor,
@@ -342,17 +343,17 @@ export function handleMarketModeHover(
 // 상권 모드 폴리곤 배치 업데이트
 export function updatePolygonsToMarketMode(
   polygons: KakaoPolygon[],
-  labels: any[],
+  labels: unknown[],
   guCountData: GuCountData
 ): void {
-  console.log('🎯 상권 모드 활성화 - 폴리곤 색상 업데이트');
+  logger.info('🎯 상권 모드 활성화 - 폴리곤 색상 업데이트');
   
   polygons.forEach((polygon, index) => {
     const district = signGuData.DATA[index];
     if (district) {
       const guName = district.signgu_nm;
       applyMarketModePolygonStyle(polygon, guName, guCountData);
-      console.log(`  ${guName}: ${guCountData[guName] || 0}개 -> ${getColorByCount(guCountData[guName] || 0)}`);
+      logger.info(`  ${guName}: ${guCountData[guName] || 0}개 -> ${getColorByCount(guCountData[guName] || 0)}`);
     }
   });
   
@@ -391,7 +392,7 @@ export function applyDongMarketModePolygonStyle(
   const baseColor = getColorByCount(count);
   const fillOpacity = count > 0 ? 0.1 : 0; // 상권이 1개 이상 있으면 배경 표시
   
-  console.log(`🎨 행정동 상권모드 폴리곤: count=${count}, color=${baseColor}, opacity=${fillOpacity}`);
+  logger.info(`🎨 행정동 상권모드 폴리곤: count=${count}, color=${baseColor}, opacity=${fillOpacity}`);
   
   polygon.setOptions({
     strokeColor: baseColor,
@@ -452,7 +453,7 @@ export function handleDongMarketModeHover(
 ): void {
   if (isEnter) {
     // hover 시작: 배경 불투명도만 30%로 증가, 색상은 유지
-    console.log(`🎯 ${dongName} hover 시작: 행정동 상권모드`);
+    logger.info(`🎯 ${dongName} hover 시작: 행정동 상권모드`);
     polygon.setOptions({
       fillOpacity: 0.3,
       strokeWeight: 2,
@@ -463,7 +464,7 @@ export function handleDongMarketModeHover(
     const baseColor = getColorByCount(count);
     const fillOpacity = count > 0 ? 0.1 : 0; // 상권이 1개 이상 있으면 배경 표시
     
-    console.log(`🔄 ${dongName} hover 해제: 행정동 상권모드, count=${count}, color=${baseColor}, opacity=${fillOpacity}`);
+    logger.info(`🔄 ${dongName} hover 해제: 행정동 상권모드, count=${count}, color=${baseColor}, opacity=${fillOpacity}`);
     
     polygon.setOptions({
       strokeColor: baseColor,

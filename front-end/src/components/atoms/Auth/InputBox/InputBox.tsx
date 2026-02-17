@@ -8,7 +8,7 @@ interface InputBoxProps {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   type?: string;
   className?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const AuthenticationInputBox: React.FC<InputBoxProps> = ({ 

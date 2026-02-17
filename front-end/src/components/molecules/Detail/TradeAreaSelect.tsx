@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Combobox } from "@headlessui/react";
+import { logger } from '@/utils/logger';
 
 type Option = { code: string; name: string };
 
@@ -22,9 +23,9 @@ function useDebounced<T>(value: T, delay = 300) {
 export default function TradeAreaSelect({ className, onChange }: Props) {
   const [quarter, setQuarter] = useState<string | null>(null);
   const [items, setItems] = useState<Map<string, Option>>(new Map());
-  const [total, setTotal] = useState<number | null>(null);
-  const [nextStart, setNextStart] = useState<number>(1);
-  const [hasMore, setHasMore] = useState<boolean>(false);
+  const [_total, setTotal] = useState<number | null>(null);
+  const [_nextStart, setNextStart] = useState<number>(1);
+  const [_hasMore, setHasMore] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -85,8 +86,8 @@ export default function TradeAreaSelect({ className, onChange }: Props) {
       // Load only first 10 items once (no infinite scroll)
       await loadRange(q, 1, 10);
       setHasMore(false);
-    } catch (e: any) {
-      setError(e?.message ?? "load failed");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "load failed");
     } finally {
       setLoading(false);
     }
@@ -97,13 +98,11 @@ export default function TradeAreaSelect({ className, onChange }: Props) {
   }, [init]);
 
   const listRef = useRef<HTMLDivElement>(null);
-  // Disable infinite scroll: keep a no-op handler
-  const onScroll = useCallback(() => {}, []);
 
   useEffect(() => {
     // Debug log: selection propagated to parent
     // eslint-disable-next-line no-console
-    console.log("[TradeAreaSelect] onChange selected:", selected);
+    logger.info("[TradeAreaSelect] onChange selected:", selected);
     if (onChange) onChange(selected);
   }, [selected, onChange]);
 
@@ -118,7 +117,7 @@ export default function TradeAreaSelect({ className, onChange }: Props) {
             onChange={(e) => setQuery(e.target.value)}
           />
           <Combobox.Options
-            ref={listRef as any}
+            ref={listRef as React.Ref<HTMLElement>}
             className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-xl border border-gray-200 bg-white p-1 shadow-lg"
           >
               {error && (

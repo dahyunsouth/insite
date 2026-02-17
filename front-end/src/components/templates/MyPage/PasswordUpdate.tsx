@@ -8,6 +8,7 @@ import AuthenticationInputBox from '@/components/atoms/Auth/InputBox/InputBox';
 import SubmitButton from '@/components/atoms/Auth/Button/Submit';
 import { API_ENDPOINTS } from '@/config/api';
 import { authManager } from '@/utils/auth';
+import { logger } from '@/utils/logger';
 
 interface PasswordUpdateProps {
   onBack?: () => void;
@@ -108,7 +109,7 @@ const PasswordUpdate: React.FC<PasswordUpdateProps> = ({
     
     setPasswordValidation({
       isValid: password.length >= 8 && password.length <= 15,
-      strength: strengthResult.strength,
+      strength: strengthResult.strength as 'weak' | 'medium' | 'strong' | null,
       message: strengthResult.message
     });
   };
@@ -162,11 +163,11 @@ const PasswordUpdate: React.FC<PasswordUpdateProps> = ({
           isLoading: false 
         });
       } else {
-        console.error('사용자 정보 가져오기 실패:', response.status);
+        logger.error('사용자 정보 가져오기 실패:', response.status);
         setUserInfo({ nickname: null, profile: null, isLoading: false });
       }
     } catch (error) {
-      console.error('사용자 정보 가져오기 에러:', error);
+      logger.error('사용자 정보 가져오기 에러:', error);
       setUserInfo({ nickname: null, profile: null, isLoading: false });
     }
   };
@@ -181,7 +182,7 @@ const PasswordUpdate: React.FC<PasswordUpdateProps> = ({
         profile: userInfo.profile || ''    // 현재 프로필 유지
       };
 
-      console.log('비밀번호 변경 요청 데이터:', requestBody);
+      logger.info('비밀번호 변경 요청 데이터:', requestBody);
 
       const response = await authManager.authenticatedRequest(API_ENDPOINTS.USER_UPDATE, {
         method: 'PUT',
@@ -189,7 +190,7 @@ const PasswordUpdate: React.FC<PasswordUpdateProps> = ({
       });
 
       if (response.ok) {
-        console.log('비밀번호 변경 성공');
+        logger.info('비밀번호 변경 성공');
         // 성공 알림 콜백 호출
         onPasswordUpdateSuccess?.('정상적으로 비밀번호가 변경되었습니다.');
         
@@ -197,11 +198,11 @@ const PasswordUpdate: React.FC<PasswordUpdateProps> = ({
         onBack?.();
       } else {
         const errorData = await response.json().catch(() => null);
-        console.error('비밀번호 변경 실패:', errorData);
+        logger.error('비밀번호 변경 실패:', errorData);
         alert(`비밀번호 변경에 실패했습니다: ${errorData?.message || '다시 시도해주세요.'}`);
       }
     } catch (error) {
-      console.error('비밀번호 변경 에러:', error);
+      logger.error('비밀번호 변경 에러:', error);
       if (error instanceof Error && error.message.includes('Authentication failed')) {
         alert('인증이 만료되었습니다. 다시 로그인해주세요.');
         // 로그인 페이지로 리다이렉트하거나 로그아웃 처리

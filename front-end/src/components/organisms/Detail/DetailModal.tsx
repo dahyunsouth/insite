@@ -9,13 +9,14 @@ import TradeAreaRawData from "@/data/TradeAreaValue.json";
 import { tmToWgs84 } from "@/utils/coordinateTransform";
 import { FavoritesContext } from "@/contexts/FavoritesContext";
 import { authManager } from "@/utils/auth";
+import { logger } from '@/utils/logger';
 
 // 상권 코드로부터 좌표를 가져오는 함수 (실제 JSON 데이터 사용)
 const getCoordinatesFromTrdarCode = (trdarCode: string): { lat: number; lng: number } | undefined => {
   try {
-    const tradeArea = TradeAreaRawData.DATA.find((item: any) => item.trdar_cd === trdarCode);
+    const tradeArea = TradeAreaRawData.DATA.find((item) => item.trdar_cd === trdarCode);
     if (!tradeArea) {
-      console.warn('Trade area not found for code:', trdarCode);
+      logger.warn('Trade area not found for code:', trdarCode);
       return undefined;
     }
 
@@ -24,10 +25,10 @@ const getCoordinatesFromTrdarCode = (trdarCode: string): { lat: number; lng: num
     const y = tradeArea.ydnts_value;
     
     const converted = tmToWgs84(x, y);
-    console.log('DetailModal 좌표 변환 결과:', { trdarCode, x, y, converted });
+    logger.info('DetailModal 좌표 변환 결과:', { trdarCode, x, y, converted });
     return converted;
   } catch (error) {
-    console.warn('DetailModal 좌표 변환 실패:', error);
+    logger.warn('DetailModal 좌표 변환 실패:', error);
     return undefined;
   }
 };
@@ -51,20 +52,23 @@ type DetailModalProps = {
  * - Uses the Detail template for visuals (container/header/section-nav)
  * - Manages the overall modal state and layout
  */
-export default function DetailModal({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea, onAddToComparison, onRemoveFromComparison, isInComparison, isNavbarOpen = true }: DetailModalProps) {
+export default function DetailModal({ open, onClose, title, subtitle, trdarCode, onSelectTradeArea: _onSelectTradeArea, onAddToComparison, onRemoveFromComparison, isInComparison, isNavbarOpen = true }: DetailModalProps) {
   const [selected, setSelected] = useState<{ code: string; name: string } | null>(null);
   const [populationType, setPopulationType] = useState<"유동" | "직장" | "상주">("유동");
   const [isSaved, setIsSaved] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [_isLoading, setIsLoading] = useState(false);
+  const [_error, setError] = useState<string | null>(null);
 
   // FavoritesContext 사용
-  const { addFavorite, removeFavorite, isFavorite } = useContext(FavoritesContext);
+  const favoritesContext = useContext(FavoritesContext);
+  const addFavorite = favoritesContext?.addFavorite;
+  const removeFavorite = favoritesContext?.removeFavorite;
+  const isFavorite = favoritesContext?.isFavorite;
 
   // trdarCode가 전달되면 selected 상태 업데이트
   useEffect(() => {
     if (trdarCode && title) {
-      console.log('💾 [DetailModal] trdarCode와 title로 selected 상태 업데이트:', { trdarCode, title });
+      logger.info('💾 [DetailModal] trdarCode와 title로 selected 상태 업데이트:', { trdarCode, title });
       setSelected({ code: trdarCode, name: title });
     }
   }, [trdarCode, title]);
@@ -89,7 +93,7 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
   useEffect(() => {
     // Debug log: verify selected and computed title changes
     // eslint-disable-next-line no-console
-    console.log("[DetailModal] selection changed:", selected, "computedTitle:", computedTitle);
+    logger.info("[DetailModal] selection changed:", selected, "computedTitle:", computedTitle);
   }, [selected, computedTitle]);
 
   // 현재 코드 기준 비교함 포함 여부를 렌더 시 계산
@@ -100,8 +104,8 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
   useEffect(() => {
     const currentCode = trdarCode ?? selected?.code ?? null;
     if (currentCode) {
-      const saved = isFavorite(parseInt(currentCode));
-      console.log('💾 [DetailModal] 저장 상태 동기화:', { currentCode, saved });
+      const saved = isFavorite?.(parseInt(currentCode)) ?? false;
+      logger.info('💾 [DetailModal] 저장 상태 동기화:', { currentCode, saved });
       setIsSaved(saved);
     }
   }, [trdarCode, selected, isFavorite]);
@@ -111,7 +115,7 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
     const currentTrdarCdNm = selected?.name || title || '상권';
     
     if (!currentCode) {
-      console.error('상권 코드가 없습니다.');
+      logger.error('상권 코드가 없습니다.');
       return;
     }
 
@@ -120,66 +124,66 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
     if (isCurrentlyInComparison) {
       // 비교함에서 제거
       onRemoveFromComparison?.(currentCode);
-      console.log("비교함에서 제거:", currentCode);
+      logger.info("비교함에서 제거:", currentCode);
     } else {
       // 비교함에 추가
       onAddToComparison?.(currentCode, currentTrdarCdNm);
-      console.log("비교함에 추가:", currentCode, currentTrdarCdNm);
+      logger.info("비교함에 추가:", currentCode, currentTrdarCdNm);
     }
   };
 
   const handleSave = async () => {
-    console.log('💾 [DetailModal] handleSave 함수 시작');
+    logger.info('💾 [DetailModal] handleSave 함수 시작');
     const currentCode = trdarCode ?? selected?.code ?? null;
-    console.log('💾 [DetailModal] 현재 상권 코드:', currentCode);
+    logger.info('💾 [DetailModal] 현재 상권 코드:', currentCode);
     
     if (!currentCode) {
-      console.error('💾 [DetailModal] 상권 코드가 없음');
+      logger.error('💾 [DetailModal] 상권 코드가 없음');
       setError('상권 정보를 찾을 수 없습니다.');
       return;
     }
 
     // 로그인 확인
     const isLoggedIn = authManager.isLoggedIn();
-    console.log('💾 [DetailModal] 로그인 상태:', isLoggedIn);
+    logger.info('💾 [DetailModal] 로그인 상태:', isLoggedIn);
     
     if (!isLoggedIn) {
-      console.log('💾 [DetailModal] 로그인 필요 - 에러 설정');
+      logger.info('💾 [DetailModal] 로그인 필요 - 에러 설정');
       setError('로그인이 필요합니다.');
       return;
     }
 
-    console.log('💾 [DetailModal] 로딩 시작');
+    logger.info('💾 [DetailModal] 로딩 시작');
     setIsLoading(true);
     setError(null);
 
     try {
-      const currentIsSaved = isFavorite(parseInt(currentCode));
+      const currentIsSaved = isFavorite?.(parseInt(currentCode)) ?? false;
       const currentTrdarCdNm = selected?.name || title || '상권';
       
-      console.log('💾 [DetailModal] 현재 저장 상태:', currentIsSaved);
-      console.log('💾 [DetailModal] 상권명:', currentTrdarCdNm);
+      logger.info('💾 [DetailModal] 현재 저장 상태:', currentIsSaved);
+      logger.info('💾 [DetailModal] 상권명:', currentTrdarCdNm);
       
       if (currentIsSaved) {
         // 저장 해제
-        console.log('💾 [DetailModal] 저장 해제 API 호출 시작');
-        await removeFavorite(parseInt(currentCode));
+        logger.info('💾 [DetailModal] 저장 해제 API 호출 시작');
+        await removeFavorite?.(parseInt(currentCode));
         setIsSaved(false);
-        console.log('✅ [DetailModal] 상권 저장 해제 성공:', currentCode);
+        logger.info('✅ [DetailModal] 상권 저장 해제 성공:', currentCode);
       } else {
         // 저장
-        console.log('💾 [DetailModal] 저장 API 호출 시작');
-        await addFavorite(parseInt(currentCode), currentTrdarCdNm);
+        logger.info('💾 [DetailModal] 저장 API 호출 시작');
+        await addFavorite?.(parseInt(currentCode), currentTrdarCdNm);
         setIsSaved(true);
-        console.log('✅ [DetailModal] 상권 저장 성공:', currentCode);
+        logger.info('✅ [DetailModal] 상권 저장 성공:', currentCode);
       }
       setError(null); // 성공 시 에러 메시지 제거
     } catch (error) {
-      console.error('❌ [DetailModal] 상권 저장/해제 실패:', error);
+      logger.error('❌ [DetailModal] 상권 저장/해제 실패:', error);
       const errorMessage = error instanceof Error ? error.message : '저장 처리 중 오류가 발생했습니다.';
       setError(errorMessage);
     } finally {
-      console.log('💾 [DetailModal] 로딩 종료');
+      logger.info('💾 [DetailModal] 로딩 종료');
       setIsLoading(false);
     }
   };
@@ -202,7 +206,7 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
             //   onChange={(opt) => {
             //     // Debug log: dropdown change event
             //     // eslint-disable-next-line no-console
-            //     console.log("[DetailModal] dropdown onChange:", opt);
+            //     logger.info("[DetailModal] dropdown onChange:", opt);
             //     setSelected(opt);
             //     onSelectTradeArea?.(opt);
             //   }}
@@ -210,21 +214,13 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
             null
           }
           sectionAside={
-            <DetailSidebar 
-              populationType={populationType} 
+            <DetailSidebar
+              populationType={populationType}
               onPopulationTypeChange={setPopulationType}
               onCompare={handleCompare}
               onSave={handleSave}
               isSaved={isSaved}
               isComparing={isComparingComputed}
-              isLoading={isLoading}
-              trdarCode={trdarCode ?? selected?.code ?? null}
-              title={title || selected?.name}
-              subtitle={subtitle}
-              onSelectTradeArea={onSelectTradeArea}
-              onAddToComparison={onAddToComparison}
-              onRemoveFromComparison={onRemoveFromComparison}
-              isInComparison={isInComparison}
             />
           }
         >
@@ -237,12 +233,12 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
               // trdarCode가 직접 전달된 경우 우선 사용
               const codeToUse = trdarCode || selected?.code;
               const coords = codeToUse ? getCoordinatesFromTrdarCode(codeToUse) : undefined;
-              console.log('DetailModal coordinates 전달:', { trdarCode, selected, codeToUse, coords });
+              logger.info('DetailModal coordinates 전달:', { trdarCode, selected, codeToUse, coords });
               return coords || { lat: 37.501309, lng: 127.039599 }; // 기본값 제공
             })()}
             onViewLargeMap={() => {
               // 홈페이지로 이동하고 해당 상권 중심으로 지도 이동
-              console.log('크게보기 클릭:', selected);
+              logger.info('크게보기 클릭:', selected);
               
               // 모달 닫기
               onClose();
@@ -274,7 +270,7 @@ export default function DetailModal({ open, onClose, title, subtitle, trdarCode,
                   }
                 }));
                 
-                console.log('홈페이지로 이동 및 지도 중심 설정:', { codeToUse, areaName, finalCoords });
+                logger.info('홈페이지로 이동 및 지도 중심 설정:', { codeToUse, areaName, finalCoords });
               }
             }}
           />

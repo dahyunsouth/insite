@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import TradeAreaPicker from '@/components/molecules/Compare/TradeAreaPicker';
 import { fetchTradeAreasDetail, fetchTradeAreaDetail, mapTradeAreaDetailToMetrics } from '@/lib/api/tradeAreas';
+import { logger } from '@/utils/logger';
 
 interface NewCompareModalProps {
   open: boolean;
@@ -24,6 +25,9 @@ interface TradeAreaData {
   trdarSeCdNm: string;
 }
 
+// 상권 상세 메트릭 타입 (mapTradeAreaDetailToMetrics 반환값)
+type TradeAreaMetrics = ReturnType<typeof mapTradeAreaDetailToMetrics>;
+
 // 비교 데이터 타입 정의
 interface ComparisonData {
   [key: string]: {
@@ -38,12 +42,12 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
   const [selectionB, setSelectionB] = useState<TradeAreaSelection>({ signguCode: null, adstrdCode: null, tradeAreaCode: null });
   
   // 상권 데이터 상태
-  const [tradeAreaDataA, setTradeAreaDataA] = useState<TradeAreaData | null>(null);
-  const [tradeAreaDataB, setTradeAreaDataB] = useState<TradeAreaData | null>(null);
+  const [_tradeAreaDataA, setTradeAreaDataA] = useState<TradeAreaData | null>(null);
+  const [_tradeAreaDataB, setTradeAreaDataB] = useState<TradeAreaData | null>(null);
   
   // 상권 상세 데이터 상태
-  const [tradeAreaDetailA, setTradeAreaDetailA] = useState<any>(null);
-  const [tradeAreaDetailB, setTradeAreaDetailB] = useState<any>(null);
+  const [tradeAreaDetailA, setTradeAreaDetailA] = useState<TradeAreaMetrics | null>(null);
+  const [tradeAreaDetailB, setTradeAreaDetailB] = useState<TradeAreaMetrics | null>(null);
   
   // 비교 데이터 상태
   const [comparisonData, setComparisonData] = useState<ComparisonData | null>(null);
@@ -99,7 +103,7 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
         }
       }
     } catch (error) {
-      console.error('상권 데이터 로드 실패:', error);
+      logger.error('상권 데이터 로드 실패:', error);
     } finally {
       setLoading(false);
     }
@@ -118,7 +122,7 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
         setTradeAreaDetailB(metrics);
       }
     } catch (error) {
-      console.error('상권 상세 데이터 로드 실패:', error);
+      logger.error('상권 상세 데이터 로드 실패:', error);
     } finally {
       setLoading(false);
     }
@@ -260,7 +264,7 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
                {/* 가운데 컬럼 - 세로로 이어지는 배경 */}
                <div className="absolute left-1/2 transform -translate-x-1/2 w-48 bg-white shadow-lg border-l border-r border-gray-200 h-full z-10">
                  <div className="py-0">
-                   {options.map((option, index) => (
+                   {options.map((option, _index) => (
                      <div key={option} className="px-4 py-6 border-b border-gray-100 last:border-b-0 h-16 flex items-center">
                        <h4 className="text-sm font-semibold text-gray-900 text-center w-full">{option}</h4>
                      </div>
@@ -270,7 +274,7 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
                
                {/* 비교 데이터 행들 */}
                <div className="space-y-0">
-                 {options.map((option, index) => {
+                 {options.map((option, _index) => {
                    const data1 = comparisonData[option].상권1;
                    const data2 = comparisonData[option].상권2;
                    

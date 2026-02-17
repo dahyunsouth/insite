@@ -42,8 +42,8 @@ export function isPointInPolygon(point: Point, polygon: PolygonPath[]): boolean 
  * @param kakaoLatLngs 카카오맵 LatLng 객체 배열
  * @returns Point 배열
  */
-export function convertKakaoLatLngsToPoints(kakaoLatLngs: any[]): PolygonPath[] {
-  return kakaoLatLngs.map((latLng: any) => ({
+export function convertKakaoLatLngsToPoints(kakaoLatLngs: kakao.maps.LatLng[]): PolygonPath[] {
+  return kakaoLatLngs.map((latLng: kakao.maps.LatLng) => ({
     lat: latLng.getLat(),
     lng: latLng.getLng()
   }));

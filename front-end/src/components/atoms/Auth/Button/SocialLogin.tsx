@@ -1,4 +1,5 @@
 import React from 'react';
+import { logger } from '@/utils/logger';
 
 interface SocialLoginProps {
   provider: 'google' | 'kakao' | 'naver' | 'ssafy';
@@ -6,7 +7,7 @@ interface SocialLoginProps {
   disabled?: boolean;
 }
 
-const socialConfigs = {
+const socialConfigs: Record<string, { backgroundColor: string; textColor: string; logo: string; text: string }> = {
   google: {
     backgroundColor: '#FFFFFF',
     textColor: '#000000',
@@ -29,7 +30,7 @@ const SocialLogin: React.FC<SocialLoginProps> = ({
   const config = socialConfigs[provider];
 
   const handleClick = () => {
-    console.log(`${provider} 로그인 클릭됨`);
+    logger.info(`${provider} 로그인 클릭됨`);
     onClick(provider);
   };
 

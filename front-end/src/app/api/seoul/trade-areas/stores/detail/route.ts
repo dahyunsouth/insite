@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { SeoulApiRoot, SeoulApiRow, isSeoulApiRoot } from '@/types/seoul-api';
 
 const SEOUL_BASE = "http://openapi.seoul.go.kr:8088";
 // Store stats by quarter per trade area
@@ -15,15 +16,13 @@ async function fetchPage(key: string, quarter: string, start: number, end: numbe
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) return { ok: false as const, status: res.status };
   const data = await res.json().catch(() => ({}));
-  const root = Object.values(data).find(
-    (v: any) => v && typeof v === "object" && "RESULT" in v
-  ) as any;
+  const root = Object.values(data).find(isSeoulApiRoot) as SeoulApiRoot | undefined;
   const code = root?.RESULT?.CODE as string | undefined;
   if (code !== "INFO-000") {
     return { ok: false as const, status: code === "INFO-200" ? 404 : code?.startsWith("ERROR-5") ? 502 : 400, code, message: root?.RESULT?.MESSAGE };
   }
   const total = Number(root?.list_total_count ?? 0);
-  const rows: any[] = Array.isArray(root?.row) ? root.row : [];
+  const rows: SeoulApiRow[] = Array.isArray(root?.row) ? root.row : [];
   return { ok: true as const, total, rows };
 }
 
@@ -104,7 +103,7 @@ export async function GET(req: NextRequest) {
         "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=2592000",
       },
     });
-  } catch (e: any) {
-    return new Response(JSON.stringify({ error: e?.message ?? "Server error" }), { status: 500 });
+  } catch (e: unknown) {
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Server error" }), { status: 500 });
   }
 }

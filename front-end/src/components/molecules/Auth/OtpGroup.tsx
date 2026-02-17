@@ -91,7 +91,7 @@ const OtpGroup: React.FC<OtpGroupProps> = ({
       {Array.from({ length }).map((_, idx) => (
         <OtpCell
           key={idx}
-          ref={(el) => (inputRefs.current[idx] = el)}
+          ref={(el) => { inputRefs.current[idx] = el; }}
           index={idx + 1}
           value={values[idx]}
           onChange={(value) => handleChange(idx, value)}

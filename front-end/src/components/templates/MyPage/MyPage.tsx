@@ -21,7 +21,7 @@ interface MyPageProps {
 
 const MyPage: React.FC<MyPageProps> = ({
   onClose,
-  onEditInfo,
+  onEditInfo: _onEditInfo,
   onSavedAreas,
   onSavedAreasClose,
   onCompareClick,

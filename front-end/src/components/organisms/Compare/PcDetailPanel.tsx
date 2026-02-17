@@ -25,7 +25,6 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
   const [showGaeeopryulTooltip, setShowGaeeopryulTooltip] = useState(false);
   const [showMarketPotentialTooltip, setShowMarketPotentialTooltip] = useState(false);
   const [showSupplyDemandTooltip, setShowSupplyDemandTooltip] = useState(false);
-  const [showIncomeLevelTooltip, setShowIncomeLevelTooltip] = useState(false);
   const [showAttractionFacilityTooltip, setShowAttractionFacilityTooltip] = useState(false);
   const [showSubwayDistanceTooltip, setShowSubwayDistanceTooltip] = useState(false);
   const [showBusStopDistanceTooltip, setShowBusStopDistanceTooltip] = useState(false);
@@ -146,8 +145,8 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                           {showMarketPotentialTooltip && (
                             <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[600] break-words min-w-max max-w-xs">
                               해당 상권 내<br/>
-                              카페와 유사한 업종의 점포 수를 통해 도출한 '식음료 시장 규모'와<br/>
-                              유사 업종 점포 수 대비 커피-음료 업종 점포 수 비율로 도출한 '커피 전문점 포화도'로<br/>
+                              카페와 유사한 업종의 점포 수를 통해 도출한 &apos;식음료 시장 규모&apos;와<br/>
+                              유사 업종 점포 수 대비 커피-음료 업종 점포 수 비율로 도출한 &apos;커피 전문점 포화도&apos;로<br/>
                               시장 잠재력을 산정하였습니다.
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
@@ -374,7 +373,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                           </button>
                           {showStoreCountTooltip && (
                             <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[600] break-words min-w-max max-w-xs">
-                              해당 상권 내 '커피-음료' 업종을 영위하는 점포의 수
+                              해당 상권 내 &apos;커피-음료&apos; 업종을 영위하는 점포의 수
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
                           )}
@@ -398,7 +397,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                           </button>
                           {showDemandDensityTooltip && (
                             <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[600] break-words min-w-max max-w-xs">
-                              해당 상권 내 유동인구 대비 '커피-음료' 업종을 영위하는 점포의 수
+                              해당 상권 내 유동인구 대비 &apos;커피-음료&apos; 업종을 영위하는 점포의 수
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
                           )}
@@ -422,7 +421,7 @@ export default function PcDetailPanel({ pc, aName = "A", bName = "B", aScore = n
                           </button>
                           {showStoreDensityTooltip && (
                             <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-[600] break-words min-w-max max-w-xs">
-                              해당 상권 내 100m²당 '커피-음료' 업종을 영위하는 점포의 수
+                              해당 상권 내 100m²당 &apos;커피-음료&apos; 업종을 영위하는 점포의 수
                               <div className="absolute top-1/2 right-full transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
                             </div>
                           )}

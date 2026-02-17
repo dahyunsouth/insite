@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import InputBox from '../../atoms/Auth/InputBox/InputBox';
 import SubmitButton from '../../atoms/Auth/Button/Submit';
 import { API_ENDPOINTS } from '@/config/api';
+import { logger } from '@/utils/logger';
 
 interface LoginFormProps {
   className?: string;
@@ -75,8 +76,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
         }
 
         // JWT 토큰 저장
-        console.log('🔐 [LoginForm] 로그인 응답 데이터:', responseData);
-        console.log('🔐 [LoginForm] 응답 헤더 Authorization:', response.headers.get('Authorization'));
+        logger.info('🔐 [LoginForm] 로그인 응답 데이터:', responseData);
+        logger.info('🔐 [LoginForm] 응답 헤더 Authorization:', response.headers.get('Authorization'));
         
         const authToken = response.headers.get('Authorization') || 
                          responseData.token || 
@@ -84,14 +85,14 @@ const LoginForm: React.FC<LoginFormProps> = ({
                          responseData.result?.accessToken ||
                          responseData.result?.token;
         
-        console.log('🔐 [LoginForm] 추출된 토큰:', authToken);
-        console.log('🔐 [LoginForm] 토큰 저장 성공:', !!authToken);
+        logger.info('🔐 [LoginForm] 추출된 토큰:', authToken);
+        logger.info('🔐 [LoginForm] 토큰 저장 성공:', !!authToken);
         
         if (authToken) {
           localStorage.setItem('authToken', authToken);
-          console.log('✅ [LoginForm] 토큰이 localStorage에 저장됨');
+          logger.info('✅ [LoginForm] 토큰이 localStorage에 저장됨');
         } else {
-          console.error('❌ [LoginForm] 토큰을 찾을 수 없음');
+          logger.error('❌ [LoginForm] 토큰을 찾을 수 없음');
         }
 
         // 로그인 성공 - 모달 닫기 및 로그인 성공 콜백 호출
@@ -106,7 +107,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         setLoginError(errorMessage);
       }
     } catch (error) {
-      console.error('로그인 중 오류 발생:', error);
+      logger.error('로그인 중 오류 발생:', error);
       setLoginError('네트워크 오류가 발생했습니다.');
     } finally {
       setIsLoggingIn(false);

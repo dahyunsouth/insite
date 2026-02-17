@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useKakaoMapContext } from "@/components/map/KakaoMap";
+import { logger } from '@/utils/logger';
 
 // 검색 결과 타입 정의
 interface SearchPlace {
@@ -25,63 +26,53 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose, onSearchReset }: 
   const { map, showNotification } = useKakaoMapContext();
   const [searchResults, setSearchResults] = useState<SearchPlace[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [markers, setMarkers] = useState<any[]>([]);
+  const [markers, setMarkers] = useState<kakao.maps.Marker[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const psRef = useRef<any>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const infowindowRef = useRef<any>(null);
+  const psRef = useRef<kakao.maps.services.Places | null>(null);
+  const infowindowRef = useRef<kakao.maps.InfoWindow | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   // 마커 제거 함수
   const removeMarkers = useCallback(() => {
     setMarkers(prevMarkers => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       prevMarkers.forEach((marker) => {
         try {
-          // 마커가 실제로 지도에 표시되어 있는지 확인
-          if (marker && (marker as any).getMap()) {
-            // 마커를 지도에서 제거
-            (marker as any).setMap(null);
+          if (marker && marker.getMap()) {
+            marker.setMap(null);
           }
         } catch (error) {
-          console.error('마커 제거 중 오류:', error);
+          logger.error('마커 제거 중 오류:', error);
         }
       });
       return [];
     });
-    
+
     // 인포윈도우도 닫기
     if (infowindowRef.current) {
       try {
         infowindowRef.current.close();
       } catch (error) {
-        console.error('인포윈도우 닫기 중 오류:', error);
+        logger.error('인포윈도우 닫기 중 오류:', error);
       }
     }
-    
+
     // 지도 새로고침을 위한 약간의 지연
     setTimeout(() => {
       if (map) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (map as any).relayout();
+        map.relayout();
       }
     }, 100);
   }, [map]);
 
   // Places API 초기화
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (!map || !(window as any).kakao || !(window as any).kakao.maps.services) return;
+    if (!map || !window.kakao?.maps?.services) return;
 
     // 장소 검색 객체 생성
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    psRef.current = new (window as any).kakao.maps.services.Places();
-    
+    psRef.current = new window.kakao.maps.services.Places();
+
     // 인포윈도우 생성
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    infowindowRef.current = new (window as any).kakao.maps.InfoWindow({ zIndex: 1 });
+    infowindowRef.current = new window.kakao.maps.InfoWindow({ zIndex: 1 });
 
     return () => {
       if (psRef.current) {
@@ -91,39 +82,30 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose, onSearchReset }: 
   }, [map]);
 
   // 인포윈도우 표시
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const displayInfowindow = useCallback((marker: any, title: string) => {
+  const displayInfowindow = useCallback((marker: kakao.maps.Marker, title: string) => {
     if (!infowindowRef.current) return;
 
     const content = `<div style="padding:5px;z-index:120;">${title}</div>`;
     infowindowRef.current.setContent(content);
-    infowindowRef.current.open(map, marker);
+    infowindowRef.current.open(map as kakao.maps.Map, marker);
   }, [map]);
 
   // 마커 생성
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const addMarker = useCallback((position: any, index: number) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (!(window as any).kakao?.maps || !map) return null;
+  const addMarker = useCallback((position: kakao.maps.LatLng, index: number) => {
+    if (!window.kakao?.maps || !map) return null;
 
     try {
       // 마커 이미지 설정 (번호가 있는 파란색 마커)
       const imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const imageSize = new (window as any).kakao.maps.Size(36, 37);
+      const imageSize = new window.kakao.maps.Size(36, 37);
       const imgOptions = {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        spriteSize: new (window as any).kakao.maps.Size(36, 691),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        spriteOrigin: new (window as any).kakao.maps.Point(0, (index * 46) + 10),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        offset: new (window as any).kakao.maps.Point(13, 37)
+        spriteSize: new window.kakao.maps.Size(36, 691),
+        spriteOrigin: new window.kakao.maps.Point(0, (index * 46) + 10),
+        offset: new window.kakao.maps.Point(13, 37)
       };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const markerImage = new (window as any).kakao.maps.MarkerImage(imageSrc, imageSize, imgOptions);
+      const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize, imgOptions);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const marker = new (window as any).kakao.maps.Marker({
+      const marker = new window.kakao.maps.Marker({
         position: position,
         image: markerImage
       });
@@ -131,78 +113,67 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose, onSearchReset }: 
       marker.setMap(map);
       return marker;
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('마커 생성 중 오류:', error);
+      logger.error('마커 생성 중 오류:', error);
       return null;
     }
   }, [map]);
 
   // 검색 결과를 지도에 표시
   const displayPlaces = useCallback((places: SearchPlace[]) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (!map || !(window as any).kakao?.maps) return;
+    if (!map || !window.kakao?.maps) return;
 
     // 기존 마커들을 먼저 제거
     setMarkers(prevMarkers => {
       prevMarkers.forEach((marker) => {
         try {
-          if (marker && (marker as any).getMap()) {
-            (marker as any).setMap(null);
+          if (marker && marker.getMap()) {
+            marker.setMap(null);
           }
         } catch (error) {
-          console.error('기존 마커 제거 중 오류:', error);
+          logger.error('기존 마커 제거 중 오류:', error);
         }
       });
       return [];
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const newMarkers: any[] = [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const bounds = new (window as any).kakao.maps.LatLngBounds();
+    const newMarkers: kakao.maps.Marker[] = [];
+    const bounds = new window.kakao.maps.LatLngBounds();
 
     for (let i = 0; i < places.length; i++) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const position = new (window as any).kakao.maps.LatLng(places[i].y, places[i].x);
+      const position = new window.kakao.maps.LatLng(Number(places[i].y), Number(places[i].x));
       const marker = addMarker(position, i);
 
       if (marker) {
         // 마커 클릭 이벤트
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (function(marker: any, place: SearchPlace, index: number) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (window as any).kakao.maps.event.addListener(marker, 'click', function() {
+        (function(marker: kakao.maps.Marker, place: SearchPlace, index: number) {
+          window.kakao.maps.event.addListener(marker, 'click', function() {
             displayInfowindow(marker, place.place_name);
             setSelectedIndex(index);
-            
+
             // 마커 클릭 시 지도 중심을 해당 위치로 이동
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (map as any).setCenter(marker.getPosition());
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (map as any).setLevel(3);
-            
+            map.setCenter(marker.getPosition());
+            map.setLevel(3);
+
             // 검색 결과 목록에서 해당 항목으로 스크롤
             setTimeout(() => {
               const listElement = listRef.current;
               if (listElement) {
                 const targetElement = listElement.children[index] as HTMLElement;
                 if (targetElement) {
-                  targetElement.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start' 
+                  targetElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
                   });
                 }
               }
             }, 100);
           });
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (window as any).kakao.maps.event.addListener(marker, 'mouseover', function() {
+          window.kakao.maps.event.addListener(marker, 'mouseover', function() {
             displayInfowindow(marker, place.place_name);
           });
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (window as any).kakao.maps.event.addListener(marker, 'mouseout', function() {
+          window.kakao.maps.event.addListener(marker, 'mouseout', function() {
             infowindowRef.current?.close();
           });
         })(marker, places[i], i);
@@ -213,11 +184,10 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose, onSearchReset }: 
     }
 
     setMarkers(newMarkers);
-    
+
     // 검색된 장소 위치를 기준으로 지도 범위 재설정
     if (places.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (map as any).setBounds(bounds);
+      map.setBounds(bounds);
     }
   }, [map, addMarker, displayInfowindow]);
 
@@ -225,17 +195,14 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose, onSearchReset }: 
   const placesSearchCB = useCallback((data: SearchPlace[], status: string) => {
     setIsLoading(false);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (status === (window as any).kakao.maps.services.Status.OK) {
+    if (status === window.kakao.maps.services.Status.OK) {
       setSearchResults(data);
       displayPlaces(data);
       showNotification(`${data.length}개의 장소를 찾았습니다.`);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } else if (status === (window as any).kakao.maps.services.Status.ZERO_RESULT) {
+    } else if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
       setSearchResults([]);
       showNotification('검색 결과가 없습니다.');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } else if (status === (window as any).kakao.maps.services.Status.ERROR) {
+    } else if (status === window.kakao.maps.services.Status.ERROR) {
       setSearchResults([]);
       showNotification('검색 중 오류가 발생했습니다.');
     }
@@ -256,8 +223,7 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose, onSearchReset }: 
     if (!psRef.current) return;
 
     // 키워드로 장소 검색
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (psRef.current as any).keywordSearch(searchKeyword, placesSearchCB);
+    psRef.current.keywordSearch(searchKeyword, placesSearchCB);
   }, [searchKeyword, isVisible, placesSearchCB, removeMarkers]);
 
 
@@ -284,14 +250,13 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose, onSearchReset }: 
   // 검색 결과 항목 클릭 핸들러
   const handleItemClick = (place: SearchPlace, index: number) => {
     setSelectedIndex(index);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const position = new (window as any).kakao.maps.LatLng(place.y, place.x);
-    
+    const position = new window.kakao.maps.LatLng(Number(place.y), Number(place.x));
+
     // 해당 위치로 지도 이동
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (map as any).setCenter(position);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (map as any).setLevel(3);
+    if (map) {
+      map.setCenter(position);
+      map.setLevel(3);
+    }
 
     // 인포윈도우 표시
     if (markers[index]) {
@@ -324,12 +289,12 @@ const SearchResultList = ({ isVisible, searchKeyword, onClose, onSearchReset }: 
           className="cursor-pointer p-1 rounded-full text-gray-400 hover:text-gray-600 active:text-gray-800 hover:bg-gray-100 active:bg-gray-200 transition-all duration-150"
           aria-label="닫기"
         >
-          <svg 
-            width="20" 
-            height="20" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
             strokeWidth="2"
           >
             <line x1="18" y1="6" x2="6" y2="18"></line>

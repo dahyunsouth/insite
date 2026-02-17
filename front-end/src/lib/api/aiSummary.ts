@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from '@/config/api';
 import { AiSummaryResponse, AiSummaryParams } from '@/types/aiSummary';
+import { logger } from '@/utils/logger';
 
 /**
  * AI 상권 요약 정보를 가져오는 API 호출 함수
@@ -37,7 +38,7 @@ export async function fetchAiSummary(params: AiSummaryParams): Promise<AiSummary
 
     return data;
   } catch (error) {
-    console.error('AI Summary API 호출 에러:', error);
+    logger.error('AI Summary API 호출 에러:', error);
     throw error;
   }
 }
@@ -52,7 +53,7 @@ export async function getAiSummary(trdarCd: string): Promise<AiSummaryResponse['
     const response = await fetchAiSummary({ trdarCd });
     return response.result;
   } catch (error) {
-    console.warn(`상권 코드 ${trdarCd}에 대한 AI 요약 정보를 가져올 수 없습니다:`, error);
+    logger.warn(`상권 코드 ${trdarCd}에 대한 AI 요약 정보를 가져올 수 없습니다:`, error);
     return null;
   }
 }

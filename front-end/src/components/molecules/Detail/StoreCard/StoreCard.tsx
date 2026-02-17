@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import StoreInfoModal from "./StoreInfoModal";
 
 type Props = { trdarCode: string | null };
@@ -42,7 +42,7 @@ const STORE_INFO_ENDPOINT = `${API_BASE_URL}/api/v1/data/info/stor`;
 
 export default function StoreCard({ trdarCode }: Props) {
   const [data, setData] = useState<StoreResponse | null>(null);
-  const [quarter, setQuarter] = useState<string | null>(null);
+  const [_quarter, setQuarter] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
@@ -69,8 +69,8 @@ export default function StoreCard({ trdarCode }: Props) {
         if (aborted) return;
         setData(json.result);
         setQuarter(json.result.stdrYyquCd);
-      } catch (e: any) {
-        if (!aborted) setError(e?.message ?? "load failed");
+      } catch (e: unknown) {
+        if (!aborted) setError(e instanceof Error ? e.message : "load failed");
       } finally {
         if (!aborted) setLoading(false);
       }

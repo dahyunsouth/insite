@@ -3,40 +3,9 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useKakaoMapContext } from './KakaoMap';
+import { logger } from '@/utils/logger';
 
-declare global {
-  interface Window {
-    kakao: {
-      maps: {
-        Roadview: new (container: HTMLElement) => {
-          setPanoId: (panoId: string, position: { getLat: () => number; getLng: () => number }) => void;
-          getPosition: () => { getLat: () => number; getLng: () => number };
-        };
-        RoadviewClient: new () => {
-          getNearestPanoId: (position: { getLat: () => number; getLng: () => number }, radius: number, callback: (panoId: string | null) => void) => void;
-        };
-        Marker: new (options: {
-          image: any;
-          position: { getLat: () => number; getLng: () => number };
-          draggable: boolean;
-        }) => {
-          setMap: (map: any) => void;
-          setPosition: (position: { getLat: () => number; getLng: () => number }) => void;
-          getPosition: () => { getLat: () => number; getLng: () => number };
-        };
-        MarkerImage: new (src: string, size: any, options?: any) => any;
-        Size: new (width: number, height: number) => any;
-        Point: new (x: number, y: number) => any;
-        MapTypeId: {
-          ROADVIEW: any;
-        };
-        event: {
-          addListener: (target: any, event: string, handler: (...args: any[]) => void) => void;
-        };
-      };
-    };
-  }
-}
+// Kakao Maps 타입은 src/types/kakao.d.ts에서 전역으로 정의됨
 
 interface LoadViewProps {
   isActive: boolean;
@@ -48,9 +17,9 @@ interface LoadViewProps {
 export default function LoadView({ isActive, isMinimized: externalIsMinimized, onToggle }: LoadViewProps) {
   const { map } = useKakaoMapContext();
   const rvContainer = useRef<HTMLDivElement>(null);
-  const rv = useRef<any>(null);
-  const rvClient = useRef<any>(null);
-  const marker = useRef<any>(null);
+  const rv = useRef<kakao.maps.Roadview | null>(null);
+  const rvClient = useRef<kakao.maps.RoadviewClient | null>(null);
+  const marker = useRef<kakao.maps.Marker | null>(null);
   
   // SSR 안전성을 위한 클라이언트 전용 렌더링
   const [isClient, setIsClient] = useState(false);
@@ -107,12 +76,12 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
       if (panoId === null) {
         // 파노라마 ID가 null 이면 로드뷰를 숨깁니다 (공식 코드와 동일)
         // eslint-disable-next-line no-console
-        console.log('로드뷰 파노라마 ID가 null입니다. 로드뷰를 숨깁니다.');
+        logger.info('로드뷰 파노라마 ID가 null입니다. 로드뷰를 숨깁니다.');
       } else {
         // panoId로 로드뷰를 설정합니다 (공식 코드와 동일)
         // eslint-disable-next-line no-console
-        console.log('로드뷰 파노라마 ID 설정:', panoId, '위치:', position);
-        rv.current.setPanoId(panoId, position);
+        logger.info('로드뷰 파노라마 ID 설정:', panoId, '위치:', position);
+        rv.current?.setPanoId(panoId, position);
       }
     });
   }, []);
@@ -125,11 +94,11 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
   // 지도 위의 로드뷰 도로 오버레이를 추가,제거하는 함수 (카카오맵 공식 코드 방식)
   const toggleOverlay = useCallback((active: boolean) => {
     // eslint-disable-next-line no-console
-    console.log('toggleOverlay 호출됨:', { active, map: !!map, marker: !!marker.current });
+    logger.info('toggleOverlay 호출됨:', { active, map: !!map, marker: !!marker.current });
     
     if (!map || !marker.current) {
       // eslint-disable-next-line no-console
-      console.warn('toggleOverlay: map 또는 marker가 없습니다', { 
+      logger.warn('toggleOverlay: map 또는 marker가 없습니다', { 
         map: !!map, 
         marker: !!marker.current,
         mapCenter: map ? map.getCenter() : null
@@ -142,18 +111,18 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
         // 지도 위에 로드뷰 도로 오버레이를 추가합니다 (공식 코드와 동일)
         map.addOverlayMapTypeId(window.kakao.maps.MapTypeId.ROADVIEW);
         // eslint-disable-next-line no-console
-        console.log('로드뷰 오버레이 추가 완료');
+        logger.info('로드뷰 오버레이 추가 완료');
         
         // 지도 위에 마커를 표시합니다 (공식 코드와 동일)
         marker.current.setMap(map);
         // eslint-disable-next-line no-console
-        console.log('마커를 지도에 추가 완료');
+        logger.info('마커를 지도에 추가 완료');
         
         // 마커의 위치를 지도 중심으로 설정합니다 (공식 코드와 동일)
         const center = map.getCenter();
         marker.current.setPosition(center);
         // eslint-disable-next-line no-console
-        console.log('마커 위치 설정 완료:', center);
+        logger.info('마커 위치 설정 완료:', center);
         
         // 로드뷰를 오른쪽 상단에 표시하도록 위치와 크기 설정
         if (typeof window !== 'undefined') {
@@ -161,35 +130,35 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
           const topY = 20; // 상단에서 20px 여백
           setPosition({ x: rightX, y: topY });
           // eslint-disable-next-line no-console
-          console.log('로드뷰를 오른쪽 상단에 배치:', { x: rightX, y: topY, size });
+          logger.info('로드뷰를 오른쪽 상단에 배치:', { x: rightX, y: topY, size });
         }
         
         // 로드뷰의 위치를 지도 중심으로 설정합니다 (공식 코드와 동일)
         toggleRoadview(center);
         
         // eslint-disable-next-line no-console
-        console.log('로드뷰 오버레이 활성화 및 마커 표시 완료');
+        logger.info('로드뷰 오버레이 활성화 및 마커 표시 완료');
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error('toggleOverlay 활성화 중 오류:', error);
+        logger.error('toggleOverlay 활성화 중 오류:', error);
       }
     } else {
       try {
         // 지도 위의 로드뷰 도로 오버레이를 제거합니다 (공식 코드와 동일)
         map.removeOverlayMapTypeId(window.kakao.maps.MapTypeId.ROADVIEW);
         // eslint-disable-next-line no-console
-        console.log('로드뷰 오버레이 제거 완료');
+        logger.info('로드뷰 오버레이 제거 완료');
         
         // 지도 위의 마커를 제거합니다 (공식 코드와 동일)
         marker.current.setMap(null);
         // eslint-disable-next-line no-console
-        console.log('마커를 지도에서 제거 완료');
+        logger.info('마커를 지도에서 제거 완료');
         
         // eslint-disable-next-line no-console
-        console.log('로드뷰 오버레이 비활성화 및 마커 제거 완료');
+        logger.info('로드뷰 오버레이 비활성화 및 마커 제거 완료');
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error('toggleOverlay 비활성화 중 오류:', error);
+        logger.error('toggleOverlay 비활성화 중 오류:', error);
       }
     }
   }, [map, toggleRoadview, size]);
@@ -197,12 +166,12 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
   // 외부 isActive 상태와 내부 overlayOn 상태 동기화
   useEffect(() => {
     // eslint-disable-next-line no-console
-    console.log('상태 동기화 체크:', { isActive, overlayOn, isMinimized, map: !!map, marker: !!marker.current });
+    logger.info('상태 동기화 체크:', { isActive, overlayOn, isMinimized, map: !!map, marker: !!marker.current });
     
     // 상태가 실제로 다를 때만 동기화 (map과 marker가 준비된 상태에서만)
     if (isActive !== overlayOn && map && marker.current) {
       // eslint-disable-next-line no-console
-      console.log('상태 불일치 감지, 동기화 시작:', { isActive, overlayOn, isMinimized });
+      logger.info('상태 불일치 감지, 동기화 시작:', { isActive, overlayOn, isMinimized });
       
       if (isActive) {
         // 로드뷰가 활성화되면 오른쪽 상단에 배치
@@ -211,19 +180,19 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
           const topY = 20; // 상단에서 20px 여백
           setPosition({ x: rightX, y: topY });
           // eslint-disable-next-line no-console
-          console.log('로드뷰를 오른쪽 상단에 배치 (상태 동기화):', { x: rightX, y: topY, size });
+          logger.info('로드뷰를 오른쪽 상단에 배치 (상태 동기화):', { x: rightX, y: topY, size });
         }
         
         // 로드뷰가 활성화되면 오버레이 활성화
         setOverlayOn(true);
         // eslint-disable-next-line no-console
-        console.log('로드뷰 활성화 요청');
+        logger.info('로드뷰 활성화 요청');
         toggleOverlay(true);
       } else {
         // 로드뷰가 비활성화되면 오버레이 비활성화
         setOverlayOn(false);
         // eslint-disable-next-line no-console
-        console.log('로드뷰 비활성화 요청');
+        logger.info('로드뷰 비활성화 요청');
         toggleOverlay(false);
       }
     }
@@ -282,7 +251,7 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
           });
         } catch (error) {
           // eslint-disable-next-line no-console
-          console.warn('로드뷰 객체 생성 중 오류:', error);
+          logger.warn('로드뷰 객체 생성 중 오류:', error);
         }
       }
     };
@@ -300,7 +269,7 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
   useEffect(() => {
     if (!map || !window.kakao) {
       // eslint-disable-next-line no-console
-      console.log('마커 초기화: map 또는 kakao가 없습니다', { map: !!map, kakao: !!window.kakao });
+      logger.info('마커 초기화: map 또는 kakao가 없습니다', { map: !!map, kakao: !!window.kakao });
       return;
     }
 
@@ -309,10 +278,10 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
       try {
         marker.current.setMap(null);
         // eslint-disable-next-line no-console
-        console.log('기존 마커 제거 완료');
+        logger.info('기존 마커 제거 완료');
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.warn('기존 마커 제거 중 오류:', error);
+        logger.warn('기존 마커 제거 중 오류:', error);
       }
       marker.current = null;
     }
@@ -321,13 +290,13 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
     const initMarker = () => {
       if (!map || !window.kakao) {
         // eslint-disable-next-line no-console
-        console.warn('initMarker: map 또는 kakao가 없습니다');
+        logger.warn('initMarker: map 또는 kakao가 없습니다');
         return;
       }
 
       try {
         // eslint-disable-next-line no-console
-        console.log('마커 초기화 시작...');
+        logger.info('마커 초기화 시작...');
         
         // 마커 이미지를 생성합니다 (카카오맵 로드뷰 전용 마커)
         const markImage = new window.kakao.maps.MarkerImage(
@@ -353,7 +322,7 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
 
         // 마커는 생성만 하고 즉시 표시하지 않음 (toggleOverlay에서 표시)
         // eslint-disable-next-line no-console
-        console.log('마커 생성 완료 (표시는 toggleOverlay에서 처리)');
+        logger.info('마커 생성 완료 (표시는 toggleOverlay에서 처리)');
 
         // 마커에 dragend 이벤트를 등록합니다
         const dragendHandler = function() {
@@ -387,14 +356,14 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
 
         // 마커가 생성되었음을 콘솔에 출력
         // eslint-disable-next-line no-console
-        console.log('로드뷰 마커가 성공적으로 생성되었습니다:', {
+        logger.info('로드뷰 마커가 성공적으로 생성되었습니다:', {
           marker: marker.current,
           position: map.getCenter(),
           draggable: true
         });
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error('마커 초기화 중 오류:', error);
+        logger.error('마커 초기화 중 오류:', error);
       }
     };
 
@@ -410,10 +379,10 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
         try {
           marker.current.setMap(null);
           // eslint-disable-next-line no-console
-          console.log('마커 cleanup 완료');
+          logger.info('마커 cleanup 완료');
         } catch (error) {
           // eslint-disable-next-line no-console
-          console.warn('마커 제거 중 오류:', error);
+          logger.warn('마커 제거 중 오류:', error);
         }
         marker.current = null;
       }
@@ -421,13 +390,10 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
       // 로드뷰 오버레이 제거
       if (map && typeof window !== 'undefined' && window.kakao) {
         try {
-          const overlayTypes = map.getOverlayMapTypes();
-          if (overlayTypes && overlayTypes.length > 0) {
-            map.removeOverlayMapTypeId(window.kakao.maps.MapTypeId.ROADVIEW);
-          }
+          map.removeOverlayMapTypeId(window.kakao.maps.MapTypeId.ROADVIEW);
         } catch (error) {
           // eslint-disable-next-line no-console
-          console.warn('로드뷰 오버레이 제거 중 오류:', error);
+          logger.warn('로드뷰 오버레이 제거 중 오류:', error);
         }
       }
     };
@@ -520,19 +486,19 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
 
   const handleFullscreenToggle = useCallback(() => {
     // eslint-disable-next-line no-console
-    console.log('전체화면 토글 버튼 클릭:', { isFullscreen });
+    logger.info('전체화면 토글 버튼 클릭:', { isFullscreen });
     
     if (isFullscreen) {
       // 전체화면 해제 - 이전 위치와 크기로 복원
       // eslint-disable-next-line no-console
-      console.log('전체화면 해제');
+      logger.info('전체화면 해제');
       setSize(preFullscreenSize);
       setPosition(preFullscreenPosition);
       setIsFullscreen(false);
     } else {
       // 전체화면 설정 - 현재 위치와 크기 저장
       // eslint-disable-next-line no-console
-      console.log('전체화면 설정');
+      logger.info('전체화면 설정');
       setPreFullscreenPosition(position);
       setPreFullscreenSize(size);
       // setOriginalSize(size); // 사용하지 않음
@@ -563,7 +529,7 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
   // 로드뷰에서 X버튼을 눌렀을 때 로드뷰 모드를 완전히 종료하는 함수
   const closeRoadview = () => {
     // eslint-disable-next-line no-console
-    console.log('로드뷰 X버튼 클릭 - 로드뷰 모드 완전 종료');
+    logger.info('로드뷰 X버튼 클릭 - 로드뷰 모드 완전 종료');
     
     // 현재 위치와 크기를 저장 (다음에 로드뷰를 열 때 사용)
     setPreFullscreenPosition(position);
@@ -573,7 +539,7 @@ export default function LoadView({ isActive, isMinimized: externalIsMinimized, o
     if (onToggle) {
       onToggle(false);
       // eslint-disable-next-line no-console
-      console.log('외부 상태를 false로 설정하여 로드뷰 모드 완전 종료');
+      logger.info('외부 상태를 false로 설정하여 로드뷰 모드 완전 종료');
     }
   };
 

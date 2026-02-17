@@ -78,7 +78,7 @@ export default function LiveRank({ className, intervalMs = 2000 }: LiveRankProps
         currentIndexRef.current = 1;
         // force reflow to ensure the browser applies the transform without transition
         if (trackRef.current) {
-          void (trackRef.current as HTMLDivElement).offsetHeight;
+          void trackRef.current.offsetHeight;
         }
         // 3) following frame: re-enable transition for subsequent moves
         requestAnimationFrame(() => setEnableTransition(true));

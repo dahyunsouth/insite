@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { HeartIcon, ScaleIcon } from "@heroicons/react/24/outline";
 import { authManager } from "@/utils/auth";
+import { logger } from '@/utils/logger';
 import AuthModalWrapper from "@/components/templates/Auth/AuthModalWrapper";
 
 type ActionButtonsProps = {
@@ -29,36 +30,36 @@ export default function ActionButtons({
   const [pendingAction, setPendingAction] = useState<'save' | 'compare' | null>(null);
 
   const handleLoginSuccess = () => {
-    console.log('💾 [ActionButtons] 로그인 성공 - 대기 중인 액션:', pendingAction);
+    logger.info('💾 [ActionButtons] 로그인 성공 - 대기 중인 액션:', pendingAction);
     setIsLoginModalOpen(false);
     // 로그인 성공 후 원래 액션 실행
     if (pendingAction === 'save' && onSave) {
-      console.log('💾 [ActionButtons] 로그인 후 저장 액션 실행');
+      logger.info('💾 [ActionButtons] 로그인 후 저장 액션 실행');
       onSave();
     } else if (pendingAction === 'compare' && onCompare) {
-      console.log('💾 [ActionButtons] 로그인 후 비교 액션 실행');
+      logger.info('💾 [ActionButtons] 로그인 후 비교 액션 실행');
       onCompare();
     }
     setPendingAction(null);
   };
 
   const handleSaveClick = () => {
-    console.log('💾 [ActionButtons] 저장 버튼 클릭됨');
-    console.log('💾 [ActionButtons] 현재 저장 상태:', isSaved);
-    console.log('💾 [ActionButtons] 로그인 상태:', authManager.isLoggedIn());
+    logger.info('💾 [ActionButtons] 저장 버튼 클릭됨');
+    logger.info('💾 [ActionButtons] 현재 저장 상태:', isSaved);
+    logger.info('💾 [ActionButtons] 로그인 상태:', authManager.isLoggedIn());
     
     if (authManager.isLoggedIn()) {
-      console.log('💾 [ActionButtons] 로그인됨 - 저장 액션 실행');
+      logger.info('💾 [ActionButtons] 로그인됨 - 저장 액션 실행');
       if (onSave) onSave();
     } else {
-      console.log('💾 [ActionButtons] 로그인 필요 - 로그인 모달 표시');
+      logger.info('💾 [ActionButtons] 로그인 필요 - 로그인 모달 표시');
       setPendingAction('save');
       setIsLoginModalOpen(true);
     }
   };
 
   const handleCompareClick = () => {
-    console.log('비교 버튼 클릭됨');
+    logger.info('비교 버튼 클릭됨');
     if (authManager.isLoggedIn()) {
       if (onCompare) onCompare();
     } else {
