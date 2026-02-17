@@ -3,7 +3,7 @@ import { API_BASE_URL } from '@/config/api';
 import { logger } from '@/utils/logger';
 
 // API 응답 타입 정의
-interface ApiResponse<T = any> {
+interface ApiResponse<T = unknown> {
   httpStatus: string;
   isSuccess: boolean;
   message: string;

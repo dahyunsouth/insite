@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { SeoulApiRoot, SeoulApiRow, isSeoulApiRoot } from '@/types/seoul-api';
 
 const SEOUL_BASE = "http://openapi.seoul.go.kr:8088";
 // Worker population by quarter per trade area
@@ -15,9 +16,7 @@ async function fetchPage(key: string, quarter: string, start: number, end: numbe
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) return { ok: false as const, status: res.status };
   const data = await res.json().catch(() => ({}));
-  const root = Object.values(data).find(
-    (v: any) => v && typeof v === "object" && "RESULT" in v
-  ) as any;
+  const root = Object.values(data).find(isSeoulApiRoot) as SeoulApiRoot | undefined;
   const code = root?.RESULT?.CODE as string | undefined;
   if (code !== "INFO-000") {
     return {
@@ -28,7 +27,7 @@ async function fetchPage(key: string, quarter: string, start: number, end: numbe
     };
   }
   const total = Number(root?.list_total_count ?? 0);
-  const rows: any[] = Array.isArray(root?.row) ? root.row : [];
+  const rows: SeoulApiRow[] = Array.isArray(root?.row) ? root.row : [];
   return { ok: true as const, total, rows };
 }
 
@@ -49,7 +48,7 @@ export async function GET(req: NextRequest) {
     const probe = await fetchPage(key, quarter, 1, 1);
     if (!probe.ok)
       return new Response(
-        JSON.stringify({ error: probe.code ?? "Upstream error", message: (probe as any).message }),
+        JSON.stringify({ error: probe.code ?? "Upstream error", message: (probe as { message?: string }).message }),
         { status: probe.status }
       );
 
@@ -57,7 +56,7 @@ export async function GET(req: NextRequest) {
     const pageSize = 1000;
     const pages = Math.max(1, Math.ceil(total / pageSize));
 
-    let found: any | null = null;
+    let found: SeoulApiRow | null = null;
 
     for (let p = 0; p < pages && !found; p++) {
       const start = p * pageSize + 1;
@@ -65,7 +64,7 @@ export async function GET(req: NextRequest) {
       const r = await fetchPage(key, quarter, start, end);
       if (!r.ok)
         return new Response(
-          JSON.stringify({ error: r.code ?? "Upstream error", message: (r as any).message }),
+          JSON.stringify({ error: r.code ?? "Upstream error", message: (r as { message?: string }).message }),
           { status: r.status }
         );
       found = r.rows.find((row) => String(row?.TRDAR_CD) === String(trdar)) ?? null;
@@ -134,9 +133,9 @@ export async function GET(req: NextRequest) {
         "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=2592000",
       },
     });
-  } catch (e: any) {
+  } catch (e: unknown) {
     return new Response(
-      JSON.stringify({ error: e?.message ?? "Server error" }),
+      JSON.stringify({ error: e instanceof Error ? e.message : "Server error" }),
       { status: 500 }
     );
   }

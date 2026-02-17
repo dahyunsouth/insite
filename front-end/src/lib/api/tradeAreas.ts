@@ -335,7 +335,7 @@ export function getTradeAreaNameByCode(tradeAreaCode: string): string {
   // TradeAreaPicker에서 사용하는 데이터와 동일한 방식으로 불러오기
   try {
     const TradeAreaRawData = TradeAreaValueData;
-    const tradeArea = TradeAreaRawData.DATA.find((item: any) => item.trdar_cd === tradeAreaCode);
+    const tradeArea = TradeAreaRawData.DATA.find((item: Record<string, string | number>) => item.trdar_cd === tradeAreaCode);
     return tradeArea?.trdar_cd_nm || "상권명 없음";
   } catch (error) {
     logger.warn('Trade area data not found:', error);
