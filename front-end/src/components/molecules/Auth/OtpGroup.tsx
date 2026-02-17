@@ -87,7 +87,7 @@ const OtpGroup: React.FC<OtpGroupProps> = ({
   }, []);
 
   return (
-    <div className={`flex gap-[5px] ${className}`}>
+    <div className={`flex flex-wrap gap-[5px] ${className}`}>
       {Array.from({ length }).map((_, idx) => (
         <OtpCell
           key={idx}

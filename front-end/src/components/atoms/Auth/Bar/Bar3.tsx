@@ -14,7 +14,7 @@ const Bar3 = ({
   return (
     <div
       className={`
-        w-[376px] h-[50px]
+        w-full max-w-[376px] h-[50px]
         px-[12px] py-[20px]
         border-b border-[#E9ECEF]
         bg-[#3288FF]

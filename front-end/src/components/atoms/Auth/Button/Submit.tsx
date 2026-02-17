@@ -16,7 +16,7 @@ const SubmitButton = ({
    <button
      onClick={onClick}
      className={`
-       w-[320px] h-[60px]
+       w-full h-[60px]
        px-[20px] py-0
        rounded-[15px]
        bg-[#404040]

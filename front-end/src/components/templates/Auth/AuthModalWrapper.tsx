@@ -1,4 +1,5 @@
 // front-end/src/components/templates/Auth/AuthModalWrapper.tsx
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import React, { useReducer, useState, useEffect, useRef } from 'react';
@@ -750,7 +751,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
         </div>
         
         <div>
-          <div className="mt-8 w-[320px]">
+          <div className="mt-8 w-full max-w-xs">
             <div className="flex items-center gap-2">
               <SignUpLabel>이메일</SignUpLabel>
               {emailDuplicateCheck.isChecking && (
@@ -789,7 +790,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
 
           {/* 이메일 유효성 검사, 중복확인 및 발송 메시지 */}
           {(emailValidation.message || emailDuplicateCheck.message || emailSendStatus.message) && (
-            <div className="mt-2 w-[320px]">
+            <div className="mt-2 w-full max-w-xs">
               <p 
                 className={`text-sm font-normal ${
                   emailDuplicateCheck.isAvailable === false
@@ -808,7 +809,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
             </div>
           )}
 
-          <div className="mt-4 w-[320px]">
+          <div className="mt-4 w-full max-w-xs">
             <SubmitButton
               className={`cursor-pointer ${
                 emailValidation.isValid !== true || emailDuplicateCheck.isAvailable !== true || emailDuplicateCheck.isChecking || emailSendStatus.isSending
@@ -844,13 +845,13 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
             />
           </div>
 
-          <div className="mt-8 w-[320px]">
+          <div className="mt-8 w-full max-w-xs">
             <SignUpLabel>이메일</SignUpLabel>
             <SignUpBody>{state.form.email || '-'}</SignUpBody>
           </div>
         </div>
         <div>
-          <div className="mt-6 w-[320px]">
+          <div className="mt-6 w-full max-w-xs">
             <div className="flex items-center gap-2">
               <SignUpLabel>인증번호</SignUpLabel>
               {otpVerificationStatus.isVerifying && (
@@ -880,14 +881,14 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
 
           {/* 인증 상태 메시지 */}
           {otpVerificationStatus.message && (
-            <div className="mt-2 w-[320px]">
+            <div className="mt-2 w-full max-w-xs">
               <p className="text-sm font-normal text-red-500">
                 {otpVerificationStatus.message}
               </p>
             </div>
           )}
 
-          <div className="mt-6 w-[320px]">
+          <div className="mt-6 w-full max-w-xs">
             <SubmitButton 
               className={`cursor-pointer ${
                 otpVerificationStatus.isVerifying
@@ -933,12 +934,12 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
             />
           </div>
 
-          <div className="mt-8 w-[320px]">
+          <div className="mt-8 w-full max-w-xs">
             <LabeledStaticField label="이메일" value={state.form.email || '-'} />
           </div>
         </div>
         <div>
-          <div className="mt-6 w-[320px]">
+          <div className="mt-6 w-full max-w-xs">
             <div className="flex items-center gap-2">
               <SignUpLabel>닉네임</SignUpLabel>
               {nicknameDuplicateCheck.isChecking && (
@@ -967,7 +968,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
 
           {/* 닉네임 중복확인 메시지 */}
           {nicknameDuplicateCheck.message && (
-            <div className="mt-2 w-[320px]">
+            <div className="mt-2 w-full max-w-xs">
               <p 
                 className={`text-sm font-normal ${
                   nicknameDuplicateCheck.isAvailable === false
@@ -982,7 +983,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
             </div>
           )}
 
-          <div className="mt-6 w-[320px]">
+          <div className="mt-6 w-full max-w-xs">
             <SubmitButton 
               className={`cursor-pointer ${
                 nicknameDuplicateCheck.isAvailable !== true || nicknameDuplicateCheck.isChecking || !state.form.nickname.trim()
@@ -1018,13 +1019,13 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
             />
           </div>
 
-          <div className="mt-8 w-[320px] space-y-4">
+          <div className="mt-8 w-full max-w-xs space-y-4">
             <LabeledStaticField label="이메일" value={state.form.email || '-'} />
             <LabeledStaticField label="닉네임" value={state.form.nickname || '-'} />
           </div>
         </div>
         <div>
-          <div className="w-[320px]">
+          <div className="w-full max-w-xs">
             <div className="flex items-center gap-2">
               <SignUpLabel>비밀번호</SignUpLabel>
               <div className="ml-2 flex items-center gap-2">
@@ -1066,14 +1067,14 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
 
           {/* 비밀번호 길이 오류 메시지만 표시 */}
           {passwordValidation.isValid === false && passwordValidation.message && (
-            <div className="mt-2 w-[320px]">
+            <div className="mt-2 w-full max-w-xs">
               <p className="text-sm font-normal text-red-500">
                 {passwordValidation.message}
               </p>
             </div>
           )}
 
-          <div className="mt-6 w-[320px]">
+          <div className="mt-6 w-full max-w-xs">
             <SubmitButton 
               className={`cursor-pointer ${
                 passwordValidation.isValid !== true
@@ -1109,14 +1110,14 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
             />
           </div>
 
-          <div className="mt-6 w-[320px] space-y-2">
+          <div className="mt-6 w-full max-w-xs space-y-2">
             <LabeledStaticField label="이메일" value={state.form.email || '-'} />
             <LabeledStaticField label="닉네임" value={state.form.nickname || '-'} />
             <LabeledStaticField label="비밀번호" value="확인 중" />
           </div>
         </div>
         <div>
-          <div className="mt-6 w-[320px]">
+          <div className="mt-6 w-full max-w-xs">
             <div className="flex items-center gap-2">
               <SignUpLabel>비밀번호 확인</SignUpLabel>
               {passwordConfirmValidation.isMatch === true && (
@@ -1143,14 +1144,14 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
 
           {/* 비밀번호 확인 메시지 */}
           {passwordConfirmValidation.message && (
-            <div className="mt-2 w-[320px]">
+            <div className="mt-2 w-full max-w-xs">
               <p className="text-sm font-normal text-red-500">
                 {passwordConfirmValidation.message}
               </p>
             </div>
           )}
 
-          <div className="mt-6 w-[320px]">
+          <div className="mt-6 w-full max-w-xs">
             <SubmitButton 
               className={`cursor-pointer ${
                 passwordConfirmValidation.isMatch !== true || signupStatus.isSigningUp
@@ -1170,7 +1171,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
 
           {/* 회원가입 상태 메시지 */}
           {signupStatus.message && (
-            <div className="mt-2 w-[320px]">
+            <div className="mt-2 w-full max-w-xs">
               <p 
                 className={`text-sm font-normal ${
                   signupStatus.isSuccess === true 
@@ -1213,7 +1214,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
         )}
       </div>
 
-      <div className="mt-8 w-[320px]">
+      <div className="mt-8 w-full max-w-xs">
         <SubmitButton 
           className="cursor-pointer"
           onClick={() => {
