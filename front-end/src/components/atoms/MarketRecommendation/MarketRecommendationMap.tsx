@@ -141,7 +141,7 @@ export default function MarketRecommendationMap({ onDistrictSelect, onNextStep, 
                   d={pathData}
                   fill={
                     selectedDistrict === districtId 
-                      ? '#3288FF' 
+                      ? 'var(--color-brand-primary)'
                       : hoveredDistrict === districtId 
                         ? '#D1D5DB' 
                         : '#F5F5F5'

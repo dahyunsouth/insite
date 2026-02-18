@@ -2,12 +2,13 @@
 
 import { KakaoPolygon } from './MarketMode';
 import { logger } from '@/utils/logger';
+import { COLORS } from '@/config/colors';
 
 // 기본 모드 폴리곤 스타일 적용
 export function applyDefaultModePolygonStyle(polygon: KakaoPolygon): void {
   polygon.setOptions({
-    strokeColor: '#3288FF',
-    fillColor: '#3288FF',
+    strokeColor: COLORS.BRAND_PRIMARY,
+    fillColor: COLORS.BRAND_PRIMARY,
     fillOpacity: 0,
     strokeWeight: 1,
     strokeOpacity: 1
@@ -23,10 +24,10 @@ export function createDefaultModeLabelStyle(): {
   textShadow: string;
 } {
   return {
-    labelBackgroundColor: '#3288FF',
-    labelBorderColor: '#3288FF',
-    hoverBackgroundColor: '#FFFFFF',
-    textColor: '#FFFFFF',
+    labelBackgroundColor: COLORS.BRAND_PRIMARY,
+    labelBorderColor: COLORS.BRAND_PRIMARY,
+    hoverBackgroundColor: COLORS.SURFACE,
+    textColor: COLORS.SURFACE,
     textShadow: 'none'
   };
 }
@@ -53,7 +54,7 @@ export function createDefaultModeLabelContent(
     border-radius: 8px;
     border: 2px solid ${styles.labelBorderColor};
     transition: all 0.2s ease;
-  " onmouseover="this.style.backgroundColor='${styles.hoverBackgroundColor}'; this.style.borderColor='${styles.labelBorderColor}'; this.style.color='#000000'; this.style.textShadow='none'; this.style.transform='scale(1.1)'" 
+  " onmouseover="this.style.backgroundColor='${styles.hoverBackgroundColor}'; this.style.borderColor='${styles.labelBorderColor}'; this.style.color=COLORS.TEXT_PRIMARY; this.style.textShadow='none'; this.style.transform='scale(1.1)'" 
      onmouseout="this.style.backgroundColor='${styles.labelBackgroundColor}'; this.style.borderColor='${styles.labelBorderColor}'; this.style.color='${styles.textColor}'; this.style.textShadow='${styles.textShadow}'; this.style.transform='scale(1)'"
   >${guName}</div>`;
 }
@@ -76,8 +77,8 @@ export function handleDefaultModeHover(
     // hover 해제: 기본 파란색으로 복원
     logger.info(`🔄 ${guName} hover 해제: 일반모드`);
     polygon.setOptions({
-      strokeColor: '#3288FF',
-      fillColor: '#3288FF',
+      strokeColor: COLORS.BRAND_PRIMARY,
+      fillColor: COLORS.BRAND_PRIMARY,
       fillOpacity: 0,
       strokeWeight: 1,
       strokeOpacity: 1
@@ -118,12 +119,12 @@ export function createDongDefaultModeLabelContent(
   labelId: string,
   fontSize: number = 10
 ): string {
-  const defaultBackgroundColor = '#3288FF';
-  const defaultBorderColor = '#3288FF';
-  const defaultTextColor = '#ffffff';
-  const hoverBackgroundColor = '#ffffff';
-  const hoverBorderColor = '#3288FF';
-  const hoverTextColor = '#000000';
+  const defaultBackgroundColor = COLORS.BRAND_PRIMARY;
+  const defaultBorderColor = COLORS.BRAND_PRIMARY;
+  const defaultTextColor = COLORS.SURFACE;
+  const hoverBackgroundColor = COLORS.SURFACE;
+  const hoverBorderColor = COLORS.BRAND_PRIMARY;
+  const hoverTextColor = COLORS.TEXT_PRIMARY;
   const textShadow = 'none';
 
   return `<div id="${labelId}" class="adstrd-label" style="
@@ -165,8 +166,8 @@ export function handleDongDefaultModeHover(
     // hover 해제: 기본 파란색으로 복원
     logger.info(`🔄 ${dongName} hover 해제: 행정동 일반모드`);
     polygon.setOptions({
-      strokeColor: '#3288FF',
-      fillColor: '#3288FF',
+      strokeColor: COLORS.BRAND_PRIMARY,
+      fillColor: COLORS.BRAND_PRIMARY,
       fillOpacity: 0,
       strokeWeight: 1,
       strokeOpacity: 0.8

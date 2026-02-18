@@ -123,7 +123,7 @@ const UserModal: React.FC<UserModalProps> = ({
             onFavoritesClick?.();
             onClose();
           }}
-          className="cursor-pointer w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-blue-50 hover:text-[#3288FF] transition-colors duration-200"
+          className="cursor-pointer w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-blue-50 hover:text-brand-primary transition-colors duration-200"
         >
           <svg 
             width="18" 

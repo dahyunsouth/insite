@@ -319,7 +319,7 @@ const MyMarket: React.FC<MyMarketProps> = ({
       {/* 비교하기 버튼 - 하단 고정 */}
       <div className="flex-shrink-0 p-4">
         <div 
-          className={`${isCompareEnabled ? 'bg-[#3288FF] cursor-pointer' : 'bg-gray-300 cursor-not-allowed opacity-60'} flex justify-center items-center text-white rounded-lg p-2 transition-colors`}
+          className={`${isCompareEnabled ? 'bg-brand-primary cursor-pointer' : 'bg-gray-300 cursor-not-allowed opacity-60'} flex justify-center items-center text-white rounded-lg p-2 transition-colors`}
           role="button"
           aria-disabled={!isCompareEnabled}
           onClick={() => {

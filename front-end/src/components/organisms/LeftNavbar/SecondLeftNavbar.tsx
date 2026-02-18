@@ -34,12 +34,12 @@ const SecondLeftNavbar: React.FC<SecondLeftNavbarProps> = ({
     
     switch (label) {
       case "상권추천":
-        return `${baseStyle} bg-[#3288FF] text-white space-y-4 ${
+        return `${baseStyle} bg-brand-primary text-white space-y-4 ${
           isActive ? 'shadow-lg' : 'hover:shadow-xl'
         }`;
       
         case "상권비교":
-        return `${baseStyle} bg-[#5AB8E2] text-white space-y-4 ${
+        return `${baseStyle} bg-brand-secondary text-white space-y-4 ${
           isActive ? 'shadow-lg' : 'hover:shadow-xl'
         }`;
       

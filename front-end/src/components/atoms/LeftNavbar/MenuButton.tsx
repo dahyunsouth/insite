@@ -15,7 +15,7 @@ export default function MenuButton({ className, onChange }: MenuButtonProps) {
   const baseBtn =
     "px-3 py-1.5 rounded-md text-sm select-none whitespace-nowrap transition-colors duration-150 focus:outline-none cursor-pointer";
 
-  const defaultClasses = " w-1/4 bg-[#3288FF]/10 text-[#3288FF] hover:bg-[#3288FF]/20 hover:text-[#3288FF]";
+  const defaultClasses = " w-1/4 bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20 hover:text-brand-primary";
 
   const select = (key: MenuKey) => {
     setActive(key);

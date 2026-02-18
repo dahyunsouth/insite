@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useKakaoMapContext } from './KakaoMap';
+import { COLORS } from '@/config/colors';
 import seoulDistricts from '../../data/seoulDistricts.json';
 
 // 카카오맵 타입은 이미 다른 파일에서 정의되어 있으므로 별도 선언 불필요
@@ -28,10 +29,10 @@ export default function ZoomBlock() {
         const polygon = new window.kakao.maps.Polygon({
           path: coordinates,
           strokeWeight: 2,
-          strokeColor: '#3288FF',
+          strokeColor: COLORS.BRAND_PRIMARY,
           strokeOpacity: 0.8,
           strokeStyle: 'solid',
-          fillColor: '#3288FF',
+          fillColor: COLORS.BRAND_PRIMARY,
           fillOpacity: 0.1
         });
 

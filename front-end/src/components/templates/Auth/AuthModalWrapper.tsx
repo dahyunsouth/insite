@@ -755,10 +755,10 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
             <div className="flex items-center gap-2">
               <SignUpLabel>이메일</SignUpLabel>
               {emailDuplicateCheck.isChecking && (
-                <div className="w-4 h-4 border-2 border-[#3288FF] border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
               )}
               {emailSendStatus.isSending && (
-                <div className="w-4 h-4 border-2 border-[#3288FF] border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
               )}
               {emailDuplicateCheck.isAvailable === true && emailSendStatus.isSuccess !== false && (
                 <img src="/badges/Available.svg" alt="사용 가능" className="w-[104px] h-[30px]" />
@@ -778,9 +778,9 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
                     : emailSendStatus.isSuccess === false
                     ? '!border-red-500 focus:!border-red-500'
                     : emailDuplicateCheck.isAvailable === true && emailSendStatus.isSuccess !== null
-                    ? '!border-[#3288FF] focus:!border-[#3288FF]'
+                    ? '!border-brand-primary focus:!border-brand-primary'
                     : emailValidation.isValid === true 
-                    ? '!border-[#3288FF] focus:!border-[#3288FF]' 
+                    ? '!border-brand-primary focus:!border-brand-primary' 
                     : emailValidation.isValid === false 
                     ? '!border-red-500 focus:!border-red-500' 
                     : ''
@@ -798,9 +798,9 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
                     : emailSendStatus.isSuccess === false
                     ? 'text-red-500'
                     : emailDuplicateCheck.isAvailable === true && emailSendStatus.isSuccess !== null
-                    ? 'text-[#3288FF]'
+                    ? 'text-brand-primary'
                     : emailValidation.isValid 
-                    ? 'text-[#3288FF]' 
+                    ? 'text-brand-primary' 
                     : 'text-red-500'
                 }`}
               >
@@ -855,7 +855,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
             <div className="flex items-center gap-2">
               <SignUpLabel>인증번호</SignUpLabel>
               {otpVerificationStatus.isVerifying && (
-                <div className="w-4 h-4 border-2 border-[#3288FF] border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
               )}
               {otpVerificationStatus.isSuccess === false && (
                 <img src="/badges/AuthenticationFailure.svg" alt="인증 실패" className="w-[104px] h-[30px]" />
@@ -943,7 +943,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
             <div className="flex items-center gap-2">
               <SignUpLabel>닉네임</SignUpLabel>
               {nicknameDuplicateCheck.isChecking && (
-                <div className="w-4 h-4 border-2 border-[#3288FF] border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
               )}
               {nicknameDuplicateCheck.isAvailable === true && (
                 <img src="/badges/Available.svg" alt="사용 가능" className="w-[104px] h-[30px]" />
@@ -960,7 +960,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
                 nicknameDuplicateCheck.isAvailable === false
                   ? '!border-red-500 focus:!border-red-500'
                   : nicknameDuplicateCheck.isAvailable === true
-                  ? '!border-[#3288FF] focus:!border-[#3288FF]'
+                  ? '!border-brand-primary focus:!border-brand-primary'
                   : ''
               }
             />
@@ -974,7 +974,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
                   nicknameDuplicateCheck.isAvailable === false
                     ? 'text-red-500'
                     : nicknameDuplicateCheck.isAvailable === true
-                    ? 'text-[#3288FF]'
+                    ? 'text-brand-primary'
                     : 'text-gray-500'
                 }`}
               >
@@ -1059,7 +1059,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
                 passwordValidation.isValid === false
                   ? '!border-red-500 focus:!border-red-500'
                   : passwordValidation.isValid === true
-                  ? '!border-[#3288FF] focus:!border-[#3288FF]'
+                  ? '!border-brand-primary focus:!border-brand-primary'
                   : '!border-black focus:!border-black'
               }
             />
@@ -1134,7 +1134,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
               onChange={handlePasswordConfirmChange}
               className={
                 passwordConfirmValidation.isMatch === true
-                  ? '!border-[#3288FF] focus:!border-[#3288FF]'
+                  ? '!border-brand-primary focus:!border-brand-primary'
                   : passwordConfirmValidation.isMatch === false
                   ? '!border-red-500 focus:!border-red-500'
                   : ''
@@ -1175,7 +1175,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
               <p 
                 className={`text-sm font-normal ${
                   signupStatus.isSuccess === true 
-                    ? 'text-[#3288FF]' 
+                    ? 'text-brand-primary' 
                     : 'text-red-500'
                 }`}
               >
@@ -1200,7 +1200,7 @@ const AuthModalWrapper: React.FC<AuthModalWrapperProps> = ({ className = '', onC
       <div className="mt-10 text-center">
         {userInfo.isLoading ? (
           <div className="flex items-center justify-center gap-2">
-            <div className="w-4 h-4 border-2 border-[#3288FF] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-4 h-4 border-2 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
             <p className="text-[16px] text-neutral-700">정보를 불러오는 중...</p>
           </div>
         ) : userInfo.error ? (

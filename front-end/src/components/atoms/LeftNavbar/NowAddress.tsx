@@ -188,6 +188,7 @@ export default function NowAddress({ onAddressClick, onAddressChange }: NowAddre
     const cleanup = checkServicesAndStart();
     
     return cleanup;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, onAddressChange]);
 
   return (
@@ -216,7 +217,7 @@ export default function NowAddress({ onAddressClick, onAddressChange }: NowAddre
           >
             <div
               className="inline-block text-2xl font-bold"
-              // style={{ color: '#3288FF' }}
+              // style={{ color: 'var(--color-brand-primary)' }}
             >
               {currentAddress.gu} {currentAddress.dong}
             </div>

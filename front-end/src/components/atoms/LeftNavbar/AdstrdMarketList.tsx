@@ -360,7 +360,7 @@ export default function AdstrdMarketList({ district, dong, onClose: _onClose, on
                 }}
               >
                 {/* 상권명 */}
-                <div className="font-medium text-base mb-2" style={{ color: isSelected ? '#000000' : '#3288FF' }}>
+                <div className="font-medium text-base mb-2" style={{ color: isSelected ? '#000000' : 'var(--color-brand-primary)' }}>
                   {area.trdarCdNm}
                   {isSelected && (
                     <span className="ml-2 text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full">

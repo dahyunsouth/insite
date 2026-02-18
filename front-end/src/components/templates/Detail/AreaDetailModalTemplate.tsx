@@ -114,7 +114,7 @@ function DefaultVerticalPills() {
                 aria-current={isActive ? "page" : undefined}
                 className={
                   "w-full text-left text-base leading-6 " +
-                  (isActive ? "text-[#3288FF] font-semibold" : "text-gray-400 hover:text-gray-600")
+                  (isActive ? "text-brand-primary font-semibold" : "text-gray-400 hover:text-gray-600")
                 }
               >
                 {it.label}

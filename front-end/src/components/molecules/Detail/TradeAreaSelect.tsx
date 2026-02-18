@@ -111,7 +111,7 @@ export default function TradeAreaSelect({ className, onChange }: Props) {
       <Combobox value={selected} onChange={setSelected} nullable>
         <div className="relative w-64">
           <Combobox.Input
-            className="w-full rounded-xl border border-gray-300 bg-white/95 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3288FF]"
+            className="w-full rounded-xl border border-gray-300 bg-white/95 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
             displayValue={(opt: Option | null) => (opt ? `${opt.name} · ${opt.code}` : "")}
             placeholder={quarter ? "상권 검색" : "로딩 중..."}
             onChange={(e) => setQuery(e.target.value)}

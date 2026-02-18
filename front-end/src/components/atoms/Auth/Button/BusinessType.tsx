@@ -18,13 +18,13 @@ const BusinessTypeButton = ({
         w-[60px] h-[39px] 
         px-[15px] py-[10px]
         rounded-[5px]
-        border-[0.5px] border-[#3288FF]
+        border-[0.5px] border-brand-primary
         bg-transparent
-        text-[#3288FF] text-sm font-medium
+        text-brand-primary text-sm font-medium
         transition-all duration-200
-        hover:bg-[#3288FF] hover:text-white
-        focus:outline-none focus:ring-2 focus:ring-[#3288FF] focus:ring-opacity-50
-        ${isSelected ? 'bg-[#3288FF] text-white' : ''}
+        hover:bg-brand-primary hover:text-white
+        focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-opacity-50
+        ${isSelected ? 'bg-brand-primary text-white' : ''}
       `}
       {...props}
     >

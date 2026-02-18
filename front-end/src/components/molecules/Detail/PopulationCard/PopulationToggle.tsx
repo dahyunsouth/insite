@@ -26,7 +26,7 @@ export default function PopulationToggle({ selected, onChange, className }: Popu
               "cursor-pointer px-3 py-1 text-sm font-medium transition-all duration-150 " +
               "rounded-full " +
               (isSelected
-                ? "bg-white text-[#3288FF] shadow-sm"
+                ? "bg-white text-brand-primary shadow-sm"
                 : "text-gray-600 hover:text-gray-800")
             }
           >

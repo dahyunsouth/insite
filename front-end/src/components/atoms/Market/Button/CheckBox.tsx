@@ -36,7 +36,7 @@ const CheckBox: React.FC<CheckBoxProps> = ({
         w-6 h-6 rounded-lg border transition-all duration-200 ease-in-out
         flex items-center justify-center cursor-pointer
         ${isChecked 
-          ? 'border-[#3288FF] bg-[#3288FF]' 
+          ? 'border-brand-primary bg-brand-primary' 
           : 'border-gray-300 bg-white hover:bg-gray-100 hover:border-gray-400'
         }
         ${className}

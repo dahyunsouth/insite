@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback, useRef } from 'react';
 import { useKakaoMapContext } from './KakaoMap';
+import { COLORS } from '@/config/colors';
 import signGuData from '../../data/SignGuValue.json';
 import signGuPolygonData from '../../data/SignGuPoligon.json';
 import seoulPolygonData from '../../data/SeoulPoligon.json';
@@ -204,7 +205,7 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
     const backgroundPolygon = new window.kakao.maps.Polygon({
       path: donutPaths,
       strokeWeight: 1,
-      strokeColor: '#3288FF',
+      strokeColor: COLORS.BRAND_PRIMARY,
       fillColor: '#000000',
       fillOpacity: 0.1,
       clickable: false,
@@ -275,9 +276,9 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
         const kakaoPolygon = new window.kakao.maps.Polygon({
           path: polygonPaths,
           strokeWeight: 1,
-          strokeColor: '#3288FF',
+          strokeColor: COLORS.BRAND_PRIMARY,
           strokeOpacity: 1,
-          fillColor: '#3288FF',
+          fillColor: COLORS.BRAND_PRIMARY,
           fillOpacity: 0, // 기본값에서 배경 투명
           clickable: false, // 클릭 비활성화로 성능 향상
           zIndex: 1 // 구별 폴리곤이 행정동보다 위에 표시
@@ -335,6 +336,7 @@ export default function SignGuPoligon({ showMarketingArea = false }: SignGuPolyg
     signGuPolygonsRef.current = polygons;
     signGuLabelsRef.current = labels;
     eventListenersRef.current = eventCleanups;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, setupGlobalEventDelegation, showMarketingArea, guCountData, loadGuCountData, isLoadingData]);
 
   // 상권 데이터가 로드된 후 이미 표시된 폴리곤들을 업데이트

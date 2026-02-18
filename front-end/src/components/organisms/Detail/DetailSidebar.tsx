@@ -59,6 +59,7 @@ export function DetailNavbar({ open, onClose, title, subtitle, trdarCode, onSele
     if (currentCode && isInComparison) {
       setIsComparing(isInComparison(currentCode));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trdarCode, selected, isInComparison]);
 
   useEffect(() => {
@@ -440,6 +441,7 @@ function DetailAsideNav({
       modalContainer.removeEventListener('scroll', handleScroll);
       clearTimeout(scrollTimeout);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [populationType]);
 
   function go(id: string, idx: number, itemPopulationType?: string) {
@@ -550,7 +552,7 @@ function DetailAsideNav({
                   aria-current={isActive ? "page" : undefined}
                   className={
                     "cursor-pointer w-full text-left text-base leading-6 " +
-                    (shouldHighlight ? "text-[#3288FF] font-semibold" : "text-gray-400 hover:text-gray-600") +
+                    (shouldHighlight ? "text-brand-primary font-semibold" : "text-gray-400 hover:text-gray-600") +
                     (isChild ? " ml-4" : "")
                   }
                 >

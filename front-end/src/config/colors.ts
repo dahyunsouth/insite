@@ -22,6 +22,7 @@ export const COLORS = {
 /** 투명도 변형 (템플릿 리터럴용) */
 export const COLORS_ALPHA = {
   BRAND_PRIMARY_80: 'rgba(50, 136, 255, 0.8)',
+  BRAND_PRIMARY_40: 'rgba(50, 136, 255, 0.4)',
   BRAND_PRIMARY_10: 'rgba(50, 136, 255, 0.1)',
 } as const;
 

@@ -103,7 +103,7 @@ const SearchBar = ({ onSearch, onSearchResultsShow, resetTrigger }: SearchBarPro
       />
       <button
         type="button"
-        className={`ml-2 ${enterActive ? "text-[#3288FF]" : "text-gray-400"} hover:text-[#3288FF] hover:cursor-pointer`}
+        className={`ml-2 ${enterActive ? "text-brand-primary" : "text-gray-400"} hover:text-brand-primary hover:cursor-pointer`}
         aria-label="Search"
         onClick={handleSearch}
       >

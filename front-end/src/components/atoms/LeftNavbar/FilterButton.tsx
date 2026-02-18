@@ -14,7 +14,7 @@ export default function FilterButton({ className, onChange }: FilterButtonProps)
     "px-3 py-1.5 rounded-md border text-sm bg-transparent select-none transition-colors duration-150 focus:outline-none cursor-pointer";
 
   const defaultClasses = " border-gray-300 text-black hover:border-[#1D73F3] hover:text-[#1D73F3]";
-  const selectedClasses = " border-[#3288FF] text-[#3288FF] hover:border-[#3288FF] hover:text-[#3288FF]";
+  const selectedClasses = " border-brand-primary text-brand-primary hover:border-brand-primary hover:text-brand-primary";
 
   const select = (key: "monthlySales" | "storeSize") => {
     setActive(key);

@@ -155,7 +155,7 @@ function AgeBar({
               className="h-full cursor-pointer" 
               style={{ 
                 width: `${malePercent}%`, 
-                backgroundColor: "#3288FF",
+                backgroundColor: "var(--color-brand-primary)",
                 borderTopLeftRadius: "6px",
                 borderBottomLeftRadius: "6px"
               }}

@@ -235,20 +235,25 @@ const PasswordUpdate: React.FC<PasswordUpdateProps> = ({
               <div className="ml-2 flex items-center gap-2">
                 <div>
                   {passwordValidation.isValid === false && (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src="/badges/Unavailable.svg" alt="사용 불가" className="w-[104px] h-[30px]" />
                   )}
                   {passwordValidation.isValid && (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src="/badges/Available.svg" alt="사용 가능" className="w-[104px] h-[30px]" />
                   )}
                 </div>
                 <div>
                   {passwordValidation.strength === 'weak' && (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src="/badges/Weak.svg" alt="위험" className="w-auto h-[30px]" />
                   )}
                   {passwordValidation.strength === 'medium' && (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src="/badges/Medium.svg" alt="보통" className="w-auto h-[30px]" />
                   )}
                   {passwordValidation.strength === 'strong' && (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src="/badges/Strong.svg" alt="안전" className="w-auto h-[30px]" />
                   )}
                 </div>
@@ -265,7 +270,7 @@ const PasswordUpdate: React.FC<PasswordUpdateProps> = ({
                 passwordValidation.isValid === false
                   ? '!border-red-500 focus:!border-red-500'
                   : passwordValidation.isValid === true
-                  ? '!border-[#3288FF] focus:!border-[#3288FF]'
+                  ? '!border-brand-primary focus:!border-brand-primary'
                   : ''
               }
             />
@@ -285,9 +290,11 @@ const PasswordUpdate: React.FC<PasswordUpdateProps> = ({
             <div className="flex items-center gap-2">
               <SignUpLabel>새 비밀번호 확인</SignUpLabel>
               {passwordConfirmValidation.isMatch === true && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src="/badges/Match.svg" alt="일치" className="w-[104px] h-[30px]" />
               )}
               {passwordConfirmValidation.isMatch === false && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src="/badges/Mismatch.svg" alt="불일치" className="w-[104px] h-[30px]" />
               )}
             </div>
@@ -300,7 +307,7 @@ const PasswordUpdate: React.FC<PasswordUpdateProps> = ({
               onKeyDown={handleConfirmPasswordKeyDown}
               className={
                 passwordConfirmValidation.isMatch === true
-                  ? '!border-[#3288FF] focus:!border-[#3288FF]'
+                  ? '!border-brand-primary focus:!border-brand-primary'
                   : passwordConfirmValidation.isMatch === false
                   ? '!border-red-500 focus:!border-red-500'
                   : ''

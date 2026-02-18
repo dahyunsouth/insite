@@ -57,7 +57,7 @@ const UserDeleteModal: React.FC<UserDeleteModalProps> = ({
           <button
             onClick={onClose}
             disabled={isLoading}
-            className={`cursor-pointer px-6 py-2 text-white bg-gray-500 rounded-lg hover:bg-[#3288FF] active:bg-[#2a73e6] transition-colors duration-200 font-medium ${
+            className={`cursor-pointer px-6 py-2 text-white bg-gray-500 rounded-lg hover:bg-brand-primary active:bg-[#2a73e6] transition-colors duration-200 font-medium ${
               isLoading ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >

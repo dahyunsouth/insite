@@ -17,7 +17,7 @@ const Bar3 = ({
         w-full max-w-[376px] h-[50px]
         px-[12px] py-[20px]
         border-b border-[#E9ECEF]
-        bg-[#3288FF]
+        bg-brand-primary
         ${className}
       `}
       style={{

@@ -234,7 +234,7 @@ export default function SalesCard({ trdarCode }: Props) {
             aria-pressed={mode === "time"}
             className={
               `cursor-pointer w-full justify-center rounded-xl px-4 py-4 text-sm font-medium ` +
-              (mode === "time" ? "bg-white text-[#3288FF] shadow-sm" : "text-gray-500")
+              (mode === "time" ? "bg-white text-brand-primary shadow-sm" : "text-gray-500")
             }
           >
             시간대별 추이
@@ -245,7 +245,7 @@ export default function SalesCard({ trdarCode }: Props) {
             aria-pressed={mode === "day"}
             className={
               `cursor-pointer w-full justify-center rounded-xl px-4 py-4 text-sm font-medium ` +
-              (mode === "day" ? "bg-white text-[#3288FF] shadow-sm" : "text-gray-500")
+              (mode === "day" ? "bg-white text-brand-primary shadow-sm" : "text-gray-500")
             }
           >
             요일별 추이
@@ -266,13 +266,13 @@ export default function SalesCard({ trdarCode }: Props) {
             {mode === "time" ? (
               <>
                 <span className="font-medium">매출이 가장 많은 시간대는</span>
-                <span className="ml-1 font-bold text-[#3288FF]">{timeLabels[timeMaxIndex ?? 0]}</span>
+                <span className="ml-1 font-bold text-brand-primary">{timeLabels[timeMaxIndex ?? 0]}</span>
                 <span className="ml-1 font-medium">입니다.</span>
               </>
             ) : (
               <>
                 <span className="font-medium">매출이 가장 많은 요일은</span>
-                <span className="ml-1 font-bold text-[#3288FF]">{dayLabels[dayMaxIndex ?? 0]}</span>
+                <span className="ml-1 font-bold text-brand-primary">{dayLabels[dayMaxIndex ?? 0]}</span>
                 <span className="ml-1 font-medium">입니다.</span>
               </>
             )}
@@ -285,10 +285,10 @@ export default function SalesCard({ trdarCode }: Props) {
       {/* 선택 모드별 최다/최소 표 */}
       <div className="mt-3 overflow-hidden rounded-2xl border border-gray-200">
         <div className="grid grid-cols-2">
-          <div className="bg-[#3288FF1A] px-4 py-3 text-center text-sm font-semibold text-black">
+          <div className="bg-brand-primary/10 px-4 py-3 text-center text-sm font-semibold text-black">
             {mode === "time" ? "매출이 가장 많은 시간대" : "주중매출금액(건수)"}
           </div>
-          <div className={`border-l border-gray-200 px-4 py-3 text-center text-sm font-semibold text-black ${mode === "time" ? "bg-red-50" : "bg-[#3288FF1A]"}`}>
+          <div className={`border-l border-gray-200 px-4 py-3 text-center text-sm font-semibold text-black ${mode === "time" ? "bg-red-50" : "bg-brand-primary/10"}`}>
             {mode === "time" ? "매출이 가장 적은 시간대" : "주말매출금액(건수)"}
           </div>
           <div className="px-4 py-5 text-center text-black">
