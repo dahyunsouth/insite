@@ -70,7 +70,7 @@ const MarketTypeStore: React.FC<MarketTypeStoreProps> = ({
   );
 
   const submitButtonClass = canRequestRecommendation
-    ? 'bg-[#3288FF] text-white cursor-pointer hover:bg-blue-600'
+    ? 'bg-brand-primary text-white cursor-pointer hover:bg-blue-600'
     : 'bg-gray-200 text-gray-400 cursor-not-allowed';
 
   const handleMarketTypeChange = (type: string | null) => {

@@ -146,7 +146,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({
           focus:outline-none
           active:scale-[0.98] transition-all duration-300 ease-in-out
           ${!isLoggedIn 
-            ? 'hover:bg-[#3288FF] hover:text-white hover:w-20' 
+            ? 'hover:bg-brand-primary hover:text-white hover:w-20' 
             : 'hover:bg-gray-50'
           }
           overflow-hidden

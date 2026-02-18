@@ -16,7 +16,7 @@ const AuthenticationCard = ({
         w-[400px] max-w-[90vw] h-[90vh] min-h-[500px]
         px-[40px] py-[40px]
         rounded-[20px]
-        bg-[#FFFFFF]
+        bg-white
         overflow-y-auto
         flex flex-col items-center justify-between
         [&::-webkit-scrollbar]:hidden

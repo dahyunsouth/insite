@@ -247,7 +247,7 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
             aria-pressed={mode === "time"}
             className={
               `cursor-pointer w-full justify-center rounded-xl px-4 py-4 text-sm font-medium ` +
-              (mode === "time" ? "bg-white text-[#3288FF] shadow-sm" : "text-gray-500")
+              (mode === "time" ? "bg-white text-brand-primary shadow-sm" : "text-gray-500")
             }
           >
             시간대별 추이
@@ -258,7 +258,7 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
             aria-pressed={mode === "dow"}
             className={
               `cursor-pointer w-full justify-center rounded-xl px-4 py-4 text-sm font-medium ` +
-              (mode === "dow" ? "bg-white text-[#3288FF] shadow-sm" : "text-gray-500")
+              (mode === "dow" ? "bg-white text-brand-primary shadow-sm" : "text-gray-500")
             }
           >
             요일별 추이
@@ -279,13 +279,13 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
             {mode === "time" ? (
               <>
                 <span className="font-medium">유동인구가 가장 많은 시간대는</span>
-                <span className="ml-1 font-bold" style={{ color: '#3288FF' }}>{data.max.label}</span>
+                <span className="ml-1 font-bold" style={{ color: 'var(--color-brand-primary)' }}>{data.max.label}</span>
                 <span className="ml-1 font-medium">입니다.</span>
               </>
             ) : (
               <>
                 <span className="font-medium">유동인구가 가장 많은 요일은</span>
-                <span className="ml-1 font-bold" style={{ color: '#3288FF' }}>{data.dayMax?.label ?? "알 수 없음"}</span>
+                <span className="ml-1 font-bold" style={{ color: 'var(--color-brand-primary)' }}>{data.dayMax?.label ?? "알 수 없음"}</span>
                 <span className="ml-1 font-medium">입니다.</span>
               </>
             )}
@@ -298,7 +298,7 @@ export default function TimeSlotCard({ trdarCode, populationType, onPopulationTy
       {/* 선택 모드별 최다/최소 표 (Highlight와 Chart 사이) */}
       <div className="mt-3 overflow-hidden rounded-2xl border border-gray-200">
         <div className="grid grid-cols-2">
-          <div className="bg-[#3288FF1A] px-4 py-3 text-center text-sm font-semibold text-black">
+          <div className="bg-brand-primary/10 px-4 py-3 text-center text-sm font-semibold text-black">
             {mode === "time" ? "유동인구가 가장 많은 시간대" : "유동인구가 가장 많은 요일"}
           </div>
           <div className="border-l border-gray-200 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-black">

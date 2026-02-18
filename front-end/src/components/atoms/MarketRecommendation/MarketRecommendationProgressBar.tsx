@@ -44,10 +44,10 @@ const MarketRecommendationProgressBar: React.FC<MarketRecommendationProgressBarP
                   w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold
                   transition-all duration-300 ease-in-out
                   ${step.isActive 
-                    ? 'bg-[#3288FF] text-white' 
+                    ? 'bg-brand-primary text-white' 
                     : step.isCompleted 
-                      ? 'bg-[#3288FF]/40 text-white/20' 
-                      : 'bg-[#3288FF]/40 text-white/20'
+                      ? 'bg-brand-primary/40 text-white/20' 
+                      : 'bg-brand-primary/40 text-white/20'
                   }
                 `}
               >

@@ -29,9 +29,9 @@ const AuthenticationInputBox: React.FC<InputBoxProps> = ({
         w-full h-[60px]
         px-[20px] py-0
         rounded-[15px]
-        border border-[#D9D9D9]
+        border border-line-default
         outline-none
-        focus:border-[2px] focus:border-[#404040]
+        focus:border-[2px] focus:border-dark
         text-black text-medium font-normal
         placeholder:text-[#BCBCBC]
         ${className}

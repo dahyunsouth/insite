@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback, useRef, useState } from 'react';
 import { useKakaoMapContext } from './KakaoMap';
+import { COLORS } from '@/config/colors';
 import adstrdAreaData from '../../data/AdstrdAreaValue.json';
 import adstrdNameData from '../../data/AdstrdValue.json';
 import seoulPolygonData from '../../data/SeoulPoligon.json';
@@ -183,7 +184,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
     const backgroundPolygon = new window.kakao.maps.Polygon({
       path: donutPaths,
       strokeWeight: 1,
-      strokeColor: '#3288FF', // 디버깅용 빨간 선
+      strokeColor: COLORS.BRAND_PRIMARY, // 디버깅용 빨간 선
       fillColor: '#000000',
       fillOpacity: 0.1,
       clickable: false,
@@ -353,9 +354,9 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
         const kakaoPolygon = new window.kakao.maps.Polygon({
           path: coordinates,
           strokeWeight: 1,
-          strokeColor: '#3288FF',
+          strokeColor: COLORS.BRAND_PRIMARY,
           strokeOpacity: 0.6, // 투명도 낮춰서 렌더링 부하 감소
-          fillColor: '#3288FF',
+          fillColor: COLORS.BRAND_PRIMARY,
           fillOpacity: 0,
           clickable: false, // 클릭 비활성화로 성능 향상
           zIndex: 0 // z-index 낮춰서 렌더링 우선순위 감소
@@ -469,6 +470,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
     if (!showMarketingArea) {
       setIsLoadingAllDongs(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, findNearestAdstrdName, findNearestGuName, setupGlobalEventDelegation, showBackgroundOverlay]);
 
   // 상권 모드 변경 시 폴리곤 업데이트
@@ -568,6 +570,7 @@ export default function AdstrdPoligon({ showMarketingArea = false }: AdstrdPolyg
       // 행정동용 기본 모드 업데이트 함수 사용
       updateDongPolygonsToDefaultMode(adstrdPolygonsRef.current, adstrdLabelsRef.current);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showMarketingArea, setupGlobalEventDelegation, dongCountCache, findNearestAdstrdName, findNearestGuName]);
 
   useEffect(() => {

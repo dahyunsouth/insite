@@ -31,7 +31,7 @@ const AuthenticationLabel: React.FC<PageTitleProps> = ({ type, onBackClick }) =>
       )}
       <h1 
         className={`text-[50px] font-extrabold whitespace-pre-line ${textAlignment}`}
-        style={{ color: '#3288FF' }}
+        style={{ color: 'var(--color-brand-primary)' }}
       >
         {titleText}
       </h1>

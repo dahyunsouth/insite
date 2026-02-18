@@ -12,7 +12,7 @@ const Bar1 = ({
       className={`
         w-full max-w-[376px] h-[50px]
         p-[10px]
-        border-b border-[#E9ECEF]
+        border-b border-line-light
         ${className}
       `}
       style={{

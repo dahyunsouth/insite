@@ -52,7 +52,7 @@ export default function DetailContent({
   return (
     <div className="space-y-3">
       <section id="intro-section" className="scroll-mt-64">
-        <div className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
+        <div className="rounded-[30px] border border-line-default overflow-hidden" style={{ backgroundColor: 'var(--color-surface)' }}>
           <div className="p-[30px]">
             <TradeAreaIntroCard 
               trdarCode={trdarCode}
@@ -72,21 +72,21 @@ export default function DetailContent({
         </div>
       </section>
       <section id="score-section" className="scroll-mt-64">
-        <div className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
+        <div className="rounded-[30px] border border-line-default overflow-hidden" style={{ backgroundColor: 'var(--color-surface)' }}>
           <div className="p-[30px]">
             <ScoreCard trdarCode={trdarCode ?? null} trdarCdNm={areaName} />
           </div>
         </div>
       </section>
       <section id="market-change-section" className="scroll-mt-64">
-        <div className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
+        <div className="rounded-[30px] border border-line-default overflow-hidden" style={{ backgroundColor: 'var(--color-surface)' }}>
           <div className="p-[30px]">
             <MarketChangeIndicatorCard trdarCode={trdarCode ?? null} />
           </div>
         </div>
       </section>
       <section id="pop-section" className="scroll-mt-64">
-        <div className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
+        <div className="rounded-[30px] border border-line-default overflow-hidden" style={{ backgroundColor: 'var(--color-surface)' }}>
           <div className="p-[30px]">
             <TimeSlotCard 
               trdarCode={trdarCode ?? null} 
@@ -97,14 +97,14 @@ export default function DetailContent({
         </div>
       </section>
       <section id="sales-section" className="scroll-mt-64">
-        <div className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
+        <div className="rounded-[30px] border border-line-default overflow-hidden" style={{ backgroundColor: 'var(--color-surface)' }}>
           <div className="p-[30px]">
             <SalesCard trdarCode={trdarCode ?? null} />
           </div>
         </div>
       </section>
       <section id="store-section" className="scroll-mt-64">
-        <div className="rounded-[30px] border border-[#D9D9D9] overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
+        <div className="rounded-[30px] border border-line-default overflow-hidden" style={{ backgroundColor: 'var(--color-surface)' }}>
           <div className="p-[30px]">
             <StoreCard trdarCode={trdarCode ?? null} />
           </div>

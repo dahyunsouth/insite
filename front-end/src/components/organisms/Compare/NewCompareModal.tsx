@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import TradeAreaPicker from '@/components/molecules/Compare/TradeAreaPicker';
 import { fetchTradeAreasDetail, fetchTradeAreaDetail, mapTradeAreaDetailToMetrics } from '@/lib/api/tradeAreas';
 import { logger } from '@/utils/logger';
+import { COLORS } from '@/config/colors';
 
 interface NewCompareModalProps {
   open: boolean;
@@ -222,7 +223,7 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
             {/* 상권 1 선택 */}
             <div className="space-y-4">
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: '#3288FF' }}>
+                <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: COLORS.BRAND_PRIMARY }}>
                   <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                   </svg>
@@ -233,7 +234,7 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
                 title="상권 1"
                 value={selectionA}
                 onChange={setSelectionA}
-                accentColor="#3288FF"
+                accentColor={COLORS.BRAND_PRIMARY}
                 backgroundColor="#f0f8ff"
               />
             </div>
@@ -241,7 +242,7 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
             {/* 상권 2 선택 */}
             <div className="space-y-4">
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: '#5AB8E2' }}>
+                <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: COLORS.BRAND_SECONDARY }}>
                   <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                   </svg>
@@ -252,7 +253,7 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
                 title="상권 2"
                 value={selectionB}
                 onChange={setSelectionB}
-                accentColor="#5AB8E2"
+                accentColor={COLORS.BRAND_SECONDARY}
                 backgroundColor="#f0fdfa"
               />
             </div>
@@ -284,8 +285,8 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
                        <div key={option} className="relative flex items-center h-16 py-2">
                          {/* 상권 1 - 왼쪽 */}
                          <div className="flex-1 flex justify-end">
-                           <div className="rounded-lg px-4 py-2 min-w-32" style={{ backgroundColor: '#f0f8ff', border: '1px solid #3288FF' }}>
-                             <span className="text-sm font-semibold" style={{ color: '#3288FF' }}>
+                           <div className="rounded-lg px-4 py-2 min-w-32" style={{ backgroundColor: '#f0f8ff', border: `1px solid ${COLORS.BRAND_PRIMARY}` }}>
+                             <span className="text-sm font-semibold" style={{ color: COLORS.BRAND_PRIMARY }}>
                                상권 확장
                              </span>
                            </div>
@@ -296,8 +297,8 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
                          
                          {/* 상권 2 - 오른쪽 */}
                          <div className="flex-1 flex justify-start">
-                           <div className="rounded-lg px-4 py-2 min-w-32" style={{ backgroundColor: '#f0fdfa', border: '1px solid #5AB8E2' }}>
-                             <span className="text-sm font-semibold" style={{ color: '#5AB8E2' }}>
+                           <div className="rounded-lg px-4 py-2 min-w-32" style={{ backgroundColor: '#f0fdfa', border: `1px solid ${COLORS.BRAND_SECONDARY}` }}>
+                             <span className="text-sm font-semibold" style={{ color: COLORS.BRAND_SECONDARY }}>
                                다이나믹
                              </span>
                            </div>
@@ -356,7 +357,7 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
                            className="rounded-l-full h-12 flex items-center justify-end pr-2 text-white font-bold text-sm transition-all duration-500"
                            style={{ 
                              width: `${width1}%`,
-                             background: 'linear-gradient(to left, #3288FF, #1e6bcc)'
+                             background: `linear-gradient(to left, ${COLORS.BRAND_PRIMARY}, #1e6bcc)`
                            }}
                          >
                            {data1.value}
@@ -372,7 +373,7 @@ export default function NewCompareModal({ open, onClose, navbarOpen = true }: Ne
                            className="rounded-r-full h-12 flex items-center justify-start pl-2 text-white font-bold text-sm transition-all duration-500"
                            style={{ 
                              width: `${width2}%`,
-                             background: 'linear-gradient(to right, #5AB8E2, #3a9bc1)'
+                             background: `linear-gradient(to right, ${COLORS.BRAND_SECONDARY}, #3a9bc1)`
                            }}
                          >
                            {data2.value}

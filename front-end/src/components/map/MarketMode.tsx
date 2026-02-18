@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 import { getColorByCount } from '../../utils/marketingAreaColors';
 import { API_ENDPOINTS } from '../../config/api';
+import { COLORS } from '@/config/colors';
 import { logger } from '@/utils/logger';
 import signGuData from '../../data/SignGuValue.json';
 
@@ -264,10 +265,10 @@ export function createMarketModeLabelStyle(
 } {
   // 고정 색상 정책: 기본 파란 배경, 호버 흰 배경
   return {
-    labelBackgroundColor: '#3288FF',
-    labelBorderColor: '#3288FF',
-    hoverBackgroundColor: '#FFFFFF',
-    textColor: '#ffffff',
+    labelBackgroundColor: COLORS.BRAND_PRIMARY,
+    labelBorderColor: COLORS.BRAND_PRIMARY,
+    hoverBackgroundColor: COLORS.SURFACE,
+    textColor: COLORS.SURFACE,
     textShadow: 'none'
   };
 }
@@ -301,9 +302,9 @@ export function createMarketModeLabelContent(
     border: 2px solid ${styles.labelBorderColor};
     transition: all 0.2s ease;
     line-height: 1.2;
-  " onmouseover="this.style.backgroundColor='${styles.hoverBackgroundColor}'; this.style.borderColor='${styles.labelBorderColor}'; this.style.color='#000000'; this.style.textShadow='none'; this.style.transform='scale(1.1)'" 
+  " onmouseover="this.style.backgroundColor='${styles.hoverBackgroundColor}'; this.style.borderColor='${styles.labelBorderColor}'; this.style.color=COLORS.TEXT_PRIMARY; this.style.textShadow='none'; this.style.transform='scale(1.1)'" 
      onmouseout="this.style.backgroundColor='${styles.labelBackgroundColor}'; this.style.borderColor='${styles.labelBorderColor}'; this.style.color='${styles.textColor}'; this.style.textShadow='${styles.textShadow}'; this.style.transform='scale(1)'"
-     onclick="this.style.backgroundColor='${styles.hoverBackgroundColor}'; this.style.borderColor='${styles.labelBorderColor}'; this.style.color='#000000'; this.style.textShadow='none'; this.style.transform='scale(1.1)'"
+     onclick="this.style.backgroundColor='${styles.hoverBackgroundColor}'; this.style.borderColor='${styles.labelBorderColor}'; this.style.color=COLORS.TEXT_PRIMARY; this.style.textShadow='none'; this.style.transform='scale(1.1)'"
   >${mainText}${countText}</div>`;
 }
 
@@ -374,10 +375,10 @@ export function updatePolygonsToMarketMode(
         
         // hover 이벤트 업데이트
         labelElement.setAttribute('onmouseover', 
-          `this.style.backgroundColor='${styles.hoverBackgroundColor}'; this.style.borderColor='${styles.hoverBackgroundColor}'; this.style.color='#ffffff'; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1.1)'`
+          `this.style.backgroundColor='${styles.hoverBackgroundColor}'; this.style.borderColor='${styles.hoverBackgroundColor}'; this.style.color=COLORS.SURFACE; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1.1)'`
         );
         labelElement.setAttribute('onmouseout', 
-          `this.style.backgroundColor='${styles.labelBackgroundColor}'; this.style.borderColor='${styles.labelBorderColor}'; this.style.color='#ffffff'; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1)'`
+          `this.style.backgroundColor='${styles.labelBackgroundColor}'; this.style.borderColor='${styles.labelBorderColor}'; this.style.color=COLORS.SURFACE; this.style.textShadow='1px 1px 2px rgba(0,0,0,0.7)'; this.style.transform='scale(1)'`
         );
       }
     }
@@ -412,12 +413,12 @@ export function createDongMarketModeLabelContent(
   showCount: boolean = false
 ): string {
   // 행정동 라벨은 고정 색상 정책 적용
-  const defaultBackgroundColor = '#3288FF';
-  const defaultBorderColor = '#3288FF';
-  const defaultTextColor = '#ffffff';
-  const hoverBackgroundColor = '#ffffff';
-  const hoverBorderColor = '#3288FF';
-  const hoverTextColor = '#000000';
+  const defaultBackgroundColor = COLORS.BRAND_PRIMARY;
+  const defaultBorderColor = COLORS.BRAND_PRIMARY;
+  const defaultTextColor = COLORS.SURFACE;
+  const hoverBackgroundColor = COLORS.SURFACE;
+  const hoverBorderColor = COLORS.BRAND_PRIMARY;
+  const hoverTextColor = COLORS.TEXT_PRIMARY;
   
   const mainText = dongName;
   const countText = showCount ? `<div style="font-size: ${fontSize - 1}px; margin-top: 1px; opacity: 0.9;">${count}개</div>` : '';

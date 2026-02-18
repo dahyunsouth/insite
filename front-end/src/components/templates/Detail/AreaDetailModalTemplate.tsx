@@ -43,7 +43,7 @@ export default function DetailNavbarTemplate({
       {/* Header */}
       <div
         className="sticky top-0 z-10 relative border-b border-black/5 bg-white"
-        style={{ backgroundColor: "#FFFFFF" }}
+        style={{ backgroundColor: 'var(--color-surface)' }}
       >
         {/* Close button (kept within sticky header) */}
         {showCloseButton && onClose && (
@@ -114,7 +114,7 @@ function DefaultVerticalPills() {
                 aria-current={isActive ? "page" : undefined}
                 className={
                   "w-full text-left text-base leading-6 " +
-                  (isActive ? "text-[#3288FF] font-semibold" : "text-gray-400 hover:text-gray-600")
+                  (isActive ? "text-brand-primary font-semibold" : "text-gray-400 hover:text-gray-600")
                 }
               >
                 {it.label}

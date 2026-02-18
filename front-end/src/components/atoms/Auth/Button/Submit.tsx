@@ -19,7 +19,7 @@ const SubmitButton = ({
        w-full h-[60px]
        px-[20px] py-0
        rounded-[15px]
-       bg-[#404040]
+       bg-dark
        text-white text-medium font-normal
        ${className}
      `}

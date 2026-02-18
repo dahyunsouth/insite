@@ -193,6 +193,7 @@ const MyInfoUpdate: React.FC<MyInfoUpdateProps> = ({
                 }`}
                 onClick={() => setSelectedProfile(option.name)}
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={option.image}
                   alt={option.name}
@@ -208,12 +209,14 @@ const MyInfoUpdate: React.FC<MyInfoUpdateProps> = ({
           <div className="flex items-center gap-2 mb-2">
             <SignUpLabel>닉네임</SignUpLabel>
             {nicknameDuplicateCheck.isChecking && (
-              <div className="w-4 h-4 border-2 border-[#3288FF] border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-4 h-4 border-2 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
             )}
             {nicknameDuplicateCheck.isAvailable === true && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img src="/badges/Available.svg" alt="사용 가능" className="w-[104px] h-[30px]" />
             )}
             {nicknameDuplicateCheck.isAvailable === false && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img src="/badges/Unavailable.svg" alt="사용 불가" className="w-[104px] h-[30px]" />
             )}
           </div>
@@ -233,7 +236,7 @@ const MyInfoUpdate: React.FC<MyInfoUpdateProps> = ({
                   nicknameDuplicateCheck.isAvailable === false
                   ? '!border-red-500 focus:!border-red-500'
                   : nicknameDuplicateCheck.isAvailable === true
-                  ? '!border-[#3288FF] focus:!border-[#3288FF]'
+                  ? '!border-brand-primary focus:!border-brand-primary'
                   : ''
               }
               />
@@ -241,7 +244,7 @@ const MyInfoUpdate: React.FC<MyInfoUpdateProps> = ({
             <button
             onClick={checkNicknameDuplicate}
             disabled={nicknameDuplicateCheck.isChecking || !nickname.trim()}
-            className="cursor-pointer w-1/3 px-4 py-3 bg-[#404040] text-white rounded-lg font-medium disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed whitespace-nowrap"
+            className="cursor-pointer w-1/3 px-4 py-3 bg-dark text-white rounded-lg font-medium disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed whitespace-nowrap"
             >
             {nicknameDuplicateCheck.isChecking ? '확인 중...' : '중복확인'}
             </button>
@@ -255,7 +258,7 @@ const MyInfoUpdate: React.FC<MyInfoUpdateProps> = ({
                   nicknameDuplicateCheck.isAvailable === false
                     ? 'text-red-500'
                     : nicknameDuplicateCheck.isAvailable === true
-                    ? 'text-[#3288FF]'
+                    ? 'text-brand-primary'
                     : 'text-gray-500'
                 }`}
               >

@@ -31,7 +31,7 @@ export default function FloatingPopulationWeekChart({ labels, values, maxIndex =
   const gap = band * 0.4;
 
   // Dynamic colors: max -> blue, min -> red, ranks 2~6 -> progressively lighter grays
-  const BLUE = "#3288FF";
+  const BLUE = "var(--color-brand-primary)";
   const RED = "#ef4444";
   const GRAY = "#9CA3AF"; // fallback
   const GRAY_2 = "#AEB4BF"; // rank 2 (lighter than before)
@@ -82,6 +82,7 @@ export default function FloatingPopulationWeekChart({ labels, values, maxIndex =
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values.join(",")]);
 
   return (

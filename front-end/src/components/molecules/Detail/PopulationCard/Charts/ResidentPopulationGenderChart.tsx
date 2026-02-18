@@ -33,7 +33,7 @@ export default function ResidentPopulationGenderChart({ data }: Props) {
             leftLabel={`남 ${formatPercent(maleRate)}`}
             rightLabel={`여 ${formatPercent(femaleRate)}`}
             leftRate={clamp01(maleRate / 100)}
-            leftColor="#3288FF"
+            leftColor="var(--color-brand-primary)"
             rightColor="#FF9CBC"
             isMaleMajority={isMaleMajority}
             onMaleHover={(e) => {
@@ -88,7 +88,7 @@ function SegmentBar({
   leftRate,
   leftLabel,
   rightLabel,
-  leftColor = "#3288FF",
+  leftColor = "var(--color-brand-primary)",
   rightColor = "#FF9CBC",
   isMaleMajority,
   onMaleHover,

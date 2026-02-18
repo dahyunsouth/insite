@@ -8,6 +8,7 @@ import seoulPolygonData from '../../data/SeoulPoligon.json';
 import { tmToWgs84 } from '../../utils/coordinateTransform';
 import { API_ENDPOINTS } from '../../config/api';
 import { fetchTradeAreaDetail } from '@/lib/api/tradeAreas';
+import { COLORS, COLORS_ALPHA } from '@/config/colors';
 import { isPointInPolygon, convertKakaoLatLngsToPoints, Point, PolygonPath } from '../../utils/pointInPolygon';
 import { logger } from '@/utils/logger';
 
@@ -100,6 +101,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
   const ensuredPriorityOnceRef = useRef<boolean>(false);
 
   // 백그라운드 큐 처리기: 한 번에 너무 많이 호출하지 않도록 배치 처리 (호이스팅되는 함수 선언)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   function processBackgroundQueue(batchSize: number = 5, delayMs: number = 200): void {
     if (pendingLabelUpdatesRef.current.length === 0) return;
     const batch = pendingLabelUpdatesRef.current.splice(0, batchSize);
@@ -202,15 +204,15 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
         padding: 6px 12px;
         font-size: ${fontSize}px;
         font-weight: bold;
-        color: #ffffff;
+        color: ${COLORS.SURFACE};
         text-align: center;
         white-space: nowrap;
         pointer-events: auto;
         cursor: pointer;
         text-shadow: none;
-        background-color: #3288FF;
+        background-color: ${COLORS.BRAND_PRIMARY};
         border-radius: 6px;
-        border: 1px solid rgba(50, 136, 255, 0.8);
+        border: 1px solid ${COLORS_ALPHA.BRAND_PRIMARY_80};
         transition: all 0.2s ease;
         position: relative;
         z-index: 100;
@@ -228,8 +230,8 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
           <path d="M28 12c0 2 2 2 2 4s-2 2-2 4 2 2 2 4" stroke-width="2"/>
         </svg>
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;">
-          <div style="font-size: 14px; color: #ffffff;">${name}</div>
-          <div style="font-size: 12px; color: #ffffff; font-weight: normal;">${subtitle}</div>
+          <div style="font-size: 14px; color: ${COLORS.SURFACE};">${name}</div>
+          <div style="font-size: 12px; color: ${COLORS.SURFACE}; font-weight: normal;">${subtitle}</div>
         </div>
       </div>`;
         };
@@ -244,10 +246,10 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
               selectedTradeAreaRef.current = labelId;
               if (polygonData.polygon) {
                 polygonData.polygon.setOptions({
-                  fillColor: '#3288FF',
+                  fillColor: COLORS.BRAND_PRIMARY,
                   fillOpacity: 0.3,
                   strokeWeight: 3,
-                  strokeColor: '#3288FF',
+                  strokeColor: COLORS.BRAND_PRIMARY,
                   strokeOpacity: 1,
                   zIndex: 1000
                 });
@@ -257,15 +259,15 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
               }
               el.classList.add('selected');
               el.style.transform = 'scale(1.05)';
-              el.style.backgroundColor = '#ffffff';
-              el.style.color = '#000000';
+              el.style.backgroundColor = COLORS.SURFACE;
+              el.style.color = COLORS.TEXT_PRIMARY;
               const svg = el.querySelector('svg') as HTMLElement | null;
-              if (svg) svg.style.color = '#000000';
+              if (svg) svg.style.color = COLORS.TEXT_PRIMARY;
               const tc = el.querySelector('div[style*="flex-direction: column"]');
               if (tc) {
                 const [nameEl, salesEl] = Array.from(tc.querySelectorAll('div')) as HTMLElement[];
-                if (nameEl) nameEl.style.color = '#000000';
-                if (salesEl) salesEl.style.color = '#3288FF';
+                if (nameEl) nameEl.style.color = COLORS.TEXT_PRIMARY;
+                if (salesEl) salesEl.style.color = COLORS.BRAND_PRIMARY;
               }
               // 클릭 로직을 한 번 더 트리거해 중앙 클릭 처리(스타일/상태)도 보장
               el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -344,9 +346,9 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
     const kakaoPolygon = new window.kakao.maps.Polygon({
       path: found.kakaoPaths,
       strokeWeight: 1,
-      strokeColor: '#3288FF',
+      strokeColor: COLORS.BRAND_PRIMARY,
       strokeOpacity: 0.8,
-      fillColor: '#3288FF',
+      fillColor: COLORS.BRAND_PRIMARY,
       fillOpacity: 0,
       clickable: true,
       zIndex: 2
@@ -366,15 +368,15 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
         padding: 6px 12px;
         font-size: 12px;
         font-weight: bold;
-        color: #ffffff;
+        color: ${COLORS.SURFACE};
         text-align: center;
         white-space: nowrap;
         pointer-events: auto;
         cursor: pointer;
         text-shadow: none;
-        background-color: #3288FF;
+        background-color: ${COLORS.BRAND_PRIMARY};
         border-radius: 6px;
-        border: 1px solid rgba(50, 136, 255, 0.8);
+        border: 1px solid ${COLORS_ALPHA.BRAND_PRIMARY_80};
         transition: all 0.2s ease;
         position: relative;
         z-index: 100;
@@ -392,8 +394,8 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
           <path d="M28 12c0 2 2 2 2 4s-2 2-2 4 2 2 2 4" stroke-width="2"/>
         </svg>
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;">
-          <div style="font-size: 14px; color: #ffffff;">${ta.trdar_cd_nm}</div>
-          <div style="font-size: 12px; color: #ffffff; font-weight: normal;">${subtitle}</div>
+          <div style="font-size: 14px; color: ${COLORS.SURFACE};">${ta.trdar_cd_nm}</div>
+          <div style="font-size: 12px; color: ${COLORS.SURFACE}; font-weight: normal;">${subtitle}</div>
         </div>
       </div>`;
 
@@ -458,15 +460,15 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
         padding: 6px 12px;
         font-size: ${fontSize}px;
         font-weight: bold;
-        color: #ffffff;
+        color: ${COLORS.SURFACE};
         text-align: center;
         white-space: nowrap;
         pointer-events: auto;
         cursor: pointer;
         text-shadow: none;
-        background-color: #3288FF;
+        background-color: ${COLORS.BRAND_PRIMARY};
         border-radius: 6px;
-        border: 1px solid rgba(50, 136, 255, 0.8);
+        border: 1px solid ${COLORS_ALPHA.BRAND_PRIMARY_80};
         transition: all 0.2s ease;
         position: relative;
         z-index: 100;
@@ -484,8 +486,8 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
           <path d="M28 12c0 2 2 2 2 4s-2 2-2 4 2 2 2 4" stroke-width="2"/>
         </svg>
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;">
-          <div style="font-size: 14px; color: #ffffff;">${ta.trdar_cd_nm}</div>
-          <div style="font-size: 12px; color: #ffffff; font-weight: normal;">${text}</div>
+          <div style="font-size: 14px; color: ${COLORS.SURFACE};">${ta.trdar_cd_nm}</div>
+          <div style="font-size: 12px; color: ${COLORS.SURFACE}; font-weight: normal;">${text}</div>
         </div>
       </div>`;
             };
@@ -498,6 +500,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
     } else {
       pendingLabelUpdatesRef.current.push(() => updateTradeAreaLabelSales(labelId, ta.trdar_cd_nm, ta.signgu_cd_nm, ta.adstrd_cd_nm));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, findContainingGeometryPaths, getSalesAndStoresFromCache, formatAverageAmount, updateTradeAreaLabelSales]);
 
   // 반드시 표시해야 하는 상권들 강제 생성 (1회)
@@ -539,10 +542,10 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
         if (selectedTradeAreaRef.current !== labelId) {
           // 폴리곤 호버 효과
           polygon.setOptions({
-            fillColor: '#3288FF',
+            fillColor: COLORS.BRAND_PRIMARY,
             fillOpacity: 0.3,
             strokeWeight: 3,
-            strokeColor: '#3288FF',
+            strokeColor: COLORS.BRAND_PRIMARY,
             strokeOpacity: 1,
             zIndex: 1000
           });
@@ -553,16 +556,16 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
             (data.overlay as kakao.maps.CustomOverlay).setZIndex(10000);
             if (target.style) {
               target.style.transform = 'scale(1.05)';
-              target.style.backgroundColor = '#ffffff';
-              target.style.color = '#000000';
+              target.style.backgroundColor = COLORS.SURFACE;
+              target.style.color = COLORS.TEXT_PRIMARY;
             }
             const svgElement = target.querySelector('svg');
-            if (svgElement) svgElement.style.color = '#000000';
+            if (svgElement) svgElement.style.color = COLORS.TEXT_PRIMARY;
             const textContainer = target.querySelector('div[style*="flex-direction: column"]');
             if (textContainer) {
               const [nameEl, salesEl] = Array.from(textContainer.querySelectorAll('div'));
-              if (nameEl) (nameEl as HTMLElement).style.color = '#000000';
-              if (salesEl) (salesEl as HTMLElement).style.color = '#3288FF';
+              if (nameEl) (nameEl as HTMLElement).style.color = COLORS.TEXT_PRIMARY;
+              if (salesEl) (salesEl as HTMLElement).style.color = COLORS.BRAND_PRIMARY;
             }
           }
         }
@@ -571,10 +574,10 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
         if (selectedTradeAreaRef.current !== labelId) {
           // 폴리곤 호버 효과 제거
           polygon.setOptions({
-            fillColor: '#3288FF',
+            fillColor: COLORS.BRAND_PRIMARY,
             fillOpacity: 0,
             strokeWeight: 1,
-            strokeColor: '#3288FF',
+            strokeColor: COLORS.BRAND_PRIMARY,
             strokeOpacity: 0.8,
             zIndex: 2
           });
@@ -585,16 +588,16 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
           }
           if (target.style) {
             target.style.transform = 'scale(1)';
-            target.style.backgroundColor = '#3288FF';
-            target.style.color = '#ffffff';
+            target.style.backgroundColor = COLORS.BRAND_PRIMARY;
+            target.style.color = COLORS.SURFACE;
           }
           const svgElement = target.querySelector('svg');
-          if (svgElement) svgElement.style.color = '#ffffff';
+          if (svgElement) svgElement.style.color = COLORS.SURFACE;
           const textContainer = target.querySelector('div[style*="flex-direction: column"]');
           if (textContainer) {
             const [nameEl, salesEl] = Array.from(textContainer.querySelectorAll('div'));
-            if (nameEl) (nameEl as HTMLElement).style.color = '#ffffff';
-            if (salesEl) (salesEl as HTMLElement).style.color = '#ffffff';
+            if (nameEl) (nameEl as HTMLElement).style.color = COLORS.SURFACE;
+            if (salesEl) (salesEl as HTMLElement).style.color = COLORS.SURFACE;
           }
         }
       } else if (e.type === 'click') {
@@ -603,10 +606,10 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
           const prevPolygonData = polygonMapRef.current.get(selectedTradeAreaRef.current);
           if (prevPolygonData) {
             prevPolygonData.polygon.setOptions({
-              fillColor: '#3288FF',
+              fillColor: COLORS.BRAND_PRIMARY,
               fillOpacity: 0, // 기본 상태: 투명
               strokeWeight: 1,
-              strokeColor: '#3288FF',
+              strokeColor: COLORS.BRAND_PRIMARY,
               strokeOpacity: 0.6,
               zIndex: 0
             });
@@ -620,8 +623,8 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
             if (prevLabelElement && prevLabelElement.style) {
               prevLabelElement.style.zIndex = '100';
               prevLabelElement.style.transform = 'scale(1)';
-              prevLabelElement.style.backgroundColor = '#3288FF';
-              prevLabelElement.style.color = '#ffffff';
+              prevLabelElement.style.backgroundColor = COLORS.BRAND_PRIMARY;
+              prevLabelElement.style.color = COLORS.SURFACE;
               prevLabelElement.style.textShadow = 'none';
               // 기본 레이아웃 속성들 유지
               prevLabelElement.style.padding = '6px 12px';
@@ -632,17 +635,17 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
               prevLabelElement.style.pointerEvents = 'auto';
               prevLabelElement.style.cursor = 'pointer';
               prevLabelElement.style.borderRadius = '6px';
-              prevLabelElement.style.border = '1px solid rgba(50, 136, 255, 0.8)';
+              prevLabelElement.style.border = `1px solid ${COLORS_ALPHA.BRAND_PRIMARY_80}`;
               prevLabelElement.style.transition = 'all 0.2s ease';
               prevLabelElement.style.position = 'relative';
 
               // 내부 SVG/텍스트 색상도 기본(흰색)으로 복원
               const prevSvg = prevLabelElement.querySelector('svg') as HTMLElement | null;
-              if (prevSvg) prevSvg.style.color = '#ffffff';
+              if (prevSvg) prevSvg.style.color = COLORS.SURFACE;
               const prevTextContainer = prevLabelElement.querySelector('div[style*="flex-direction: column"]');
               if (prevTextContainer) {
                 const prevTextDivs = prevTextContainer.querySelectorAll('div');
-                prevTextDivs.forEach((el) => ((el as HTMLElement).style.color = '#ffffff'));
+                prevTextDivs.forEach((el) => ((el as HTMLElement).style.color = COLORS.SURFACE));
               }
             }
           }
@@ -653,10 +656,10 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
         
         // 선택된 상권의 스타일 유지 (클릭 후에도 hover 상태 유지)
         polygon.setOptions({
-          fillColor: '#3288FF',
+          fillColor: COLORS.BRAND_PRIMARY,
           fillOpacity: 0.3,
           strokeWeight: 3,
-          strokeColor: '#3288FF',
+          strokeColor: COLORS.BRAND_PRIMARY,
           strokeOpacity: 1,
           zIndex: 1000
         });
@@ -668,16 +671,16 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
         }
         if (target.style) {
           target.style.transform = 'scale(1.05)';
-          target.style.backgroundColor = '#ffffff';
-          target.style.color = '#000000';
+          target.style.backgroundColor = COLORS.SURFACE;
+          target.style.color = COLORS.TEXT_PRIMARY;
         }
         const svgElement = target.querySelector('svg');
-        if (svgElement) svgElement.style.color = '#000000';
+        if (svgElement) svgElement.style.color = COLORS.TEXT_PRIMARY;
         const textContainer = target.querySelector('div[style*="flex-direction: column"]');
         if (textContainer) {
           const [nameEl, salesEl] = Array.from(textContainer.querySelectorAll('div'));
-          if (nameEl) (nameEl as HTMLElement).style.color = '#000000';
-          if (salesEl) (salesEl as HTMLElement).style.color = '#3288FF';
+          if (nameEl) (nameEl as HTMLElement).style.color = COLORS.TEXT_PRIMARY;
+          if (salesEl) (salesEl as HTMLElement).style.color = COLORS.BRAND_PRIMARY;
         }
 
         // 지도 중심 이동 및 확대
@@ -734,10 +737,10 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
             if (previousPolygonData) {
               // 상권 모드가 활성화된 상태에서는 기본 상권 모드 스타일로 복원
               previousPolygonData.polygon.setOptions({
-                fillColor: '#3288FF',
+                fillColor: COLORS.BRAND_PRIMARY,
                 fillOpacity: 0, // 기본 상태: 투명
                 strokeWeight: 1,
-                strokeColor: '#3288FF',
+                strokeColor: COLORS.BRAND_PRIMARY,
                 strokeOpacity: 0.6,
                 zIndex: 0
               });
@@ -749,10 +752,10 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
           
           // 선택된 상권의 스타일 적용
           polygon.setOptions({
-            fillColor: '#3288FF',
+            fillColor: COLORS.BRAND_PRIMARY,
             fillOpacity: 0.3,
             strokeWeight: 3,
-            strokeColor: '#3288FF',
+            strokeColor: COLORS.BRAND_PRIMARY,
             strokeOpacity: 1,
             zIndex: 1000
           });
@@ -800,6 +803,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
       backgroundOverlayRef.current.setMap(null);
       backgroundOverlayRef.current = null;
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onTradeAreaSelect, onShowMarketList]);
 
   // 서울시 외부 영역 도넛 오버레이 표시
@@ -844,8 +848,8 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
     const backgroundPolygon = new window.kakao.maps.Polygon({
       path: donutPaths,
       strokeWeight: 1,
-      strokeColor: '#3288FF',
-      fillColor: '#000000',
+      strokeColor: COLORS.BRAND_PRIMARY,
+      fillColor: COLORS.TEXT_PRIMARY,
       fillOpacity: 0.1,
       clickable: false,
       zIndex: -1
@@ -935,10 +939,10 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
                 selectedTradeAreaRef.current = labelId;
                 // 폴리곤 강조
                 polygon.setOptions({
-                  fillColor: '#3288FF',
+                  fillColor: COLORS.BRAND_PRIMARY,
                   fillOpacity: 0.3,
                   strokeWeight: 3,
-                  strokeColor: '#3288FF',
+                  strokeColor: COLORS.BRAND_PRIMARY,
                   strokeOpacity: 1,
                   zIndex: 1000
                 });
@@ -949,15 +953,15 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
                 const lbl = targetLabel as HTMLElement;
                 lbl.classList.add('selected');
                 lbl.style.transform = 'scale(1.05)';
-                lbl.style.backgroundColor = '#ffffff';
-                lbl.style.color = '#000000';
+                lbl.style.backgroundColor = COLORS.SURFACE;
+                lbl.style.color = COLORS.TEXT_PRIMARY;
                 const svgElement = lbl.querySelector('svg') as HTMLElement | null;
-                if (svgElement) svgElement.style.color = '#000000';
+                if (svgElement) svgElement.style.color = COLORS.TEXT_PRIMARY;
                 const textContainer = lbl.querySelector('div[style*="flex-direction: column"]');
                 if (textContainer) {
                   const [nameEl, salesEl] = Array.from(textContainer.querySelectorAll('div')) as HTMLElement[];
-                  if (nameEl) nameEl.style.color = '#000000';
-                  if (salesEl) salesEl.style.color = '#3288FF';
+                  if (nameEl) nameEl.style.color = COLORS.TEXT_PRIMARY;
+                  if (salesEl) salesEl.style.color = COLORS.BRAND_PRIMARY;
                 }
                 // 상위로 선택 전달
                 try {
@@ -975,6 +979,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
         setTimeout(tryAutoSelect, 250);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, setupGlobalEventDelegation]);
 
   // 현재 영역에 대한 폴리곤 로드 함수
@@ -1037,9 +1042,9 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
         const kakaoPolygon = new window.kakao.maps.Polygon({
           path: polygonPaths,
           strokeWeight: 1,
-          strokeColor: '#3288FF',
+          strokeColor: COLORS.BRAND_PRIMARY,
           strokeOpacity: 0.8,
-          fillColor: '#3288FF',
+          fillColor: COLORS.BRAND_PRIMARY,
           fillOpacity: 0,
           clickable: true,
           zIndex: 2
@@ -1095,6 +1100,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
     
     // 새로 로드된 폴리곤들 표시
     showDynamicCachedPolygons();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 지도 레벨에 따른 가시 범위 계산
@@ -1128,9 +1134,9 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
       const kakaoPolygon = new window.kakao.maps.Polygon({
         path: polygonPaths,
         strokeWeight: 1,
-        strokeColor: '#3288FF',
+        strokeColor: COLORS.BRAND_PRIMARY,
         strokeOpacity: 0.8,
-        fillColor: '#3288FF',
+        fillColor: COLORS.BRAND_PRIMARY,
         fillOpacity: 0,
         clickable: true,
         zIndex: 2
@@ -1170,15 +1176,15 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
         padding: 6px 12px;
         font-size: ${fontSize}px;
         font-weight: bold;
-        color: #ffffff;
+        color: ${COLORS.SURFACE};
         text-align: center;
         white-space: nowrap;
         pointer-events: auto;
         cursor: pointer;
         text-shadow: none;
-        background-color: #3288FF;
+        background-color: ${COLORS.BRAND_PRIMARY};
         border-radius: 6px;
-        border: 1px solid rgba(50, 136, 255, 0.8);
+        border: 1px solid ${COLORS_ALPHA.BRAND_PRIMARY_80};
         transition: all 0.2s ease;
         position: relative;
         z-index: 100;
@@ -1199,8 +1205,8 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
           <path d="M28 12c0 2 2 2 2 4s-2 2-2 4 2 2 2 4" stroke-width="2"/>
         </svg>
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;">
-          <div style="font-size: 14px; color: #ffffff;">${cachedPolygon.tradeAreaName}</div>
-          <div style="font-size: 12px; color: #ffffff; font-weight: normal;">${subtitle}</div>
+          <div style="font-size: 14px; color: ${COLORS.SURFACE};">${cachedPolygon.tradeAreaName}</div>
+          <div style="font-size: 12px; color: ${COLORS.SURFACE}; font-weight: normal;">${subtitle}</div>
         </div>
       </div>`;
 
@@ -1245,6 +1251,7 @@ export default function TradeAreaPoligon({ onTradeAreaSelect, onShowMarketList }
       hasScheduledBackgroundFetchRef.current = true;
       setTimeout(() => processBackgroundQueue(5, 200), 800);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map]);
 
   // 동적 캐시 초기화

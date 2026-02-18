@@ -23,7 +23,7 @@ const SignUp: React.FC<SignUpProps> = ({
         type="button"
         // onClick={onClick}
         onClick={() => { logger.info('signup click'); onClick?.(); }}
-        className={`text-[14px] font-normal text-[#3288FF] cursor-pointer hover:underline ${className}`}
+        className={`text-[14px] font-normal text-brand-primary cursor-pointer hover:underline ${className}`}
         {...props}
       >
         {children}
@@ -36,7 +36,7 @@ const SignUp: React.FC<SignUpProps> = ({
     <a
       href={href}
       onClick={onClick}
-      className={`text-[14px] font-normal text-[#3288FF] cursor-pointer hover:underline ${className}`}
+      className={`text-[14px] font-normal text-brand-primary cursor-pointer hover:underline ${className}`}
       {...props}
     >
       {children}

@@ -31,7 +31,7 @@ export default function TimeSlotBarChart({ labels, values, maxIndex = null, clas
   const gap = band * 0.4;
 
   // Dynamic colors: max -> blue, min -> red, ranks 2~5 -> progressively lighter grays
-  const BLUE = "#3288FF";
+  const BLUE = "var(--color-brand-primary)";
   const RED = "#ef4444";
   const GRAY = "#9CA3AF"; // fallback
   const GRAY_2 = "#AEB4BF"; // rank 2
@@ -84,6 +84,7 @@ export default function TimeSlotBarChart({ labels, values, maxIndex = null, clas
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values.join(",")]);
 
   return (

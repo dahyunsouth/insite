@@ -20,6 +20,7 @@ import Notification from '@/components/map/Notification';
 import { tmToWgs84 } from '@/utils/coordinateTransform';
 import { useComparisonStore } from '@/stores/comparisonStore';
 import { logger } from '@/utils/logger';
+import { COLORS, COLORS_ALPHA } from '@/config/colors';
 
 // 상권 데이터 타입 정의
 interface TradeArea {
@@ -432,8 +433,8 @@ export default function HomePage() {
       prevElement.style.zIndex = '100';
       prevElement.style.transform = 'scale(1)';
       prevElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-      prevElement.style.backgroundColor = '#3288FF';
-      prevElement.style.color = '#ffffff';
+      prevElement.style.backgroundColor = COLORS.BRAND_PRIMARY;
+      prevElement.style.color = COLORS.SURFACE;
       prevElement.style.textShadow = 'none';
       prevElement.style.padding = '6px 12px';
       prevElement.style.fontSize = '12px';
@@ -443,16 +444,16 @@ export default function HomePage() {
       prevElement.style.pointerEvents = 'auto';
       prevElement.style.cursor = 'pointer';
       prevElement.style.borderRadius = '6px';
-      prevElement.style.border = '1px solid rgba(50, 136, 255, 0.8)';
+      prevElement.style.border = `1px solid ${COLORS_ALPHA.BRAND_PRIMARY_80}`;
       prevElement.style.transition = 'all 0.2s ease';
       prevElement.style.position = 'relative';
       // 내부 SVG/텍스트 색상도 기본(흰색)으로 복원
       const prevSvg = prevElement.querySelector('svg') as HTMLElement | null;
-      if (prevSvg) prevSvg.style.color = '#ffffff';
+      if (prevSvg) prevSvg.style.color = COLORS.SURFACE;
       const prevTextContainer = prevElement.querySelector('div[style*="flex-direction: column"]');
       if (prevTextContainer) {
         const prevTextDivs = prevTextContainer.querySelectorAll('div');
-        prevTextDivs.forEach((el) => ((el as HTMLElement).style.color = '#ffffff'));
+        prevTextDivs.forEach((el) => ((el as HTMLElement).style.color = COLORS.SURFACE));
       }
     }
     
@@ -470,9 +471,9 @@ export default function HomePage() {
       // 선택된 상권 스타일 적용 (TradeAreaPoligon.tsx 클릭 효과와 동일)
       targetLabel.style.zIndex = '10000';
       targetLabel.style.transform = 'scale(1.05)';
-      targetLabel.style.boxShadow = '0 4px 12px rgba(50, 136, 255, 0.4)';
-      targetLabel.style.backgroundColor = '#ffffff';
-      targetLabel.style.color = '#000000';
+      targetLabel.style.boxShadow = `0 4px 12px ${COLORS_ALPHA.BRAND_PRIMARY_40}`;
+      targetLabel.style.backgroundColor = COLORS.SURFACE;
+      targetLabel.style.color = COLORS.TEXT_PRIMARY;
       targetLabel.style.textShadow = 'none';
       targetLabel.style.padding = '6px 12px';
       targetLabel.style.fontSize = '12px';
@@ -482,18 +483,18 @@ export default function HomePage() {
       targetLabel.style.pointerEvents = 'auto';
       targetLabel.style.cursor = 'pointer';
       targetLabel.style.borderRadius = '6px';
-      targetLabel.style.border = '1px solid rgba(50, 136, 255, 0.8)';
+      targetLabel.style.border = `1px solid ${COLORS_ALPHA.BRAND_PRIMARY_80}`;
       targetLabel.style.transition = 'all 0.2s ease';
       targetLabel.style.position = 'relative';
 
       // 내부 요소 색상 동기화 (이름: 검정, 매출/보조: 파랑)
       const svgElement = targetLabel.querySelector('svg') as HTMLElement | null;
-      if (svgElement) svgElement.style.color = '#000000';
+      if (svgElement) svgElement.style.color = COLORS.TEXT_PRIMARY;
       const textContainer = targetLabel.querySelector('div[style*="flex-direction: column"]');
       if (textContainer) {
         const [nameEl, salesEl] = Array.from(textContainer.querySelectorAll('div')) as HTMLElement[];
-        if (nameEl) nameEl.style.color = '#000000';
-        if (salesEl) salesEl.style.color = '#3288FF';
+        if (nameEl) nameEl.style.color = COLORS.TEXT_PRIMARY;
+        if (salesEl) salesEl.style.color = COLORS.BRAND_PRIMARY;
       }
       
       logger.info('🎨 상권 라벨 스타일 적용 완료');

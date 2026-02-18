@@ -123,7 +123,7 @@ export default function StoreCard({ trdarCode }: Props) {
         {/* Open */}
         <KpiTile
           title="개업"
-          primaryClass="text-[#3288FF]"
+          primaryClass="text-brand-primary"
           primary={data ? `${formatPercent(data.opbizRt)}` : "—"}
           secondary={data ? `${formatNumber(data.opbizStorCo)}개` : "—"}
         />

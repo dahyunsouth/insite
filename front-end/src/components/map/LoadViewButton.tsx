@@ -68,7 +68,7 @@ const LoadViewButton: React.FC<LoadViewButtonProps> = ({
           active:scale-[0.98]
           cursor-pointer
           ${isActive 
-            ? 'bg-[#3288FF] text-white hover:bg-[#3288FF]' 
+            ? 'bg-brand-primary text-white hover:bg-brand-primary' 
             : 'bg-white text-gray-600 hover:bg-gray-100'
           }
           ${className}
@@ -95,7 +95,7 @@ const LoadViewButton: React.FC<LoadViewButtonProps> = ({
       <div
         className={`
           absolute right-0 top-0
-          bg-[#3288FF] rounded-2xl shadow-lg
+          bg-brand-primary rounded-2xl shadow-lg
           overflow-hidden
           h-12 cursor-pointer
           flex h-full items-center justify-center text-white
