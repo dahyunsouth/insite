@@ -15,7 +15,7 @@ const Bar2 = ({
       className={`
         w-full max-w-[376px] h-[50px]
         pt-[10px] pr-[5px] pb-0 pl-[5px]
-        border-b border-[#E9ECEF]
+        border-b border-line-light
         ${className}
       `}
       style={{

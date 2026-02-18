@@ -49,7 +49,7 @@ const OtpCell = React.forwardRef<HTMLInputElement, OtpCellProps>(
           "w-[49px] h-[49px]",
           "rounded-[10px]",
           "border",
-          selected ? "border-black border-2" : "border-[#D9D9D9]",
+          selected ? "border-black border-2" : "border-line-default",
           // Focus interaction: when inner input focuses, make stroke black and thicker
           "focus-within:border-black focus-within:border-2",
           className,

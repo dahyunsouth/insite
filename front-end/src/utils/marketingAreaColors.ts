@@ -1,3 +1,5 @@
+import { COLORS, VIZ_COLORS } from '@/config/colors';
+
 // 상권 개수별 색상 매핑 유틸리티
 export interface ColorRange {
   color: string;
@@ -8,17 +10,17 @@ export interface ColorRange {
 
 // MarketingAreaRange.tsx와 동일한 색상 범위 정의
 export const COLOR_RANGES: ColorRange[] = [
-  { color: "#000000", label: "5개 미만", min: 0, max: 4 },
-  { color: "#9DDE4D", label: "5 ~ 10개", min: 5, max: 10 },
-  { color: "#FFD62B", label: "11 ~ 50개", min: 11, max: 50 },
-  { color: "#FF8A36", label: "51 ~ 300개", min: 51, max: 300 },
-  { color: "#FF3F43", label: "301 ~ 1,000개", min: 301, max: 1000 },
-  { color: "#5473DF", label: "1,001 ~ 2,000개", min: 1001, max: 2000 },
-  { color: "#8C2ED4", label: "2,000개 초과", min: 2001, max: Infinity },
+  { color: COLORS.TEXT_PRIMARY, label: "5개 미만", min: 0, max: 4 },
+  { color: VIZ_COLORS[0], label: "5 ~ 10개", min: 5, max: 10 },
+  { color: VIZ_COLORS[1], label: "11 ~ 50개", min: 11, max: 50 },
+  { color: VIZ_COLORS[2], label: "51 ~ 300개", min: 51, max: 300 },
+  { color: VIZ_COLORS[3], label: "301 ~ 1,000개", min: 301, max: 1000 },
+  { color: VIZ_COLORS[4], label: "1,001 ~ 2,000개", min: 1001, max: 2000 },
+  { color: VIZ_COLORS[5], label: "2,000개 초과", min: 2001, max: Infinity },
 ];
 
 // 기본 색상 (상권 개수가 5개 미만인 경우)
-export const DEFAULT_COLOR = "#000000"; // 검정색으로 변경
+export const DEFAULT_COLOR = COLORS.TEXT_PRIMARY;
 
 /**
  * 상권 개수에 따른 색상 반환

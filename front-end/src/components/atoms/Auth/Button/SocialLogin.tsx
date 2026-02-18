@@ -36,7 +36,7 @@ const SocialLogin: React.FC<SocialLoginProps> = ({
 
   return (
     <button 
-      className="w-full h-[60px] px-[20px] py-0 rounded-[15px] border border-[#D9D9D9] flex items-center justify-center gap-[12px] text-[20px] font-normal cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"
+      className="w-full h-[60px] px-[20px] py-0 rounded-[15px] border border-line-default flex items-center justify-center gap-[12px] text-[20px] font-normal cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"
       style={{ 
         backgroundColor: disabled ? '#f5f5f5' : config.backgroundColor,
         color: disabled ? '#999' : config.textColor

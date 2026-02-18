@@ -43,7 +43,7 @@ export default function DetailNavbarTemplate({
       {/* Header */}
       <div
         className="sticky top-0 z-10 relative border-b border-black/5 bg-white"
-        style={{ backgroundColor: "#FFFFFF" }}
+        style={{ backgroundColor: 'var(--color-surface)' }}
       >
         {/* Close button (kept within sticky header) */}
         {showCloseButton && onClose && (

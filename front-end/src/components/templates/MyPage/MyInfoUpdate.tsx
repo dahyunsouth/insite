@@ -244,7 +244,7 @@ const MyInfoUpdate: React.FC<MyInfoUpdateProps> = ({
             <button
             onClick={checkNicknameDuplicate}
             disabled={nicknameDuplicateCheck.isChecking || !nickname.trim()}
-            className="cursor-pointer w-1/3 px-4 py-3 bg-[#404040] text-white rounded-lg font-medium disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed whitespace-nowrap"
+            className="cursor-pointer w-1/3 px-4 py-3 bg-dark text-white rounded-lg font-medium disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed whitespace-nowrap"
             >
             {nicknameDuplicateCheck.isChecking ? '확인 중...' : '중복확인'}
             </button>
